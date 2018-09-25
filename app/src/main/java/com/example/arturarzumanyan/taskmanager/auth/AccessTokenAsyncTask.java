@@ -6,13 +6,20 @@ import android.util.Log;
 
 import com.example.arturarzumanyan.taskmanager.R;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.net.URLEncoder;
+import java.util.Iterator;
 
 public class AccessTokenAsyncTask extends AsyncTask<String, Void, String> {
 
@@ -32,9 +39,8 @@ public class AccessTokenAsyncTask extends AsyncTask<String, Void, String> {
 
             Uri.Builder uriBuilder = new Uri.Builder()
                     .appendQueryParameter("code", authCode)
-                    .appendQueryParameter("redirect_uri","https://accounts.google.com/o/oauth2/v2/auth")
-                    .appendQueryParameter("client_id", String.valueOf(R.string.server_client_id))
-                    .appendQueryParameter("client_secret", String.valueOf(R.string.client_secret))
+                    .appendQueryParameter("client_id", "685238908043-obre149i2k2gh9a71g2it0emsa97glma.apps.googleusercontent.com")
+                    .appendQueryParameter("client_secret", "6ygf5qYHRMx3AnIwXGbLhWuz")
                     .appendQueryParameter("grant_type", "authorization_code");
             String query = uriBuilder.build().getEncodedQuery();
 
@@ -48,15 +54,18 @@ public class AccessTokenAsyncTask extends AsyncTask<String, Void, String> {
 
             conn.connect();
 
+
             int responseCode=conn.getResponseCode();
 
             if (responseCode == HttpURLConnection.HTTP_OK){
-
+                
             }
 
         } catch (MalformedURLException e) {
             e.printStackTrace();
         } catch (IOException e) {
+            e.printStackTrace();
+        } catch (Exception e) {
             e.printStackTrace();
         }
         return "s";
