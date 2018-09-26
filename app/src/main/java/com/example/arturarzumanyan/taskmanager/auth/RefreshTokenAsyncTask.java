@@ -18,18 +18,18 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 
-public class AccessTokenAsyncTask extends AsyncTask<String, Void, String> {
+public class RefreshTokenAsyncTask extends AsyncTask<String, Void, String> {
 
     private TokenAsyncTaskEvents mTokenAsyncTaskEvents;
-    private String mBuffer;
+    private String mAccessToken;
 
-    public AccessTokenAsyncTask(TokenAsyncTaskEvents tokenAsyncTaskEvents) {
+    public RefreshTokenAsyncTask(TokenAsyncTaskEvents tokenAsyncTaskEvents) {
         mTokenAsyncTaskEvents = tokenAsyncTaskEvents;
     }
 
     @Override
     protected String doInBackground(String... strings) {
-        String authCode = strings[0];
+        String mRefreshToken = strings[0];
         HttpURLConnection conn = null;
         BufferedReader reader = null;
         try {
@@ -44,10 +44,10 @@ public class AccessTokenAsyncTask extends AsyncTask<String, Void, String> {
             conn.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
 
             Uri.Builder uriBuilder = new Uri.Builder()
-                    .appendQueryParameter("code", authCode)
+                    .appendQueryParameter("refresh_token", mRefreshToken)
                     .appendQueryParameter("client_id", Constants.CLIENT_ID)
                     .appendQueryParameter("client_secret", Constants.CLIENT_SECRET)
-                    .appendQueryParameter("grant_type", "authorization_code");
+                    .appendQueryParameter("grant_type", "refresh_token");
             String query = uriBuilder.build().getEncodedQuery();
 
             OutputStream os = conn.getOutputStream();
@@ -69,8 +69,7 @@ public class AccessTokenAsyncTask extends AsyncTask<String, Void, String> {
                 while ((line=reader.readLine()) != null) {
                     buf.append(line + "\n");
                 }
-                mBuffer = buf.toString();
-                return mBuffer;
+                return getAccessTokenFromBuffer(buf.toString());
             }
 
         } catch (MalformedURLException e) {
@@ -96,16 +95,21 @@ public class AccessTokenAsyncTask extends AsyncTask<String, Void, String> {
         return "";
     }
 
+    private String getAccessTokenFromBuffer(String buffer) throws JSONException {
+        JSONObject object = new JSONObject(buffer);
+        mAccessToken = object.getString("access_token");
+        return mAccessToken;
+    }
+
     @Override
     protected void onPostExecute(String s) {
         super.onPostExecute(s);
         if (mTokenAsyncTaskEvents != null) {
             try {
-                mTokenAsyncTaskEvents.onPostExecute(mBuffer);
+                mTokenAsyncTaskEvents.onPostExecute(mAccessToken);
             } catch (JSONException e) {
                 e.printStackTrace();
             }
         }
     }
-
 }
