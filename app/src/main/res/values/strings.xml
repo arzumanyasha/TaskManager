@@ -14,4 +14,5 @@
     <string name="user_photo_url">userPhotoUrl</string>
     <string name="access_token">access_token</string>
     <string name="refresh_token">refresh_token</string>
+    <string name="action_settings">action</string>
 </resources>
