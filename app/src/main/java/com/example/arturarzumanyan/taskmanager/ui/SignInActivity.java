@@ -91,12 +91,12 @@ public class SignInActivity extends AppCompatActivity implements TokenAsyncTaskE
     }
 
     private void updateUI(String userName, String userEmail, String userPhotoUrl) {
-        Toast.makeText(getApplicationContext(), "Logged in", Toast.LENGTH_LONG).show();
+        Toast.makeText(getApplicationContext(), getString(R.string.logged_in_message), Toast.LENGTH_LONG).show();
 
         Intent accountIntent = new Intent(SignInActivity.this, IntentionActivity.class);
-        accountIntent.putExtra(Constants.USER_NAME, userName);
-        accountIntent.putExtra(Constants.USER_EMAIL, userEmail);
-        accountIntent.putExtra(Constants.USER_PHOTO_URL, userPhotoUrl);
+        accountIntent.putExtra(getString(R.string.user_name), userName);
+        accountIntent.putExtra(getString(R.string.user_email), userEmail);
+        accountIntent.putExtra(getString(R.string.user_photo_url), userPhotoUrl);
         startActivity(accountIntent);
         finish();
     }
@@ -158,13 +158,13 @@ public class SignInActivity extends AppCompatActivity implements TokenAsyncTaskE
 
     private String getAccessTokenFromBuffer(String buffer) throws JSONException {
         JSONObject object = new JSONObject(buffer);
-        mAccessToken = object.getString("access_token");
+        mAccessToken = object.getString(getString(R.string.access_token));
         return mAccessToken;
     }
 
     private String getRefreshTokenFromBuffer(String buffer) throws JSONException {
         JSONObject object = new JSONObject(buffer);
-        mRefreshToken = object.getString("refresh_token");
+        mRefreshToken = object.getString(getString(R.string.refresh_token));
         return mRefreshToken;
     }
 }
