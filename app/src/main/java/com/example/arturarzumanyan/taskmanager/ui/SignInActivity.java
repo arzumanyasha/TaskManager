@@ -8,9 +8,11 @@ import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.Toast;
 
+import com.example.arturarzumanyan.taskmanager.Constants;
 import com.example.arturarzumanyan.taskmanager.R;
 import com.example.arturarzumanyan.taskmanager.auth.AccessTokenAsyncTask;
 import com.example.arturarzumanyan.taskmanager.auth.TokenAsyncTaskEvents;
+import com.example.arturarzumanyan.taskmanager.auth.TokenStorage;
 import com.google.android.gms.auth.api.Auth;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
@@ -52,8 +54,8 @@ public class SignInActivity extends AppCompatActivity implements TokenAsyncTaskE
                 .requestIdToken(getString(R.string.server_client_id))
                 .requestServerAuthCode(getString(R.string.server_client_id))
                 .requestEmail()
-                .requestScopes(new Scope("https://www.googleapis.com/auth/calendar.events"),
-                               new Scope("https://www.googleapis.com/auth/tasks"))
+                .requestScopes(new Scope(Constants.CALENDAR_SCOPE),
+                               new Scope(Constants.TASKS_SCOPE))
                 .build();
 
         mApiClient = new GoogleApiClient.Builder(this)
@@ -89,33 +91,28 @@ public class SignInActivity extends AppCompatActivity implements TokenAsyncTaskE
     }
 
     private void updateUI(String userName, String userEmail, String userPhotoUrl) {
-        Toast.makeText(getApplicationContext(), "User logged in", Toast.LENGTH_LONG).show();
+        Toast.makeText(getApplicationContext(), "Logged in", Toast.LENGTH_LONG).show();
 
         Intent accountIntent = new Intent(SignInActivity.this, IntentionActivity.class);
-        accountIntent.putExtra("userName", userName);
-        accountIntent.putExtra("userEmail", userEmail);
-        accountIntent.putExtra("userPhotoUrl", userPhotoUrl);
+        accountIntent.putExtra(Constants.USER_NAME, userName);
+        accountIntent.putExtra(Constants.USER_EMAIL, userEmail);
+        accountIntent.putExtra(Constants.USER_PHOTO_URL, userPhotoUrl);
         startActivity(accountIntent);
         finish();
     }
     private void signIn() {
         Intent signInIntent = mGoogleSignInClient.getSignInIntent();
-        startActivityForResult(signInIntent, 101);
+        startActivityForResult(signInIntent, Constants.REQUEST_CODE);
     }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (requestCode == 101) {
+        if (requestCode == Constants.REQUEST_CODE) {
 
             GoogleSignInResult result = Auth.GoogleSignInApi.getSignInResultFromIntent(data);
             if (result.isSuccess()) {
                 GoogleSignInAccount acct = result.getSignInAccount();
                 firebaseAuthWithGoogle(acct);
-                //String authCode = acct.getServerAuthCode();
-                //String userName = acct.getDisplayName();
-                //String userPhotoUrl = acct.getPhotoUrl().toString();
-                //mAccessTokenAsyncTask = new AccessTokenAsyncTask(this);
-                //mAccessTokenAsyncTask.execute(authCode);
             }
         }
     }
@@ -154,12 +151,8 @@ public class SignInActivity extends AppCompatActivity implements TokenAsyncTaskE
         String accessToken = getAccessTokenFromBuffer(buffer);
         String refreshToken = getRefreshTokenFromBuffer(buffer);
 
-        SharedPreferences prefs = getSharedPreferences("sharedPrefs", MODE_PRIVATE);
-
-        SharedPreferences.Editor editor = prefs.edit();
-        editor.putString("accessToken", accessToken);
-        editor.putString("refreshToken", refreshToken);
-        editor.apply();
+        TokenStorage tokenStorage = new TokenStorage();
+        tokenStorage.write(SignInActivity.this, accessToken, refreshToken);
         Toast.makeText(SignInActivity.this, accessToken, Toast.LENGTH_SHORT).show();
     }
 
