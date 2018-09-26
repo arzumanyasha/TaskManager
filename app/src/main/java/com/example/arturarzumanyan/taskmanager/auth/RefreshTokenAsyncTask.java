@@ -30,18 +30,11 @@ public class RefreshTokenAsyncTask extends AsyncTask<String, Void, String> {
     @Override
     protected String doInBackground(String... strings) {
         String mRefreshToken = strings[0];
-        HttpURLConnection conn = null;
+        HttpURLConnection connection = null;
         BufferedReader reader = null;
         try {
-            URL url = new URL(Constants.BASE_URL);
-            conn = (HttpURLConnection) url.openConnection();
-            conn.setReadTimeout(15000 /* milliseconds */);
-            conn.setConnectTimeout(15000 /* milliseconds */);
-            conn.setInstanceFollowRedirects( true );
-            conn.setRequestMethod("POST");
-            conn.setDoOutput(true);
-            conn.setDoInput(true);
-            conn.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
+            TokenHttpUrlConnection tokenHttpUrlConnection = new TokenHttpUrlConnection();
+            connection = tokenHttpUrlConnection.getConnectionSettings(connection);
 
             Uri.Builder uriBuilder = new Uri.Builder()
                     .appendQueryParameter("refresh_token", mRefreshToken)
@@ -50,26 +43,14 @@ public class RefreshTokenAsyncTask extends AsyncTask<String, Void, String> {
                     .appendQueryParameter("grant_type", "refresh_token");
             String query = uriBuilder.build().getEncodedQuery();
 
-            OutputStream os = conn.getOutputStream();
-            BufferedWriter writer = new BufferedWriter(
-                    new OutputStreamWriter(os, "UTF-8"));
-            writer.write(query);
-            writer.flush();
-            writer.close();
-            os.close();
+            tokenHttpUrlConnection.getConnection(connection, query);
 
-            conn.connect();
-
-            int responseCode=conn.getResponseCode();
+            int responseCode=connection.getResponseCode();
 
             if (responseCode == HttpURLConnection.HTTP_OK){
-                reader= new BufferedReader(new InputStreamReader(conn.getInputStream()));
-                StringBuilder buf=new StringBuilder();
-                String line=null;
-                while ((line=reader.readLine()) != null) {
-                    buf.append(line + "\n");
-                }
-                return getAccessTokenFromBuffer(buf.toString());
+                reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+                String buffer = tokenHttpUrlConnection.getInputStream(reader, connection);
+                return getAccessTokenFromBuffer(buffer);
             }
 
         } catch (MalformedURLException e) {
@@ -80,8 +61,8 @@ public class RefreshTokenAsyncTask extends AsyncTask<String, Void, String> {
             e.printStackTrace();
         }
         finally {
-            if (conn != null) {
-                conn.disconnect();
+            if (connection != null) {
+                connection.disconnect();
             }
             if (reader != null) {
                 try {
