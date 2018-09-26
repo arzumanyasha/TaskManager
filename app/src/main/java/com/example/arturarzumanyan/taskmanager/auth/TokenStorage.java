@@ -8,7 +8,7 @@ import com.example.arturarzumanyan.taskmanager.Constants;
 import static android.content.Context.MODE_PRIVATE;
 
 public class TokenStorage {
-    protected final static String DEFAULT = " ";
+    private final static String DEFAULT = "";
 
     public void write(Context context, String accessToken, String refreshToken){
         SharedPreferences prefs = context.getSharedPreferences(Constants.SHARED_PREFS_NAME, MODE_PRIVATE);
