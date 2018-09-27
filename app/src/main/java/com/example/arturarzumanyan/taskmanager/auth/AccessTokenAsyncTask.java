@@ -2,9 +2,14 @@ package com.example.arturarzumanyan.taskmanager.auth;
 
 import android.os.AsyncTask;
 
+import com.example.arturarzumanyan.taskmanager.networking.RequestParameters;
+import com.example.arturarzumanyan.taskmanager.networking.BaseHttpUrlConnection;
+
 import org.json.JSONException;
 
-public class AccessTokenAsyncTask extends AsyncTask<String, Void, String> {
+import java.util.HashMap;
+
+public class AccessTokenAsyncTask extends AsyncTask<RequestParameters, Void, String> {
 
     private TokenAsyncTaskEvents mTokenAsyncTaskEvents;
     private String mBuffer;
@@ -14,13 +19,17 @@ public class AccessTokenAsyncTask extends AsyncTask<String, Void, String> {
     }
 
     @Override
-    protected String doInBackground(String... strings) {
-        String authCode = strings[0];
-        String authCodeKey = strings[1];
-        String grantType = strings[2];
+    protected String doInBackground(RequestParameters... requestParameters) {
+        String url = requestParameters[0].getUrl();
+        String requestMethod = requestParameters[0].getRequestMethod();
+        HashMap<String, String> requestBodyParameters = requestParameters[0].getRequestBodyParameters();
+        HashMap<String, String> requestHeaderParameters = requestParameters[0].getRequestHeaderParameters();
 
-        TokenHttpUrlConnection tokenHttpUrlConnection = new TokenHttpUrlConnection();
-        mBuffer = tokenHttpUrlConnection.getAccessToken(authCode, authCodeKey, grantType);
+        BaseHttpUrlConnection baseHttpUrlConnection = new BaseHttpUrlConnection();
+        mBuffer = baseHttpUrlConnection.getResult(url,
+                requestMethod,
+                requestBodyParameters,
+                requestHeaderParameters);
         return mBuffer;
     }
 

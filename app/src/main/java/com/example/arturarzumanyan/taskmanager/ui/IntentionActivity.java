@@ -65,10 +65,10 @@ public class IntentionActivity extends AppCompatActivity
         userEmailTextView = navigationView
                 .getHeaderView(0)
                 .findViewById(R.id.textViewUserEmail);
-        userNameTextView.setText(userData.getStringExtra(getString(R.string.user_name)));
-        userEmailTextView.setText(userData.getStringExtra(getString(R.string.user_email)));
+        userNameTextView.setText(userData.getStringExtra(SignInActivity.EXTRA_USER_NAME));
+        userEmailTextView.setText(userData.getStringExtra(SignInActivity.EXTRA_USER_EMAIL));
         Picasso.get()
-                .load(userData.getStringExtra(getString(R.string.user_photo_url)))
+                .load(userData.getStringExtra(SignInActivity.EXTRA_USER_PHOTO_URL))
                 .into(userPhotoImageView);
     }
 

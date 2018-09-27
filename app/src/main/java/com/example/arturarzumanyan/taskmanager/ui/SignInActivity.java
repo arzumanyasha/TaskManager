@@ -1,18 +1,17 @@
 package com.example.arturarzumanyan.taskmanager.ui;
 
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.Toast;
 
-import com.example.arturarzumanyan.taskmanager.Constants;
 import com.example.arturarzumanyan.taskmanager.R;
 import com.example.arturarzumanyan.taskmanager.auth.AccessTokenAsyncTask;
 import com.example.arturarzumanyan.taskmanager.auth.TokenAsyncTaskEvents;
 import com.example.arturarzumanyan.taskmanager.auth.TokenStorage;
+import com.example.arturarzumanyan.taskmanager.networking.RequestParameters;
 import com.google.android.gms.auth.api.Auth;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
@@ -34,7 +33,21 @@ import com.google.firebase.auth.GoogleAuthProvider;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.HashMap;
+
 public class SignInActivity extends AppCompatActivity implements TokenAsyncTaskEvents {
+
+    private static final String BASE_URL = "https://www.googleapis.com/oauth2/v4/token";
+    private static final String CLIENT_ID = "685238908043-obre149i2k2gh9a71g2it0emsa97glma.apps.googleusercontent.com";
+    private static final String CLIENT_SECRET = "6ygf5qYHRMx3AnIwXGbLhWuz";
+    private static final String CALENDAR_SCOPE = "https://www.googleapis.com/auth/calendar.events";
+    private static final String TASKS_SCOPE = "https://www.googleapis.com/auth/tasks";
+    private static final int REQUEST_CODE = 101;
+    public static final String EXTRA_USER_NAME = "userName";
+    public static final String EXTRA_USER_EMAIL = "userEmail";
+    public static final String EXTRA_USER_PHOTO_URL = "userPhotoUrl";
+    public static final String ACCESS_TOKEN_KEY = "access_token";
+    public static final String REFRESH_TOKEN_KEY = "refresh_token";
 
     private FirebaseAuth mAuth;
     private GoogleSignInClient mGoogleSignInClient;
@@ -51,11 +64,11 @@ public class SignInActivity extends AppCompatActivity implements TokenAsyncTaskE
         mAuth = FirebaseAuth.getInstance();
 
         GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-                .requestIdToken(getString(R.string.server_client_id))
-                .requestServerAuthCode(getString(R.string.server_client_id))
+                .requestIdToken(CLIENT_ID)
+                .requestServerAuthCode(CLIENT_ID)
                 .requestEmail()
-                .requestScopes(new Scope(Constants.CALENDAR_SCOPE),
-                               new Scope(Constants.TASKS_SCOPE))
+                .requestScopes(new Scope(CALENDAR_SCOPE),
+                               new Scope(TASKS_SCOPE))
                 .build();
 
         mApiClient = new GoogleApiClient.Builder(this)
@@ -96,20 +109,20 @@ public class SignInActivity extends AppCompatActivity implements TokenAsyncTaskE
         Toast.makeText(getApplicationContext(), getString(R.string.logged_in_message), Toast.LENGTH_LONG).show();
 
         Intent accountIntent = new Intent(SignInActivity.this, IntentionActivity.class);
-        accountIntent.putExtra(getString(R.string.user_name), userName);
-        accountIntent.putExtra(getString(R.string.user_email), userEmail);
-        accountIntent.putExtra(getString(R.string.user_photo_url), userPhotoUrl);
+        accountIntent.putExtra(EXTRA_USER_NAME, userName);
+        accountIntent.putExtra(EXTRA_USER_EMAIL, userEmail);
+        accountIntent.putExtra(EXTRA_USER_PHOTO_URL, userPhotoUrl);
         startActivity(accountIntent);
         finish();
     }
     private void signIn() {
         Intent signInIntent = mGoogleSignInClient.getSignInIntent();
-        startActivityForResult(signInIntent, Constants.REQUEST_CODE);
+        startActivityForResult(signInIntent, REQUEST_CODE);
     }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (requestCode == Constants.REQUEST_CODE) {
+        if (requestCode == REQUEST_CODE) {
 
             GoogleSignInResult result = Auth.GoogleSignInApi.getSignInResultFromIntent(data);
             if (result.isSuccess()) {
@@ -122,7 +135,22 @@ public class SignInActivity extends AppCompatActivity implements TokenAsyncTaskE
     private void firebaseAuthWithGoogle(GoogleSignInAccount acct) {
         String authCode = acct.getServerAuthCode();
         mAccessTokenAsyncTask = new AccessTokenAsyncTask(this);
-        mAccessTokenAsyncTask.execute(authCode, getString(R.string.code_key), getString(R.string.authorization_code_key));
+
+        String requestType = "POST";
+        HashMap<String, String> requestBodyParameters = new HashMap<>();
+        requestBodyParameters.put("code", authCode);
+        requestBodyParameters.put("client_id", CLIENT_ID);
+        requestBodyParameters.put("client_secret", CLIENT_SECRET);
+        requestBodyParameters.put("grant_type", "authorization_code");
+        HashMap<String, String> requestHeaderParameters = new HashMap<>();
+        requestHeaderParameters.put("Content-Type", "application/x-www-form-urlencoded");
+
+        RequestParameters requestParameters = new RequestParameters(BASE_URL,
+                requestType,
+                requestBodyParameters,
+                requestHeaderParameters);
+
+        mAccessTokenAsyncTask.execute(requestParameters);
 
         AuthCredential credential = GoogleAuthProvider.getCredential(acct.getIdToken(), null);
         mAuth.signInWithCredential(credential)
@@ -160,13 +188,13 @@ public class SignInActivity extends AppCompatActivity implements TokenAsyncTaskE
 
     private String getAccessTokenFromBuffer(String buffer) throws JSONException {
         JSONObject object = new JSONObject(buffer);
-        mAccessToken = object.getString(getString(R.string.access_token_key));
+        mAccessToken = object.getString(ACCESS_TOKEN_KEY);
         return mAccessToken;
     }
 
     private String getRefreshTokenFromBuffer(String buffer) throws JSONException {
         JSONObject object = new JSONObject(buffer);
-        mRefreshToken = object.getString(getString(R.string.refresh_token_key));
+        mRefreshToken = object.getString(REFRESH_TOKEN_KEY);
         return mRefreshToken;
     }
 }

@@ -1,11 +1,6 @@
-package com.example.arturarzumanyan.taskmanager.auth;
+package com.example.arturarzumanyan.taskmanager.networking;
 
 import android.net.Uri;
-
-import com.example.arturarzumanyan.taskmanager.Constants;
-
-import org.json.JSONException;
-import org.json.JSONObject;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -15,21 +10,25 @@ import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.HashMap;
 
-public class TokenHttpUrlConnection {
+public class BaseHttpUrlConnection {
 
-    public String getAccessToken(String authCredential, String authCodeKey, String grantType){
+    public String getResult(String url,
+                                String requestMethod,
+                                HashMap<String, String> requestBodyParameters,
+                                HashMap<String, String> requestHeaderParameters){
         HttpURLConnection connection = null;
         BufferedReader reader = null;
         Uri.Builder uriBuilder;
         String query = "";
         try {
-            connection = getConnectionSettings(connection);
-            uriBuilder = new Uri.Builder()
-                    .appendQueryParameter(authCodeKey, authCredential)
-                    .appendQueryParameter("client_id", Constants.CLIENT_ID)
-                    .appendQueryParameter("client_secret", Constants.CLIENT_SECRET)
-                    .appendQueryParameter("grant_type", grantType);
+            connection = getConnectionSettings(connection, url, requestMethod, requestHeaderParameters);
+            uriBuilder = new Uri.Builder();
+            for(HashMap.Entry<String, String> map : requestBodyParameters.entrySet()){
+                uriBuilder.appendQueryParameter(map.getKey(), map.getValue());
+            }
+
             query = uriBuilder.build().getEncodedQuery();
 
             setConnection(connection, query);
@@ -61,16 +60,22 @@ public class TokenHttpUrlConnection {
         return "";
     }
 
-    private HttpURLConnection getConnectionSettings(HttpURLConnection connection) throws IOException {
-        URL url = new URL(Constants.BASE_URL);
-        connection = (HttpURLConnection) url.openConnection();
+    private HttpURLConnection getConnectionSettings(HttpURLConnection connection,
+                                                    String url,
+                                                    String requestMethod,
+                                                    HashMap<String, String> requestHeaderParameters) throws IOException {
+        URL requestUrl = new URL(url);
+        connection = (HttpURLConnection) requestUrl.openConnection();
         connection.setReadTimeout(15000);
         connection.setConnectTimeout(15000);
         connection.setInstanceFollowRedirects( true );
-        connection.setRequestMethod("POST");
+        connection.setRequestMethod(requestMethod);
         connection.setDoOutput(true);
         connection.setDoInput(true);
-        connection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
+        for(HashMap.Entry<String, String> map : requestHeaderParameters.entrySet()){
+            connection.setRequestProperty(map.getKey(), map.getValue());
+        }
+
         return connection;
     }
 
