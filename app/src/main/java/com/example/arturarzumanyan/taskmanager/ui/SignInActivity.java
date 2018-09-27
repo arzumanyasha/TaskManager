@@ -85,7 +85,9 @@ public class SignInActivity extends AppCompatActivity implements TokenAsyncTaskE
         FirebaseUser currentUser = mAuth.getCurrentUser();
 
         if(currentUser!=null){
-            updateUI(currentUser.getDisplayName(), currentUser.getEmail(), currentUser.getPhotoUrl().toString());
+            updateUI(currentUser.getDisplayName(),
+                     currentUser.getEmail(),
+                     currentUser.getPhotoUrl().toString());
 
         }
     }
@@ -120,7 +122,7 @@ public class SignInActivity extends AppCompatActivity implements TokenAsyncTaskE
     private void firebaseAuthWithGoogle(GoogleSignInAccount acct) {
         String authCode = acct.getServerAuthCode();
         mAccessTokenAsyncTask = new AccessTokenAsyncTask(this);
-        mAccessTokenAsyncTask.execute(authCode);
+        mAccessTokenAsyncTask.execute(authCode, getString(R.string.code_key), getString(R.string.authorization_code_key));
 
         AuthCredential credential = GoogleAuthProvider.getCredential(acct.getIdToken(), null);
         mAuth.signInWithCredential(credential)
@@ -129,9 +131,9 @@ public class SignInActivity extends AppCompatActivity implements TokenAsyncTaskE
                     public void onComplete(@NonNull Task<AuthResult> task) {
                         if (task.isSuccessful()) {
                             FirebaseUser user = mAuth.getCurrentUser();
-                            updateUI(user.getDisplayName(), user.getEmail(), user.getPhotoUrl().toString());
-                        } else {
-
+                            updateUI(user.getDisplayName(),
+                                     user.getEmail(),
+                                     user.getPhotoUrl().toString());
                         }
                     }
                 });
@@ -158,13 +160,13 @@ public class SignInActivity extends AppCompatActivity implements TokenAsyncTaskE
 
     private String getAccessTokenFromBuffer(String buffer) throws JSONException {
         JSONObject object = new JSONObject(buffer);
-        mAccessToken = object.getString(getString(R.string.access_token));
+        mAccessToken = object.getString(getString(R.string.access_token_key));
         return mAccessToken;
     }
 
     private String getRefreshTokenFromBuffer(String buffer) throws JSONException {
         JSONObject object = new JSONObject(buffer);
-        mRefreshToken = object.getString(getString(R.string.refresh_token));
+        mRefreshToken = object.getString(getString(R.string.refresh_token_key));
         return mRefreshToken;
     }
 }

@@ -1,9 +1,6 @@
 package com.example.arturarzumanyan.taskmanager.auth;
 
-import android.net.Uri;
 import android.os.AsyncTask;
-
-import com.example.arturarzumanyan.taskmanager.Constants;
 
 import org.json.JSONException;
 
@@ -19,8 +16,11 @@ public class AccessTokenAsyncTask extends AsyncTask<String, Void, String> {
     @Override
     protected String doInBackground(String... strings) {
         String authCode = strings[0];
+        String authCodeKey = strings[1];
+        String grantType = strings[2];
+
         TokenHttpUrlConnection tokenHttpUrlConnection = new TokenHttpUrlConnection();
-        mBuffer = tokenHttpUrlConnection.getAccessToken(authCode, Constants.AUTH_CODE_KEY);
+        mBuffer = tokenHttpUrlConnection.getAccessToken(authCode, authCodeKey, grantType);
         return mBuffer;
     }
 

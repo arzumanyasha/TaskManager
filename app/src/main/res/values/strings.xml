@@ -12,7 +12,9 @@
     <string name="user_name">userName</string>
     <string name="user_email">userEmail</string>
     <string name="user_photo_url">userPhotoUrl</string>
-    <string name="access_token">access_token</string>
-    <string name="refresh_token">refresh_token</string>
+    <string name="access_token_key">access_token</string>
+    <string name="refresh_token_key">refresh_token</string>
     <string name="action_settings">action</string>
+    <string name="code_key">code</string>
+    <string name="authorization_code_key">authorization_code</string>
 </resources>
