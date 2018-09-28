@@ -14,26 +14,26 @@ public class TokenStorage {
     public void write(Context context, String accessToken, String refreshToken){
         SharedPreferences prefs = context.getSharedPreferences(SHARED_PREFS_NAME, MODE_PRIVATE);
         SharedPreferences.Editor editor = prefs.edit();
-        editor.putString(SignInActivity.ACCESS_TOKEN_KEY, accessToken);
-        editor.putString(SignInActivity.REFRESH_TOKEN_KEY, refreshToken);
+        editor.putString(FirebaseWebService.ACCESS_TOKEN_KEY, accessToken);
+        editor.putString(FirebaseWebService.REFRESH_TOKEN_KEY, refreshToken);
         editor.apply();
     }
 
     public void writeAccessToken(Context context, String accessToken){
         SharedPreferences prefs = context.getSharedPreferences(SHARED_PREFS_NAME, MODE_PRIVATE);
         SharedPreferences.Editor editor = prefs.edit();
-        editor.putString(SignInActivity.ACCESS_TOKEN_KEY, accessToken);
+        editor.putString(FirebaseWebService.ACCESS_TOKEN_KEY, accessToken);
         editor.apply();
     }
 
     public String getAccessToken(Context context){
         SharedPreferences prefs = context.getSharedPreferences(SHARED_PREFS_NAME, MODE_PRIVATE);
-        return prefs.getString(SignInActivity.ACCESS_TOKEN_KEY, DEFAULT);
+        return prefs.getString(FirebaseWebService.ACCESS_TOKEN_KEY, DEFAULT);
     }
 
     public String getRefreshToken(Context context){
         SharedPreferences prefs = context.getSharedPreferences(SHARED_PREFS_NAME, MODE_PRIVATE);
-        return prefs.getString(SignInActivity.REFRESH_TOKEN_KEY, DEFAULT);
+        return prefs.getString(FirebaseWebService.REFRESH_TOKEN_KEY, DEFAULT);
     }
 
 }
