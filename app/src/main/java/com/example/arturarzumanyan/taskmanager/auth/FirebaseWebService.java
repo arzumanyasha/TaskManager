@@ -1,16 +1,12 @@
 package com.example.arturarzumanyan.taskmanager.auth;
 
-import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 import android.support.v4.app.FragmentActivity;
-import android.widget.Toast;
 
-import com.example.arturarzumanyan.taskmanager.networking.RequestParameters;
-import com.example.arturarzumanyan.taskmanager.ui.SignInActivity;
+import com.example.arturarzumanyan.taskmanager.networking.base.RequestParameters;
 import com.google.android.gms.auth.api.Auth;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
@@ -23,17 +19,19 @@ import com.google.android.gms.common.api.Scope;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthCredential;
-import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.GoogleAuthProvider;
+
+import android.support.v4.app.LoaderManager;
+import android.support.v4.content.Loader;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.HashMap;
 
-public class FirebaseWebService implements GoogleApiClient.OnConnectionFailedListener, TokenAsyncTaskEvents, OnCompleteListener{
+public class FirebaseWebService implements GoogleApiClient.OnConnectionFailedListener, TokenAsyncTaskEvents, OnCompleteListener {
 
     private static final String BASE_URL = "https://www.googleapis.com/oauth2/v4/token";
     private static final String CLIENT_ID = "685238908043-obre149i2k2gh9a71g2it0emsa97glma.apps.googleusercontent.com";
@@ -43,7 +41,7 @@ public class FirebaseWebService implements GoogleApiClient.OnConnectionFailedLis
     public static final String ACCESS_TOKEN_KEY = "access_token";
     public static final String REFRESH_TOKEN_KEY = "refresh_token";
 
-    public enum RequestMethods{ POST, GET}
+    public enum RequestMethods {POST, GET}
 
     private FirebaseAuth mAuth;
     private GoogleSignInClient mGoogleSignInClient;
@@ -53,13 +51,11 @@ public class FirebaseWebService implements GoogleApiClient.OnConnectionFailedLis
     private String mRefreshToken;
     private Context mContext;
 
-    private UpdateUiCallback mUpdateUiCallback = null;
-
-    public FirebaseWebService(UpdateUiCallback updateUiCallback){
-        this.mUpdateUiCallback = updateUiCallback;
+    public FirebaseWebService() {
+        this.listener = null;
     }
 
-    public void setGoogleClient(Context context){
+    public void setGoogleClient(Context context) {
         mContext = context;
 
         mAuth = FirebaseAuth.getInstance();
@@ -72,12 +68,12 @@ public class FirebaseWebService implements GoogleApiClient.OnConnectionFailedLis
                         new Scope(TASKS_SCOPE))
                 .build();
 
-        mApiClient = new GoogleApiClient.Builder(context)
-                .enableAutoManage((FragmentActivity)context,this)
+        mApiClient = new GoogleApiClient.Builder(mContext)
+                .enableAutoManage((FragmentActivity) mContext, this)
                 .addApi(Auth.GOOGLE_SIGN_IN_API, gso)
                 .build();
 
-        mGoogleSignInClient = GoogleSignIn.getClient(context, gso);
+        mGoogleSignInClient = GoogleSignIn.getClient(mContext, gso);
     }
 
     public void authWithGoogle(Intent data) {
@@ -98,10 +94,11 @@ public class FirebaseWebService implements GoogleApiClient.OnConnectionFailedLis
     public void onComplete(@NonNull Task task) {
         if (task.isSuccessful()) {
             FirebaseUser user = mAuth.getCurrentUser();
-            mUpdateUiCallback.updateUi(user.getDisplayName(),
-                    user.getEmail(),
-                    user.getPhotoUrl().toString());
-
+            if (listener != null) {
+                listener.onDataLoaded(user.getDisplayName(),
+                        user.getEmail(),
+                        user.getPhotoUrl().toString());
+            }
         }
     }
 
@@ -131,7 +128,7 @@ public class FirebaseWebService implements GoogleApiClient.OnConnectionFailedLis
         return mRefreshToken;
     }
 
-    private void requestToken(String authCode){
+    private void requestToken(String authCode) {
         mAccessTokenAsyncTask = new AccessTokenAsyncTask(this);
 
         RequestMethods requestMethod = RequestMethods.POST;
@@ -151,18 +148,28 @@ public class FirebaseWebService implements GoogleApiClient.OnConnectionFailedLis
         mAccessTokenAsyncTask.execute(requestParameters);
     }
 
-    public FirebaseUser getCurrentUser(){
+    public FirebaseUser getCurrentUser() {
         return mAuth.getCurrentUser();
     }
 
-    public Intent getGoogleSignInClientIntent(){
+    public Intent getGoogleSignInClientIntent() {
         return mGoogleSignInClient.getSignInIntent();
     }
 
-    public void closeAuthConnection(){
-        if(mAccessTokenAsyncTask != null){
+    public void closeAuthConnection() {
+        if (mAccessTokenAsyncTask != null) {
             mAccessTokenAsyncTask.cancel(false);
             mAccessTokenAsyncTask = null;
         }
     }
+
+    public interface FirebaseWebServiceListener {
+        public void onDataLoaded(String userName, String userEmail, String userPhotoUrl);
+    }
+
+    public void setFirebaseWebServiceListener(FirebaseWebServiceListener listener) {
+        this.listener = listener;
+    }
+
+    private FirebaseWebServiceListener listener;
 }

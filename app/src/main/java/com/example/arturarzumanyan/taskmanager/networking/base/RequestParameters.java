@@ -1,4 +1,4 @@
-package com.example.arturarzumanyan.taskmanager.networking;
+package com.example.arturarzumanyan.taskmanager.networking.base;
 
 import com.example.arturarzumanyan.taskmanager.auth.FirebaseWebService;
 

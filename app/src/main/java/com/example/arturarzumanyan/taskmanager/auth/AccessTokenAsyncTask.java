@@ -2,8 +2,8 @@ package com.example.arturarzumanyan.taskmanager.auth;
 
 import android.os.AsyncTask;
 
-import com.example.arturarzumanyan.taskmanager.networking.RequestParameters;
-import com.example.arturarzumanyan.taskmanager.networking.BaseHttpUrlConnection;
+import com.example.arturarzumanyan.taskmanager.networking.base.RequestParameters;
+import com.example.arturarzumanyan.taskmanager.networking.base.BaseHttpUrlConnection;
 
 import org.json.JSONException;
 

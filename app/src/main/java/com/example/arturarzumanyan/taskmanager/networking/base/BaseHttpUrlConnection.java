@@ -1,4 +1,4 @@
-package com.example.arturarzumanyan.taskmanager.networking;
+package com.example.arturarzumanyan.taskmanager.networking.base;
 
 import android.net.Uri;
 
@@ -17,9 +17,9 @@ import java.util.HashMap;
 public class BaseHttpUrlConnection {
 
     public String getResult(String url,
-                                FirebaseWebService.RequestMethods requestMethod,
-                                HashMap<String, String> requestBodyParameters,
-                                HashMap<String, String> requestHeaderParameters){
+                            FirebaseWebService.RequestMethods requestMethod,
+                            HashMap<String, String> requestBodyParameters,
+                            HashMap<String, String> requestHeaderParameters) {
         HttpURLConnection connection = null;
         BufferedReader reader = null;
         Uri.Builder uriBuilder;
@@ -27,7 +27,7 @@ public class BaseHttpUrlConnection {
         try {
             connection = getConnectionSettings(connection, url, requestMethod, requestHeaderParameters);
             uriBuilder = new Uri.Builder();
-            for(HashMap.Entry<String, String> map : requestBodyParameters.entrySet()){
+            for (HashMap.Entry<String, String> map : requestBodyParameters.entrySet()) {
                 uriBuilder.appendQueryParameter(map.getKey(), map.getValue());
             }
 
@@ -35,9 +35,9 @@ public class BaseHttpUrlConnection {
 
             setConnection(connection, query);
 
-            int responseCode=connection.getResponseCode();
+            int responseCode = connection.getResponseCode();
 
-            if (responseCode == HttpURLConnection.HTTP_OK){
+            if (responseCode == HttpURLConnection.HTTP_OK) {
                 reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
                 String buffer;
                 buffer = getInputStream(reader);
@@ -45,8 +45,7 @@ public class BaseHttpUrlConnection {
             }
         } catch (IOException e) {
             e.printStackTrace();
-        }
-        finally {
+        } finally {
             if (connection != null) {
                 connection.disconnect();
             }
@@ -70,11 +69,11 @@ public class BaseHttpUrlConnection {
         connection = (HttpURLConnection) requestUrl.openConnection();
         connection.setReadTimeout(15000);
         connection.setConnectTimeout(15000);
-        connection.setInstanceFollowRedirects( true );
+        connection.setInstanceFollowRedirects(true);
         connection.setRequestMethod(requestMethod.toString());
         connection.setDoOutput(true);
         connection.setDoInput(true);
-        for(HashMap.Entry<String, String> map : requestHeaderParameters.entrySet()){
+        for (HashMap.Entry<String, String> map : requestHeaderParameters.entrySet()) {
             connection.setRequestProperty(map.getKey(), map.getValue());
         }
 
@@ -94,9 +93,9 @@ public class BaseHttpUrlConnection {
     }
 
     private String getInputStream(BufferedReader reader) throws IOException {
-        StringBuilder buf=new StringBuilder();
-        String line=null;
-        while ((line=reader.readLine()) != null) {
+        StringBuilder buf = new StringBuilder();
+        String line = null;
+        while ((line = reader.readLine()) != null) {
             buf.append(line + "\n");
         }
         return buf.toString();

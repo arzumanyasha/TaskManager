@@ -9,7 +9,7 @@ public class TokenStorage {
     private static final String SHARED_PREFS_NAME = "sharedPrefs";
     private static final String DEFAULT = "";
 
-    public void write(Context context, String accessToken, String refreshToken){
+    public void write(Context context, String accessToken, String refreshToken) {
         SharedPreferences prefs = context.getSharedPreferences(SHARED_PREFS_NAME, MODE_PRIVATE);
         SharedPreferences.Editor editor = prefs.edit();
         editor.putString(FirebaseWebService.ACCESS_TOKEN_KEY, accessToken);
@@ -17,19 +17,19 @@ public class TokenStorage {
         editor.apply();
     }
 
-    public void writeAccessToken(Context context, String accessToken){
+    public void writeAccessToken(Context context, String accessToken) {
         SharedPreferences prefs = context.getSharedPreferences(SHARED_PREFS_NAME, MODE_PRIVATE);
         SharedPreferences.Editor editor = prefs.edit();
         editor.putString(FirebaseWebService.ACCESS_TOKEN_KEY, accessToken);
         editor.apply();
     }
 
-    public String getAccessToken(Context context){
+    public String getAccessToken(Context context) {
         SharedPreferences prefs = context.getSharedPreferences(SHARED_PREFS_NAME, MODE_PRIVATE);
         return prefs.getString(FirebaseWebService.ACCESS_TOKEN_KEY, DEFAULT);
     }
 
-    public String getRefreshToken(Context context){
+    public String getRefreshToken(Context context) {
         SharedPreferences prefs = context.getSharedPreferences(SHARED_PREFS_NAME, MODE_PRIVATE);
         return prefs.getString(FirebaseWebService.REFRESH_TOKEN_KEY, DEFAULT);
     }

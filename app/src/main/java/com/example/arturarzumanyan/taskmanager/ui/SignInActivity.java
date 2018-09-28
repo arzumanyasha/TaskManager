@@ -8,10 +8,9 @@ import android.widget.Toast;
 
 import com.example.arturarzumanyan.taskmanager.R;
 import com.example.arturarzumanyan.taskmanager.auth.FirebaseWebService;
-import com.example.arturarzumanyan.taskmanager.auth.UpdateUiCallback;
 import com.google.android.gms.common.SignInButton;
 
-public class SignInActivity extends AppCompatActivity implements UpdateUiCallback{
+public class SignInActivity extends AppCompatActivity {
 
     private static final int REQUEST_CODE = 101;
     public static final String EXTRA_USER_NAME = "userName";
@@ -25,8 +24,14 @@ public class SignInActivity extends AppCompatActivity implements UpdateUiCallbac
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        mFirebaseWebService = new FirebaseWebService(this);
+        mFirebaseWebService = new FirebaseWebService();
         mFirebaseWebService.setGoogleClient(this);
+        mFirebaseWebService.setFirebaseWebServiceListener(new FirebaseWebService.FirebaseWebServiceListener() {
+            @Override
+            public void onDataLoaded(String userName, String userEmail, String userPhotoUrl) {
+                updateUI(userName, userEmail, userPhotoUrl);
+            }
+        });
 
         SignInButton signInButton = findViewById(R.id.button_sign_in);
         signInButton.setOnClickListener(new View.OnClickListener() {
@@ -41,7 +46,7 @@ public class SignInActivity extends AppCompatActivity implements UpdateUiCallbac
     public void onStart() {
         super.onStart();
 
-        if(mFirebaseWebService.getCurrentUser()!=null){
+        if (mFirebaseWebService.getCurrentUser() != null) {
             updateUI(mFirebaseWebService.getCurrentUser().getDisplayName(),
                     mFirebaseWebService.getCurrentUser().getEmail(),
                     mFirebaseWebService.getCurrentUser().getPhotoUrl().toString());
@@ -59,6 +64,7 @@ public class SignInActivity extends AppCompatActivity implements UpdateUiCallbac
         startActivity(accountIntent);
         finish();
     }
+
     private void signIn() {
         Intent signInIntent = mFirebaseWebService.getGoogleSignInClientIntent();
 
@@ -77,10 +83,5 @@ public class SignInActivity extends AppCompatActivity implements UpdateUiCallbac
     protected void onDestroy() {
         mFirebaseWebService.closeAuthConnection();
         super.onDestroy();
-    }
-
-    @Override
-    public void updateUi(String userName, String userEmail, String userPhotoUrl) {
-        updateUI(userName, userEmail, userPhotoUrl);
     }
 }
