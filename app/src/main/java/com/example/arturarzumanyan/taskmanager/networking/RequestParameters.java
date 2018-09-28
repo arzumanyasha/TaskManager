@@ -1,15 +1,17 @@
 package com.example.arturarzumanyan.taskmanager.networking;
 
+import com.example.arturarzumanyan.taskmanager.auth.FirebaseWebService;
+
 import java.util.HashMap;
 
 public class RequestParameters {
     private String url;
-    private String requestMethod;
+    private FirebaseWebService.RequestMethods requestMethod;
     private HashMap<String, String> requestBodyParameters;
     private HashMap<String, String> requestHeaderParameters;
 
     public RequestParameters(String url,
-                             String requestMethod,
+                             FirebaseWebService.RequestMethods requestMethod,
                              HashMap<String, String> requestBodyParameters,
                              HashMap<String, String> requestHeaderParameters) {
         this.url = url;
@@ -22,7 +24,7 @@ public class RequestParameters {
         return url;
     }
 
-    public String getRequestMethod() {
+    public FirebaseWebService.RequestMethods getRequestMethod() {
         return requestMethod;
     }
 

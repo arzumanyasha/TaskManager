@@ -21,7 +21,7 @@ public class AccessTokenAsyncTask extends AsyncTask<RequestParameters, Void, Str
     @Override
     protected String doInBackground(RequestParameters... requestParameters) {
         String url = requestParameters[0].getUrl();
-        String requestMethod = requestParameters[0].getRequestMethod();
+        FirebaseWebService.RequestMethods requestMethod = requestParameters[0].getRequestMethod();
         HashMap<String, String> requestBodyParameters = requestParameters[0].getRequestBodyParameters();
         HashMap<String, String> requestHeaderParameters = requestParameters[0].getRequestHeaderParameters();
 

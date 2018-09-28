@@ -2,6 +2,8 @@ package com.example.arturarzumanyan.taskmanager.networking;
 
 import android.net.Uri;
 
+import com.example.arturarzumanyan.taskmanager.auth.FirebaseWebService;
+
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.IOException;
@@ -15,7 +17,7 @@ import java.util.HashMap;
 public class BaseHttpUrlConnection {
 
     public String getResult(String url,
-                                String requestMethod,
+                                FirebaseWebService.RequestMethods requestMethod,
                                 HashMap<String, String> requestBodyParameters,
                                 HashMap<String, String> requestHeaderParameters){
         HttpURLConnection connection = null;
@@ -62,14 +64,14 @@ public class BaseHttpUrlConnection {
 
     private HttpURLConnection getConnectionSettings(HttpURLConnection connection,
                                                     String url,
-                                                    String requestMethod,
+                                                    FirebaseWebService.RequestMethods requestMethod,
                                                     HashMap<String, String> requestHeaderParameters) throws IOException {
         URL requestUrl = new URL(url);
         connection = (HttpURLConnection) requestUrl.openConnection();
         connection.setReadTimeout(15000);
         connection.setConnectTimeout(15000);
         connection.setInstanceFollowRedirects( true );
-        connection.setRequestMethod(requestMethod);
+        connection.setRequestMethod(requestMethod.toString());
         connection.setDoOutput(true);
         connection.setDoInput(true);
         for(HashMap.Entry<String, String> map : requestHeaderParameters.entrySet()){

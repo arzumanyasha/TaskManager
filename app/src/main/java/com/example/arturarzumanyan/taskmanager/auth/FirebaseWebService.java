@@ -43,6 +43,8 @@ public class FirebaseWebService implements GoogleApiClient.OnConnectionFailedLis
     public static final String ACCESS_TOKEN_KEY = "access_token";
     public static final String REFRESH_TOKEN_KEY = "refresh_token";
 
+    public enum RequestMethods{ POST, GET}
+
     private FirebaseAuth mAuth;
     private GoogleSignInClient mGoogleSignInClient;
     private GoogleApiClient mApiClient;
@@ -78,7 +80,7 @@ public class FirebaseWebService implements GoogleApiClient.OnConnectionFailedLis
         mGoogleSignInClient = GoogleSignIn.getClient(context, gso);
     }
 
-    public void firebaseAuthWithGoogle(Intent data) {
+    public void authWithGoogle(Intent data) {
         GoogleSignInResult result = Auth.GoogleSignInApi.getSignInResultFromIntent(data);
         if (result.isSuccess()) {
             GoogleSignInAccount acct = result.getSignInAccount();
@@ -115,7 +117,6 @@ public class FirebaseWebService implements GoogleApiClient.OnConnectionFailedLis
 
         TokenStorage tokenStorage = new TokenStorage();
         tokenStorage.write(mContext, accessToken, refreshToken);
-        Toast.makeText(mContext, accessToken, Toast.LENGTH_SHORT).show();
     }
 
     private String getAccessTokenFromBuffer(String buffer) throws JSONException {
@@ -133,7 +134,7 @@ public class FirebaseWebService implements GoogleApiClient.OnConnectionFailedLis
     private void requestToken(String authCode){
         mAccessTokenAsyncTask = new AccessTokenAsyncTask(this);
 
-        String requestType = "POST";
+        RequestMethods requestMethod = RequestMethods.POST;
         HashMap<String, String> requestBodyParameters = new HashMap<>();
         requestBodyParameters.put("code", authCode);
         requestBodyParameters.put("client_id", CLIENT_ID);
@@ -143,7 +144,7 @@ public class FirebaseWebService implements GoogleApiClient.OnConnectionFailedLis
         requestHeaderParameters.put("Content-Type", "application/x-www-form-urlencoded");
 
         RequestParameters requestParameters = new RequestParameters(BASE_URL,
-                requestType,
+                requestMethod,
                 requestBodyParameters,
                 requestHeaderParameters);
 
@@ -158,7 +159,7 @@ public class FirebaseWebService implements GoogleApiClient.OnConnectionFailedLis
         return mGoogleSignInClient.getSignInIntent();
     }
 
-    public void destroyAsyncTask(){
+    public void closeAuthConnection(){
         if(mAccessTokenAsyncTask != null){
             mAccessTokenAsyncTask.cancel(false);
             mAccessTokenAsyncTask = null;

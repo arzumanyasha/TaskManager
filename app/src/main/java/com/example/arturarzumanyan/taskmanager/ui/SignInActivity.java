@@ -69,13 +69,13 @@ public class SignInActivity extends AppCompatActivity implements UpdateUiCallbac
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == REQUEST_CODE) {
 
-            mFirebaseWebService.firebaseAuthWithGoogle(data);
+            mFirebaseWebService.authWithGoogle(data);
         }
     }
 
     @Override
     protected void onDestroy() {
-        mFirebaseWebService.destroyAsyncTask();
+        mFirebaseWebService.closeAuthConnection();
         super.onDestroy();
     }
 

@@ -3,8 +3,6 @@ package com.example.arturarzumanyan.taskmanager.auth;
 import android.content.Context;
 import android.content.SharedPreferences;
 
-import com.example.arturarzumanyan.taskmanager.ui.SignInActivity;
-
 import static android.content.Context.MODE_PRIVATE;
 
 public class TokenStorage {
