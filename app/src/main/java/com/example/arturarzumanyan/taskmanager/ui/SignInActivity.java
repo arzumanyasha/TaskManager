@@ -26,7 +26,7 @@ public class SignInActivity extends AppCompatActivity {
 
         mFirebaseWebService = new FirebaseWebService();
         mFirebaseWebService.setGoogleClient(this);
-        mFirebaseWebService.setFirebaseWebServiceListener(new FirebaseWebService.FirebaseWebServiceListener() {
+        mFirebaseWebService.setUserInfoLoadingListener(new FirebaseWebService.UserInfoLoadingListener() {
             @Override
             public void onDataLoaded(String userName, String userEmail, String userPhotoUrl) {
                 updateUI(userName, userEmail, userPhotoUrl);
