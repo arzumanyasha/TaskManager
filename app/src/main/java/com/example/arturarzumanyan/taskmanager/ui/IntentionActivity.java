@@ -3,7 +3,6 @@ package com.example.arturarzumanyan.taskmanager.ui;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.view.View;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
@@ -17,15 +16,23 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.example.arturarzumanyan.taskmanager.R;
+import com.example.arturarzumanyan.taskmanager.auth.FirebaseWebService;
+import com.example.arturarzumanyan.taskmanager.auth.TokenStorage;
+import com.example.arturarzumanyan.taskmanager.networking.UserDataAsyncTask;
+import com.example.arturarzumanyan.taskmanager.networking.base.RequestParameters;
 import com.squareup.picasso.Picasso;
 
-import java.util.zip.Inflater;
+import java.util.HashMap;
 
 public class IntentionActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
+    private static final String BASE_EVENTS_URL = "https://www.googleapis.com/calendar/v3/calendars/";
+
     private TextView userNameTextView, userEmailTextView;
     private ImageView userPhotoImageView;
+
+    private UserDataAsyncTask mUserEventsAsyncTask;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -70,7 +77,34 @@ public class IntentionActivity extends AppCompatActivity
         Picasso.get()
                 .load(userData.getStringExtra(SignInActivity.EXTRA_USER_PHOTO_URL))
                 .into(userPhotoImageView);
+
+        getUserEvents(userData.getStringExtra(SignInActivity.EXTRA_USER_EMAIL));
+
+        mUserEventsAsyncTask.setDataInfoLoadingListener(new UserDataAsyncTask.UserDataLoadingListener() {
+            @Override
+            public void onDataLoaded(String response) {
+                String resp = response;
+            }
+        });
     }
+
+    private void getUserEvents(String userEmail) {
+        TokenStorage tokenStorage = new TokenStorage();
+
+        mUserEventsAsyncTask = new UserDataAsyncTask();
+        String url = BASE_EVENTS_URL + userEmail + "/events";
+        FirebaseWebService.RequestMethods requestMethod = FirebaseWebService.RequestMethods.GET;
+        HashMap<String, String> requestBodyParameters = new HashMap<>();
+        HashMap<String, String> requestHeaderParameters = new HashMap<>();
+        String token = tokenStorage.getAccessToken(this);
+        requestHeaderParameters.put("Authorization", "Bearer " + tokenStorage.getAccessToken(this));
+        RequestParameters requestParameters = new RequestParameters(url,
+                requestMethod,
+                requestBodyParameters,
+                requestHeaderParameters);
+        mUserEventsAsyncTask.execute(requestParameters);
+    }
+
 
     @Override
     public void onBackPressed() {

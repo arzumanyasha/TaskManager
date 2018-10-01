@@ -1,21 +1,21 @@
-package com.example.arturarzumanyan.taskmanager.auth;
+package com.example.arturarzumanyan.taskmanager.networking;
 
 import android.os.AsyncTask;
 
-import com.example.arturarzumanyan.taskmanager.networking.base.RequestParameters;
+import com.example.arturarzumanyan.taskmanager.auth.FirebaseWebService;
 import com.example.arturarzumanyan.taskmanager.networking.base.BaseHttpUrlConnection;
+import com.example.arturarzumanyan.taskmanager.networking.base.RequestParameters;
 
 import org.json.JSONException;
 
 import java.util.HashMap;
 
-public class AccessTokenAsyncTask extends AsyncTask<RequestParameters, Void, String> {
+public class UserDataAsyncTask extends AsyncTask<RequestParameters, Void, String> {
 
-    private TokenAsyncTaskEvents mTokenAsyncTaskEvents;
     private String mBuffer;
 
-    public AccessTokenAsyncTask(TokenAsyncTaskEvents tokenAsyncTaskEvents) {
-        mTokenAsyncTaskEvents = tokenAsyncTaskEvents;
+    public UserDataAsyncTask() {
+        this.userDataLoadingListener = null;
     }
 
     @Override
@@ -36,15 +36,22 @@ public class AccessTokenAsyncTask extends AsyncTask<RequestParameters, Void, Str
     @Override
     protected void onPostExecute(String s) {
         super.onPostExecute(s);
-        if (mTokenAsyncTaskEvents != null) {
+        if (userDataLoadingListener != null) {
             try {
-                mTokenAsyncTaskEvents.onPostExecute(mBuffer);
-            } catch (JSONException e) {
-                e.printStackTrace();
-            } catch (InterruptedException e) {
+                userDataLoadingListener.onDataLoaded(mBuffer);
+            } catch (Exception e) {
                 e.printStackTrace();
             }
         }
     }
 
+    public interface UserDataLoadingListener {
+        void onDataLoaded(String response);
+    }
+
+    public void setDataInfoLoadingListener(UserDataLoadingListener listener) {
+        this.userDataLoadingListener = listener;
+    }
+
+    private UserDataLoadingListener userDataLoadingListener;
 }

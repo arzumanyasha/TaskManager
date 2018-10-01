@@ -4,9 +4,11 @@ import android.net.Uri;
 
 import com.example.arturarzumanyan.taskmanager.auth.FirebaseWebService;
 
+import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
@@ -27,13 +29,15 @@ public class BaseHttpUrlConnection {
         try {
             connection = getConnectionSettings(connection, url, requestMethod, requestHeaderParameters);
             uriBuilder = new Uri.Builder();
-            for (HashMap.Entry<String, String> map : requestBodyParameters.entrySet()) {
-                uriBuilder.appendQueryParameter(map.getKey(), map.getValue());
+            if (requestMethod == FirebaseWebService.RequestMethods.POST) {
+                for (HashMap.Entry<String, String> map : requestBodyParameters.entrySet()) {
+                    uriBuilder.appendQueryParameter(map.getKey(), map.getValue());
+                }
             }
 
             query = uriBuilder.build().getEncodedQuery();
 
-            setConnection(connection, query);
+            setConnection(connection, query, requestMethod);
 
             int responseCode = connection.getResponseCode();
 
@@ -71,7 +75,9 @@ public class BaseHttpUrlConnection {
         connection.setConnectTimeout(15000);
         connection.setInstanceFollowRedirects(true);
         connection.setRequestMethod(requestMethod.toString());
-        connection.setDoOutput(true);
+        if (requestMethod == FirebaseWebService.RequestMethods.POST) {
+            connection.setDoOutput(true);
+        }
         connection.setDoInput(true);
         for (HashMap.Entry<String, String> map : requestHeaderParameters.entrySet()) {
             connection.setRequestProperty(map.getKey(), map.getValue());
@@ -80,15 +86,16 @@ public class BaseHttpUrlConnection {
         return connection;
     }
 
-    private void setConnection(HttpURLConnection connection, String query) throws IOException {
-        OutputStream os = connection.getOutputStream();
-        BufferedWriter writer = new BufferedWriter(
-                new OutputStreamWriter(os, "UTF-8"));
-        writer.write(query);
-        writer.flush();
-        writer.close();
-        os.close();
-
+    private void setConnection(HttpURLConnection connection, String query, FirebaseWebService.RequestMethods requestMethod) throws IOException {
+        if (requestMethod == FirebaseWebService.RequestMethods.POST) {
+            OutputStream os = connection.getOutputStream();
+            BufferedWriter writer = new BufferedWriter(
+                    new OutputStreamWriter(os, "UTF-8"));
+            writer.write(query);
+            writer.flush();
+            writer.close();
+            os.close();
+        }
         connection.connect();
     }
 
