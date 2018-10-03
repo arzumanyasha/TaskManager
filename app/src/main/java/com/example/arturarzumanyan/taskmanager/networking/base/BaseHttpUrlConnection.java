@@ -48,9 +48,7 @@ public class BaseHttpUrlConnection {
                 buffer = getInputStream(reader);
                 return buffer;
             } else if (responseCode == HttpURLConnection.HTTP_UNAUTHORIZED) {
-                FirebaseWebService firebaseWebService = new FirebaseWebService();
-                //firebaseWebService.refreshAccessToken();
-                //////////Question
+                return "";
             }
         } catch (IOException e) {
             e.printStackTrace();

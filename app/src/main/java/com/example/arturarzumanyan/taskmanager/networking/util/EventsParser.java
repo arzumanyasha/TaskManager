@@ -5,55 +5,72 @@ import android.content.Context;
 
 import com.example.arturarzumanyan.taskmanager.db.EventsContract.*;
 import com.example.arturarzumanyan.taskmanager.db.EventsDbHelper;
+import com.example.arturarzumanyan.taskmanager.domain.Event;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-public class EventsParser {
-    private Context mContext;
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
 
-    public void storeEvents(Context context, String buffer) throws JSONException {
-        mContext = context;
+public class EventsParser {
+
+    public ArrayList<Event> parseEvents(String buffer) throws JSONException, ParseException {
+
+        ArrayList<Event> eventsList = new ArrayList<>();
         JSONObject jsonobject = new JSONObject(buffer);
         JSONArray jsonArray = jsonobject.getJSONArray("items");
         for (int i = 0; i < jsonArray.length(); i++) {
             JSONObject explrObject = jsonArray.getJSONObject(i);
-            storeEvent(explrObject);
+            eventsList.add(parseEvent(explrObject));
         }
+        return eventsList;
     }
 
-    private void storeEvent(JSONObject jsonObject) throws JSONException {
-        ContentValues cv = new ContentValues();
-        cv.put(EventsTable.COLUMN_EVENT_ID, jsonObject.getString("id"));
-        cv.put(EventsTable.COLUMN_NAME, jsonObject.getString("summary"));
+    private Event parseEvent(JSONObject jsonObject) throws JSONException, ParseException {
 
+        String description;
         if (!jsonObject.isNull("description")) {
-            cv.put(EventsTable.COLUMN_DESCRIPTION, jsonObject.getString("description"));
+            description = jsonObject.getString("description");
         } else {
-            cv.put(EventsTable.COLUMN_DESCRIPTION, "");
+            description = "";
         }
 
+        int colorId;
         if (!jsonObject.isNull("colorId")) {
-            cv.put(EventsTable.COLUMN_COLOR_ID, jsonObject.getInt("colorId"));
+            colorId = jsonObject.getInt("colorId");
         } else {
-            cv.put(EventsTable.COLUMN_COLOR_ID, 9);
+            colorId = 9;
         }
 
+        DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ");
         JSONObject startTimeJsonObject = jsonObject.getJSONObject("start");
-        cv.put(EventsTable.COLUMN_START_TIME, startTimeJsonObject.getString("dateTime"));
-
         JSONObject endTimeJsonObject = jsonObject.getJSONObject("end");
-        cv.put(EventsTable.COLUMN_END_TIME, endTimeJsonObject.getString("dateTime"));
 
+        Date startDate = dateFormat.parse(startTimeJsonObject.getString("dateTime"));
+
+        Date endDate = dateFormat.parse(endTimeJsonObject.getString("dateTime"));
+
+        Boolean isNotify;
         JSONObject reminderJsonObject = jsonObject.getJSONObject("reminders");
         if (!reminderJsonObject.isNull("overrides")) {
-            cv.put(EventsTable.COLUMN_REMINDER, 1);
+            isNotify = true;
         } else {
-            cv.put(EventsTable.COLUMN_REMINDER, 0);
+            isNotify = false;
         }
 
-        EventsDbHelper eventsDbHelper = new EventsDbHelper(mContext);
-        eventsDbHelper.insertEvent(cv);
+        Event event = new Event(jsonObject.getString("id"),
+                jsonObject.getString("summary"),
+                description,
+                colorId,
+                startDate,
+                endDate,
+                isNotify);
+
+        return event;
     }
 }

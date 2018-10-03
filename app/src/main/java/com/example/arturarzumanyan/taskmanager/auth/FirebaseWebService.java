@@ -124,7 +124,7 @@ public class FirebaseWebService implements GoogleApiClient.OnConnectionFailedLis
     }
 
     private void requestToken(String authCode) {
-        mAccessTokenAsyncTask = new AccessTokenAsyncTask(/*this*/);
+        mAccessTokenAsyncTask = new AccessTokenAsyncTask();
         mAccessTokenAsyncTask.setTokensLoadingListener(new AccessTokenAsyncTask.TokensLoadingListener() {
             @Override
             public void onDataLoaded(String buffer) throws JSONException {
@@ -153,6 +153,7 @@ public class FirebaseWebService implements GoogleApiClient.OnConnectionFailedLis
     }
 
     public void refreshAccessToken(Context context) {
+        mContext = context;
         AccessTokenAsyncTask accessTokenAsyncTask = new AccessTokenAsyncTask();
         accessTokenAsyncTask.setTokensLoadingListener(new AccessTokenAsyncTask.TokensLoadingListener() {
             @Override

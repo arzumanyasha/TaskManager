@@ -17,7 +17,7 @@ import java.util.Date;
 
 public class EventsDbHelper extends SQLiteOpenHelper {
     private static final String DATABASE_NAME = "EventsDatabase.db";
-    private static final int DATABASE_VERSION = 3;
+    private static final int DATABASE_VERSION = 4;
 
     private SQLiteDatabase db;
 
@@ -53,6 +53,31 @@ public class EventsDbHelper extends SQLiteOpenHelper {
     public void insertEvent(ContentValues cv) {
         db = getWritableDatabase();
         db.insert(EventsTable.TABLE_NAME, null, cv);
+    }
+
+    public void insertEvents(ArrayList<Event> eventsList) {
+        db = getWritableDatabase();
+        for (int i = 0; i < eventsList.size(); i++) {
+            ContentValues cv = new ContentValues();
+
+            cv.put(EventsTable.COLUMN_EVENT_ID, eventsList.get(i).getId());
+            cv.put(EventsTable.COLUMN_NAME, eventsList.get(i).getName());
+            cv.put(EventsTable.COLUMN_DESCRIPTION, eventsList.get(i).getDescription());
+            cv.put(EventsTable.COLUMN_COLOR_ID, eventsList.get(i).getColorId());
+
+            DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ");
+            cv.put(EventsTable.COLUMN_START_TIME, dateFormat.format(eventsList.get(i).getStartTime()));
+
+            cv.put(EventsTable.COLUMN_END_TIME, dateFormat.format(eventsList.get(i).getEndTime()));
+
+            if (eventsList.get(i).isNotify() == true) {
+                cv.put(EventsTable.COLUMN_REMINDER, 1);
+            } else {
+                cv.put(EventsTable.COLUMN_REMINDER, 0);
+            }
+
+            db.insert(EventsTable.TABLE_NAME, null, cv);
+        }
     }
 
     public ArrayList<Event> getEvents() throws ParseException {

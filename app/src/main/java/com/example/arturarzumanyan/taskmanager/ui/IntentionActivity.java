@@ -1,6 +1,7 @@
 package com.example.arturarzumanyan.taskmanager.ui;
 
 import android.content.Intent;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.view.View;
@@ -39,8 +40,11 @@ public class IntentionActivity extends AppCompatActivity
 
     private TextView userNameTextView, userEmailTextView;
     private ImageView userPhotoImageView;
+    private Intent mUserData;
+    private EventsDbHelper eventsDbHelper;
 
     private UserDataAsyncTask mUserEventsAsyncTask;
+    private UserDataAsyncTask mUserRefreshEventsAsyncTask;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -70,7 +74,7 @@ public class IntentionActivity extends AppCompatActivity
         NavigationView navigationView = findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
 
-        Intent userData = getIntent();
+        mUserData = getIntent();
         userPhotoImageView = navigationView
                 .getHeaderView(0)
                 .findViewById(R.id.imageViewUserPhoto);
@@ -80,23 +84,41 @@ public class IntentionActivity extends AppCompatActivity
         userEmailTextView = navigationView
                 .getHeaderView(0)
                 .findViewById(R.id.textViewUserEmail);
-        userNameTextView.setText(userData.getStringExtra(SignInActivity.EXTRA_USER_NAME));
-        userEmailTextView.setText(userData.getStringExtra(SignInActivity.EXTRA_USER_EMAIL));
+        userNameTextView.setText(mUserData.getStringExtra(SignInActivity.EXTRA_USER_NAME));
+        userEmailTextView.setText(mUserData.getStringExtra(SignInActivity.EXTRA_USER_EMAIL));
         Picasso.get()
-                .load(userData.getStringExtra(SignInActivity.EXTRA_USER_PHOTO_URL))
+                .load(mUserData.getStringExtra(SignInActivity.EXTRA_USER_PHOTO_URL))
                 .into(userPhotoImageView);
 
-        getUserEvents(userData.getStringExtra(SignInActivity.EXTRA_USER_EMAIL));
+        eventsDbHelper = new EventsDbHelper(this);
 
-        mUserEventsAsyncTask.setDataInfoLoadingListener(new UserDataAsyncTask.UserDataLoadingListener() {
+        mUserEventsAsyncTask = new UserDataAsyncTask();
+        mUserRefreshEventsAsyncTask = new UserDataAsyncTask();
+
+        getUserEvents(mUserEventsAsyncTask, mUserData.getStringExtra(SignInActivity.EXTRA_USER_EMAIL));
+
+        mUserRefreshEventsAsyncTask.setDataInfoLoadingListener(new UserDataAsyncTask.UserDataLoadingListener() {
             @Override
-            public void onDataLoaded(String response) throws JSONException {
+            public void onDataLoaded(String response) throws JSONException, ParseException {
                 EventsParser eventsParser = new EventsParser();
-                eventsParser.storeEvents(IntentionActivity.this, response);
+                eventsDbHelper.insertEvents(eventsParser.parseEvents(response));
             }
         });
 
-        EventsDbHelper eventsDbHelper = new EventsDbHelper(IntentionActivity.this);
+        mUserEventsAsyncTask.setDataInfoLoadingListener(new UserDataAsyncTask.UserDataLoadingListener() {
+            @Override
+            public void onDataLoaded(String response) throws JSONException, ParseException {
+                if (response.equals("")) {
+                    FirebaseWebService firebaseWebService = new FirebaseWebService();
+                    firebaseWebService.refreshAccessToken(IntentionActivity.this);
+                    getUserEvents(mUserRefreshEventsAsyncTask, mUserData.getStringExtra(SignInActivity.EXTRA_USER_EMAIL));
+                } else {
+                    EventsParser eventsParser = new EventsParser();
+                    eventsDbHelper.insertEvents(eventsParser.parseEvents(response));
+                }
+            }
+        });
+
         try {
             ArrayList<Event> eventsList = eventsDbHelper.getEvents();
             int size = eventsList.size();
@@ -105,10 +127,9 @@ public class IntentionActivity extends AppCompatActivity
         }
     }
 
-    private void getUserEvents(String userEmail) {
+    private void getUserEvents(UserDataAsyncTask asyncTask, String userEmail) {
         TokenStorage tokenStorage = new TokenStorage();
 
-        mUserEventsAsyncTask = new UserDataAsyncTask();
         String url = BASE_EVENTS_URL + userEmail + "/events";
         FirebaseWebService.RequestMethods requestMethod = FirebaseWebService.RequestMethods.GET;
         HashMap<String, String> requestBodyParameters = new HashMap<>();
@@ -119,7 +140,7 @@ public class IntentionActivity extends AppCompatActivity
                 requestMethod,
                 requestBodyParameters,
                 requestHeaderParameters);
-        mUserEventsAsyncTask.execute(requestParameters);
+        asyncTask.execute(requestParameters);
     }
 
 

@@ -8,6 +8,7 @@ import com.example.arturarzumanyan.taskmanager.networking.base.RequestParameters
 
 import org.json.JSONException;
 
+import java.text.ParseException;
 import java.util.HashMap;
 
 public class UserDataAsyncTask extends AsyncTask<RequestParameters, Void, String> {
@@ -30,7 +31,11 @@ public class UserDataAsyncTask extends AsyncTask<RequestParameters, Void, String
                 requestMethod,
                 requestBodyParameters,
                 requestHeaderParameters);
-        return mBuffer;
+        if (mBuffer.equals("")) {
+            return "";
+        } else {
+            return mBuffer;
+        }
     }
 
     @Override
@@ -46,7 +51,7 @@ public class UserDataAsyncTask extends AsyncTask<RequestParameters, Void, String
     }
 
     public interface UserDataLoadingListener {
-        void onDataLoaded(String response) throws JSONException;
+        void onDataLoaded(String response) throws JSONException, ParseException;
     }
 
     public void setDataInfoLoadingListener(UserDataLoadingListener listener) {
