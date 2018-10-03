@@ -1,14 +1,23 @@
 package com.example.arturarzumanyan.taskmanager.db;
 
+import android.content.ContentValues;
 import android.content.Context;
+import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
 import com.example.arturarzumanyan.taskmanager.db.EventsContract.*;
+import com.example.arturarzumanyan.taskmanager.domain.Event;
+
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
 
 public class EventsDbHelper extends SQLiteOpenHelper {
     private static final String DATABASE_NAME = "EventsDatabase.db";
-    private static final int DATABASE_VERSION = 1;
+    private static final int DATABASE_VERSION = 3;
 
     private SQLiteDatabase db;
 
@@ -22,12 +31,11 @@ public class EventsDbHelper extends SQLiteOpenHelper {
 
         final String SQL_CREATE_EVENTS_TABLE = "CREATE TABLE " +
                 EventsTable.TABLE_NAME + " ( " +
-                EventsTable._ID + "INTEGER PRIMARY KEY AUTOINCREMENT, " +
+                EventsTable._ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
                 EventsTable.COLUMN_EVENT_ID + " TEXT, " +
                 EventsTable.COLUMN_NAME + " TEXT, " +
                 EventsTable.COLUMN_DESCRIPTION + " TEXT, " +
                 EventsTable.COLUMN_COLOR_ID + " INTEGER, " +
-                EventsTable.COLUMN_DATE + " TEXT, " +
                 EventsTable.COLUMN_START_TIME + " TEXT, " +
                 EventsTable.COLUMN_END_TIME + " TEXT, " +
                 EventsTable.COLUMN_REMINDER + " INTEGER" +
@@ -41,4 +49,43 @@ public class EventsDbHelper extends SQLiteOpenHelper {
         db.execSQL("DROP TABLE IF EXISTS " + EventsTable.TABLE_NAME);
         onCreate(db);
     }
+
+    public void insertEvent(ContentValues cv) {
+        db = getWritableDatabase();
+        db.insert(EventsTable.TABLE_NAME, null, cv);
+    }
+
+    public ArrayList<Event> getEvents() throws ParseException {
+        ArrayList<Event> eventsList = new ArrayList<>();
+        db = getReadableDatabase();
+        Cursor c = db.rawQuery("SELECT * FROM " + EventsTable.TABLE_NAME, null);
+
+        if (c.moveToFirst()) {
+            do {
+                DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ");
+                Date startDate = dateFormat.parse(c.getString(c.getColumnIndex(EventsTable.COLUMN_START_TIME)));
+                Date endDate = dateFormat.parse(c.getString(c.getColumnIndex(EventsTable.COLUMN_END_TIME)));
+                Boolean isNotify;
+                if (c.getInt(c.getColumnIndex(EventsTable.COLUMN_REMINDER)) == 1) {
+                    isNotify = true;
+                } else
+                    isNotify = false;
+
+                Event event = new Event(c.getString(c.getColumnIndex(EventsTable.COLUMN_EVENT_ID)),
+                        c.getString(c.getColumnIndex(EventsTable.COLUMN_NAME)),
+                        c.getString(c.getColumnIndex(EventsTable.COLUMN_DESCRIPTION)),
+                        c.getInt(c.getColumnIndex(EventsTable.COLUMN_COLOR_ID)),
+                        startDate,
+                        endDate,
+                        isNotify
+                );
+
+                eventsList.add(event);
+            } while (c.moveToNext());
+        }
+
+        c.close();
+        return eventsList;
+    }
+
 }

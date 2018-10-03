@@ -32,7 +32,7 @@ import org.json.JSONObject;
 
 import java.util.HashMap;
 
-public class FirebaseWebService implements GoogleApiClient.OnConnectionFailedListener, TokenAsyncTaskEvents, OnCompleteListener {
+public class FirebaseWebService implements GoogleApiClient.OnConnectionFailedListener, OnCompleteListener {
 
     private static final String BASE_URL = "https://www.googleapis.com/oauth2/v4/token";
     private static final String CLIENT_ID = "685238908043-obre149i2k2gh9a71g2it0emsa97glma.apps.googleusercontent.com";
@@ -51,6 +51,7 @@ public class FirebaseWebService implements GoogleApiClient.OnConnectionFailedLis
     private String mAccessToken;
     private String mRefreshToken;
     private Context mContext;
+    private TokenStorage mTokenStorage = new TokenStorage();
 
     public FirebaseWebService() {
         this.userInfoLoadingListener = null;
@@ -75,6 +76,8 @@ public class FirebaseWebService implements GoogleApiClient.OnConnectionFailedLis
                 .build();
 
         mGoogleSignInClient = GoogleSignIn.getClient(mContext, gso);
+
+
     }
 
     public void authWithGoogle(Intent data) {
@@ -108,15 +111,6 @@ public class FirebaseWebService implements GoogleApiClient.OnConnectionFailedLis
 
     }
 
-    @Override
-    public void onPostExecute(String buffer) throws JSONException {
-        String accessToken = getAccessTokenFromBuffer(buffer);
-        String refreshToken = getRefreshTokenFromBuffer(buffer);
-
-        TokenStorage tokenStorage = new TokenStorage();
-        tokenStorage.write(mContext, accessToken, refreshToken);
-    }
-
     private String getAccessTokenFromBuffer(String buffer) throws JSONException {
         JSONObject object = new JSONObject(buffer);
         mAccessToken = object.getString(ACCESS_TOKEN_KEY);
@@ -130,7 +124,16 @@ public class FirebaseWebService implements GoogleApiClient.OnConnectionFailedLis
     }
 
     private void requestToken(String authCode) {
-        mAccessTokenAsyncTask = new AccessTokenAsyncTask(this);
+        mAccessTokenAsyncTask = new AccessTokenAsyncTask(/*this*/);
+        mAccessTokenAsyncTask.setTokensLoadingListener(new AccessTokenAsyncTask.TokensLoadingListener() {
+            @Override
+            public void onDataLoaded(String buffer) throws JSONException {
+                String accessToken = getAccessTokenFromBuffer(buffer);
+                String refreshToken = getRefreshTokenFromBuffer(buffer);
+
+                mTokenStorage.write(mContext, accessToken, refreshToken);
+            }
+        });
 
         RequestMethods requestMethod = RequestMethods.POST;
         HashMap<String, String> requestBodyParameters = new HashMap<>();
@@ -147,6 +150,34 @@ public class FirebaseWebService implements GoogleApiClient.OnConnectionFailedLis
                 requestHeaderParameters);
 
         mAccessTokenAsyncTask.execute(requestParameters);
+    }
+
+    public void refreshAccessToken(Context context) {
+        AccessTokenAsyncTask accessTokenAsyncTask = new AccessTokenAsyncTask();
+        accessTokenAsyncTask.setTokensLoadingListener(new AccessTokenAsyncTask.TokensLoadingListener() {
+            @Override
+            public void onDataLoaded(String buffer) throws JSONException {
+                String accessToken = getAccessTokenFromBuffer(buffer);
+
+                mTokenStorage.writeAccessToken(mContext, accessToken);
+            }
+        });
+
+        FirebaseWebService.RequestMethods requestMethod = FirebaseWebService.RequestMethods.POST;
+        HashMap<String, String> requestBodyParameters = new HashMap<>();
+        requestBodyParameters.put("refresh_token", mTokenStorage.getRefreshToken(context));
+        requestBodyParameters.put("client_id", CLIENT_ID);
+        requestBodyParameters.put("client_secret", CLIENT_SECRET);
+        requestBodyParameters.put("grant_type", "refresh_token");
+        HashMap<String, String> requestHeaderParameters = new HashMap<>();
+        requestHeaderParameters.put("Content-Type", "application/x-www-form-urlencoded");
+
+        RequestParameters requestParameters = new RequestParameters(BASE_URL,
+                requestMethod,
+                requestBodyParameters,
+                requestHeaderParameters);
+
+        accessTokenAsyncTask.execute(requestParameters);
     }
 
     public FirebaseUser getCurrentUser() {

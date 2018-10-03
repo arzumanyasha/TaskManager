@@ -18,16 +18,24 @@ import android.widget.TextView;
 import com.example.arturarzumanyan.taskmanager.R;
 import com.example.arturarzumanyan.taskmanager.auth.FirebaseWebService;
 import com.example.arturarzumanyan.taskmanager.auth.TokenStorage;
+import com.example.arturarzumanyan.taskmanager.db.EventsDbHelper;
+import com.example.arturarzumanyan.taskmanager.domain.Event;
 import com.example.arturarzumanyan.taskmanager.networking.UserDataAsyncTask;
 import com.example.arturarzumanyan.taskmanager.networking.base.RequestParameters;
+import com.example.arturarzumanyan.taskmanager.networking.util.EventsParser;
 import com.squareup.picasso.Picasso;
 
+import org.json.JSONException;
+
+import java.text.ParseException;
+import java.util.ArrayList;
 import java.util.HashMap;
 
 public class IntentionActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
     private static final String BASE_EVENTS_URL = "https://www.googleapis.com/calendar/v3/calendars/";
+    private static final String AUTHORIZATION_KEY = "Authorization";
 
     private TextView userNameTextView, userEmailTextView;
     private ImageView userPhotoImageView;
@@ -82,10 +90,19 @@ public class IntentionActivity extends AppCompatActivity
 
         mUserEventsAsyncTask.setDataInfoLoadingListener(new UserDataAsyncTask.UserDataLoadingListener() {
             @Override
-            public void onDataLoaded(String response) {
-                String resp = response;
+            public void onDataLoaded(String response) throws JSONException {
+                EventsParser eventsParser = new EventsParser();
+                eventsParser.storeEvents(IntentionActivity.this, response);
             }
         });
+
+        EventsDbHelper eventsDbHelper = new EventsDbHelper(IntentionActivity.this);
+        try {
+            ArrayList<Event> eventsList = eventsDbHelper.getEvents();
+            int size = eventsList.size();
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
     }
 
     private void getUserEvents(String userEmail) {
@@ -97,7 +114,7 @@ public class IntentionActivity extends AppCompatActivity
         HashMap<String, String> requestBodyParameters = new HashMap<>();
         HashMap<String, String> requestHeaderParameters = new HashMap<>();
         String token = tokenStorage.getAccessToken(this);
-        requestHeaderParameters.put("Authorization", "Bearer " + tokenStorage.getAccessToken(this));
+        requestHeaderParameters.put(AUTHORIZATION_KEY, "Bearer " + tokenStorage.getAccessToken(this));
         RequestParameters requestParameters = new RequestParameters(url,
                 requestMethod,
                 requestBodyParameters,
@@ -137,11 +154,11 @@ public class IntentionActivity extends AppCompatActivity
     @SuppressWarnings("StatementWithEmptyBody")
     @Override
     public boolean onNavigationItemSelected(MenuItem item) {
-        // Handle navigation view item clicks here.
+
         int id = item.getItemId();
 
         if (id == R.id.nav_camera) {
-            // Handle the camera action
+
         } else if (id == R.id.nav_gallery) {
 
         } else if (id == R.id.nav_slideshow) {

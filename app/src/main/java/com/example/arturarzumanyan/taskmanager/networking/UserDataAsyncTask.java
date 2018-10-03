@@ -46,7 +46,7 @@ public class UserDataAsyncTask extends AsyncTask<RequestParameters, Void, String
     }
 
     public interface UserDataLoadingListener {
-        void onDataLoaded(String response);
+        void onDataLoaded(String response) throws JSONException;
     }
 
     public void setDataInfoLoadingListener(UserDataLoadingListener listener) {

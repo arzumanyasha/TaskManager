@@ -12,7 +12,6 @@ public final class EventsContract {
         public static final String COLUMN_NAME = "name";
         public static final String COLUMN_DESCRIPTION = "description";
         public static final String COLUMN_COLOR_ID = "color_id";
-        public static final String COLUMN_DATE = "date";
         public static final String COLUMN_START_TIME = "start_time";
         public static final String COLUMN_END_TIME = "end_time";
         public static final String COLUMN_REMINDER = "reminder";

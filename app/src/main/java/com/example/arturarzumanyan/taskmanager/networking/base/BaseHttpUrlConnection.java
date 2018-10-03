@@ -2,6 +2,7 @@ package com.example.arturarzumanyan.taskmanager.networking.base;
 
 import android.net.Uri;
 
+import com.example.arturarzumanyan.taskmanager.auth.AccessTokenAsyncTask;
 import com.example.arturarzumanyan.taskmanager.auth.FirebaseWebService;
 
 import java.io.BufferedInputStream;
@@ -46,6 +47,10 @@ public class BaseHttpUrlConnection {
                 String buffer;
                 buffer = getInputStream(reader);
                 return buffer;
+            } else if (responseCode == HttpURLConnection.HTTP_UNAUTHORIZED) {
+                FirebaseWebService firebaseWebService = new FirebaseWebService();
+                //firebaseWebService.refreshAccessToken();
+                //////////Question
             }
         } catch (IOException e) {
             e.printStackTrace();
@@ -64,6 +69,7 @@ public class BaseHttpUrlConnection {
         }
         return "";
     }
+
 
     private HttpURLConnection getConnectionSettings(HttpURLConnection connection,
                                                     String url,

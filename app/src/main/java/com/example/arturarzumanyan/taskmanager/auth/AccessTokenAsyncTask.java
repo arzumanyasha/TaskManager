@@ -11,11 +11,10 @@ import java.util.HashMap;
 
 public class AccessTokenAsyncTask extends AsyncTask<RequestParameters, Void, String> {
 
-    private TokenAsyncTaskEvents mTokenAsyncTaskEvents;
     private String mBuffer;
 
-    public AccessTokenAsyncTask(TokenAsyncTaskEvents tokenAsyncTaskEvents) {
-        mTokenAsyncTaskEvents = tokenAsyncTaskEvents;
+    public AccessTokenAsyncTask() {
+        tokensLoadingListener = null;
     }
 
     @Override
@@ -36,15 +35,23 @@ public class AccessTokenAsyncTask extends AsyncTask<RequestParameters, Void, Str
     @Override
     protected void onPostExecute(String s) {
         super.onPostExecute(s);
-        if (mTokenAsyncTaskEvents != null) {
+
+        if (tokensLoadingListener != null) {
             try {
-                mTokenAsyncTaskEvents.onPostExecute(mBuffer);
+                tokensLoadingListener.onDataLoaded(mBuffer);
             } catch (JSONException e) {
-                e.printStackTrace();
-            } catch (InterruptedException e) {
                 e.printStackTrace();
             }
         }
     }
 
+    public interface TokensLoadingListener {
+        void onDataLoaded(String buffer) throws JSONException;
+    }
+
+    public void setTokensLoadingListener(TokensLoadingListener listener) {
+        this.tokensLoadingListener = listener;
+    }
+
+    private TokensLoadingListener tokensLoadingListener;
 }
