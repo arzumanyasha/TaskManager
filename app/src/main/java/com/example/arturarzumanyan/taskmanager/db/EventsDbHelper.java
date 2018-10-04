@@ -50,11 +50,6 @@ public class EventsDbHelper extends SQLiteOpenHelper {
         onCreate(db);
     }
 
-    public void insertEvent(ContentValues cv) {
-        db = getWritableDatabase();
-        db.insert(EventsTable.TABLE_NAME, null, cv);
-    }
-
     public void insertEvents(ArrayList<Event> eventsList) {
         db = getWritableDatabase();
         for (int i = 0; i < eventsList.size(); i++) {
@@ -70,7 +65,7 @@ public class EventsDbHelper extends SQLiteOpenHelper {
 
             cv.put(EventsTable.COLUMN_END_TIME, dateFormat.format(eventsList.get(i).getEndTime()));
 
-            if (eventsList.get(i).isNotify() == true) {
+            if (eventsList.get(i).isNotify()) {
                 cv.put(EventsTable.COLUMN_REMINDER, 1);
             } else {
                 cv.put(EventsTable.COLUMN_REMINDER, 0);

@@ -6,8 +6,23 @@ public class Task {
     private String id;
     private String name;
     private String description;
-    private Date date;
     private boolean isExecuted;
+    private Date date;
+    private String listName;
+
+    public Task(String id,
+                String name,
+                String description,
+                boolean isExecuted,
+                Date date,
+                String listName) {
+        this.id = id;
+        this.name = name;
+        this.description = description;
+        this.isExecuted = isExecuted;
+        this.date = date;
+        this.listName = listName;
+    }
 
     public String getId() {
         return id;
@@ -47,5 +62,13 @@ public class Task {
 
     public void setExecuted(boolean executed) {
         isExecuted = executed;
+    }
+
+    public String getListName() {
+        return listName;
+    }
+
+    public void setListName(String listName) {
+        this.listName = listName;
     }
 }
