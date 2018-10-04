@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.FragmentActivity;
 
+import com.example.arturarzumanyan.taskmanager.networking.UserDataAsyncTask;
 import com.example.arturarzumanyan.taskmanager.networking.base.RequestParameters;
 import com.google.android.gms.auth.api.Auth;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
@@ -31,7 +32,7 @@ import org.json.JSONObject;
 
 import java.util.HashMap;
 
-public class FirebaseWebService implements GoogleApiClient.OnConnectionFailedListener, TokenAsyncTaskEvents, OnCompleteListener {
+public class FirebaseWebService implements GoogleApiClient.OnConnectionFailedListener, OnCompleteListener {
 
     private static final String BASE_URL = "https://www.googleapis.com/oauth2/v4/token";
     private static final String CLIENT_ID = "685238908043-obre149i2k2gh9a71g2it0emsa97glma.apps.googleusercontent.com";
@@ -50,9 +51,10 @@ public class FirebaseWebService implements GoogleApiClient.OnConnectionFailedLis
     private String mAccessToken;
     private String mRefreshToken;
     private Context mContext;
+    private TokenStorage mTokenStorage = new TokenStorage();
 
     public FirebaseWebService() {
-        this.listener = null;
+        this.userInfoLoadingListener = null;
     }
 
     public void setGoogleClient(Context context) {
@@ -74,6 +76,8 @@ public class FirebaseWebService implements GoogleApiClient.OnConnectionFailedLis
                 .build();
 
         mGoogleSignInClient = GoogleSignIn.getClient(mContext, gso);
+
+
     }
 
     public void authWithGoogle(Intent data) {
@@ -94,8 +98,8 @@ public class FirebaseWebService implements GoogleApiClient.OnConnectionFailedLis
     public void onComplete(@NonNull Task task) {
         if (task.isSuccessful()) {
             FirebaseUser user = mAuth.getCurrentUser();
-            if (listener != null) {
-                listener.onDataLoaded(user.getDisplayName(),
+            if (userInfoLoadingListener != null) {
+                userInfoLoadingListener.onDataLoaded(user.getDisplayName(),
                         user.getEmail(),
                         user.getPhotoUrl().toString());
             }
@@ -105,15 +109,6 @@ public class FirebaseWebService implements GoogleApiClient.OnConnectionFailedLis
     @Override
     public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
 
-    }
-
-    @Override
-    public void onPostExecute(String buffer) throws JSONException {
-        String accessToken = getAccessTokenFromBuffer(buffer);
-        String refreshToken = getRefreshTokenFromBuffer(buffer);
-
-        TokenStorage tokenStorage = new TokenStorage();
-        tokenStorage.write(mContext, accessToken, refreshToken);
     }
 
     private String getAccessTokenFromBuffer(String buffer) throws JSONException {
@@ -129,7 +124,16 @@ public class FirebaseWebService implements GoogleApiClient.OnConnectionFailedLis
     }
 
     private void requestToken(String authCode) {
-        mAccessTokenAsyncTask = new AccessTokenAsyncTask(this);
+        mAccessTokenAsyncTask = new AccessTokenAsyncTask();
+        mAccessTokenAsyncTask.setTokensLoadingListener(new AccessTokenAsyncTask.TokensLoadingListener() {
+            @Override
+            public void onDataLoaded(String buffer) throws JSONException {
+                String accessToken = getAccessTokenFromBuffer(buffer);
+                String refreshToken = getRefreshTokenFromBuffer(buffer);
+
+                mTokenStorage.write(mContext, accessToken, refreshToken);
+            }
+        });
 
         RequestMethods requestMethod = RequestMethods.POST;
         HashMap<String, String> requestBodyParameters = new HashMap<>();
@@ -148,6 +152,35 @@ public class FirebaseWebService implements GoogleApiClient.OnConnectionFailedLis
         mAccessTokenAsyncTask.execute(requestParameters);
     }
 
+    public void refreshAccessToken(Context context) {
+        mContext = context;
+        AccessTokenAsyncTask accessTokenAsyncTask = new AccessTokenAsyncTask();
+        accessTokenAsyncTask.setTokensLoadingListener(new AccessTokenAsyncTask.TokensLoadingListener() {
+            @Override
+            public void onDataLoaded(String buffer) throws JSONException {
+                String accessToken = getAccessTokenFromBuffer(buffer);
+
+                mTokenStorage.writeAccessToken(mContext, accessToken);
+            }
+        });
+
+        FirebaseWebService.RequestMethods requestMethod = FirebaseWebService.RequestMethods.POST;
+        HashMap<String, String> requestBodyParameters = new HashMap<>();
+        requestBodyParameters.put("refresh_token", mTokenStorage.getRefreshToken(context));
+        requestBodyParameters.put("client_id", CLIENT_ID);
+        requestBodyParameters.put("client_secret", CLIENT_SECRET);
+        requestBodyParameters.put("grant_type", "refresh_token");
+        HashMap<String, String> requestHeaderParameters = new HashMap<>();
+        requestHeaderParameters.put("Content-Type", "application/x-www-form-urlencoded");
+
+        RequestParameters requestParameters = new RequestParameters(BASE_URL,
+                requestMethod,
+                requestBodyParameters,
+                requestHeaderParameters);
+
+        accessTokenAsyncTask.execute(requestParameters);
+    }
+
     public FirebaseUser getCurrentUser() {
         return mAuth.getCurrentUser();
     }
@@ -163,13 +196,13 @@ public class FirebaseWebService implements GoogleApiClient.OnConnectionFailedLis
         }
     }
 
-    public interface FirebaseWebServiceListener {
-        public void onDataLoaded(String userName, String userEmail, String userPhotoUrl);
+    public interface UserInfoLoadingListener {
+        void onDataLoaded(String userName, String userEmail, String userPhotoUrl);
     }
 
-    public void setFirebaseWebServiceListener(FirebaseWebServiceListener listener) {
-        this.listener = listener;
+    public void setUserInfoLoadingListener(UserInfoLoadingListener listener) {
+        this.userInfoLoadingListener = listener;
     }
 
-    private FirebaseWebServiceListener listener;
+    private UserInfoLoadingListener userInfoLoadingListener;
 }

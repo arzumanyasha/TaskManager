@@ -1,20 +1,22 @@
-package com.example.arturarzumanyan.taskmanager.auth;
+package com.example.arturarzumanyan.taskmanager.networking;
 
 import android.os.AsyncTask;
 
-import com.example.arturarzumanyan.taskmanager.networking.base.RequestParameters;
+import com.example.arturarzumanyan.taskmanager.auth.FirebaseWebService;
 import com.example.arturarzumanyan.taskmanager.networking.base.BaseHttpUrlConnection;
+import com.example.arturarzumanyan.taskmanager.networking.base.RequestParameters;
 
 import org.json.JSONException;
 
+import java.text.ParseException;
 import java.util.HashMap;
 
-public class AccessTokenAsyncTask extends AsyncTask<RequestParameters, Void, String> {
+public class UserDataAsyncTask extends AsyncTask<RequestParameters, Void, String> {
 
     private String mBuffer;
 
-    public AccessTokenAsyncTask() {
-        tokensLoadingListener = null;
+    public UserDataAsyncTask() {
+        this.userDataLoadingListener = null;
     }
 
     @Override
@@ -35,23 +37,22 @@ public class AccessTokenAsyncTask extends AsyncTask<RequestParameters, Void, Str
     @Override
     protected void onPostExecute(String s) {
         super.onPostExecute(s);
-
-        if (tokensLoadingListener != null) {
+        if (userDataLoadingListener != null) {
             try {
-                tokensLoadingListener.onDataLoaded(mBuffer);
-            } catch (JSONException e) {
+                userDataLoadingListener.onDataLoaded(mBuffer);
+            } catch (Exception e) {
                 e.printStackTrace();
             }
         }
     }
 
-    public interface TokensLoadingListener {
-        void onDataLoaded(String buffer) throws JSONException;
+    public interface UserDataLoadingListener {
+        void onDataLoaded(String response) throws JSONException, ParseException;
     }
 
-    public void setTokensLoadingListener(TokensLoadingListener listener) {
-        this.tokensLoadingListener = listener;
+    public void setDataInfoLoadingListener(UserDataLoadingListener listener) {
+        this.userDataLoadingListener = listener;
     }
 
-    private TokensLoadingListener tokensLoadingListener;
+    private UserDataLoadingListener userDataLoadingListener;
 }

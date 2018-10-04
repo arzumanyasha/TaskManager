@@ -7,10 +7,25 @@ public class Event {
     private String name;
     private String description;
     private int colorId;
-    private Date date;
     private Date startTime;
     private Date endTime;
     private boolean isNotify;
+
+    public Event(String id,
+                 String name,
+                 String description,
+                 int colorId,
+                 Date startTime,
+                 Date endTime,
+                 boolean isNotify) {
+        this.id = id;
+        this.name = name;
+        this.description = description;
+        this.colorId = colorId;
+        this.startTime = startTime;
+        this.endTime = endTime;
+        this.isNotify = isNotify;
+    }
 
     public String getId() {
         return id;
@@ -42,14 +57,6 @@ public class Event {
 
     public void setColorId(int colorId) {
         this.colorId = colorId;
-    }
-
-    public Date getDate() {
-        return date;
-    }
-
-    public void setDate(Date date) {
-        this.date = date;
     }
 
     public Date getStartTime() {
