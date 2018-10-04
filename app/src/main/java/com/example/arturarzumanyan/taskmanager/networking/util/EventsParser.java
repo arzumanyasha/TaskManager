@@ -1,10 +1,5 @@
 package com.example.arturarzumanyan.taskmanager.networking.util;
 
-import android.content.ContentValues;
-import android.content.Context;
-
-import com.example.arturarzumanyan.taskmanager.db.EventsContract.*;
-import com.example.arturarzumanyan.taskmanager.db.EventsDbHelper;
 import com.example.arturarzumanyan.taskmanager.domain.Event;
 
 import org.json.JSONArray;

@@ -31,11 +31,7 @@ public class UserDataAsyncTask extends AsyncTask<RequestParameters, Void, String
                 requestMethod,
                 requestBodyParameters,
                 requestHeaderParameters);
-        if (mBuffer.equals("")) {
-            return "";
-        } else {
-            return mBuffer;
-        }
+        return mBuffer;
     }
 
     @Override
