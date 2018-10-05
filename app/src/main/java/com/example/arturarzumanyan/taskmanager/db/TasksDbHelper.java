@@ -18,7 +18,7 @@ import java.util.Date;
 
 public class TasksDbHelper extends SQLiteOpenHelper {
     private static final String DATABASE_NAME = "Tasks.db";
-    private static final int DATABASE_VERSION = 1;
+    private static final int DATABASE_VERSION = 5;
 
     private SQLiteDatabase db;
 
@@ -45,7 +45,7 @@ public class TasksDbHelper extends SQLiteOpenHelper {
                 TasksTable.COLUMN_NOTES + " TEXT, " +
                 TasksTable.COLUMN_STATUS + " INTEGER, " +
                 TasksTable.COLUMN_DUE + " TEXT, " +
-                TasksTable.COLUMN_LIST_TITLE + " TEXT" +
+                TasksTable.COLUMN_LIST_ID + " INTEGER" +
                 ")";
 
         db.execSQL(SQL_CREATE_TASK_LISTS_TABLE);
@@ -86,40 +86,50 @@ public class TasksDbHelper extends SQLiteOpenHelper {
                 cv.put(TasksTable.COLUMN_STATUS, 0);
             }
 
-            DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
-            cv.put(TasksTable.COLUMN_DUE, dateFormat.format(tasksArrayList.get(i).getDate()));
-
-            cv.put(TasksTable.COLUMN_LIST_TITLE, tasksArrayList.get(i).getListName());
+            if (tasksArrayList.get(i).getDate() != null) {
+                DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+                cv.put(TasksTable.COLUMN_DUE, dateFormat.format(tasksArrayList.get(i).getDate()));
+            }
+            cv.put(TasksTable.COLUMN_LIST_ID, tasksArrayList.get(i).getListId());
 
             db.insert(TasksTable.TABLE_NAME, null, cv);
         }
     }
 
-    public ArrayList<Task> getTasks(String tasksListTitle) throws ParseException {
+    public ArrayList<Task> getTasksFromList(int tasksListId) throws ParseException {
         ArrayList<Task> tasksList = new ArrayList<>();
         db = getReadableDatabase();
 
-        String[] selectionArgs = new String[]{tasksListTitle};
+        String[] selectionArgs = new String[]{Integer.toString(tasksListId)};
         Cursor c = db.rawQuery("SELECT * FROM " + TasksTable.TABLE_NAME +
-                " WHERE " + TasksTable.COLUMN_LIST_TITLE + " = ?", selectionArgs);
+                " WHERE " + TasksTable.COLUMN_LIST_ID + " = ?", selectionArgs);
 
         if (c.moveToFirst()) {
             do {
-                DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
-                Date date = dateFormat.parse(c.getString(c.getColumnIndex(TasksTable.COLUMN_DUE)));
-
                 Boolean isExecuted;
-                if (c.getInt(c.getColumnIndex(TasksContract.TasksTable.COLUMN_STATUS)) == 1) {
+                if (c.getInt(c.getColumnIndex(TasksTable.COLUMN_STATUS)) == 1) {
                     isExecuted = true;
                 } else
                     isExecuted = false;
 
-                Task task = new Task(c.getString(c.getColumnIndex(TasksContract.TasksTable.COLUMN_TASK_ID)),
-                        c.getString(c.getColumnIndex(TasksContract.TasksTable.COLUMN_TITLE)),
-                        c.getString(c.getColumnIndex(TasksContract.TasksTable.COLUMN_NOTES)),
+                Task task;
+
+                if (c.getString(c.getColumnIndex(TasksTable.COLUMN_DUE)) != null) {
+                    DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+                    Date date = dateFormat.parse(c.getString(c.getColumnIndex(TasksTable.COLUMN_DUE)));
+
+                    task = new Task(c.getString(c.getColumnIndex(TasksTable.COLUMN_TASK_ID)),
+                            c.getString(c.getColumnIndex(TasksTable.COLUMN_TITLE)),
+                            c.getString(c.getColumnIndex(TasksTable.COLUMN_NOTES)),
+                            isExecuted,
+                            date,
+                            tasksListId
+                    );
+                } else task = new Task(c.getString(c.getColumnIndex(TasksTable.COLUMN_TASK_ID)),
+                        c.getString(c.getColumnIndex(TasksTable.COLUMN_TITLE)),
+                        c.getString(c.getColumnIndex(TasksTable.COLUMN_NOTES)),
                         isExecuted,
-                        date,
-                        tasksListTitle
+                        tasksListId
                 );
 
                 tasksList.add(task);
@@ -128,5 +138,26 @@ public class TasksDbHelper extends SQLiteOpenHelper {
 
         c.close();
         return tasksList;
+    }
+
+    public ArrayList<TaskList> getTaskLists() {
+        ArrayList<TaskList> taskListArrayList = new ArrayList<>();
+        db = getReadableDatabase();
+
+        Cursor c = db.rawQuery("SELECT * FROM " + TaskListTable.TABLE_NAME, null);
+
+        if (c.moveToFirst()) {
+            do {
+                TaskList taskList = new TaskList(c.getInt(c.getColumnIndex(TaskListTable._ID)),
+                        c.getString(c.getColumnIndex(TaskListTable.COLUMN_LIST_ID)),
+                        c.getString(c.getColumnIndex(TaskListTable.COLUMN_TITLE))
+                );
+
+                taskListArrayList.add(taskList);
+            } while (c.moveToNext());
+        }
+
+        c.close();
+        return taskListArrayList;
     }
 }

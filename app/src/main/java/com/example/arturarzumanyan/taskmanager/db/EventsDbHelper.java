@@ -17,7 +17,7 @@ import java.util.Date;
 
 public class EventsDbHelper extends SQLiteOpenHelper {
     private static final String DATABASE_NAME = "EventsDatabase.db";
-    private static final int DATABASE_VERSION = 4;
+    private static final int DATABASE_VERSION = 11;
 
     private SQLiteDatabase db;
 

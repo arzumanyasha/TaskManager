@@ -15,15 +15,21 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.example.arturarzumanyan.taskmanager.R;
 import com.example.arturarzumanyan.taskmanager.auth.FirebaseWebService;
 import com.example.arturarzumanyan.taskmanager.auth.TokenStorage;
 import com.example.arturarzumanyan.taskmanager.db.EventsDbHelper;
+import com.example.arturarzumanyan.taskmanager.db.TasksDbHelper;
 import com.example.arturarzumanyan.taskmanager.domain.Event;
+import com.example.arturarzumanyan.taskmanager.domain.Task;
+import com.example.arturarzumanyan.taskmanager.domain.TaskList;
 import com.example.arturarzumanyan.taskmanager.networking.UserDataAsyncTask;
 import com.example.arturarzumanyan.taskmanager.networking.base.RequestParameters;
 import com.example.arturarzumanyan.taskmanager.networking.util.EventsParser;
+import com.example.arturarzumanyan.taskmanager.networking.util.TaskListsParser;
+import com.example.arturarzumanyan.taskmanager.networking.util.TasksParser;
 import com.squareup.picasso.Picasso;
 
 import org.json.JSONException;
@@ -36,15 +42,24 @@ public class IntentionActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
     private static final String BASE_EVENTS_URL = "https://www.googleapis.com/calendar/v3/calendars/";
+    private static final String BASE_TASK_LISTS_URL = "https://www.googleapis.com/tasks/v1/users/@me/lists";
+    private static final String BASE_TASKS_URL = "https://www.googleapis.com/tasks/v1/lists/";
     private static final String AUTHORIZATION_KEY = "Authorization";
 
     private TextView userNameTextView, userEmailTextView;
     private ImageView userPhotoImageView;
     private Intent mUserData;
     private EventsDbHelper eventsDbHelper;
+    private TasksDbHelper tasksDbHelper;
 
     private UserDataAsyncTask mUserEventsAsyncTask;
     private UserDataAsyncTask mUserRefreshEventsAsyncTask;
+    private UserDataAsyncTask mUserTaskListsAsyncTask;
+    private ArrayList<UserDataAsyncTask> mUserTasksAsyncTaskList = new ArrayList<>();
+
+    private String mEventsUrl;
+    private String mTasksUrl;
+    private int mTaskListId;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -91,11 +106,16 @@ public class IntentionActivity extends AppCompatActivity
                 .into(userPhotoImageView);
 
         eventsDbHelper = new EventsDbHelper(this);
+        tasksDbHelper = new TasksDbHelper(this);
 
         mUserEventsAsyncTask = new UserDataAsyncTask();
+        mUserTaskListsAsyncTask = new UserDataAsyncTask();
         mUserRefreshEventsAsyncTask = new UserDataAsyncTask();
 
-        getUserEvents(mUserEventsAsyncTask, mUserData.getStringExtra(SignInActivity.EXTRA_USER_EMAIL));
+        mEventsUrl = BASE_EVENTS_URL + mUserData.getStringExtra(SignInActivity.EXTRA_USER_EMAIL) + "/events";
+        requestUserData(mUserEventsAsyncTask, mEventsUrl);
+
+        requestUserData(mUserTaskListsAsyncTask, BASE_TASK_LISTS_URL);
 
         mUserRefreshEventsAsyncTask.setDataInfoLoadingListener(new UserDataAsyncTask.UserDataLoadingListener() {
             @Override
@@ -111,7 +131,7 @@ public class IntentionActivity extends AppCompatActivity
                 if (response.equals("")) {
                     FirebaseWebService firebaseWebService = new FirebaseWebService();
                     firebaseWebService.refreshAccessToken(IntentionActivity.this);
-                    getUserEvents(mUserRefreshEventsAsyncTask, mUserData.getStringExtra(SignInActivity.EXTRA_USER_EMAIL));
+                    requestUserData(mUserRefreshEventsAsyncTask, mEventsUrl);
                 } else {
                     EventsParser eventsParser = new EventsParser();
                     eventsDbHelper.insertEvents(eventsParser.parseEvents(response));
@@ -119,18 +139,51 @@ public class IntentionActivity extends AppCompatActivity
             }
         });
 
+        mUserTaskListsAsyncTask.setDataInfoLoadingListener(new UserDataAsyncTask.UserDataLoadingListener() {
+            @Override
+            public void onDataLoaded(String response) throws JSONException {
+                if (response.equals("")) {
+                    Toast.makeText(getApplicationContext(), getString(R.string.network_error), Toast.LENGTH_LONG).show();
+                } else {
+                    loadTasks(response);
+                }
+            }
+        });
+
+
         try {
             ArrayList<Event> eventsList = eventsDbHelper.getEvents();
+            ArrayList<TaskList> taskListArrayList = tasksDbHelper.getTaskLists();
+            int id = taskListArrayList.get(0).getId();
+            ArrayList<Task> tasksArrayList = tasksDbHelper.getTasksFromList(0);
             int size = eventsList.size();
         } catch (ParseException e) {
             e.printStackTrace();
         }
     }
 
-    private void getUserEvents(UserDataAsyncTask asyncTask, String userEmail) {
+    private void loadTasks(String response) throws JSONException {
+        TaskListsParser taskListsParser = new TaskListsParser();
+        ArrayList<TaskList> taskListArrayList = taskListsParser.parseTaskLists(response);
+        for (int i = 0; i < taskListArrayList.size(); i++) {
+            mTaskListId = taskListArrayList.get(i).getId();
+            mTasksUrl = BASE_TASKS_URL + taskListArrayList.get(i).getTaskListId() + "/tasks?showHidden=true";
+            mUserTasksAsyncTaskList.add(new UserDataAsyncTask());
+            requestUserData(mUserTasksAsyncTaskList.get(i), mTasksUrl);
+            mUserTasksAsyncTaskList.get(i).setDataInfoLoadingListener(new UserDataAsyncTask.UserDataLoadingListener() {
+                @Override
+                public void onDataLoaded(String response) throws JSONException, ParseException {
+                    TasksParser tasksParser = new TasksParser();
+                    tasksDbHelper.insertTasks(tasksParser.parseTasks(response, mTaskListId));
+                }
+            });
+        }
+        tasksDbHelper.insertTaskLists(taskListArrayList);
+    }
+
+    private void requestUserData(UserDataAsyncTask asyncTask, String url) {
         TokenStorage tokenStorage = new TokenStorage();
 
-        String url = BASE_EVENTS_URL + userEmail + "/events";
         FirebaseWebService.RequestMethods requestMethod = FirebaseWebService.RequestMethods.GET;
         HashMap<String, String> requestBodyParameters = new HashMap<>();
         HashMap<String, String> requestHeaderParameters = new HashMap<>();
@@ -142,7 +195,6 @@ public class IntentionActivity extends AppCompatActivity
                 requestHeaderParameters);
         asyncTask.execute(requestParameters);
     }
-
 
     @Override
     public void onBackPressed() {

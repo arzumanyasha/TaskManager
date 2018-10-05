@@ -8,20 +8,32 @@ public class Task {
     private String description;
     private boolean isExecuted;
     private Date date;
-    private String listName;
+    private int listId;
 
     public Task(String id,
                 String name,
                 String description,
                 boolean isExecuted,
                 Date date,
-                String listName) {
+                int listId) {
         this.id = id;
         this.name = name;
         this.description = description;
         this.isExecuted = isExecuted;
         this.date = date;
-        this.listName = listName;
+        this.listId = listId;
+    }
+
+    public Task(String id,
+                String name,
+                String description,
+                boolean isExecuted,
+                int listId) {
+        this.id = id;
+        this.name = name;
+        this.description = description;
+        this.isExecuted = isExecuted;
+        this.listId = listId;
     }
 
     public String getId() {
@@ -64,11 +76,11 @@ public class Task {
         isExecuted = executed;
     }
 
-    public String getListName() {
-        return listName;
+    public int getListId() {
+        return listId;
     }
 
-    public void setListName(String listName) {
-        this.listName = listName;
+    public void setListId(int listId) {
+        this.listId = listId;
     }
 }

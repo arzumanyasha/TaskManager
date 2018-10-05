@@ -19,6 +19,6 @@ public final class TasksContract {
         public static final String COLUMN_NOTES = "notes";
         public static final String COLUMN_STATUS = "status";
         public static final String COLUMN_DUE = "due";
-        public static final String COLUMN_LIST_TITLE = "list_title";
+        public static final String COLUMN_LIST_ID = "list_id";
     }
 }
