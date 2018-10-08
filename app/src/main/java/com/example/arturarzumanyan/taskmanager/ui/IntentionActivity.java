@@ -61,6 +61,8 @@ public class IntentionActivity extends AppCompatActivity
     private String mTasksUrl;
     private int mTaskListId;
 
+    private ArrayList<TaskList> mTaskListArrayList;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -121,7 +123,7 @@ public class IntentionActivity extends AppCompatActivity
             @Override
             public void onDataLoaded(String response) throws JSONException, ParseException {
                 EventsParser eventsParser = new EventsParser();
-                eventsDbHelper.insertEvents(eventsParser.parseEvents(response));
+                //eventsDbHelper.insertEvents(eventsParser.parseEvents(response));
             }
         });
 
@@ -134,7 +136,7 @@ public class IntentionActivity extends AppCompatActivity
                     requestUserData(mUserRefreshEventsAsyncTask, mEventsUrl);
                 } else {
                     EventsParser eventsParser = new EventsParser();
-                    eventsDbHelper.insertEvents(eventsParser.parseEvents(response));
+                    //eventsDbHelper.insertEvents(eventsParser.parseEvents(response));
                 }
             }
         });
@@ -145,7 +147,25 @@ public class IntentionActivity extends AppCompatActivity
                 if (response.equals("")) {
                     Toast.makeText(getApplicationContext(), getString(R.string.network_error), Toast.LENGTH_LONG).show();
                 } else {
-                    loadTasks(response);
+
+                    loadTaskLists(response);
+
+                    for (int i = 0; i < mTaskListArrayList.size(); i++) {
+                        mTaskListArrayList = tasksDbHelper.getTaskLists();
+                        mTaskListId = mTaskListArrayList.get(i).getId();
+                        mTasksUrl = BASE_TASKS_URL + mTaskListArrayList.get(i).getTaskListId() + "/tasks?showHidden=true";
+                        mUserTasksAsyncTaskList.add(new UserDataAsyncTask());
+                        requestUserData(mUserTasksAsyncTaskList.get(i), mTasksUrl);
+                        mUserTasksAsyncTaskList.get(i).setDataInfoLoadingListener(new UserDataAsyncTask.UserDataLoadingListener() {
+                            @Override
+                            public void onDataLoaded(String response) throws JSONException, ParseException {
+                                TasksParser tasksParser = new TasksParser();
+                                tasksDbHelper.insertTasks(tasksParser.parseTasks(response, mTaskListId));
+                            }
+                        });
+                    }
+
+
                 }
             }
         });
@@ -154,31 +174,33 @@ public class IntentionActivity extends AppCompatActivity
         try {
             ArrayList<Event> eventsList = eventsDbHelper.getEvents();
             ArrayList<TaskList> taskListArrayList = tasksDbHelper.getTaskLists();
-            int id = taskListArrayList.get(0).getId();
-            ArrayList<Task> tasksArrayList = tasksDbHelper.getTasksFromList(0);
+            //int id = taskListArrayList.get(0).getId();
+            ArrayList<Task> tasksList = tasksDbHelper.getAllTasks();
+            ArrayList<Task> tasksArrayList = tasksDbHelper.getTasksFromList(1);
             int size = eventsList.size();
         } catch (ParseException e) {
             e.printStackTrace();
         }
     }
 
-    private void loadTasks(String response) throws JSONException {
+    private void loadTaskLists(String response) throws JSONException {
         TaskListsParser taskListsParser = new TaskListsParser();
-        ArrayList<TaskList> taskListArrayList = taskListsParser.parseTaskLists(response);
-        for (int i = 0; i < taskListArrayList.size(); i++) {
-            mTaskListId = taskListArrayList.get(i).getId();
-            mTasksUrl = BASE_TASKS_URL + taskListArrayList.get(i).getTaskListId() + "/tasks?showHidden=true";
+        mTaskListArrayList = taskListsParser.parseTaskLists(response);
+        for (int i = 0; i < mTaskListArrayList.size(); i++) {
+            //mTaskListId = taskListArrayList.get(i).getId();
+            //mTasksUrl = BASE_TASKS_URL + taskListArrayList.get(i).getTaskListId() + "/tasks?showHidden=true";
             mUserTasksAsyncTaskList.add(new UserDataAsyncTask());
-            requestUserData(mUserTasksAsyncTaskList.get(i), mTasksUrl);
+            //requestUserData(mUserTasksAsyncTaskList.get(i), mTasksUrl);
+            /*
             mUserTasksAsyncTaskList.get(i).setDataInfoLoadingListener(new UserDataAsyncTask.UserDataLoadingListener() {
                 @Override
                 public void onDataLoaded(String response) throws JSONException, ParseException {
                     TasksParser tasksParser = new TasksParser();
                     tasksDbHelper.insertTasks(tasksParser.parseTasks(response, mTaskListId));
                 }
-            });
+            });*/
         }
-        tasksDbHelper.insertTaskLists(taskListArrayList);
+        tasksDbHelper.insertTaskLists(mTaskListArrayList);
     }
 
     private void requestUserData(UserDataAsyncTask asyncTask, String url) {
@@ -193,7 +215,7 @@ public class IntentionActivity extends AppCompatActivity
                 requestMethod,
                 requestBodyParameters,
                 requestHeaderParameters);
-        asyncTask.execute(requestParameters);
+        asyncTask.executeOnExecutor(AsyncTask.SERIAL_EXECUTOR, requestParameters);
     }
 
     @Override
