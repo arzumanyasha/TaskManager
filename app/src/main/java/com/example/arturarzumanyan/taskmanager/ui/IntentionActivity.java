@@ -20,8 +20,7 @@ import android.widget.Toast;
 import com.example.arturarzumanyan.taskmanager.R;
 import com.example.arturarzumanyan.taskmanager.auth.FirebaseWebService;
 import com.example.arturarzumanyan.taskmanager.auth.TokenStorage;
-import com.example.arturarzumanyan.taskmanager.db.EventsDbHelper;
-import com.example.arturarzumanyan.taskmanager.db.TasksDbHelper;
+import com.example.arturarzumanyan.taskmanager.db.SQLiteDbHelper;
 import com.example.arturarzumanyan.taskmanager.domain.Event;
 import com.example.arturarzumanyan.taskmanager.domain.Task;
 import com.example.arturarzumanyan.taskmanager.domain.TaskList;
@@ -49,8 +48,7 @@ public class IntentionActivity extends AppCompatActivity
     private TextView userNameTextView, userEmailTextView;
     private ImageView userPhotoImageView;
     private Intent mUserData;
-    private EventsDbHelper eventsDbHelper;
-    private TasksDbHelper tasksDbHelper;
+    private SQLiteDbHelper sqliteDbHelper;
 
     private UserDataAsyncTask mUserEventsAsyncTask;
     private UserDataAsyncTask mUserRefreshEventsAsyncTask;
@@ -107,8 +105,7 @@ public class IntentionActivity extends AppCompatActivity
                 .load(mUserData.getStringExtra(SignInActivity.EXTRA_USER_PHOTO_URL))
                 .into(userPhotoImageView);
 
-        eventsDbHelper = new EventsDbHelper(this);
-        tasksDbHelper = new TasksDbHelper(this);
+        sqliteDbHelper = new SQLiteDbHelper(this);
 
         mUserEventsAsyncTask = new UserDataAsyncTask();
         mUserTaskListsAsyncTask = new UserDataAsyncTask();
@@ -123,7 +120,7 @@ public class IntentionActivity extends AppCompatActivity
             @Override
             public void onDataLoaded(String response) throws JSONException, ParseException {
                 EventsParser eventsParser = new EventsParser();
-                //eventsDbHelper.insertEvents(eventsParser.parseEvents(response));
+                sqliteDbHelper.insertEvents(eventsParser.parseEvents(response));
             }
         });
 
@@ -136,7 +133,7 @@ public class IntentionActivity extends AppCompatActivity
                     requestUserData(mUserRefreshEventsAsyncTask, mEventsUrl);
                 } else {
                     EventsParser eventsParser = new EventsParser();
-                    //eventsDbHelper.insertEvents(eventsParser.parseEvents(response));
+                    sqliteDbHelper.insertEvents(eventsParser.parseEvents(response));
                 }
             }
         });
@@ -147,60 +144,48 @@ public class IntentionActivity extends AppCompatActivity
                 if (response.equals("")) {
                     Toast.makeText(getApplicationContext(), getString(R.string.network_error), Toast.LENGTH_LONG).show();
                 } else {
-
-                    loadTaskLists(response);
-
-                    for (int i = 0; i < mTaskListArrayList.size(); i++) {
-                        mTaskListArrayList = tasksDbHelper.getTaskLists();
-                        mTaskListId = mTaskListArrayList.get(i).getId();
-                        mTasksUrl = BASE_TASKS_URL + mTaskListArrayList.get(i).getTaskListId() + "/tasks?showHidden=true";
-                        mUserTasksAsyncTaskList.add(new UserDataAsyncTask());
-                        requestUserData(mUserTasksAsyncTaskList.get(i), mTasksUrl);
-                        mUserTasksAsyncTaskList.get(i).setDataInfoLoadingListener(new UserDataAsyncTask.UserDataLoadingListener() {
-                            @Override
-                            public void onDataLoaded(String response) throws JSONException, ParseException {
-                                TasksParser tasksParser = new TasksParser();
-                                tasksDbHelper.insertTasks(tasksParser.parseTasks(response, mTaskListId));
-                            }
-                        });
-                    }
-
-
+                    storeTaskLists(response);
+                    loadTasks();
                 }
             }
         });
 
 
         try {
-            ArrayList<Event> eventsList = eventsDbHelper.getEvents();
-            ArrayList<TaskList> taskListArrayList = tasksDbHelper.getTaskLists();
-            //int id = taskListArrayList.get(0).getId();
-            ArrayList<Task> tasksList = tasksDbHelper.getAllTasks();
-            ArrayList<Task> tasksArrayList = tasksDbHelper.getTasksFromList(1);
+            ArrayList<Event> eventsList = sqliteDbHelper.getEvents();
+            ArrayList<TaskList> taskListArrayList = sqliteDbHelper.getTaskLists();
+            ArrayList<Task> tasksArrayList = sqliteDbHelper.getTasksFromList(1);
             int size = eventsList.size();
         } catch (ParseException e) {
             e.printStackTrace();
         }
     }
 
-    private void loadTaskLists(String response) throws JSONException {
-        TaskListsParser taskListsParser = new TaskListsParser();
-        mTaskListArrayList = taskListsParser.parseTaskLists(response);
+    private void loadTasks() {
         for (int i = 0; i < mTaskListArrayList.size(); i++) {
-            //mTaskListId = taskListArrayList.get(i).getId();
-            //mTasksUrl = BASE_TASKS_URL + taskListArrayList.get(i).getTaskListId() + "/tasks?showHidden=true";
+            mTaskListArrayList = sqliteDbHelper.getTaskLists();
+            mTaskListId = mTaskListArrayList.get(i).getId();
+            final int taskListId = mTaskListId;
+            mTasksUrl = BASE_TASKS_URL + mTaskListArrayList.get(i).getTaskListId() + "/tasks?showHidden=true";
             mUserTasksAsyncTaskList.add(new UserDataAsyncTask());
-            //requestUserData(mUserTasksAsyncTaskList.get(i), mTasksUrl);
-            /*
+            requestUserData(mUserTasksAsyncTaskList.get(i), mTasksUrl);
             mUserTasksAsyncTaskList.get(i).setDataInfoLoadingListener(new UserDataAsyncTask.UserDataLoadingListener() {
                 @Override
                 public void onDataLoaded(String response) throws JSONException, ParseException {
                     TasksParser tasksParser = new TasksParser();
-                    tasksDbHelper.insertTasks(tasksParser.parseTasks(response, mTaskListId));
+                    sqliteDbHelper.insertTasks(tasksParser.parseTasks(response, taskListId));
                 }
-            });*/
+            });
         }
-        tasksDbHelper.insertTaskLists(mTaskListArrayList);
+    }
+
+    private void storeTaskLists(String response) throws JSONException {
+        TaskListsParser taskListsParser = new TaskListsParser();
+        mTaskListArrayList = taskListsParser.parseTaskLists(response);
+        for (int i = 0; i < mTaskListArrayList.size(); i++) {
+            mUserTasksAsyncTaskList.add(new UserDataAsyncTask());
+        }
+        sqliteDbHelper.insertTaskLists(mTaskListArrayList);
     }
 
     private void requestUserData(UserDataAsyncTask asyncTask, String url) {
