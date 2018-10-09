@@ -1,4 +1,4 @@
-package com.example.arturarzumanyan.taskmanager.db;
+package com.example.arturarzumanyan.taskmanager.data.db;
 
 import android.content.ContentValues;
 import android.content.Context;
@@ -6,12 +6,12 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
-import com.example.arturarzumanyan.taskmanager.db.contract.EventsContract;
+import com.example.arturarzumanyan.taskmanager.data.db.contract.EventsContract;
 import com.example.arturarzumanyan.taskmanager.domain.Event;
 import com.example.arturarzumanyan.taskmanager.domain.Task;
 import com.example.arturarzumanyan.taskmanager.domain.TaskList;
-import com.example.arturarzumanyan.taskmanager.db.contract.TasksContract.*;
-import com.example.arturarzumanyan.taskmanager.db.contract.EventsContract.*;
+import com.example.arturarzumanyan.taskmanager.data.db.contract.TasksContract.*;
+import com.example.arturarzumanyan.taskmanager.data.db.contract.EventsContract.*;
 
 import java.text.DateFormat;
 import java.text.ParseException;

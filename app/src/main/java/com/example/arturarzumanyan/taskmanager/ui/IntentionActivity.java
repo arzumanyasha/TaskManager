@@ -20,7 +20,7 @@ import android.widget.Toast;
 import com.example.arturarzumanyan.taskmanager.R;
 import com.example.arturarzumanyan.taskmanager.auth.FirebaseWebService;
 import com.example.arturarzumanyan.taskmanager.auth.TokenStorage;
-import com.example.arturarzumanyan.taskmanager.db.SQLiteDbHelper;
+import com.example.arturarzumanyan.taskmanager.data.db.SQLiteDbHelper;
 import com.example.arturarzumanyan.taskmanager.domain.Event;
 import com.example.arturarzumanyan.taskmanager.domain.Task;
 import com.example.arturarzumanyan.taskmanager.domain.TaskList;
@@ -45,21 +45,12 @@ public class IntentionActivity extends AppCompatActivity
     private static final String BASE_TASKS_URL = "https://www.googleapis.com/tasks/v1/lists/";
     private static final String AUTHORIZATION_KEY = "Authorization";
 
-    private TextView userNameTextView, userEmailTextView;
-    private ImageView userPhotoImageView;
-    private Intent mUserData;
     private SQLiteDbHelper sqliteDbHelper;
 
-    private UserDataAsyncTask mUserEventsAsyncTask;
     private UserDataAsyncTask mUserRefreshEventsAsyncTask;
-    private UserDataAsyncTask mUserTaskListsAsyncTask;
     private ArrayList<UserDataAsyncTask> mUserTasksAsyncTaskList = new ArrayList<>();
 
     private String mEventsUrl;
-    private String mTasksUrl;
-    private int mTaskListId;
-
-    private ArrayList<TaskList> mTaskListArrayList;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -89,14 +80,14 @@ public class IntentionActivity extends AppCompatActivity
         NavigationView navigationView = findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
 
-        mUserData = getIntent();
-        userPhotoImageView = navigationView
+        Intent mUserData = getIntent();
+        ImageView userPhotoImageView = navigationView
                 .getHeaderView(0)
                 .findViewById(R.id.imageViewUserPhoto);
-        userNameTextView = navigationView
+        TextView userNameTextView = navigationView
                 .getHeaderView(0)
                 .findViewById(R.id.textViewUserName);
-        userEmailTextView = navigationView
+        TextView userEmailTextView = navigationView
                 .getHeaderView(0)
                 .findViewById(R.id.textViewUserEmail);
         userNameTextView.setText(mUserData.getStringExtra(SignInActivity.EXTRA_USER_NAME));
@@ -107,8 +98,8 @@ public class IntentionActivity extends AppCompatActivity
 
         sqliteDbHelper = new SQLiteDbHelper(this);
 
-        mUserEventsAsyncTask = new UserDataAsyncTask();
-        mUserTaskListsAsyncTask = new UserDataAsyncTask();
+        UserDataAsyncTask mUserEventsAsyncTask = new UserDataAsyncTask();
+        UserDataAsyncTask mUserTaskListsAsyncTask = new UserDataAsyncTask();
         mUserRefreshEventsAsyncTask = new UserDataAsyncTask();
 
         mEventsUrl = BASE_EVENTS_URL + mUserData.getStringExtra(SignInActivity.EXTRA_USER_EMAIL) + "/events";
@@ -162,11 +153,10 @@ public class IntentionActivity extends AppCompatActivity
     }
 
     private void loadTasks() {
-        for (int i = 0; i < mTaskListArrayList.size(); i++) {
-            mTaskListArrayList = sqliteDbHelper.getTaskLists();
-            mTaskListId = mTaskListArrayList.get(i).getId();
-            final int taskListId = mTaskListId;
-            mTasksUrl = BASE_TASKS_URL + mTaskListArrayList.get(i).getTaskListId() + "/tasks?showHidden=true";
+        ArrayList<TaskList> taskListArrayList = sqliteDbHelper.getTaskLists();
+        for (int i = 0; i < taskListArrayList.size(); i++) {
+            final int taskListId = taskListArrayList.get(i).getId();
+            String mTasksUrl = BASE_TASKS_URL + taskListArrayList.get(i).getTaskListId() + "/tasks?showHidden=true";
             mUserTasksAsyncTaskList.add(new UserDataAsyncTask());
             requestUserData(mUserTasksAsyncTaskList.get(i), mTasksUrl);
             mUserTasksAsyncTaskList.get(i).setDataInfoLoadingListener(new UserDataAsyncTask.UserDataLoadingListener() {
@@ -181,11 +171,11 @@ public class IntentionActivity extends AppCompatActivity
 
     private void storeTaskLists(String response) throws JSONException {
         TaskListsParser taskListsParser = new TaskListsParser();
-        mTaskListArrayList = taskListsParser.parseTaskLists(response);
-        for (int i = 0; i < mTaskListArrayList.size(); i++) {
+        ArrayList<TaskList> taskListArrayList = taskListsParser.parseTaskLists(response);
+        for (int i = 0; i < taskListArrayList.size(); i++) {
             mUserTasksAsyncTaskList.add(new UserDataAsyncTask());
         }
-        sqliteDbHelper.insertTaskLists(mTaskListArrayList);
+        sqliteDbHelper.insertTaskLists(taskListArrayList);
     }
 
     private void requestUserData(UserDataAsyncTask asyncTask, String url) {
