@@ -9,4 +9,7 @@
     <string name="logged_in_message">Logged in</string>
     <string name="action_settings">action</string>
     <string name="network_error">Check network connection</string>
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
 </resources>

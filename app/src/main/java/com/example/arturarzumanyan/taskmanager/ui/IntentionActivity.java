@@ -3,6 +3,10 @@ package com.example.arturarzumanyan.taskmanager.ui;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentTransaction;
+import android.view.SubMenu;
 import android.view.View;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
@@ -37,6 +41,16 @@ public class IntentionActivity extends AppCompatActivity
     private TaskListsDbRepository taskListsDbRepository;
     private TasksDbRepository tasksDbRepository;
     private TasksCloudRepository tasksCloudRepository;
+    private EventsCloudRepository eventsCloudRepository;
+    private TaskListsCloudRepository taskListsCloudRepository;
+
+    private NavigationView mNavigationView;
+    private DrawerLayout drawer;
+    private Intent mUserData;
+
+    private Fragment fragment;
+    private FragmentManager fragmentManager;
+    private FragmentTransaction transaction;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -53,7 +67,7 @@ public class IntentionActivity extends AppCompatActivity
             }
         });
 
-        DrawerLayout drawer = findViewById(R.id.drawer_layout);
+        drawer = findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
                 this,
                 drawer,
@@ -63,17 +77,55 @@ public class IntentionActivity extends AppCompatActivity
         drawer.addDrawerListener(toggle);
         toggle.syncState();
 
-        NavigationView navigationView = findViewById(R.id.nav_view);
-        navigationView.setNavigationItemSelectedListener(this);
+        mUserData = getIntent();
 
-        Intent mUserData = getIntent();
-        ImageView userPhotoImageView = navigationView
+        mNavigationView = findViewById(R.id.nav_view);
+
+        eventsDbRepository = new EventsDbRepository();
+        taskListsDbRepository = new TaskListsDbRepository();
+        tasksCloudRepository = new TasksCloudRepository();
+        tasksDbRepository = new TasksDbRepository();
+        eventsCloudRepository = new EventsCloudRepository();
+
+        try {
+            if ((tasksDbRepository.getTasksFromTaskList(this, 1).size() == 0) &&
+                    (taskListsDbRepository.getTaskLists(this).size() == 0) &&
+                    (eventsDbRepository.getEvents(this).size() == 0)) {
+                loadUserData();
+            } else
+                displayMenu();
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+
+        try {
+            ArrayList<Task> tasks = tasksDbRepository.getTasksFromTaskList(this, 3);
+            ArrayList<TaskList> taskListArrayList = taskListsDbRepository.getTaskLists(this);
+            ArrayList<Event> events1 = eventsDbRepository.getEvents(this);
+
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+
+        drawer.closeDrawers();
+
+        fragmentManager = getSupportFragmentManager();
+        transaction = fragmentManager.beginTransaction();
+        Bundle bundle = new Bundle();
+        bundle.putString("taskListId", "1");
+        TasksFragment tasksFragment = new TasksFragment();
+        tasksFragment.setArguments(bundle);
+        openFragment(tasksFragment);
+    }
+
+    private void displayMenu() {
+        ImageView userPhotoImageView = mNavigationView
                 .getHeaderView(0)
                 .findViewById(R.id.imageViewUserPhoto);
-        TextView userNameTextView = navigationView
+        TextView userNameTextView = mNavigationView
                 .getHeaderView(0)
                 .findViewById(R.id.textViewUserName);
-        TextView userEmailTextView = navigationView
+        TextView userEmailTextView = mNavigationView
                 .getHeaderView(0)
                 .findViewById(R.id.textViewUserEmail);
         userNameTextView.setText(mUserData.getStringExtra(SignInActivity.EXTRA_USER_NAME));
@@ -82,8 +134,32 @@ public class IntentionActivity extends AppCompatActivity
                 .load(mUserData.getStringExtra(SignInActivity.EXTRA_USER_PHOTO_URL))
                 .into(userPhotoImageView);
 
-        eventsDbRepository = new EventsDbRepository();
-        EventsCloudRepository eventsCloudRepository = new EventsCloudRepository();
+        Menu menu = mNavigationView.getMenu();
+        SubMenu calendarMenu = menu.addSubMenu("Calendars");
+        calendarMenu.add(mUserData.getStringExtra(SignInActivity.EXTRA_USER_EMAIL));
+
+        SubMenu taskListsMenu = menu.addSubMenu("TaskLists");
+
+        ArrayList<TaskList> taskListArrayList = taskListsDbRepository.getTaskLists(IntentionActivity.this);
+        for (int i = 0; i < taskListArrayList.size(); i++) {
+            final int position = i + 1;
+            taskListsMenu.add(taskListArrayList.get(i).getTitle()).setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
+                @Override
+                public boolean onMenuItemClick(MenuItem item) {
+                    fragmentManager = getSupportFragmentManager();
+                    transaction = fragmentManager.beginTransaction();
+                    Bundle bundle = new Bundle();
+                    bundle.putString("taskListId", Integer.toString(position));
+                    TasksFragment tasksFragment = new TasksFragment();
+                    tasksFragment.setArguments(bundle);
+                    openFragment(tasksFragment);
+                    return false;
+                }
+            });
+        }
+    }
+
+    private void loadUserData() {
         eventsCloudRepository.getEvents(this, new EventsCloudRepository.OnTaskCompletedListener() {
             @Override
             public void onSuccess(ArrayList<Event> eventsList) {
@@ -97,24 +173,23 @@ public class IntentionActivity extends AppCompatActivity
             }
         });
 
-        taskListsDbRepository = new TaskListsDbRepository();
-
-        tasksCloudRepository = new TasksCloudRepository();
-        tasksDbRepository = new TasksDbRepository();
-
-        TaskListsCloudRepository taskListsCloudRepository = new TaskListsCloudRepository();
+        taskListsCloudRepository = new TaskListsCloudRepository();
         taskListsCloudRepository.getTaskLists(this, new TaskListsCloudRepository.OnTaskCompletedListener() {
             @Override
             public void onSuccess(ArrayList<TaskList> taskListArrayList) {
                 taskListsDbRepository.addTaskLists(IntentionActivity.this, taskListArrayList);
                 ArrayList<TaskList> taskLists = taskListsDbRepository.getTaskLists(IntentionActivity.this);
                 for (int i = 0; i < taskLists.size(); i++) {
+                    final int position = i;
                     tasksCloudRepository.getTasksFromTaskList(IntentionActivity.this,
                             taskLists.get(i),
                             new TasksCloudRepository.OnTaskCompletedListener() {
                                 @Override
                                 public void onSuccess(ArrayList<Task> taskArrayList) {
                                     tasksDbRepository.addTasks(IntentionActivity.this, taskArrayList);
+                                    if (position == taskListsDbRepository.getTaskLists(IntentionActivity.this).size() - 1) {
+                                        displayMenu();
+                                    }
                                 }
 
                                 @Override
@@ -130,15 +205,13 @@ public class IntentionActivity extends AppCompatActivity
 
             }
         });
+    }
 
-        try {
-            ArrayList<Task> tasks = tasksDbRepository.getTasksFromTaskList(this, 3);
-            ArrayList<TaskList> taskListArrayList = taskListsDbRepository.getTaskLists(this);
-            ArrayList<Event> events1 = eventsDbRepository.getEvents(this);
-
-        } catch (ParseException e) {
-            e.printStackTrace();
-        }
+    public void openFragment(Fragment fragment) {
+        FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+        transaction.replace(R.id.main_container, fragment);
+        transaction.addToBackStack(null);
+        transaction.commit();
     }
 
     @Override
@@ -172,23 +245,17 @@ public class IntentionActivity extends AppCompatActivity
     @SuppressWarnings("StatementWithEmptyBody")
     @Override
     public boolean onNavigationItemSelected(MenuItem item) {
-
+/*
         int id = item.getItemId();
 
-        if (id == R.id.nav_camera) {
-
-        } else if (id == R.id.nav_gallery) {
-
-        } else if (id == R.id.nav_slideshow) {
-
-        } else if (id == R.id.nav_manage) {
+        if (id == R.id.nav_calendar) {
 
         } else if (id == R.id.nav_share) {
 
         } else if (id == R.id.nav_send) {
 
         }
-
+*/
         DrawerLayout drawer = findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
         return true;
