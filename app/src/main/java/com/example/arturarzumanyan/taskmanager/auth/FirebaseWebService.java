@@ -182,6 +182,7 @@ public class FirebaseWebService implements GoogleApiClient.OnConnectionFailedLis
     }
 
     public FirebaseUser getCurrentUser() {
+        mAuth = FirebaseAuth.getInstance();
         return mAuth.getCurrentUser();
     }
 

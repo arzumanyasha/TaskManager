@@ -1,7 +1,6 @@
 package com.example.arturarzumanyan.taskmanager.ui;
 
 import android.content.Intent;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.view.View;
@@ -15,42 +14,29 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.example.arturarzumanyan.taskmanager.R;
-import com.example.arturarzumanyan.taskmanager.auth.FirebaseWebService;
-import com.example.arturarzumanyan.taskmanager.auth.TokenStorage;
-import com.example.arturarzumanyan.taskmanager.data.db.SQLiteDbHelper;
+import com.example.arturarzumanyan.taskmanager.data.repository.events.EventsCloudRepository;
+import com.example.arturarzumanyan.taskmanager.data.repository.events.EventsDbRepository;
+import com.example.arturarzumanyan.taskmanager.data.repository.tasklists.TaskListsCloudRepository;
+import com.example.arturarzumanyan.taskmanager.data.repository.tasklists.TaskListsDbRepository;
+import com.example.arturarzumanyan.taskmanager.data.repository.tasks.TasksCloudRepository;
+import com.example.arturarzumanyan.taskmanager.data.repository.tasks.TasksDbRepository;
 import com.example.arturarzumanyan.taskmanager.domain.Event;
 import com.example.arturarzumanyan.taskmanager.domain.Task;
 import com.example.arturarzumanyan.taskmanager.domain.TaskList;
-import com.example.arturarzumanyan.taskmanager.networking.UserDataAsyncTask;
-import com.example.arturarzumanyan.taskmanager.networking.base.RequestParameters;
-import com.example.arturarzumanyan.taskmanager.networking.util.EventsParser;
-import com.example.arturarzumanyan.taskmanager.networking.util.TaskListsParser;
-import com.example.arturarzumanyan.taskmanager.networking.util.TasksParser;
 import com.squareup.picasso.Picasso;
-
-import org.json.JSONException;
 
 import java.text.ParseException;
 import java.util.ArrayList;
-import java.util.HashMap;
 
 public class IntentionActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
-    private static final String BASE_EVENTS_URL = "https://www.googleapis.com/calendar/v3/calendars/";
-    private static final String BASE_TASK_LISTS_URL = "https://www.googleapis.com/tasks/v1/users/@me/lists";
-    private static final String BASE_TASKS_URL = "https://www.googleapis.com/tasks/v1/lists/";
-    private static final String AUTHORIZATION_KEY = "Authorization";
-
-    private SQLiteDbHelper sqliteDbHelper;
-
-    private UserDataAsyncTask mUserRefreshEventsAsyncTask;
-    private ArrayList<UserDataAsyncTask> mUserTasksAsyncTaskList = new ArrayList<>();
-
-    private String mEventsUrl;
+    private EventsDbRepository eventsDbRepository;
+    private TaskListsDbRepository taskListsDbRepository;
+    private TasksDbRepository tasksDbRepository;
+    private TasksCloudRepository tasksCloudRepository;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -96,101 +82,63 @@ public class IntentionActivity extends AppCompatActivity
                 .load(mUserData.getStringExtra(SignInActivity.EXTRA_USER_PHOTO_URL))
                 .into(userPhotoImageView);
 
-        sqliteDbHelper = new SQLiteDbHelper(this);
-
-        UserDataAsyncTask mUserEventsAsyncTask = new UserDataAsyncTask();
-        UserDataAsyncTask mUserTaskListsAsyncTask = new UserDataAsyncTask();
-        mUserRefreshEventsAsyncTask = new UserDataAsyncTask();
-
-        mEventsUrl = BASE_EVENTS_URL + mUserData.getStringExtra(SignInActivity.EXTRA_USER_EMAIL) + "/events";
-        requestUserData(mUserEventsAsyncTask, mEventsUrl);
-
-        requestUserData(mUserTaskListsAsyncTask, BASE_TASK_LISTS_URL);
-
-        mUserRefreshEventsAsyncTask.setDataInfoLoadingListener(new UserDataAsyncTask.UserDataLoadingListener() {
+        eventsDbRepository = new EventsDbRepository();
+        EventsCloudRepository eventsCloudRepository = new EventsCloudRepository();
+        eventsCloudRepository.getEvents(this, new EventsCloudRepository.OnTaskCompletedListener() {
             @Override
-            public void onDataLoaded(String response) throws JSONException, ParseException {
-                EventsParser eventsParser = new EventsParser();
-                sqliteDbHelper.insertEvents(eventsParser.parseEvents(response));
+            public void onSuccess(ArrayList<Event> eventsList) {
+                ArrayList<Event> events = eventsList;
+                eventsDbRepository.addEvents(IntentionActivity.this, events);
+            }
+
+            @Override
+            public void onfail() {
+
             }
         });
 
-        mUserEventsAsyncTask.setDataInfoLoadingListener(new UserDataAsyncTask.UserDataLoadingListener() {
+        taskListsDbRepository = new TaskListsDbRepository();
+
+        tasksCloudRepository = new TasksCloudRepository();
+        tasksDbRepository = new TasksDbRepository();
+
+        TaskListsCloudRepository taskListsCloudRepository = new TaskListsCloudRepository();
+        taskListsCloudRepository.getTaskLists(this, new TaskListsCloudRepository.OnTaskCompletedListener() {
             @Override
-            public void onDataLoaded(String response) throws JSONException, ParseException {
-                if (response.equals("")) {
-                    FirebaseWebService firebaseWebService = new FirebaseWebService();
-                    firebaseWebService.refreshAccessToken(IntentionActivity.this);
-                    requestUserData(mUserRefreshEventsAsyncTask, mEventsUrl);
-                } else {
-                    EventsParser eventsParser = new EventsParser();
-                    sqliteDbHelper.insertEvents(eventsParser.parseEvents(response));
+            public void onSuccess(ArrayList<TaskList> taskListArrayList) {
+                taskListsDbRepository.addTaskLists(IntentionActivity.this, taskListArrayList);
+                ArrayList<TaskList> taskLists = taskListsDbRepository.getTaskLists(IntentionActivity.this);
+                for (int i = 0; i < taskLists.size(); i++) {
+                    tasksCloudRepository.getTasksFromTaskList(IntentionActivity.this,
+                            taskLists.get(i),
+                            new TasksCloudRepository.OnTaskCompletedListener() {
+                                @Override
+                                public void onSuccess(ArrayList<Task> taskArrayList) {
+                                    tasksDbRepository.addTasks(IntentionActivity.this, taskArrayList);
+                                }
+
+                                @Override
+                                public void onfail() {
+
+                                }
+                            });
                 }
             }
-        });
 
-        mUserTaskListsAsyncTask.setDataInfoLoadingListener(new UserDataAsyncTask.UserDataLoadingListener() {
             @Override
-            public void onDataLoaded(String response) throws JSONException {
-                if (response.equals("")) {
-                    Toast.makeText(getApplicationContext(), getString(R.string.network_error), Toast.LENGTH_LONG).show();
-                } else {
-                    storeTaskLists(response);
-                    loadTasks();
-                }
+            public void onfail() {
+
             }
         });
-
 
         try {
-            ArrayList<Event> eventsList = sqliteDbHelper.getEvents();
-            ArrayList<TaskList> taskListArrayList = sqliteDbHelper.getTaskLists();
-            ArrayList<Task> tasksArrayList = sqliteDbHelper.getTasksFromList(1);
-            int size = eventsList.size();
+            ArrayList<Task> tasks = tasksDbRepository.getTasksFromTaskList(this, 3);
+            ArrayList<TaskList> taskListArrayList = taskListsDbRepository.getTaskLists(this);
+            ArrayList<Event> events1 = eventsDbRepository.getEvents(this);
+
         } catch (ParseException e) {
             e.printStackTrace();
         }
-    }
-
-    private void loadTasks() {
-        ArrayList<TaskList> taskListArrayList = sqliteDbHelper.getTaskLists();
-        for (int i = 0; i < taskListArrayList.size(); i++) {
-            final int taskListId = taskListArrayList.get(i).getId();
-            String mTasksUrl = BASE_TASKS_URL + taskListArrayList.get(i).getTaskListId() + "/tasks?showHidden=true";
-            mUserTasksAsyncTaskList.add(new UserDataAsyncTask());
-            requestUserData(mUserTasksAsyncTaskList.get(i), mTasksUrl);
-            mUserTasksAsyncTaskList.get(i).setDataInfoLoadingListener(new UserDataAsyncTask.UserDataLoadingListener() {
-                @Override
-                public void onDataLoaded(String response) throws JSONException, ParseException {
-                    TasksParser tasksParser = new TasksParser();
-                    sqliteDbHelper.insertTasks(tasksParser.parseTasks(response, taskListId));
-                }
-            });
-        }
-    }
-
-    private void storeTaskLists(String response) throws JSONException {
-        TaskListsParser taskListsParser = new TaskListsParser();
-        ArrayList<TaskList> taskListArrayList = taskListsParser.parseTaskLists(response);
-        for (int i = 0; i < taskListArrayList.size(); i++) {
-            mUserTasksAsyncTaskList.add(new UserDataAsyncTask());
-        }
-        sqliteDbHelper.insertTaskLists(taskListArrayList);
-    }
-
-    private void requestUserData(UserDataAsyncTask asyncTask, String url) {
-        TokenStorage tokenStorage = new TokenStorage();
-
-        FirebaseWebService.RequestMethods requestMethod = FirebaseWebService.RequestMethods.GET;
-        HashMap<String, String> requestBodyParameters = new HashMap<>();
-        HashMap<String, String> requestHeaderParameters = new HashMap<>();
-        String token = tokenStorage.getAccessToken(this);
-        requestHeaderParameters.put(AUTHORIZATION_KEY, "Bearer " + tokenStorage.getAccessToken(this));
-        RequestParameters requestParameters = new RequestParameters(url,
-                requestMethod,
-                requestBodyParameters,
-                requestHeaderParameters);
-        asyncTask.executeOnExecutor(AsyncTask.SERIAL_EXECUTOR, requestParameters);
     }
 
     @Override
