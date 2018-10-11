@@ -17,7 +17,7 @@ import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-public class TasksCloudRepository {
+public class TasksCloudStore {
     private static final String BASE_TASKS_URL = "https://www.googleapis.com/tasks/v1/lists/";
     private static final String AUTHORIZATION_KEY = "Authorization";
 

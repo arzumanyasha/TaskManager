@@ -20,12 +20,13 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.example.arturarzumanyan.taskmanager.R;
-import com.example.arturarzumanyan.taskmanager.data.repository.events.EventsCloudRepository;
-import com.example.arturarzumanyan.taskmanager.data.repository.events.EventsDbRepository;
-import com.example.arturarzumanyan.taskmanager.data.repository.tasklists.TaskListsCloudRepository;
-import com.example.arturarzumanyan.taskmanager.data.repository.tasklists.TaskListsDbRepository;
-import com.example.arturarzumanyan.taskmanager.data.repository.tasks.TasksCloudRepository;
-import com.example.arturarzumanyan.taskmanager.data.repository.tasks.TasksDbRepository;
+import com.example.arturarzumanyan.taskmanager.data.repository.UserDataRepository;
+import com.example.arturarzumanyan.taskmanager.data.repository.events.EventsCloudStore;
+import com.example.arturarzumanyan.taskmanager.data.repository.events.EventsDbStore;
+import com.example.arturarzumanyan.taskmanager.data.repository.tasklists.TaskListsCloudStore;
+import com.example.arturarzumanyan.taskmanager.data.repository.tasklists.TaskListsDbStore;
+import com.example.arturarzumanyan.taskmanager.data.repository.tasks.TasksCloudStore;
+import com.example.arturarzumanyan.taskmanager.data.repository.tasks.TasksDbStore;
 import com.example.arturarzumanyan.taskmanager.domain.Event;
 import com.example.arturarzumanyan.taskmanager.domain.Task;
 import com.example.arturarzumanyan.taskmanager.domain.TaskList;
@@ -34,15 +35,15 @@ import com.squareup.picasso.Picasso;
 import java.text.ParseException;
 import java.util.ArrayList;
 
-public class IntentionActivity extends AppCompatActivity
-        implements NavigationView.OnNavigationItemSelectedListener {
+public class IntentionActivity extends AppCompatActivity {
 
-    private EventsDbRepository eventsDbRepository;
-    private TaskListsDbRepository taskListsDbRepository;
-    private TasksDbRepository tasksDbRepository;
-    private TasksCloudRepository tasksCloudRepository;
-    private EventsCloudRepository eventsCloudRepository;
-    private TaskListsCloudRepository taskListsCloudRepository;
+
+    private EventsDbStore eventsDbStore;
+    private TaskListsDbStore taskListsDbStore;
+    private TasksDbStore tasksDbStore;
+    private TasksCloudStore tasksCloudStore;
+    private EventsCloudStore eventsCloudStore;
+    private TaskListsCloudStore taskListsCloudStore;
 
     private NavigationView mNavigationView;
     private DrawerLayout drawer;
@@ -81,17 +82,19 @@ public class IntentionActivity extends AppCompatActivity
 
         mNavigationView = findViewById(R.id.nav_view);
 
-        eventsDbRepository = new EventsDbRepository();
-        taskListsDbRepository = new TaskListsDbRepository();
-        tasksCloudRepository = new TasksCloudRepository();
-        tasksDbRepository = new TasksDbRepository();
-        eventsCloudRepository = new EventsCloudRepository();
+        eventsDbStore = new EventsDbStore();
+        taskListsDbStore = new TaskListsDbStore();
+        tasksCloudStore = new TasksCloudStore();
+        tasksDbStore = new TasksDbStore();
+        eventsCloudStore = new EventsCloudStore();
+
+        UserDataRepository userDataRepository = new UserDataRepository();
 
         try {
-            if ((tasksDbRepository.getTasksFromTaskList(this, 1).size() == 0) &&
-                    (taskListsDbRepository.getTaskLists(this).size() == 0) &&
-                    (eventsDbRepository.getEvents(this).size() == 0)) {
-                loadUserData();
+            if ((tasksDbStore.getTasksFromTaskList(this, 1).size() == 0) &&
+                    (taskListsDbStore.getTaskLists(this).size() == 0) &&
+                    (eventsDbStore.getEvents(this).size() == 0)) {
+                userDataRepository.loadUserData(this);
             } else
                 displayMenu();
         } catch (ParseException e) {
@@ -99,9 +102,9 @@ public class IntentionActivity extends AppCompatActivity
         }
 
         try {
-            ArrayList<Task> tasks = tasksDbRepository.getTasksFromTaskList(this, 3);
-            ArrayList<TaskList> taskListArrayList = taskListsDbRepository.getTaskLists(this);
-            ArrayList<Event> events1 = eventsDbRepository.getEvents(this);
+            ArrayList<Task> tasks = tasksDbStore.getTasksFromTaskList(this, 3);
+            ArrayList<TaskList> taskListArrayList = taskListsDbStore.getTaskLists(this);
+            ArrayList<Event> events1 = eventsDbStore.getEvents(this);
 
         } catch (ParseException e) {
             e.printStackTrace();
@@ -140,7 +143,7 @@ public class IntentionActivity extends AppCompatActivity
 
         SubMenu taskListsMenu = menu.addSubMenu("TaskLists");
 
-        ArrayList<TaskList> taskListArrayList = taskListsDbRepository.getTaskLists(IntentionActivity.this);
+        ArrayList<TaskList> taskListArrayList = taskListsDbStore.getTaskLists(IntentionActivity.this);
         for (int i = 0; i < taskListArrayList.size(); i++) {
             final int position = i + 1;
             taskListsMenu.add(taskListArrayList.get(i).getTitle()).setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
@@ -159,53 +162,7 @@ public class IntentionActivity extends AppCompatActivity
         }
     }
 
-    private void loadUserData() {
-        eventsCloudRepository.getEvents(this, new EventsCloudRepository.OnTaskCompletedListener() {
-            @Override
-            public void onSuccess(ArrayList<Event> eventsList) {
-                ArrayList<Event> events = eventsList;
-                eventsDbRepository.addEvents(IntentionActivity.this, events);
-            }
 
-            @Override
-            public void onfail() {
-
-            }
-        });
-
-        taskListsCloudRepository = new TaskListsCloudRepository();
-        taskListsCloudRepository.getTaskLists(this, new TaskListsCloudRepository.OnTaskCompletedListener() {
-            @Override
-            public void onSuccess(ArrayList<TaskList> taskListArrayList) {
-                taskListsDbRepository.addTaskLists(IntentionActivity.this, taskListArrayList);
-                ArrayList<TaskList> taskLists = taskListsDbRepository.getTaskLists(IntentionActivity.this);
-                for (int i = 0; i < taskLists.size(); i++) {
-                    final int position = i;
-                    tasksCloudRepository.getTasksFromTaskList(IntentionActivity.this,
-                            taskLists.get(i),
-                            new TasksCloudRepository.OnTaskCompletedListener() {
-                                @Override
-                                public void onSuccess(ArrayList<Task> taskArrayList) {
-                                    tasksDbRepository.addTasks(IntentionActivity.this, taskArrayList);
-                                    if (position == taskListsDbRepository.getTaskLists(IntentionActivity.this).size() - 1) {
-                                        displayMenu();
-                                    }
-                                }
-
-                                @Override
-                                public void onfail() {
-
-                                }
-                            });
-                }
-            }
-
-            @Override
-            public void onfail() {
-
-            }
-        });
-    }
 
     public void openFragment(Fragment fragment) {
         FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
@@ -240,24 +197,5 @@ public class IntentionActivity extends AppCompatActivity
         }
 
         return super.onOptionsItemSelected(item);
-    }
-
-    @SuppressWarnings("StatementWithEmptyBody")
-    @Override
-    public boolean onNavigationItemSelected(MenuItem item) {
-/*
-        int id = item.getItemId();
-
-        if (id == R.id.nav_calendar) {
-
-        } else if (id == R.id.nav_share) {
-
-        } else if (id == R.id.nav_send) {
-
-        }
-*/
-        DrawerLayout drawer = findViewById(R.id.drawer_layout);
-        drawer.closeDrawer(GravityCompat.START);
-        return true;
     }
 }

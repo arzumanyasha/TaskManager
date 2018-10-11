@@ -171,48 +171,52 @@ public class SQLiteDbHelper extends SQLiteOpenHelper {
         return eventsList;
     }
 
-    public ArrayList<Task> getTasksFromList(int tasksListId) throws ParseException {
+    public ArrayList<Task> getTasksFromList(int tasksListId) {
         ArrayList<Task> tasksList = new ArrayList<>();
-        db = getReadableDatabase();
+        try {
+            db = getReadableDatabase();
 
-        String[] selectionArgs = new String[]{Integer.toString(tasksListId)};
-        Cursor c = db.rawQuery("SELECT * FROM " + TasksTable.TABLE_NAME +
-                " WHERE " + TasksTable.COLUMN_LIST_ID + " = ?", selectionArgs);
+            String[] selectionArgs = new String[]{Integer.toString(tasksListId)};
+            Cursor c = db.rawQuery("SELECT * FROM " + TasksTable.TABLE_NAME +
+                    " WHERE " + TasksTable.COLUMN_LIST_ID + " = ?", selectionArgs);
 
-        if (c.moveToFirst()) {
-            do {
-                Boolean isExecuted;
-                if (c.getInt(c.getColumnIndex(TasksTable.COLUMN_STATUS)) == 1) {
-                    isExecuted = true;
-                } else
-                    isExecuted = false;
+            if (c.moveToFirst()) {
+                do {
+                    Boolean isExecuted;
+                    if (c.getInt(c.getColumnIndex(TasksTable.COLUMN_STATUS)) == 1) {
+                        isExecuted = true;
+                    } else
+                        isExecuted = false;
 
-                Task task;
+                    Task task;
 
-                if (c.getString(c.getColumnIndex(TasksTable.COLUMN_DUE)) != null) {
-                    DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
-                    Date date = dateFormat.parse(c.getString(c.getColumnIndex(TasksTable.COLUMN_DUE)));
+                    if (c.getString(c.getColumnIndex(TasksTable.COLUMN_DUE)) != null) {
+                        DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+                        Date date = dateFormat.parse(c.getString(c.getColumnIndex(TasksTable.COLUMN_DUE)));
 
-                    task = new Task(c.getString(c.getColumnIndex(TasksTable.COLUMN_TASK_ID)),
+                        task = new Task(c.getString(c.getColumnIndex(TasksTable.COLUMN_TASK_ID)),
+                                c.getString(c.getColumnIndex(TasksTable.COLUMN_TITLE)),
+                                c.getString(c.getColumnIndex(TasksTable.COLUMN_NOTES)),
+                                isExecuted,
+                                date,
+                                tasksListId
+                        );
+                    } else task = new Task(c.getString(c.getColumnIndex(TasksTable.COLUMN_TASK_ID)),
                             c.getString(c.getColumnIndex(TasksTable.COLUMN_TITLE)),
                             c.getString(c.getColumnIndex(TasksTable.COLUMN_NOTES)),
                             isExecuted,
-                            date,
                             tasksListId
                     );
-                } else task = new Task(c.getString(c.getColumnIndex(TasksTable.COLUMN_TASK_ID)),
-                        c.getString(c.getColumnIndex(TasksTable.COLUMN_TITLE)),
-                        c.getString(c.getColumnIndex(TasksTable.COLUMN_NOTES)),
-                        isExecuted,
-                        tasksListId
-                );
 
-                tasksList.add(task);
-            } while (c.moveToNext());
+                    tasksList.add(task);
+                } while (c.moveToNext());
+            }
+
+            c.close();
+            return tasksList;
+        } catch (ParseException e){
+            return tasksList;
         }
-
-        c.close();
-        return tasksList;
     }
 
     public ArrayList<TaskList> getTaskLists() {

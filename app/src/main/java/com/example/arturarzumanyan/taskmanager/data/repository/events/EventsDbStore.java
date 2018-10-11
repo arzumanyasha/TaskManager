@@ -8,7 +8,7 @@ import com.example.arturarzumanyan.taskmanager.domain.Event;
 import java.text.ParseException;
 import java.util.ArrayList;
 
-public class EventsDbRepository {
+public class EventsDbStore {
     private SQLiteDbHelper sqliteDbHelper;
 
     public ArrayList<Event> getEvents(Context context) throws ParseException {

@@ -8,14 +8,14 @@ import com.example.arturarzumanyan.taskmanager.domain.Task;
 import java.text.ParseException;
 import java.util.ArrayList;
 
-public class TasksDbRepository {
+public class TasksDbStore {
     private SQLiteDbHelper sqliteDbHelper;
 
     public ArrayList<Task> getTasks() {
         return null;
     }
 
-    public ArrayList<Task> getTasksFromTaskList(Context context, int taskListId) throws ParseException {
+    public ArrayList<Task> getTasksFromTaskList(Context context, int taskListId) {
         sqliteDbHelper = new SQLiteDbHelper(context);
         return sqliteDbHelper.getTasksFromList(taskListId);
     }

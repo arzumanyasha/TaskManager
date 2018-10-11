@@ -7,7 +7,7 @@ import com.example.arturarzumanyan.taskmanager.domain.TaskList;
 
 import java.util.ArrayList;
 
-public class TaskListsDbRepository {
+public class TaskListsDbStore {
     private SQLiteDbHelper sqliteDbHelper;
 
     public ArrayList<TaskList> getTaskLists(Context context) {

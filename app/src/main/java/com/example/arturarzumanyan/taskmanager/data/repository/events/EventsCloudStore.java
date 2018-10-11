@@ -9,9 +9,6 @@ import com.example.arturarzumanyan.taskmanager.domain.Event;
 import com.example.arturarzumanyan.taskmanager.networking.UserDataAsyncTask;
 import com.example.arturarzumanyan.taskmanager.networking.base.RequestParameters;
 import com.example.arturarzumanyan.taskmanager.networking.util.EventsParser;
-import com.example.arturarzumanyan.taskmanager.ui.IntentionActivity;
-import com.example.arturarzumanyan.taskmanager.ui.SignInActivity;
-import com.google.android.gms.tasks.OnCompleteListener;
 
 import org.json.JSONException;
 
@@ -19,7 +16,7 @@ import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-public class EventsCloudRepository {
+public class EventsCloudStore {
     private static final String BASE_EVENTS_URL = "https://www.googleapis.com/calendar/v3/calendars/";
     private static final String AUTHORIZATION_KEY = "Authorization";
 
