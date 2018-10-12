@@ -10,9 +10,14 @@ import java.util.ArrayList;
 
 public class EventsDbStore {
     private SQLiteDbHelper sqliteDbHelper;
+    private Context mContext;
 
-    public ArrayList<Event> getEvents(Context context) throws ParseException {
-        sqliteDbHelper = new SQLiteDbHelper(context);
+    public EventsDbStore(Context context) {
+        this.mContext = context;
+    }
+
+    public ArrayList<Event> getEvents() {
+        sqliteDbHelper = new SQLiteDbHelper(mContext);
         return sqliteDbHelper.getEvents();
     }
 
@@ -28,8 +33,8 @@ public class EventsDbStore {
         return null;
     }
 
-    public void addEvents(Context context, ArrayList<Event> eventList) {
-        sqliteDbHelper = new SQLiteDbHelper(context);
+    public void addEvents(ArrayList<Event> eventList) {
+        sqliteDbHelper = new SQLiteDbHelper(mContext);
         sqliteDbHelper.insertEvents(eventList);
     }
 

@@ -21,7 +21,7 @@ import java.util.Date;
 
 public class SQLiteDbHelper extends SQLiteOpenHelper {
     private static final String DATABASE_NAME = "Tasks.db";
-    private static final int DATABASE_VERSION = 18;
+    private static final int DATABASE_VERSION = 23;
 
     private SQLiteDatabase db;
 
@@ -138,37 +138,42 @@ public class SQLiteDbHelper extends SQLiteOpenHelper {
         }
     }
 
-    public ArrayList<Event> getEvents() throws ParseException {
+    public ArrayList<Event> getEvents() {
         ArrayList<Event> eventsList = new ArrayList<>();
-        db = getReadableDatabase();
-        Cursor c = db.rawQuery("SELECT * FROM " + EventsTable.TABLE_NAME, null);
+        try {
+            db = getReadableDatabase();
+            Cursor c = db.rawQuery("SELECT * FROM " + EventsTable.TABLE_NAME, null);
 
-        if (c.moveToFirst()) {
-            do {
-                DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ");
-                Date startDate = dateFormat.parse(c.getString(c.getColumnIndex(EventsTable.COLUMN_START_TIME)));
-                Date endDate = dateFormat.parse(c.getString(c.getColumnIndex(EventsTable.COLUMN_END_TIME)));
-                Boolean isNotify;
-                if (c.getInt(c.getColumnIndex(EventsTable.COLUMN_REMINDER)) == 1) {
-                    isNotify = true;
-                } else
-                    isNotify = false;
+            if (c.moveToFirst()) {
+                do {
+                    DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ");
+                    Date startDate = dateFormat.parse(c.getString(c.getColumnIndex(EventsTable.COLUMN_START_TIME)));
+                    Date endDate = dateFormat.parse(c.getString(c.getColumnIndex(EventsTable.COLUMN_END_TIME)));
+                    Boolean isNotify;
+                    if (c.getInt(c.getColumnIndex(EventsTable.COLUMN_REMINDER)) == 1) {
+                        isNotify = true;
+                    } else
+                        isNotify = false;
 
-                Event event = new Event(c.getString(c.getColumnIndex(EventsTable.COLUMN_EVENT_ID)),
-                        c.getString(c.getColumnIndex(EventsTable.COLUMN_NAME)),
-                        c.getString(c.getColumnIndex(EventsTable.COLUMN_DESCRIPTION)),
-                        c.getInt(c.getColumnIndex(EventsTable.COLUMN_COLOR_ID)),
-                        startDate,
-                        endDate,
-                        isNotify
-                );
+                    Event event = new Event(c.getString(c.getColumnIndex(EventsTable.COLUMN_EVENT_ID)),
+                            c.getString(c.getColumnIndex(EventsTable.COLUMN_NAME)),
+                            c.getString(c.getColumnIndex(EventsTable.COLUMN_DESCRIPTION)),
+                            c.getInt(c.getColumnIndex(EventsTable.COLUMN_COLOR_ID)),
+                            startDate,
+                            endDate,
+                            isNotify
+                    );
 
-                eventsList.add(event);
-            } while (c.moveToNext());
+                    eventsList.add(event);
+                } while (c.moveToNext());
+            }
+
+            c.close();
+            return eventsList;
         }
-
-        c.close();
-        return eventsList;
+        catch (ParseException e){
+            return eventsList;
+        }
     }
 
     public ArrayList<Task> getTasksFromList(int tasksListId) {
@@ -214,7 +219,7 @@ public class SQLiteDbHelper extends SQLiteOpenHelper {
 
             c.close();
             return tasksList;
-        } catch (ParseException e){
+        } catch (ParseException e) {
             return tasksList;
         }
     }

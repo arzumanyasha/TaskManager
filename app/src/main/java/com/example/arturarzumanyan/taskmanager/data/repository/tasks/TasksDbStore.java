@@ -10,18 +10,19 @@ import java.util.ArrayList;
 
 public class TasksDbStore {
     private SQLiteDbHelper sqliteDbHelper;
+    private Context mContext;
 
-    public ArrayList<Task> getTasks() {
-        return null;
+    public TasksDbStore(Context context) {
+        this.mContext = context;
     }
 
-    public ArrayList<Task> getTasksFromTaskList(Context context, int taskListId) {
-        sqliteDbHelper = new SQLiteDbHelper(context);
+    public ArrayList<Task> getTasksFromTaskList(int taskListId) {
+        sqliteDbHelper = new SQLiteDbHelper(mContext);
         return sqliteDbHelper.getTasksFromList(taskListId);
     }
 
-    public void addTasks(Context context, ArrayList<Task> tasks) {
-        sqliteDbHelper = new SQLiteDbHelper(context);
+    public void addTasks(ArrayList<Task> tasks) {
+        sqliteDbHelper = new SQLiteDbHelper(mContext);
         sqliteDbHelper.insertTasks(tasks);
     }
 

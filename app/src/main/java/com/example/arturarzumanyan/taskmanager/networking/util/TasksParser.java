@@ -1,6 +1,5 @@
 package com.example.arturarzumanyan.taskmanager.networking.util;
 
-import com.example.arturarzumanyan.taskmanager.domain.Event;
 import com.example.arturarzumanyan.taskmanager.domain.Task;
 
 import org.json.JSONArray;

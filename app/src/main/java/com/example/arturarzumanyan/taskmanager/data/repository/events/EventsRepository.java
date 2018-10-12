@@ -1,35 +1,35 @@
 package com.example.arturarzumanyan.taskmanager.data.repository.events;
 
 import android.content.Context;
-import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
 
+import com.example.arturarzumanyan.taskmanager.data.repository.RepositoryLoadHelper;
 import com.example.arturarzumanyan.taskmanager.domain.Event;
 
-import java.text.ParseException;
 import java.util.ArrayList;
 
 public class EventsRepository {
     private EventsDbStore eventsDbStore;
     private EventsCloudStore eventsCloudStore;
+    private Context mContext;
+    private RepositoryLoadHelper mRepositoryLoadHelper;
 
-    public void loadEvents(Context context) {
-        final Context tempContext = context;
-        eventsCloudStore = new EventsCloudStore();
-        eventsDbStore = new EventsDbStore();
+    public EventsRepository(Context context) {
+        this.mContext = context;
+    }
 
-        ArrayList<Event> events = new ArrayList<>();
-        try {
-            events = eventsDbStore.getEvents(tempContext);
-        } catch (ParseException e) {
-            e.printStackTrace();
-        }
-        if ((isOnline(context)) && (events.size() == 0)) {
-            eventsCloudStore.getEvents(tempContext, new EventsCloudStore.OnTaskCompletedListener() {
+    public void loadEvents(final OnEventsLoadedListener listener) {
+        eventsCloudStore = new EventsCloudStore(mContext);
+        eventsDbStore = new EventsDbStore(mContext);
+        mRepositoryLoadHelper = new RepositoryLoadHelper(mContext);
+
+        ArrayList<Event> events = eventsDbStore.getEvents();
+
+        if ((mRepositoryLoadHelper.isOnline()) && (events.size() == 0)) {
+            eventsCloudStore.getEvents(new EventsCloudStore.OnTaskCompletedListener() {
                 @Override
                 public void onSuccess(ArrayList<Event> eventsList) {
-                    ArrayList<Event> events = eventsList;
-                    eventsDbStore.addEvents(tempContext, events);
+                    listener.onSuccess(eventsList);
+                    eventsDbStore.addEvents(eventsList);
                 }
 
                 @Override
@@ -37,16 +37,23 @@ public class EventsRepository {
 
                 }
             });
+        } else if ((mRepositoryLoadHelper.isOnline()) && (events.size() != 0)) {
+            listener.onSuccess(events);
         }
     }
 
-    private boolean isOnline(Context context) {
-        ConnectivityManager cm =
-                (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
-        NetworkInfo netInfo = cm.getActiveNetworkInfo();
-        if (netInfo != null && netInfo.isConnectedOrConnecting()) {
-            return true;
-        }
-        return false;
+    public void addEvent() {
+    }
+
+    public void updateEvent() {
+    }
+
+    public void deleteEvent() {
+    }
+
+    public interface OnEventsLoadedListener {
+        void onSuccess(ArrayList<Event> eventsList);
+
+        void onfail();
     }
 }

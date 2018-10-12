@@ -23,16 +23,18 @@ import com.example.arturarzumanyan.taskmanager.R;
 import com.example.arturarzumanyan.taskmanager.data.repository.UserDataRepository;
 import com.example.arturarzumanyan.taskmanager.data.repository.events.EventsCloudStore;
 import com.example.arturarzumanyan.taskmanager.data.repository.events.EventsDbStore;
+import com.example.arturarzumanyan.taskmanager.data.repository.events.EventsRepository;
 import com.example.arturarzumanyan.taskmanager.data.repository.tasklists.TaskListsCloudStore;
 import com.example.arturarzumanyan.taskmanager.data.repository.tasklists.TaskListsDbStore;
+import com.example.arturarzumanyan.taskmanager.data.repository.tasklists.TaskListsRepository;
 import com.example.arturarzumanyan.taskmanager.data.repository.tasks.TasksCloudStore;
 import com.example.arturarzumanyan.taskmanager.data.repository.tasks.TasksDbStore;
+import com.example.arturarzumanyan.taskmanager.data.repository.tasks.TasksRepository;
 import com.example.arturarzumanyan.taskmanager.domain.Event;
 import com.example.arturarzumanyan.taskmanager.domain.Task;
 import com.example.arturarzumanyan.taskmanager.domain.TaskList;
 import com.squareup.picasso.Picasso;
 
-import java.text.ParseException;
 import java.util.ArrayList;
 
 public class IntentionActivity extends AppCompatActivity {
@@ -52,6 +54,8 @@ public class IntentionActivity extends AppCompatActivity {
     private Fragment fragment;
     private FragmentManager fragmentManager;
     private FragmentTransaction transaction;
+
+    private ArrayList<TaskList> mTaskLists;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -82,33 +86,53 @@ public class IntentionActivity extends AppCompatActivity {
 
         mNavigationView = findViewById(R.id.nav_view);
 
-        eventsDbStore = new EventsDbStore();
-        taskListsDbStore = new TaskListsDbStore();
-        tasksCloudStore = new TasksCloudStore();
-        tasksDbStore = new TasksDbStore();
-        eventsCloudStore = new EventsCloudStore();
+        //eventsDbStore = new EventsDbStore();
+        //taskListsDbStore = new TaskListsDbStore();
+        //tasksCloudStore = new TasksCloudStore();
+        //tasksDbStore = new TasksDbStore();
+        //eventsCloudStore = new EventsCloudStore();
 
-        UserDataRepository userDataRepository = new UserDataRepository();
+        //UserDataRepository userDataRepository = new UserDataRepository();
 
-        try {
-            if ((tasksDbStore.getTasksFromTaskList(this, 1).size() == 0) &&
-                    (taskListsDbStore.getTaskLists(this).size() == 0) &&
-                    (eventsDbStore.getEvents(this).size() == 0)) {
-                userDataRepository.loadUserData(this);
-            } else
+        EventsRepository eventsRepository = new EventsRepository(this);
+        eventsRepository.loadEvents(new EventsRepository.OnEventsLoadedListener() {
+            @Override
+            public void onSuccess(ArrayList<Event> eventsList) {
+
+            }
+
+            @Override
+            public void onfail() {
+
+            }
+        });
+
+        TaskListsRepository taskListsRepository = new TaskListsRepository(this);
+        taskListsRepository.loadTaskLists(new TaskListsRepository.OnTaskListsLoadedListener() {
+            @Override
+            public void onSuccess(ArrayList<TaskList> taskLists) {
+                mTaskLists = taskLists;
+            }
+
+            @Override
+            public void onfail() {
+
+            }
+        });
+
+        TasksRepository tasksRepository = new TasksRepository(this);
+
+        tasksRepository.loadTasks(mTaskLists.get(0), new TasksRepository.OnTasksLoadedListener() {
+            @Override
+            public void onSuccess(ArrayList<Task> tasks) {
                 displayMenu();
-        } catch (ParseException e) {
-            e.printStackTrace();
-        }
+            }
 
-        try {
-            ArrayList<Task> tasks = tasksDbStore.getTasksFromTaskList(this, 3);
-            ArrayList<TaskList> taskListArrayList = taskListsDbStore.getTaskLists(this);
-            ArrayList<Event> events1 = eventsDbStore.getEvents(this);
+            @Override
+            public void onfail() {
 
-        } catch (ParseException e) {
-            e.printStackTrace();
-        }
+            }
+        });
 
         drawer.closeDrawers();
 
@@ -143,7 +167,8 @@ public class IntentionActivity extends AppCompatActivity {
 
         SubMenu taskListsMenu = menu.addSubMenu("TaskLists");
 
-        ArrayList<TaskList> taskListArrayList = taskListsDbStore.getTaskLists(IntentionActivity.this);
+        taskListsDbStore = new TaskListsDbStore(this);
+        ArrayList<TaskList> taskListArrayList = taskListsDbStore.getTaskLists();
         for (int i = 0; i < taskListArrayList.size(); i++) {
             final int position = i + 1;
             taskListsMenu.add(taskListArrayList.get(i).getTitle()).setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
@@ -161,7 +186,6 @@ public class IntentionActivity extends AppCompatActivity {
             });
         }
     }
-
 
 
     public void openFragment(Fragment fragment) {
