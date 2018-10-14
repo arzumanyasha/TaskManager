@@ -21,7 +21,7 @@ import java.util.Date;
 
 public class SQLiteDbHelper extends SQLiteOpenHelper {
     private static final String DATABASE_NAME = "Tasks.db";
-    private static final int DATABASE_VERSION = 23;
+    private static final int DATABASE_VERSION = 25;
 
     private SQLiteDatabase db;
 
@@ -139,11 +139,21 @@ public class SQLiteDbHelper extends SQLiteOpenHelper {
     }
 
     public ArrayList<Event> getEvents() {
+        db = getReadableDatabase();
+        Cursor c = db.rawQuery("SELECT * FROM " + EventsTable.TABLE_NAME, null);
+        return getEventsFromCursor(c);
+    }
+
+    public ArrayList<Event> getDailyEvents(String date) {
+        db = getReadableDatabase();
+        Cursor c = db.rawQuery("SELECT * FROM " + EventsTable.TABLE_NAME +
+                " WHERE " + EventsTable.COLUMN_START_TIME + " LIKE '" + date + "%'", null);
+        return getEventsFromCursor(c);
+    }
+
+    private ArrayList<Event> getEventsFromCursor(Cursor c) {
         ArrayList<Event> eventsList = new ArrayList<>();
         try {
-            db = getReadableDatabase();
-            Cursor c = db.rawQuery("SELECT * FROM " + EventsTable.TABLE_NAME, null);
-
             if (c.moveToFirst()) {
                 do {
                     DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ");
@@ -170,10 +180,10 @@ public class SQLiteDbHelper extends SQLiteOpenHelper {
 
             c.close();
             return eventsList;
-        }
-        catch (ParseException e){
+        } catch (ParseException e) {
             return eventsList;
         }
+
     }
 
     public ArrayList<Task> getTasksFromList(int tasksListId) {

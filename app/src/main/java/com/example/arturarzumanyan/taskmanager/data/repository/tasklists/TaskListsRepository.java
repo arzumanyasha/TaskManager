@@ -37,12 +37,16 @@ public class TaskListsRepository {
                 public void onSuccess(ArrayList<TaskList> taskListArrayList) {
                     taskListsDbStore.addTaskLists(taskListArrayList);
                     ArrayList<TaskList> taskLists = taskListsDbStore.getTaskLists();
-                    listener.onSuccess(taskListsDbStore.getTaskLists());
-                    for (int i = 0; i < taskLists.size(); i++){
+                    //listener.onSuccess(taskListsDbStore.getTaskLists());
+                    for (int i = 0; i < taskLists.size(); i++) {
+                        final int position = i;
                         tasksCloudStore.getTasksFromTaskList(taskLists.get(i), new TasksCloudStore.OnTaskCompletedListener() {
                             @Override
                             public void onSuccess(ArrayList<Task> taskArrayList) {
                                 tasksDbStore.addTasks(taskArrayList);
+                                if (position == taskListsDbStore.getTaskLists().size() - 1) {
+                                    listener.onSuccess(taskListsDbStore.getTaskLists());
+                                }
                             }
 
                             @Override

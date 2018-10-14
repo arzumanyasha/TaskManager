@@ -6,7 +6,10 @@ import com.example.arturarzumanyan.taskmanager.data.db.SQLiteDbHelper;
 import com.example.arturarzumanyan.taskmanager.domain.Event;
 
 import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 
 public class EventsDbStore {
     private SQLiteDbHelper sqliteDbHelper;
@@ -22,7 +25,12 @@ public class EventsDbStore {
     }
 
     public ArrayList<Event> getDailyEvents() {
-        return null;
+        Calendar c = Calendar.getInstance();
+        Date currentDate = c.getTime();
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
+        String date = simpleDateFormat.format(currentDate);
+        sqliteDbHelper = new SQLiteDbHelper(mContext);
+        return sqliteDbHelper.getDailyEvents(date);
     }
 
     public ArrayList<Event> getWeeklyEvents() {

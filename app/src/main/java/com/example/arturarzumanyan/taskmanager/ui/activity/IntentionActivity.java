@@ -1,4 +1,4 @@
-package com.example.arturarzumanyan.taskmanager.ui;
+package com.example.arturarzumanyan.taskmanager.ui.activity;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -18,9 +18,9 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.example.arturarzumanyan.taskmanager.R;
-import com.example.arturarzumanyan.taskmanager.data.repository.UserDataRepository;
 import com.example.arturarzumanyan.taskmanager.data.repository.events.EventsCloudStore;
 import com.example.arturarzumanyan.taskmanager.data.repository.events.EventsDbStore;
 import com.example.arturarzumanyan.taskmanager.data.repository.events.EventsRepository;
@@ -33,19 +33,13 @@ import com.example.arturarzumanyan.taskmanager.data.repository.tasks.TasksReposi
 import com.example.arturarzumanyan.taskmanager.domain.Event;
 import com.example.arturarzumanyan.taskmanager.domain.Task;
 import com.example.arturarzumanyan.taskmanager.domain.TaskList;
+import com.example.arturarzumanyan.taskmanager.ui.fragment.EventsFragment;
+import com.example.arturarzumanyan.taskmanager.ui.fragment.TasksFragment;
 import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
 
 public class IntentionActivity extends AppCompatActivity {
-
-
-    private EventsDbStore eventsDbStore;
-    private TaskListsDbStore taskListsDbStore;
-    private TasksDbStore tasksDbStore;
-    private TasksCloudStore tasksCloudStore;
-    private EventsCloudStore eventsCloudStore;
-    private TaskListsCloudStore taskListsCloudStore;
 
     private NavigationView mNavigationView;
     private DrawerLayout drawer;
@@ -68,7 +62,9 @@ public class IntentionActivity extends AppCompatActivity {
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-
+                if (getTitle() == "Events") {
+                    Toast.makeText(getApplicationContext(), "Events", Toast.LENGTH_LONG).show();
+                }
             }
         });
 
@@ -85,14 +81,6 @@ public class IntentionActivity extends AppCompatActivity {
         mUserData = getIntent();
 
         mNavigationView = findViewById(R.id.nav_view);
-
-        //eventsDbStore = new EventsDbStore();
-        //taskListsDbStore = new TaskListsDbStore();
-        //tasksCloudStore = new TasksCloudStore();
-        //tasksDbStore = new TasksDbStore();
-        //eventsCloudStore = new EventsCloudStore();
-
-        //UserDataRepository userDataRepository = new UserDataRepository();
 
         EventsRepository eventsRepository = new EventsRepository(this);
         eventsRepository.loadEvents(new EventsRepository.OnEventsLoadedListener() {
@@ -112,6 +100,7 @@ public class IntentionActivity extends AppCompatActivity {
             @Override
             public void onSuccess(ArrayList<TaskList> taskLists) {
                 mTaskLists = taskLists;
+                displayMenu();
             }
 
             @Override
@@ -120,6 +109,7 @@ public class IntentionActivity extends AppCompatActivity {
             }
         });
 
+        /*
         TasksRepository tasksRepository = new TasksRepository(this);
 
         tasksRepository.loadTasks(mTaskLists.get(0), new TasksRepository.OnTasksLoadedListener() {
@@ -133,11 +123,9 @@ public class IntentionActivity extends AppCompatActivity {
 
             }
         });
-
+*/
         drawer.closeDrawers();
 
-        fragmentManager = getSupportFragmentManager();
-        transaction = fragmentManager.beginTransaction();
         Bundle bundle = new Bundle();
         bundle.putString("taskListId", "1");
         TasksFragment tasksFragment = new TasksFragment();
@@ -163,28 +151,43 @@ public class IntentionActivity extends AppCompatActivity {
 
         Menu menu = mNavigationView.getMenu();
         SubMenu calendarMenu = menu.addSubMenu("Calendars");
-        calendarMenu.add(mUserData.getStringExtra(SignInActivity.EXTRA_USER_EMAIL));
+        calendarMenu.add(mUserData.getStringExtra(SignInActivity.EXTRA_USER_EMAIL))
+                .setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
+                    @Override
+                    public boolean onMenuItemClick(MenuItem item) {
+                        EventsFragment eventsFragment = new EventsFragment();
+                        openFragment(eventsFragment);
+                        return false;
+                    }
+                });
 
-        SubMenu taskListsMenu = menu.addSubMenu("TaskLists");
-
-        taskListsDbStore = new TaskListsDbStore(this);
-        ArrayList<TaskList> taskListArrayList = taskListsDbStore.getTaskLists();
-        for (int i = 0; i < taskListArrayList.size(); i++) {
-            final int position = i + 1;
-            taskListsMenu.add(taskListArrayList.get(i).getTitle()).setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
-                @Override
-                public boolean onMenuItemClick(MenuItem item) {
-                    fragmentManager = getSupportFragmentManager();
-                    transaction = fragmentManager.beginTransaction();
-                    Bundle bundle = new Bundle();
-                    bundle.putString("taskListId", Integer.toString(position));
-                    TasksFragment tasksFragment = new TasksFragment();
-                    tasksFragment.setArguments(bundle);
-                    openFragment(tasksFragment);
-                    return false;
+        final SubMenu taskListsMenu = menu.addSubMenu("TaskLists");
+        TaskListsRepository taskListsRepository = new TaskListsRepository(this);
+        taskListsRepository.loadTaskLists(new TaskListsRepository.OnTaskListsLoadedListener() {
+            @Override
+            public void onSuccess(ArrayList<TaskList> taskLists) {
+                for (int i = 0; i < taskLists.size(); i++) {
+                    final int position = i + 1;
+                    taskListsMenu.add(taskLists.get(i).getTitle()).setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
+                        @Override
+                        public boolean onMenuItemClick(MenuItem item) {
+                            Bundle bundle = new Bundle();
+                            bundle.putString("taskListId", Integer.toString(position));
+                            TasksFragment tasksFragment = new TasksFragment();
+                            tasksFragment.setArguments(bundle);
+                            openFragment(tasksFragment);
+                            return false;
+                        }
+                    });
                 }
-            });
-        }
+            }
+
+            @Override
+            public void onfail() {
+
+            }
+        });
+
     }
 
 

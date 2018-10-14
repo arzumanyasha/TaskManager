@@ -42,6 +42,11 @@ public class EventsRepository {
         }
     }
 
+    public ArrayList<Event> getDailyEvents() {
+        eventsDbStore = new EventsDbStore(mContext);
+        return eventsDbStore.getDailyEvents();
+    }
+
     public void addEvent() {
     }
 

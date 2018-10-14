@@ -1,4 +1,4 @@
-package com.example.arturarzumanyan.taskmanager.ui;
+package com.example.arturarzumanyan.taskmanager.ui.adapter;
 
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -13,7 +13,7 @@ import com.example.arturarzumanyan.taskmanager.domain.Task;
 
 import java.util.List;
 
-public class TasksAdapter extends RecyclerView.Adapter<TasksAdapter.ViewHolder> implements View.OnClickListener{
+public class TasksAdapter extends RecyclerView.Adapter<TasksAdapter.ViewHolder> implements View.OnClickListener {
     private List<Task> dataset;
     private OnItemClickListener mListener;
 
@@ -41,9 +41,9 @@ public class TasksAdapter extends RecyclerView.Adapter<TasksAdapter.ViewHolder> 
 
     @Override
     public void onClick(View v) {
-        if(mListener != null){
-            int position = (int)v.getTag();
-            if(position != RecyclerView.NO_POSITION){
+        if (mListener != null) {
+            int position = (int) v.getTag();
+            if (position != RecyclerView.NO_POSITION) {
                 Task task = dataset.get(position);
                 mListener.onItemDelete(task);
                 dataset.remove(task);
@@ -79,7 +79,7 @@ public class TasksAdapter extends RecyclerView.Adapter<TasksAdapter.ViewHolder> 
         }
     }
 
-    public interface OnItemClickListener{
+    public interface OnItemClickListener {
         void onItemDelete(Task task);
     }
 }

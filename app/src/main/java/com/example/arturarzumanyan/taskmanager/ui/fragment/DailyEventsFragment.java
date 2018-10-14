@@ -1,4 +1,4 @@
-package com.example.arturarzumanyan.taskmanager.ui;
+package com.example.arturarzumanyan.taskmanager.ui.fragment;
 
 import android.content.Context;
 import android.net.Uri;
@@ -12,33 +12,29 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.example.arturarzumanyan.taskmanager.R;
-import com.example.arturarzumanyan.taskmanager.data.repository.tasks.TasksDbStore;
-import com.example.arturarzumanyan.taskmanager.domain.Task;
+import com.example.arturarzumanyan.taskmanager.data.repository.events.EventsRepository;
+import com.example.arturarzumanyan.taskmanager.domain.Event;
+import com.example.arturarzumanyan.taskmanager.ui.adapter.EventsAdapter;
 
 import java.util.ArrayList;
 
-public class TasksFragment extends Fragment {
-    // TODO: Rename parameter arguments, choose names that match
-    // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
+public class DailyEventsFragment extends Fragment {
     private static final String ARG_PARAM1 = "param1";
     private static final String ARG_PARAM2 = "param2";
 
-    private RecyclerView tasksRecyclerView;
-    private ArrayList<Task> tasks;
+    private RecyclerView eventsRecyclerView;
 
-    // TODO: Rename and change types of parameters
     private String mParam1;
     private String mParam2;
 
     private OnFragmentInteractionListener mListener;
 
-    public TasksFragment() {
-        // Required empty public constructor
+    public DailyEventsFragment() {
+
     }
 
-    // TODO: Rename and change types and number of parameters
-    public static TasksFragment newInstance(String param1, String param2) {
-        TasksFragment fragment = new TasksFragment();
+    public static DailyEventsFragment newInstance(String param1, String param2) {
+        DailyEventsFragment fragment = new DailyEventsFragment();
         Bundle args = new Bundle();
         args.putString(ARG_PARAM1, param1);
         args.putString(ARG_PARAM2, param2);
@@ -50,41 +46,37 @@ public class TasksFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
-            mParam1 = getArguments().getString("taskListId");
-            //mParam2 = getArguments().getString(ARG_PARAM2);
+            mParam1 = getArguments().getString(ARG_PARAM1);
+            mParam2 = getArguments().getString(ARG_PARAM2);
         }
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
-        View view = inflater.inflate(R.layout.fragment_tasks, container, false);
-        tasksRecyclerView = view.findViewById(R.id.recyclerView);
+        View view = inflater.inflate(R.layout.fragment_daily_events, container, false);
+        eventsRecyclerView = view.findViewById(R.id.recyclerViewEvents);
         return view;
     }
 
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
+        EventsRepository eventsRepository = new EventsRepository(getActivity());
+        ArrayList<Event> events = eventsRepository.getDailyEvents();
 
         LinearLayoutManager layoutManager = new LinearLayoutManager(getActivity());
-        tasksRecyclerView.setLayoutManager(layoutManager);
+        eventsRecyclerView.setLayoutManager(layoutManager);
 
-        TasksDbStore tasksDbStore = new TasksDbStore(getActivity());
-
-        tasks = tasksDbStore.getTasksFromTaskList(Integer.parseInt(mParam1));
-
-        TasksAdapter tasksAdapter = new TasksAdapter(tasks, new TasksAdapter.OnItemClickListener() {
+        EventsAdapter eventsAdapter = new EventsAdapter(getActivity(), events, new EventsAdapter.OnItemClickListener() {
             @Override
-            public void onItemDelete(Task task) {
+            public void onItemDelete(Event event) {
 
             }
         });
-        tasksRecyclerView.setAdapter(tasksAdapter);
+        eventsRecyclerView.setAdapter(eventsAdapter);
     }
 
-    // TODO: Rename method, update argument and hook method into UI event
     public void onButtonPressed(Uri uri) {
         if (mListener != null) {
             mListener.onFragmentInteraction(uri);
@@ -108,7 +100,6 @@ public class TasksFragment extends Fragment {
     }
 
     public interface OnFragmentInteractionListener {
-        // TODO: Update argument type and name
         void onFragmentInteraction(Uri uri);
     }
 }
