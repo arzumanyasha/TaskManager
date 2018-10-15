@@ -157,32 +157,20 @@ public class IntentionActivity extends AppCompatActivity {
                 });
 
         final SubMenu taskListsMenu = menu.addSubMenu("TaskLists");
-        TaskListsRepository taskListsRepository = new TaskListsRepository(this);
-        taskListsRepository.loadTaskLists(new TaskListsRepository.OnTaskListsLoadedListener() {
-            @Override
-            public void onSuccess(ArrayList<TaskList> taskLists) {
-                for (int i = 0; i < taskLists.size(); i++) {
-                    final int position = i + 1;
-                    taskListsMenu.add(taskLists.get(i).getTitle()).setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
-                        @Override
-                        public boolean onMenuItemClick(MenuItem item) {
-                            Bundle bundle = new Bundle();
-                            bundle.putString("taskListId", Integer.toString(position));
-                            TasksFragment tasksFragment = new TasksFragment();
-                            tasksFragment.setArguments(bundle);
-                            openFragment(tasksFragment);
-                            return false;
-                        }
-                    });
+        for (int i = 0; i < mTaskLists.size(); i++) {
+            final int position = i + 1;
+            taskListsMenu.add(mTaskLists.get(i).getTitle()).setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
+                @Override
+                public boolean onMenuItemClick(MenuItem item) {
+                    Bundle bundle = new Bundle();
+                    bundle.putString("taskListId", Integer.toString(position));
+                    TasksFragment tasksFragment = new TasksFragment();
+                    tasksFragment.setArguments(bundle);
+                    openFragment(tasksFragment);
+                    return false;
                 }
-            }
-
-            @Override
-            public void onfail() {
-
-            }
-        });
-
+            });
+        }
     }
 
     private void notifyDataLoaded(){
