@@ -26,8 +26,7 @@ public class EventsDbStore {
     }
 
     public ArrayList<Event> getDailyEvents() {
-        DateUtils dateUtils = new DateUtils();
-        String date = dateUtils.getCurrentTime();
+        String date = DateUtils.getCurrentTime();
         mSqliteDbHelper = new SQLiteDbHelper(mContext);
         return mSqliteDbHelper.getDailyEvents(date);
     }

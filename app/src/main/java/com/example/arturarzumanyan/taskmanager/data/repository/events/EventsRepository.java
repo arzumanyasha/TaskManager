@@ -15,13 +15,12 @@ public class EventsRepository {
 
     public EventsRepository(Context context) {
         this.mContext = context;
-    }
-
-    public void loadEvents(final OnEventsLoadedListener listener) {
         mEventsCloudStore = new EventsCloudStore(mContext);
         mEventsDbStore = new EventsDbStore(mContext);
         mRepositoryLoadHelper = new RepositoryLoadHelper(mContext);
+    }
 
+    public void loadEvents(final OnEventsLoadedListener listener) {
         ArrayList<Event> events = mEventsDbStore.getEvents();
 
         if ((mRepositoryLoadHelper.isOnline()) && (events.size() == 0)) {
@@ -43,7 +42,6 @@ public class EventsRepository {
     }
 
     public ArrayList<Event> getDailyEvents() {
-        mEventsDbStore = new EventsDbStore(mContext);
         return mEventsDbStore.getDailyEvents();
     }
 

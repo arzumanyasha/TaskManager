@@ -52,13 +52,12 @@ public class EventsParser {
             colorId = 9;
         }
 
-        DateUtils dateUtils = new DateUtils();
         JSONObject startTimeJsonObject = jsonObject.getJSONObject(START_KEY);
         JSONObject endTimeJsonObject = jsonObject.getJSONObject(END_KEY);
 
-        Date startDate = dateUtils.getEventDateFromString(startTimeJsonObject.getString(DATETIME_KEY));
+        Date startDate = DateUtils.getEventDateFromString(startTimeJsonObject.getString(DATETIME_KEY));
 
-        Date endDate = dateUtils.getEventDateFromString(endTimeJsonObject.getString(DATETIME_KEY));
+        Date endDate = DateUtils.getEventDateFromString(endTimeJsonObject.getString(DATETIME_KEY));
 
         Boolean isNotify;
         JSONObject reminderJsonObject = jsonObject.getJSONObject(REMINDERS_KEY);

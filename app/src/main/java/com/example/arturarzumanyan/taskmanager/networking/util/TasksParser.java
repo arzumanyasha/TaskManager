@@ -53,8 +53,7 @@ public class TasksParser {
         Task task;
 
         if (!jsonObject.isNull(DUE_KEY)) {
-            DateUtils dateUtils = new DateUtils();
-            Date date = dateUtils.getTaskDateFromString(jsonObject.getString(DUE_KEY));
+            Date date = DateUtils.getTaskDateFromString(jsonObject.getString(DUE_KEY));
 
             task = new Task(jsonObject.getString(ID_KEY),
                     jsonObject.getString(TITLE_KEY),

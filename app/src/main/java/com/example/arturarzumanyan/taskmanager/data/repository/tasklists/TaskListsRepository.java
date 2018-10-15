@@ -20,16 +20,15 @@ public class TaskListsRepository {
 
     public TaskListsRepository(Context context) {
         this.mContext = context;
-    }
-
-    public void loadTaskLists(final OnTaskListsLoadedListener listener) {
         mTaskListsCloudStore = new TaskListsCloudStore(mContext);
         mTaskListsDbStore = new TaskListsDbStore(mContext);
         mTasksCloudStore = new TasksCloudStore(mContext);
         mTasksDbStore = new TasksDbStore(mContext);
-
-        ArrayList<TaskList> taskLists = mTaskListsDbStore.getTaskLists();
         mRepositoryLoadHelper = new RepositoryLoadHelper(mContext);
+    }
+
+    public void loadTaskLists(final OnTaskListsLoadedListener listener) {
+        ArrayList<TaskList> taskLists = mTaskListsDbStore.getTaskLists();
 
         if ((mRepositoryLoadHelper.isOnline()) && (taskLists.size() == 0)) {
             mTaskListsCloudStore.getTaskLists(new TaskListsCloudStore.OnTaskCompletedListener() {

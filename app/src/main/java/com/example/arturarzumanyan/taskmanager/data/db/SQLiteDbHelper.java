@@ -24,8 +24,7 @@ public class SQLiteDbHelper extends SQLiteOpenHelper {
     private static final String DATABASE_NAME = "Tasks.db";
     private static final int DATABASE_VERSION = 26;
 
-    private SQLiteDatabase db;
-    private DateUtils dateUtils;
+    private SQLiteDatabase mDb;
 
     public SQLiteDbHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
@@ -33,7 +32,7 @@ public class SQLiteDbHelper extends SQLiteOpenHelper {
 
     @Override
     public void onCreate(SQLiteDatabase db) {
-        this.db = db;
+        this.mDb = db;
 
         final String SQL_CREATE_EVENTS_TABLE = "CREATE TABLE " +
                 EventsContract.EventsTable.TABLE_NAME + " ( " +
@@ -79,8 +78,7 @@ public class SQLiteDbHelper extends SQLiteOpenHelper {
     }
 
     public void insertEvents(ArrayList<Event> eventsList) {
-        db = getWritableDatabase();
-        dateUtils = new DateUtils();
+        mDb = getWritableDatabase();
         for (int i = 0; i < eventsList.size(); i++) {
             ContentValues cv = new ContentValues();
 
@@ -89,9 +87,9 @@ public class SQLiteDbHelper extends SQLiteOpenHelper {
             cv.put(EventsTable.COLUMN_DESCRIPTION, eventsList.get(i).getDescription());
             cv.put(EventsTable.COLUMN_COLOR_ID, eventsList.get(i).getColorId());
 
-            cv.put(EventsTable.COLUMN_START_TIME, dateUtils.formatEventTime(eventsList.get(i).getStartTime()));
+            cv.put(EventsTable.COLUMN_START_TIME, DateUtils.formatEventTime(eventsList.get(i).getStartTime()));
 
-            cv.put(EventsTable.COLUMN_END_TIME, dateUtils.formatEventTime(eventsList.get(i).getEndTime()));
+            cv.put(EventsTable.COLUMN_END_TIME, DateUtils.formatEventTime(eventsList.get(i).getEndTime()));
 
             if (eventsList.get(i).isNotify()) {
                 cv.put(EventsTable.COLUMN_REMINDER, 1);
@@ -99,25 +97,24 @@ public class SQLiteDbHelper extends SQLiteOpenHelper {
                 cv.put(EventsTable.COLUMN_REMINDER, 0);
             }
 
-            db.insert(EventsTable.TABLE_NAME, null, cv);
+            mDb.insert(EventsTable.TABLE_NAME, null, cv);
         }
     }
 
     public void insertTaskLists(ArrayList<TaskList> taskListArrayList) {
-        db = getWritableDatabase();
+        mDb = getWritableDatabase();
         for (int i = 0; i < taskListArrayList.size(); i++) {
             ContentValues cv = new ContentValues();
 
             cv.put(TaskListTable.COLUMN_LIST_ID, taskListArrayList.get(i).getTaskListId());
             cv.put(TaskListTable.COLUMN_TITLE, taskListArrayList.get(i).getTitle());
 
-            db.insert(TaskListTable.TABLE_NAME, null, cv);
+            mDb.insert(TaskListTable.TABLE_NAME, null, cv);
         }
     }
 
     public void insertTasks(ArrayList<Task> tasksArrayList) {
-        db = getWritableDatabase();
-        dateUtils = new DateUtils();
+        mDb = getWritableDatabase();
         for (int i = 0; i < tasksArrayList.size(); i++) {
             ContentValues cv = new ContentValues();
 
@@ -132,35 +129,34 @@ public class SQLiteDbHelper extends SQLiteOpenHelper {
             }
 
             if (tasksArrayList.get(i).getDate() != null) {
-                cv.put(TasksTable.COLUMN_DUE, dateUtils.formatTaskDate(tasksArrayList.get(i).getDate()));
+                cv.put(TasksTable.COLUMN_DUE, DateUtils.formatTaskDate(tasksArrayList.get(i).getDate()));
             }
             cv.put(TasksTable.COLUMN_LIST_ID, tasksArrayList.get(i).getListId());
 
-            db.insert(TasksTable.TABLE_NAME, null, cv);
+            mDb.insert(TasksTable.TABLE_NAME, null, cv);
         }
     }
 
     public ArrayList<Event> getEvents() {
-        db = getReadableDatabase();
-        Cursor c = db.rawQuery("SELECT * FROM " + EventsTable.TABLE_NAME, null);
+        mDb = getReadableDatabase();
+        Cursor c = mDb.rawQuery("SELECT * FROM " + EventsTable.TABLE_NAME, null);
         return getEventsFromCursor(c);
     }
 
     public ArrayList<Event> getDailyEvents(String date) {
-        db = getReadableDatabase();
-        Cursor c = db.rawQuery("SELECT * FROM " + EventsTable.TABLE_NAME +
+        mDb = getReadableDatabase();
+        Cursor c = mDb.rawQuery("SELECT * FROM " + EventsTable.TABLE_NAME +
                 " WHERE " + EventsTable.COLUMN_START_TIME + " LIKE '" + date + "%'", null);
         return getEventsFromCursor(c);
     }
 
     private ArrayList<Event> getEventsFromCursor(Cursor c) {
         ArrayList<Event> eventsList = new ArrayList<>();
-        dateUtils = new DateUtils();
         try {
             if (c.moveToFirst()) {
                 do {
-                    Date startDate = dateUtils.getEventDateFromString(c.getString(c.getColumnIndex(EventsTable.COLUMN_START_TIME)));
-                    Date endDate = dateUtils.getEventDateFromString(c.getString(c.getColumnIndex(EventsTable.COLUMN_END_TIME)));
+                    Date startDate = DateUtils.getEventDateFromString(c.getString(c.getColumnIndex(EventsTable.COLUMN_START_TIME)));
+                    Date endDate = DateUtils.getEventDateFromString(c.getString(c.getColumnIndex(EventsTable.COLUMN_END_TIME)));
                     Boolean isNotify;
                     if (c.getInt(c.getColumnIndex(EventsTable.COLUMN_REMINDER)) == 1) {
                         isNotify = true;
@@ -190,12 +186,11 @@ public class SQLiteDbHelper extends SQLiteOpenHelper {
 
     public ArrayList<Task> getTasksFromList(int tasksListId) {
         ArrayList<Task> tasksList = new ArrayList<>();
-        dateUtils = new DateUtils();
         try {
-            db = getReadableDatabase();
+            mDb = getReadableDatabase();
 
             String[] selectionArgs = new String[]{Integer.toString(tasksListId)};
-            Cursor c = db.rawQuery("SELECT * FROM " + TasksTable.TABLE_NAME +
+            Cursor c = mDb.rawQuery("SELECT * FROM " + TasksTable.TABLE_NAME +
                     " WHERE " + TasksTable.COLUMN_LIST_ID + " = ?", selectionArgs);
 
             if (c.moveToFirst()) {
@@ -209,7 +204,7 @@ public class SQLiteDbHelper extends SQLiteOpenHelper {
                     Task task;
 
                     if (c.getString(c.getColumnIndex(TasksTable.COLUMN_DUE)) != null) {
-                        Date date = dateUtils.getTaskDateFromString(c.getString(c.getColumnIndex(TasksTable.COLUMN_DUE)));
+                        Date date = DateUtils.getTaskDateFromString(c.getString(c.getColumnIndex(TasksTable.COLUMN_DUE)));
 
                         task = new Task(c.getString(c.getColumnIndex(TasksTable.COLUMN_TASK_ID)),
                                 c.getString(c.getColumnIndex(TasksTable.COLUMN_TITLE)),
@@ -238,9 +233,9 @@ public class SQLiteDbHelper extends SQLiteOpenHelper {
 
     public ArrayList<TaskList> getTaskLists() {
         ArrayList<TaskList> taskListArrayList = new ArrayList<>();
-        db = getReadableDatabase();
+        mDb = getReadableDatabase();
 
-        Cursor c = db.rawQuery("SELECT * FROM " + TaskListTable.TABLE_NAME, null);
+        Cursor c = mDb.rawQuery("SELECT * FROM " + TaskListTable.TABLE_NAME, null);
 
         if (c.moveToFirst()) {
             do {

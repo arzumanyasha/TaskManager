@@ -21,13 +21,12 @@ public class TasksRepository {
 
     public TasksRepository(Context context) {
         this.mContext = context;
-    }
-
-    public void loadTasks(TaskList taskList, final OnTasksLoadedListener listener) {
         mTasksCloudStore = new TasksCloudStore(mContext);
         mTasksDbStore = new TasksDbStore(mContext);
         mRepositoryLoadHelper = new RepositoryLoadHelper(mContext);
+    }
 
+    public void loadTasks(TaskList taskList, final OnTasksLoadedListener listener) {
         ArrayList<Task> tasks = mTasksDbStore.getTasksFromTaskList(taskList.getId());
 
         if ((mRepositoryLoadHelper.isOnline()) && (tasks.size() == 0)) {
