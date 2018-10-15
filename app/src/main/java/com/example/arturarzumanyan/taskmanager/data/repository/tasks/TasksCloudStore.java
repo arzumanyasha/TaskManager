@@ -22,12 +22,12 @@ public class TasksCloudStore {
 
     public TasksCloudStore(Context context) {
         this.mContext = context;
+        mRepositoryLoadHelper = new RepositoryLoadHelper(mContext);
     }
 
     public void getTasksFromTaskList(TaskList taskList, final OnTaskCompletedListener listener) {
         String url = BASE_TASKS_URL + taskList.getTaskListId() + "/tasks?showHidden=true";
         final int taskListId = taskList.getId();
-        mRepositoryLoadHelper = new RepositoryLoadHelper(mContext);
         mUserTasksAsyncTaskList.add(new UserDataAsyncTask());
         int position = mUserTasksAsyncTaskList.size() - 1;
         mRepositoryLoadHelper.requestUserData(mUserTasksAsyncTaskList.get(position), url);

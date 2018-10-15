@@ -24,15 +24,14 @@ public class EventsCloudStore {
 
     public EventsCloudStore(Context context) {
         this.mContext = context;
+        mEventsList = new ArrayList<>();
+        mUserRefreshEventsAsyncTask = new UserDataAsyncTask();
+        mUserEventsAsyncTask = new UserDataAsyncTask();
+        mRepositoryLoadHelper = new RepositoryLoadHelper(mContext);
     }
 
     public void getEvents(final OnTaskCompletedListener listener) {
         FirebaseWebService firebaseWebService = new FirebaseWebService();
-        mEventsList = new ArrayList<>();
-        mUserRefreshEventsAsyncTask = new UserDataAsyncTask();
-        mUserEventsAsyncTask = new UserDataAsyncTask();
-
-        mRepositoryLoadHelper = new RepositoryLoadHelper(mContext);
 
         final String eventsUrl = BASE_EVENTS_URL + firebaseWebService.getCurrentUser().getEmail() + "/events";
         mRepositoryLoadHelper.requestUserData(mUserEventsAsyncTask, eventsUrl);

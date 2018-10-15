@@ -18,10 +18,10 @@ public class TaskListsCloudStore {
 
     public TaskListsCloudStore(Context context) {
         this.mContext = context;
+        mUserTaskListsAsyncTask = new UserDataAsyncTask();
     }
 
     public void getTaskLists(final OnTaskCompletedListener listener) {
-        mUserTaskListsAsyncTask = new UserDataAsyncTask();
         RepositoryLoadHelper repositoryLoadHelper = new RepositoryLoadHelper(mContext);
         repositoryLoadHelper.requestUserData(mUserTaskListsAsyncTask, BASE_TASK_LISTS_URL);
         mUserTaskListsAsyncTask.setDataInfoLoadingListener(new UserDataAsyncTask.UserDataLoadingListener() {
