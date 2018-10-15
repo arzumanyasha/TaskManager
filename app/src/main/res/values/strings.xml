@@ -8,9 +8,8 @@
     <string name="nav_header_desc">Navigation header</string>
     <string name="logged_in_message">Logged in</string>
     <string name="action_settings">action</string>
+    <string name="data_loaded_message">Data loaded</string>
     <string name="network_error">Check network connection</string>
-
-    <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="TimeErrorMsg">End time might be bigger than start time</string>
 </resources>

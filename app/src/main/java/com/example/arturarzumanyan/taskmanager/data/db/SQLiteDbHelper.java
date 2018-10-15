@@ -21,7 +21,7 @@ import java.util.Date;
 
 public class SQLiteDbHelper extends SQLiteOpenHelper {
     private static final String DATABASE_NAME = "Tasks.db";
-    private static final int DATABASE_VERSION = 25;
+    private static final int DATABASE_VERSION = 26;
 
     private SQLiteDatabase db;
 

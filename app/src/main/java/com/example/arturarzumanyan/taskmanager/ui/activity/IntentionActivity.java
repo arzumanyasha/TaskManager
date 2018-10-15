@@ -4,8 +4,9 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
+import android.support.v4.app.NotificationCompat;
+import android.support.v4.app.NotificationManagerCompat;
 import android.view.SubMenu;
 import android.view.View;
 import android.support.design.widget.NavigationView;
@@ -21,27 +22,22 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.arturarzumanyan.taskmanager.R;
-import com.example.arturarzumanyan.taskmanager.data.repository.events.EventsCloudStore;
-import com.example.arturarzumanyan.taskmanager.data.repository.events.EventsDbStore;
 import com.example.arturarzumanyan.taskmanager.data.repository.events.EventsRepository;
-import com.example.arturarzumanyan.taskmanager.data.repository.tasklists.TaskListsCloudStore;
-import com.example.arturarzumanyan.taskmanager.data.repository.tasklists.TaskListsDbStore;
 import com.example.arturarzumanyan.taskmanager.data.repository.tasklists.TaskListsRepository;
-import com.example.arturarzumanyan.taskmanager.data.repository.tasks.TasksCloudStore;
-import com.example.arturarzumanyan.taskmanager.data.repository.tasks.TasksDbStore;
-import com.example.arturarzumanyan.taskmanager.data.repository.tasks.TasksRepository;
 import com.example.arturarzumanyan.taskmanager.domain.Event;
-import com.example.arturarzumanyan.taskmanager.domain.Task;
 import com.example.arturarzumanyan.taskmanager.domain.TaskList;
 import com.example.arturarzumanyan.taskmanager.ui.dialog.EventsDialog;
 import com.example.arturarzumanyan.taskmanager.ui.fragment.EventsFragment;
 import com.example.arturarzumanyan.taskmanager.ui.fragment.TasksFragment;
 import com.squareup.picasso.Picasso;
 
+import java.net.NoRouteToHostException;
 import java.util.ArrayList;
 
 public class IntentionActivity extends AppCompatActivity {
 
+    private final String CHANNEL_ID = "notification_channel";
+    private final int NOTIFICATION_ID = 001;
     private NavigationView mNavigationView;
     private DrawerLayout drawer;
     private Intent mUserData;
@@ -99,6 +95,7 @@ public class IntentionActivity extends AppCompatActivity {
             public void onSuccess(ArrayList<TaskList> taskLists) {
                 mTaskLists = taskLists;
                 displayMenu();
+                notifyDataLoaded();
             }
 
             @Override
@@ -186,6 +183,17 @@ public class IntentionActivity extends AppCompatActivity {
             }
         });
 
+    }
+
+    private void notifyDataLoaded(){
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(this, CHANNEL_ID);
+        builder.setSmallIcon(R.drawable.ic_event_black_24dp);
+        builder.setContentTitle(getString(R.string.app_name));
+        builder.setContentText(getString(R.string.data_loaded_message));
+        builder.setPriority(NotificationCompat.PRIORITY_DEFAULT);
+
+        NotificationManagerCompat notificationManagerCompat = NotificationManagerCompat.from(this);
+        notificationManagerCompat.notify(NOTIFICATION_ID, builder.build());
     }
 
     private void openEventsDialog(){
