@@ -33,6 +33,7 @@ import com.example.arturarzumanyan.taskmanager.data.repository.tasks.TasksReposi
 import com.example.arturarzumanyan.taskmanager.domain.Event;
 import com.example.arturarzumanyan.taskmanager.domain.Task;
 import com.example.arturarzumanyan.taskmanager.domain.TaskList;
+import com.example.arturarzumanyan.taskmanager.ui.dialog.EventsDialog;
 import com.example.arturarzumanyan.taskmanager.ui.fragment.EventsFragment;
 import com.example.arturarzumanyan.taskmanager.ui.fragment.TasksFragment;
 import com.squareup.picasso.Picasso;
@@ -44,10 +45,6 @@ public class IntentionActivity extends AppCompatActivity {
     private NavigationView mNavigationView;
     private DrawerLayout drawer;
     private Intent mUserData;
-
-    private Fragment fragment;
-    private FragmentManager fragmentManager;
-    private FragmentTransaction transaction;
 
     private ArrayList<TaskList> mTaskLists;
 
@@ -64,6 +61,7 @@ public class IntentionActivity extends AppCompatActivity {
             public void onClick(View view) {
                 if (getTitle() == "Events") {
                     Toast.makeText(getApplicationContext(), "Events", Toast.LENGTH_LONG).show();
+                    openEventsDialog();
                 }
             }
         });
@@ -190,8 +188,12 @@ public class IntentionActivity extends AppCompatActivity {
 
     }
 
+    private void openEventsDialog(){
+        EventsDialog eventsDialog = new EventsDialog();
+        eventsDialog.show(getSupportFragmentManager(), "Events");
+    }
 
-    public void openFragment(Fragment fragment) {
+    private void openFragment(Fragment fragment) {
         FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
         transaction.replace(R.id.main_container, fragment);
         transaction.addToBackStack(null);
