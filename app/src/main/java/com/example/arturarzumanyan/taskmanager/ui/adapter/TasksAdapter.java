@@ -14,11 +14,11 @@ import com.example.arturarzumanyan.taskmanager.domain.Task;
 import java.util.List;
 
 public class TasksAdapter extends RecyclerView.Adapter<TasksAdapter.ViewHolder> implements View.OnClickListener {
-    private List<Task> dataset;
+    private List<Task> mDataset;
     private OnItemClickListener mListener;
 
     public TasksAdapter(List<Task> dataset, OnItemClickListener onItemClickListener) {
-        this.dataset = dataset;
+        this.mDataset = dataset;
         this.mListener = onItemClickListener;
     }
 
@@ -30,7 +30,7 @@ public class TasksAdapter extends RecyclerView.Adapter<TasksAdapter.ViewHolder> 
 
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
-        Task task = dataset.get(position);
+        Task task = mDataset.get(position);
         holder.taskName.setText(task.getName());
         holder.taskDescription.setText(task.getDescription().replaceAll("[\n]", ""));
 
@@ -44,22 +44,22 @@ public class TasksAdapter extends RecyclerView.Adapter<TasksAdapter.ViewHolder> 
         if (mListener != null) {
             int position = (int) v.getTag();
             if (position != RecyclerView.NO_POSITION) {
-                Task task = dataset.get(position);
+                Task task = mDataset.get(position);
                 mListener.onItemDelete(task);
-                dataset.remove(task);
+                mDataset.remove(task);
                 notifyItemRemoved(position);
-                notifyItemRangeChanged(position, dataset.size());
+                notifyItemRangeChanged(position, mDataset.size());
             }
         }
     }
 
     @Override
     public int getItemCount() {
-        return dataset.size();
+        return mDataset.size();
     }
 
     public void updateList(List<Task> updatedList) {
-        dataset = updatedList;
+        mDataset = updatedList;
         notifyDataSetChanged();
     }
 

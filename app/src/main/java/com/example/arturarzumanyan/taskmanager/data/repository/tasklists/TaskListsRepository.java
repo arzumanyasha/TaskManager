@@ -11,10 +11,10 @@ import com.example.arturarzumanyan.taskmanager.domain.TaskList;
 import java.util.ArrayList;
 
 public class TaskListsRepository {
-    private TaskListsCloudStore taskListsCloudStore;
-    private TaskListsDbStore taskListsDbStore;
-    private TasksDbStore tasksDbStore;
-    private TasksCloudStore tasksCloudStore;
+    private TaskListsCloudStore mTaskListsCloudStore;
+    private TaskListsDbStore mTaskListsDbStore;
+    private TasksDbStore mTasksDbStore;
+    private TasksCloudStore mTasksCloudStore;
     private RepositoryLoadHelper mRepositoryLoadHelper;
     private Context mContext;
 
@@ -23,29 +23,29 @@ public class TaskListsRepository {
     }
 
     public void loadTaskLists(final OnTaskListsLoadedListener listener) {
-        taskListsCloudStore = new TaskListsCloudStore(mContext);
-        taskListsDbStore = new TaskListsDbStore(mContext);
-        tasksCloudStore = new TasksCloudStore(mContext);
-        tasksDbStore = new TasksDbStore(mContext);
+        mTaskListsCloudStore = new TaskListsCloudStore(mContext);
+        mTaskListsDbStore = new TaskListsDbStore(mContext);
+        mTasksCloudStore = new TasksCloudStore(mContext);
+        mTasksDbStore = new TasksDbStore(mContext);
 
-        ArrayList<TaskList> taskLists = taskListsDbStore.getTaskLists();
+        ArrayList<TaskList> taskLists = mTaskListsDbStore.getTaskLists();
         mRepositoryLoadHelper = new RepositoryLoadHelper(mContext);
 
         if ((mRepositoryLoadHelper.isOnline()) && (taskLists.size() == 0)) {
-            taskListsCloudStore.getTaskLists(new TaskListsCloudStore.OnTaskCompletedListener() {
+            mTaskListsCloudStore.getTaskLists(new TaskListsCloudStore.OnTaskCompletedListener() {
                 @Override
                 public void onSuccess(ArrayList<TaskList> taskListArrayList) {
-                    taskListsDbStore.addTaskLists(taskListArrayList);
-                    ArrayList<TaskList> taskLists = taskListsDbStore.getTaskLists();
+                    mTaskListsDbStore.addTaskLists(taskListArrayList);
+                    ArrayList<TaskList> taskLists = mTaskListsDbStore.getTaskLists();
                     //listener.onSuccess(taskListsDbStore.getTaskLists());
                     for (int i = 0; i < taskLists.size(); i++) {
                         final int position = i;
-                        tasksCloudStore.getTasksFromTaskList(taskLists.get(i), new TasksCloudStore.OnTaskCompletedListener() {
+                        mTasksCloudStore.getTasksFromTaskList(taskLists.get(i), new TasksCloudStore.OnTaskCompletedListener() {
                             @Override
                             public void onSuccess(ArrayList<Task> taskArrayList) {
-                                tasksDbStore.addTasks(taskArrayList);
-                                if (position == taskListsDbStore.getTaskLists().size() - 1) {
-                                    listener.onSuccess(taskListsDbStore.getTaskLists());
+                                mTasksDbStore.addTasks(taskArrayList);
+                                if (position == mTaskListsDbStore.getTaskLists().size() - 1) {
+                                    listener.onSuccess(mTaskListsDbStore.getTaskLists());
                                 }
                             }
 

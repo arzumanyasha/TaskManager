@@ -21,9 +21,10 @@ import java.util.ArrayList;
 public class TasksFragment extends Fragment {
     private static final String ARG_PARAM1 = "param1";
     private static final String ARG_PARAM2 = "param2";
+    public static final String TASK_LIST_ID_KEY = "taskListId";
 
-    private RecyclerView tasksRecyclerView;
-    private ArrayList<Task> tasks;
+    private RecyclerView mTasksRecyclerView;
+    private ArrayList<Task> mTasks;
 
     private String mParam1;
     private String mParam2;
@@ -46,7 +47,7 @@ public class TasksFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
-            mParam1 = getArguments().getString("taskListId");
+            mParam1 = getArguments().getString(TASK_LIST_ID_KEY);
             //mParam2 = getArguments().getString(ARG_PARAM2);
         }
     }
@@ -55,7 +56,7 @@ public class TasksFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_tasks, container, false);
-        tasksRecyclerView = view.findViewById(R.id.recyclerViewTasks);
+        mTasksRecyclerView = view.findViewById(R.id.recyclerViewTasks);
         return view;
     }
 
@@ -64,19 +65,19 @@ public class TasksFragment extends Fragment {
         super.onActivityCreated(savedInstanceState);
 
         LinearLayoutManager layoutManager = new LinearLayoutManager(getActivity());
-        tasksRecyclerView.setLayoutManager(layoutManager);
+        mTasksRecyclerView.setLayoutManager(layoutManager);
 
         TasksDbStore tasksDbStore = new TasksDbStore(getActivity());
 
-        tasks = tasksDbStore.getTasksFromTaskList(Integer.parseInt(mParam1));
+        mTasks = tasksDbStore.getTasksFromTaskList(Integer.parseInt(mParam1));
 
-        TasksAdapter tasksAdapter = new TasksAdapter(tasks, new TasksAdapter.OnItemClickListener() {
+        TasksAdapter tasksAdapter = new TasksAdapter(mTasks, new TasksAdapter.OnItemClickListener() {
             @Override
             public void onItemDelete(Task task) {
 
             }
         });
-        tasksRecyclerView.setAdapter(tasksAdapter);
+        mTasksRecyclerView.setAdapter(tasksAdapter);
     }
 
     public void onButtonPressed(Uri uri) {
@@ -90,8 +91,6 @@ public class TasksFragment extends Fragment {
         super.onAttach(context);
         if (context instanceof OnFragmentInteractionListener) {
             mListener = (OnFragmentInteractionListener) context;
-        } else {
-
         }
     }
 

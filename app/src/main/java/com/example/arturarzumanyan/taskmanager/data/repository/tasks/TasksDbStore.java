@@ -9,7 +9,7 @@ import java.text.ParseException;
 import java.util.ArrayList;
 
 public class TasksDbStore {
-    private SQLiteDbHelper sqliteDbHelper;
+    private SQLiteDbHelper mSqliteDbHelper;
     private Context mContext;
 
     public TasksDbStore(Context context) {
@@ -17,13 +17,13 @@ public class TasksDbStore {
     }
 
     public ArrayList<Task> getTasksFromTaskList(int taskListId) {
-        sqliteDbHelper = new SQLiteDbHelper(mContext);
-        return sqliteDbHelper.getTasksFromList(taskListId);
+        mSqliteDbHelper = new SQLiteDbHelper(mContext);
+        return mSqliteDbHelper.getTasksFromList(taskListId);
     }
 
     public void addTasks(ArrayList<Task> tasks) {
-        sqliteDbHelper = new SQLiteDbHelper(mContext);
-        sqliteDbHelper.insertTasks(tasks);
+        mSqliteDbHelper = new SQLiteDbHelper(mContext);
+        mSqliteDbHelper.insertTasks(tasks);
     }
 
     public void addTask(Task task) {

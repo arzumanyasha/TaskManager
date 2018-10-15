@@ -4,6 +4,7 @@ import android.content.Context;
 
 import com.example.arturarzumanyan.taskmanager.data.db.SQLiteDbHelper;
 import com.example.arturarzumanyan.taskmanager.domain.Event;
+import com.example.arturarzumanyan.taskmanager.networking.util.DateUtils;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -12,7 +13,7 @@ import java.util.Calendar;
 import java.util.Date;
 
 public class EventsDbStore {
-    private SQLiteDbHelper sqliteDbHelper;
+    private SQLiteDbHelper mSqliteDbHelper;
     private Context mContext;
 
     public EventsDbStore(Context context) {
@@ -20,17 +21,15 @@ public class EventsDbStore {
     }
 
     public ArrayList<Event> getEvents() {
-        sqliteDbHelper = new SQLiteDbHelper(mContext);
-        return sqliteDbHelper.getEvents();
+        mSqliteDbHelper = new SQLiteDbHelper(mContext);
+        return mSqliteDbHelper.getEvents();
     }
 
     public ArrayList<Event> getDailyEvents() {
-        Calendar c = Calendar.getInstance();
-        Date currentDate = c.getTime();
-        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
-        String date = simpleDateFormat.format(currentDate);
-        sqliteDbHelper = new SQLiteDbHelper(mContext);
-        return sqliteDbHelper.getDailyEvents(date);
+        DateUtils dateUtils = new DateUtils();
+        String date = dateUtils.getCurrentTime();
+        mSqliteDbHelper = new SQLiteDbHelper(mContext);
+        return mSqliteDbHelper.getDailyEvents(date);
     }
 
     public ArrayList<Event> getWeeklyEvents() {
@@ -42,8 +41,8 @@ public class EventsDbStore {
     }
 
     public void addEvents(ArrayList<Event> eventList) {
-        sqliteDbHelper = new SQLiteDbHelper(mContext);
-        sqliteDbHelper.insertEvents(eventList);
+        mSqliteDbHelper = new SQLiteDbHelper(mContext);
+        mSqliteDbHelper.insertEvents(eventList);
     }
 
     public void addEvent(Event event) {

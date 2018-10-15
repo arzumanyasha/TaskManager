@@ -12,8 +12,8 @@ import com.example.arturarzumanyan.taskmanager.domain.TaskList;
 import java.util.ArrayList;
 
 public class TasksRepository {
-    private TasksDbStore tasksDbStore;
-    private TasksCloudStore tasksCloudStore;
+    private TasksDbStore mTasksDbStore;
+    private TasksCloudStore mTasksCloudStore;
 
     private RepositoryLoadHelper mRepositoryLoadHelper;
 
@@ -24,18 +24,18 @@ public class TasksRepository {
     }
 
     public void loadTasks(TaskList taskList, final OnTasksLoadedListener listener) {
-        tasksCloudStore = new TasksCloudStore(mContext);
-        tasksDbStore = new TasksDbStore(mContext);
+        mTasksCloudStore = new TasksCloudStore(mContext);
+        mTasksDbStore = new TasksDbStore(mContext);
         mRepositoryLoadHelper = new RepositoryLoadHelper(mContext);
 
-        ArrayList<Task> tasks = tasksDbStore.getTasksFromTaskList(taskList.getId());
+        ArrayList<Task> tasks = mTasksDbStore.getTasksFromTaskList(taskList.getId());
 
         if ((mRepositoryLoadHelper.isOnline()) && (tasks.size() == 0)) {
-            tasksCloudStore.getTasksFromTaskList(taskList, new TasksCloudStore.OnTaskCompletedListener() {
+            mTasksCloudStore.getTasksFromTaskList(taskList, new TasksCloudStore.OnTaskCompletedListener() {
                 @Override
                 public void onSuccess(ArrayList<Task> taskArrayList) {
                     listener.onSuccess(taskArrayList);
-                    tasksDbStore.addTasks(taskArrayList);
+                    mTasksDbStore.addTasks(taskArrayList);
                 }
 
                 @Override

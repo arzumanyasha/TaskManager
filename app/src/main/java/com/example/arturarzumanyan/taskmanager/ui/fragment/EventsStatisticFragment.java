@@ -57,8 +57,6 @@ public class EventsStatisticFragment extends Fragment {
         super.onAttach(context);
         if (context instanceof OnFragmentInteractionListener) {
             mListener = (OnFragmentInteractionListener) context;
-        } else {
-
         }
     }
 

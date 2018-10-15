@@ -8,7 +8,7 @@ import com.example.arturarzumanyan.taskmanager.domain.TaskList;
 import java.util.ArrayList;
 
 public class TaskListsDbStore {
-    private SQLiteDbHelper sqliteDbHelper;
+    private SQLiteDbHelper mSqliteDbHelper;
     private Context mContext;
 
     public TaskListsDbStore(Context context) {
@@ -16,13 +16,13 @@ public class TaskListsDbStore {
     }
 
     public ArrayList<TaskList> getTaskLists() {
-        sqliteDbHelper = new SQLiteDbHelper(mContext);
-        return sqliteDbHelper.getTaskLists();
+        mSqliteDbHelper = new SQLiteDbHelper(mContext);
+        return mSqliteDbHelper.getTaskLists();
     }
 
     public void addTaskLists(ArrayList<TaskList> taskListArrayList) {
-        sqliteDbHelper = new SQLiteDbHelper(mContext);
-        sqliteDbHelper.insertTaskLists(taskListArrayList);
+        mSqliteDbHelper = new SQLiteDbHelper(mContext);
+        mSqliteDbHelper.insertTaskLists(taskListArrayList);
     }
 
     public void addTaskList(TaskList taskList) {

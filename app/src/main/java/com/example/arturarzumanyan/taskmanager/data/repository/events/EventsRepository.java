@@ -8,8 +8,8 @@ import com.example.arturarzumanyan.taskmanager.domain.Event;
 import java.util.ArrayList;
 
 public class EventsRepository {
-    private EventsDbStore eventsDbStore;
-    private EventsCloudStore eventsCloudStore;
+    private EventsDbStore mEventsDbStore;
+    private EventsCloudStore mEventsCloudStore;
     private Context mContext;
     private RepositoryLoadHelper mRepositoryLoadHelper;
 
@@ -18,18 +18,18 @@ public class EventsRepository {
     }
 
     public void loadEvents(final OnEventsLoadedListener listener) {
-        eventsCloudStore = new EventsCloudStore(mContext);
-        eventsDbStore = new EventsDbStore(mContext);
+        mEventsCloudStore = new EventsCloudStore(mContext);
+        mEventsDbStore = new EventsDbStore(mContext);
         mRepositoryLoadHelper = new RepositoryLoadHelper(mContext);
 
-        ArrayList<Event> events = eventsDbStore.getEvents();
+        ArrayList<Event> events = mEventsDbStore.getEvents();
 
         if ((mRepositoryLoadHelper.isOnline()) && (events.size() == 0)) {
-            eventsCloudStore.getEvents(new EventsCloudStore.OnTaskCompletedListener() {
+            mEventsCloudStore.getEvents(new EventsCloudStore.OnTaskCompletedListener() {
                 @Override
                 public void onSuccess(ArrayList<Event> eventsList) {
                     listener.onSuccess(eventsList);
-                    eventsDbStore.addEvents(eventsList);
+                    mEventsDbStore.addEvents(eventsList);
                 }
 
                 @Override
@@ -43,8 +43,8 @@ public class EventsRepository {
     }
 
     public ArrayList<Event> getDailyEvents() {
-        eventsDbStore = new EventsDbStore(mContext);
-        return eventsDbStore.getDailyEvents();
+        mEventsDbStore = new EventsDbStore(mContext);
+        return mEventsDbStore.getDailyEvents();
     }
 
     public void addEvent() {

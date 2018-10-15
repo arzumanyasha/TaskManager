@@ -12,6 +12,7 @@ import com.example.arturarzumanyan.taskmanager.domain.Task;
 import com.example.arturarzumanyan.taskmanager.domain.TaskList;
 import com.example.arturarzumanyan.taskmanager.data.db.contract.TasksContract.*;
 import com.example.arturarzumanyan.taskmanager.data.db.contract.EventsContract.*;
+import com.example.arturarzumanyan.taskmanager.networking.util.DateUtils;
 
 import java.text.DateFormat;
 import java.text.ParseException;
@@ -24,6 +25,7 @@ public class SQLiteDbHelper extends SQLiteOpenHelper {
     private static final int DATABASE_VERSION = 26;
 
     private SQLiteDatabase db;
+    private DateUtils dateUtils;
 
     public SQLiteDbHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
@@ -78,6 +80,7 @@ public class SQLiteDbHelper extends SQLiteOpenHelper {
 
     public void insertEvents(ArrayList<Event> eventsList) {
         db = getWritableDatabase();
+        dateUtils = new DateUtils();
         for (int i = 0; i < eventsList.size(); i++) {
             ContentValues cv = new ContentValues();
 
@@ -86,10 +89,9 @@ public class SQLiteDbHelper extends SQLiteOpenHelper {
             cv.put(EventsTable.COLUMN_DESCRIPTION, eventsList.get(i).getDescription());
             cv.put(EventsTable.COLUMN_COLOR_ID, eventsList.get(i).getColorId());
 
-            DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ");
-            cv.put(EventsTable.COLUMN_START_TIME, dateFormat.format(eventsList.get(i).getStartTime()));
+            cv.put(EventsTable.COLUMN_START_TIME, dateUtils.formatEventTime(eventsList.get(i).getStartTime()));
 
-            cv.put(EventsTable.COLUMN_END_TIME, dateFormat.format(eventsList.get(i).getEndTime()));
+            cv.put(EventsTable.COLUMN_END_TIME, dateUtils.formatEventTime(eventsList.get(i).getEndTime()));
 
             if (eventsList.get(i).isNotify()) {
                 cv.put(EventsTable.COLUMN_REMINDER, 1);
@@ -115,6 +117,7 @@ public class SQLiteDbHelper extends SQLiteOpenHelper {
 
     public void insertTasks(ArrayList<Task> tasksArrayList) {
         db = getWritableDatabase();
+        dateUtils = new DateUtils();
         for (int i = 0; i < tasksArrayList.size(); i++) {
             ContentValues cv = new ContentValues();
 
@@ -129,8 +132,7 @@ public class SQLiteDbHelper extends SQLiteOpenHelper {
             }
 
             if (tasksArrayList.get(i).getDate() != null) {
-                DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
-                cv.put(TasksTable.COLUMN_DUE, dateFormat.format(tasksArrayList.get(i).getDate()));
+                cv.put(TasksTable.COLUMN_DUE, dateUtils.formatTaskDate(tasksArrayList.get(i).getDate()));
             }
             cv.put(TasksTable.COLUMN_LIST_ID, tasksArrayList.get(i).getListId());
 
@@ -153,12 +155,12 @@ public class SQLiteDbHelper extends SQLiteOpenHelper {
 
     private ArrayList<Event> getEventsFromCursor(Cursor c) {
         ArrayList<Event> eventsList = new ArrayList<>();
+        dateUtils = new DateUtils();
         try {
             if (c.moveToFirst()) {
                 do {
-                    DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ");
-                    Date startDate = dateFormat.parse(c.getString(c.getColumnIndex(EventsTable.COLUMN_START_TIME)));
-                    Date endDate = dateFormat.parse(c.getString(c.getColumnIndex(EventsTable.COLUMN_END_TIME)));
+                    Date startDate = dateUtils.getEventDateFromString(c.getString(c.getColumnIndex(EventsTable.COLUMN_START_TIME)));
+                    Date endDate = dateUtils.getEventDateFromString(c.getString(c.getColumnIndex(EventsTable.COLUMN_END_TIME)));
                     Boolean isNotify;
                     if (c.getInt(c.getColumnIndex(EventsTable.COLUMN_REMINDER)) == 1) {
                         isNotify = true;
@@ -188,6 +190,7 @@ public class SQLiteDbHelper extends SQLiteOpenHelper {
 
     public ArrayList<Task> getTasksFromList(int tasksListId) {
         ArrayList<Task> tasksList = new ArrayList<>();
+        dateUtils = new DateUtils();
         try {
             db = getReadableDatabase();
 
@@ -206,8 +209,7 @@ public class SQLiteDbHelper extends SQLiteOpenHelper {
                     Task task;
 
                     if (c.getString(c.getColumnIndex(TasksTable.COLUMN_DUE)) != null) {
-                        DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
-                        Date date = dateFormat.parse(c.getString(c.getColumnIndex(TasksTable.COLUMN_DUE)));
+                        Date date = dateUtils.getTaskDateFromString(c.getString(c.getColumnIndex(TasksTable.COLUMN_DUE)));
 
                         task = new Task(c.getString(c.getColumnIndex(TasksTable.COLUMN_TASK_ID)),
                                 c.getString(c.getColumnIndex(TasksTable.COLUMN_TITLE)),

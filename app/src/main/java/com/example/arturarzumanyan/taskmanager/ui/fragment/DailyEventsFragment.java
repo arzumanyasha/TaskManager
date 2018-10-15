@@ -22,7 +22,7 @@ public class DailyEventsFragment extends Fragment {
     private static final String ARG_PARAM1 = "param1";
     private static final String ARG_PARAM2 = "param2";
 
-    private RecyclerView eventsRecyclerView;
+    private RecyclerView mEventsRecyclerView;
 
     private String mParam1;
     private String mParam2;
@@ -55,7 +55,7 @@ public class DailyEventsFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_daily_events, container, false);
-        eventsRecyclerView = view.findViewById(R.id.recyclerViewEvents);
+        mEventsRecyclerView = view.findViewById(R.id.recyclerViewEvents);
         return view;
     }
 
@@ -66,7 +66,7 @@ public class DailyEventsFragment extends Fragment {
         ArrayList<Event> events = eventsRepository.getDailyEvents();
 
         LinearLayoutManager layoutManager = new LinearLayoutManager(getActivity());
-        eventsRecyclerView.setLayoutManager(layoutManager);
+        mEventsRecyclerView.setLayoutManager(layoutManager);
 
         EventsAdapter eventsAdapter = new EventsAdapter(getActivity(), events, new EventsAdapter.OnItemClickListener() {
             @Override
@@ -74,7 +74,7 @@ public class DailyEventsFragment extends Fragment {
 
             }
         });
-        eventsRecyclerView.setAdapter(eventsAdapter);
+        mEventsRecyclerView.setAdapter(eventsAdapter);
     }
 
     public void onButtonPressed(Uri uri) {
@@ -88,8 +88,6 @@ public class DailyEventsFragment extends Fragment {
         super.onAttach(context);
         if (context instanceof OnFragmentInteractionListener) {
             mListener = (OnFragmentInteractionListener) context;
-        } else {
-
         }
     }
 

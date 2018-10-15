@@ -31,15 +31,16 @@ import com.example.arturarzumanyan.taskmanager.ui.fragment.EventsFragment;
 import com.example.arturarzumanyan.taskmanager.ui.fragment.TasksFragment;
 import com.squareup.picasso.Picasso;
 
-import java.net.NoRouteToHostException;
 import java.util.ArrayList;
 
-public class IntentionActivity extends AppCompatActivity {
+import static com.example.arturarzumanyan.taskmanager.ui.fragment.TasksFragment.TASK_LIST_ID_KEY;
 
+public class IntentionActivity extends AppCompatActivity {
+    private final String EVENTS_KEY = "Events";
     private final String CHANNEL_ID = "notification_channel";
     private final int NOTIFICATION_ID = 001;
     private NavigationView mNavigationView;
-    private DrawerLayout drawer;
+    private DrawerLayout mDrawer;
     private Intent mUserData;
 
     private ArrayList<TaskList> mTaskLists;
@@ -55,21 +56,20 @@ public class IntentionActivity extends AppCompatActivity {
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if (getTitle() == "Events") {
-                    Toast.makeText(getApplicationContext(), "Events", Toast.LENGTH_LONG).show();
+                if (getTitle() == EVENTS_KEY) {
                     openEventsDialog();
                 }
             }
         });
 
-        drawer = findViewById(R.id.drawer_layout);
+        mDrawer = findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
                 this,
-                drawer,
+                mDrawer,
                 toolbar,
                 R.string.navigation_drawer_open,
                 R.string.navigation_drawer_close);
-        drawer.addDrawerListener(toggle);
+        mDrawer.addDrawerListener(toggle);
         toggle.syncState();
 
         mUserData = getIntent();
@@ -119,10 +119,10 @@ public class IntentionActivity extends AppCompatActivity {
             }
         });
 */
-        drawer.closeDrawers();
+        mDrawer.closeDrawers();
 
         Bundle bundle = new Bundle();
-        bundle.putString("taskListId", "1");
+        bundle.putString(TASK_LIST_ID_KEY, "1");
         TasksFragment tasksFragment = new TasksFragment();
         tasksFragment.setArguments(bundle);
         openFragment(tasksFragment);
@@ -163,7 +163,7 @@ public class IntentionActivity extends AppCompatActivity {
                 @Override
                 public boolean onMenuItemClick(MenuItem item) {
                     Bundle bundle = new Bundle();
-                    bundle.putString("taskListId", Integer.toString(position));
+                    bundle.putString(TASK_LIST_ID_KEY, Integer.toString(position));
                     TasksFragment tasksFragment = new TasksFragment();
                     tasksFragment.setArguments(bundle);
                     openFragment(tasksFragment);
@@ -186,7 +186,7 @@ public class IntentionActivity extends AppCompatActivity {
 
     private void openEventsDialog(){
         EventsDialog eventsDialog = new EventsDialog();
-        eventsDialog.show(getSupportFragmentManager(), "Events");
+        eventsDialog.show(getSupportFragmentManager(), EVENTS_KEY);
     }
 
     private void openFragment(Fragment fragment) {

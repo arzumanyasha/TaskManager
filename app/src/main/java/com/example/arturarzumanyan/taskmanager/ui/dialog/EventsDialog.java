@@ -8,8 +8,6 @@ import android.content.DialogInterface;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.RequiresApi;
-import android.support.v4.app.DialogFragment;
-import android.support.v4.content.res.ResourcesCompat;
 import android.support.v7.app.AppCompatDialogFragment;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -22,24 +20,26 @@ import android.widget.TimePicker;
 import android.widget.Toast;
 
 import com.example.arturarzumanyan.taskmanager.R;
+import com.example.arturarzumanyan.taskmanager.ui.adapter.ColorPalette;
 
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.HashMap;
 
 import petrov.kristiyan.colorpicker.ColorPicker;
 
 public class EventsDialog extends AppCompatDialogFragment {
-    private EditText editTextEventName, editTextEventDescription;
-    private ImageButton imageButtonColorPicker;
-    private TextView textViewStartTime, textViewEndTime, textViewDate;
-    private Switch switchNotification;
+    private EditText mEditTextEventName, mEditTextEventDescription;
+    private ImageButton mImageButtonColorPicker;
+    private TextView mTextViewStartTime, mTextViewEndTime, mTextViewDate;
+    private Switch mSwitchNotification;
 
-    private Date startTime;
-    private Date endTime;
+    private Date mStartTime;
+    private Date mEndTime;
 
-    private int hour, minute;
-    private int day, month, year;
+    private int mHour, mMinute;
+    private int mDay, mMonth, mYear;
 
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
@@ -59,9 +59,9 @@ public class EventsDialog extends AppCompatDialogFragment {
                 .setPositiveButton("Create", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        if(startTime.getTime() < endTime.getTime()){
+                        if (mStartTime.getTime() < mEndTime.getTime()) {
 
-                        }else{
+                        } else {
                             Toast.makeText(getContext(),
                                     R.string.TimeErrorMsg,
                                     Toast.LENGTH_LONG).show();
@@ -70,72 +70,72 @@ public class EventsDialog extends AppCompatDialogFragment {
                 });
 
         Calendar c = Calendar.getInstance();
-        hour = c.get(Calendar.HOUR_OF_DAY);
-        minute = c.get(Calendar.MINUTE);
+        mHour = c.get(Calendar.HOUR_OF_DAY);
+        mMinute = c.get(Calendar.MINUTE);
 
-        day = c.get(Calendar.DAY_OF_MONTH);
-        month = c.get(Calendar.MONTH);
-        year = c.get(Calendar.YEAR);
+        mDay = c.get(Calendar.DAY_OF_MONTH);
+        mMonth = c.get(Calendar.MONTH);
+        mYear = c.get(Calendar.YEAR);
 
-        startTime = new Date(0, 0,0, hour, minute);
-        endTime = new Date(0, 0,0, hour+1, minute);
+        mStartTime = new Date(0, 0, 0, mHour, mMinute);
+        mEndTime = new Date(0, 0, 0, mHour + 1, mMinute);
 
-        editTextEventName = view.findViewById(R.id.editTextEventName);
-        editTextEventDescription = view.findViewById(R.id.editTextEventDescription);
-        imageButtonColorPicker = view.findViewById(R.id.imageButtonColorPicker);
-        textViewStartTime = view.findViewById(R.id.textViewStartTime);
-        textViewEndTime = view.findViewById(R.id.textViewEndTime);
-        textViewDate = view.findViewById(R.id.textViewEventDate);
-        switchNotification = view.findViewById(R.id.switchNotification);
+        mEditTextEventName = view.findViewById(R.id.editTextEventName);
+        mEditTextEventDescription = view.findViewById(R.id.editTextEventDescription);
+        mImageButtonColorPicker = view.findViewById(R.id.imageButtonColorPicker);
+        mTextViewStartTime = view.findViewById(R.id.textViewStartTime);
+        mTextViewEndTime = view.findViewById(R.id.textViewEndTime);
+        mTextViewDate = view.findViewById(R.id.textViewEventDate);
+        mSwitchNotification = view.findViewById(R.id.switchNotification);
 
-        textViewStartTime.setText(hour + ":" + minute);
-        textViewEndTime.setText((hour+1) + ":" + minute);
-        textViewDate.setText(day + "/" + (month+1) + "/" + year);
+        mTextViewStartTime.setText(mHour + ":" + mMinute);
+        mTextViewEndTime.setText((mHour + 1) + ":" + mMinute);
+        mTextViewDate.setText(mDay + "/" + (mMonth + 1) + "/" + mYear);
 
-        imageButtonColorPicker.setOnClickListener(new View.OnClickListener() {
+        mImageButtonColorPicker.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 openColorPicker();
             }
         });
 
-        textViewStartTime.setOnClickListener(new View.OnClickListener() {
+        mTextViewStartTime.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 new TimePickerDialog(getActivity(), new TimePickerDialog.OnTimeSetListener() {
                     @Override
                     public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
-                        textViewStartTime.setText(hourOfDay + ":" + minute);
-                        startTime = new Date(0, 0,0, hourOfDay, minute);
+                        mTextViewStartTime.setText(hourOfDay + ":" + minute);
+                        mStartTime = new Date(0, 0, 0, hourOfDay, minute);
                     }
-                }, hour, minute, true).show();
+                }, mHour, mMinute, true).show();
             }
         });
 
-        textViewEndTime.setOnClickListener(new View.OnClickListener() {
+        mTextViewEndTime.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 new TimePickerDialog(getActivity(), new TimePickerDialog.OnTimeSetListener() {
                     @Override
                     public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
-                        textViewEndTime.setText(hourOfDay + ":" + minute);
-                        endTime = new Date(0, 0,0, hourOfDay, minute);
+                        mTextViewEndTime.setText(hourOfDay + ":" + minute);
+                        mEndTime = new Date(0, 0, 0, hourOfDay, minute);
                     }
-                }, hour, minute, true).show();
+                }, mHour, mMinute, true).show();
             }
         });
 
-        textViewDate.setOnClickListener(new View.OnClickListener() {
+        mTextViewDate.setOnClickListener(new View.OnClickListener() {
             @RequiresApi(api = Build.VERSION_CODES.N)
             @Override
             public void onClick(View v) {
-                DatePickerDialog datePickerDialog = new DatePickerDialog(getActivity(), new DatePickerDialog.OnDateSetListener(){
+                DatePickerDialog datePickerDialog = new DatePickerDialog(getActivity(), new DatePickerDialog.OnDateSetListener() {
 
                     @Override
-                    public void onDateSet(DatePicker view, int year, int monthOfYear, int dayOfMonth){
-                        textViewDate.setText(dayOfMonth + "/" + (monthOfYear+1) + "/" + year);
+                    public void onDateSet(DatePicker view, int year, int monthOfYear, int dayOfMonth) {
+                        mTextViewDate.setText(dayOfMonth + "/" + (monthOfYear + 1) + "/" + year);
                     }
-                }, year, month, day);
+                }, mYear, mMonth, mDay);
 
                 datePickerDialog.show();
             }
@@ -147,17 +147,10 @@ public class EventsDialog extends AppCompatDialogFragment {
     private void openColorPicker() {
         final ColorPicker colorPicker = new ColorPicker(getActivity());
         ArrayList<String> colors = new ArrayList<>();
-        colors.add("#" + Integer.toHexString(ResourcesCompat.getColor(getActivity().getResources(), R.color._1, null)));
-        colors.add("#" + Integer.toHexString(ResourcesCompat.getColor(getActivity().getResources(), R.color._2, null)));
-        colors.add("#" + Integer.toHexString(ResourcesCompat.getColor(getActivity().getResources(), R.color._3, null)));
-        colors.add("#" + Integer.toHexString(ResourcesCompat.getColor(getActivity().getResources(), R.color._4, null)));
-        colors.add("#" + Integer.toHexString(ResourcesCompat.getColor(getActivity().getResources(), R.color._5, null)));
-        colors.add("#" + Integer.toHexString(ResourcesCompat.getColor(getActivity().getResources(), R.color._6, null)));
-        colors.add("#" + Integer.toHexString(ResourcesCompat.getColor(getActivity().getResources(), R.color._7, null)));
-        colors.add("#" + Integer.toHexString(ResourcesCompat.getColor(getActivity().getResources(), R.color._8, null)));
-        colors.add("#" + Integer.toHexString(ResourcesCompat.getColor(getActivity().getResources(), R.color._9, null)));
-        colors.add("#" + Integer.toHexString(ResourcesCompat.getColor(getActivity().getResources(), R.color._10, null)));
-        colors.add("#" + Integer.toHexString(ResourcesCompat.getColor(getActivity().getResources(), R.color._11, null)));
+        ColorPalette colorPalette = new ColorPalette(getActivity());
+        for (HashMap.Entry<Integer, Integer> map : colorPalette.getColorPalette().entrySet()) {
+            colors.add("#" + Integer.toHexString(map.getValue()));
+        }
 
         colorPicker.setColors(colors)
                 .setColumns(5)
@@ -165,7 +158,7 @@ public class EventsDialog extends AppCompatDialogFragment {
                 .setOnChooseColorListener(new ColorPicker.OnChooseColorListener() {
                     @Override
                     public void onChooseColor(int position, int color) {
-                        imageButtonColorPicker.setColorFilter(color);
+                        mImageButtonColorPicker.setColorFilter(color);
                     }
 
                     @Override

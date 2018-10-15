@@ -12,18 +12,19 @@ import android.widget.TextView;
 
 import com.example.arturarzumanyan.taskmanager.R;
 import com.example.arturarzumanyan.taskmanager.domain.Event;
+import com.example.arturarzumanyan.taskmanager.networking.util.DateUtils;
 
-import java.text.SimpleDateFormat;
+import java.util.HashMap;
 import java.util.List;
 
 public class EventsAdapter extends RecyclerView.Adapter<EventsAdapter.ViewHolder> implements View.OnClickListener {
-    private List<Event> dataset;
+    private List<Event> mDataset;
     private EventsAdapter.OnItemClickListener mListener;
     private Context mContext;
 
     public EventsAdapter(Context context, List<Event> dataset, EventsAdapter.OnItemClickListener onItemClickListener) {
         this.mContext = context;
-        this.dataset = dataset;
+        this.mDataset = dataset;
         this.mListener = onItemClickListener;
     }
 
@@ -35,51 +36,20 @@ public class EventsAdapter extends RecyclerView.Adapter<EventsAdapter.ViewHolder
 
     @Override
     public void onBindViewHolder(EventsAdapter.ViewHolder holder, int position) {
-        Event event = dataset.get(position);
+        Event event = mDataset.get(position);
         holder.eventName.setText(event.getName());
         holder.eventDescription.setText(event.getDescription().replaceAll("[\n]", ""));
 
         //holder.taskDelete.setOnClickListener(this);
         holder.eventDelete.setTag(position);
-        switch (event.getColorId()) {
-            case 1:
-                holder.linearLayout.setBackgroundColor(ResourcesCompat.getColor(mContext.getResources(), R.color._1, null));
-                break;
-            case 2:
-                holder.linearLayout.setBackgroundColor(ResourcesCompat.getColor(mContext.getResources(), R.color._2, null));
-                break;
-            case 3:
-                holder.linearLayout.setBackgroundColor(ResourcesCompat.getColor(mContext.getResources(), R.color._3, null));
-                break;
-            case 4:
-                holder.linearLayout.setBackgroundColor(ResourcesCompat.getColor(mContext.getResources(), R.color._4, null));
-                break;
-            case 5:
-                holder.linearLayout.setBackgroundColor(ResourcesCompat.getColor(mContext.getResources(), R.color._5, null));
-                break;
-            case 6:
-                holder.linearLayout.setBackgroundColor(ResourcesCompat.getColor(mContext.getResources(), R.color._6, null));
-                break;
-            case 7:
-                holder.linearLayout.setBackgroundColor(ResourcesCompat.getColor(mContext.getResources(), R.color._7, null));
-                break;
-            case 8:
-                holder.linearLayout.setBackgroundColor(ResourcesCompat.getColor(mContext.getResources(), R.color._8, null));
-                break;
-            case 9:
-                holder.linearLayout.setBackgroundColor(ResourcesCompat.getColor(mContext.getResources(), R.color._9, null));
-                break;
-            case 10:
-                holder.linearLayout.setBackgroundColor(ResourcesCompat.getColor(mContext.getResources(), R.color._10, null));
-                break;
-            case 11:
-                holder.linearLayout.setBackgroundColor(ResourcesCompat.getColor(mContext.getResources(), R.color._11, null));
-                break;
-        }
 
-        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("HH:mm a");
-        holder.eventTime.setText(simpleDateFormat.format(event.getStartTime())
-                + " - " + simpleDateFormat.format(event.getEndTime()));
+        ColorPalette colorPalette = new ColorPalette(mContext);
+        HashMap<Integer, Integer> map = colorPalette.getColorPalette();
+        holder.linearLayout.setBackgroundColor(map.get(event.getColorId()));
+        
+        DateUtils dateUtils = new DateUtils();
+        holder.eventTime.setText(dateUtils.formatTime(event.getStartTime())
+                + " - " + dateUtils.formatTime(event.getEndTime()));
     }
 
     @Override
@@ -87,22 +57,22 @@ public class EventsAdapter extends RecyclerView.Adapter<EventsAdapter.ViewHolder
         if (mListener != null) {
             int position = (int) v.getTag();
             if (position != RecyclerView.NO_POSITION) {
-                Event event = dataset.get(position);
+                Event event = mDataset.get(position);
                 mListener.onItemDelete(event);
-                dataset.remove(event);
+                mDataset.remove(event);
                 notifyItemRemoved(position);
-                notifyItemRangeChanged(position, dataset.size());
+                notifyItemRangeChanged(position, mDataset.size());
             }
         }
     }
 
     @Override
     public int getItemCount() {
-        return dataset.size();
+        return mDataset.size();
     }
 
     public void updateList(List<Event> updatedList) {
-        dataset = updatedList;
+        mDataset = updatedList;
         notifyDataSetChanged();
     }
 
