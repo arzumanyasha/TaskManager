@@ -14,15 +14,14 @@ public class TasksDbStore {
 
     public TasksDbStore(Context context) {
         this.mContext = context;
+        mSqliteDbHelper = new SQLiteDbHelper(mContext);
     }
 
     public ArrayList<Task> getTasksFromTaskList(int taskListId) {
-        mSqliteDbHelper = new SQLiteDbHelper(mContext);
         return mSqliteDbHelper.getTasksFromList(taskListId);
     }
 
     public void addTasks(ArrayList<Task> tasks) {
-        mSqliteDbHelper = new SQLiteDbHelper(mContext);
         mSqliteDbHelper.insertTasks(tasks);
     }
 

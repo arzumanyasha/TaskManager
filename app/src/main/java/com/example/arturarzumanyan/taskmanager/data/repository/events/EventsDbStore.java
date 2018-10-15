@@ -18,16 +18,15 @@ public class EventsDbStore {
 
     public EventsDbStore(Context context) {
         this.mContext = context;
+        mSqliteDbHelper = new SQLiteDbHelper(mContext);
     }
 
     public ArrayList<Event> getEvents() {
-        mSqliteDbHelper = new SQLiteDbHelper(mContext);
         return mSqliteDbHelper.getEvents();
     }
 
     public ArrayList<Event> getDailyEvents() {
         String date = DateUtils.getCurrentTime();
-        mSqliteDbHelper = new SQLiteDbHelper(mContext);
         return mSqliteDbHelper.getDailyEvents(date);
     }
 
@@ -40,7 +39,6 @@ public class EventsDbStore {
     }
 
     public void addEvents(ArrayList<Event> eventList) {
-        mSqliteDbHelper = new SQLiteDbHelper(mContext);
         mSqliteDbHelper.insertEvents(eventList);
     }
 
