@@ -1,4 +1,4 @@
-package com.example.arturarzumanyan.taskmanager.ui;
+package com.example.arturarzumanyan.taskmanager.ui.activity;
 
 import android.content.Intent;
 import android.os.Bundle;

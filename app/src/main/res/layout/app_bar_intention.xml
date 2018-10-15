@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".ui.IntentionActivity">
+    tools:context=".ui.activity.IntentionActivity">
 
     <android.support.design.widget.AppBarLayout
         android:layout_width="match_parent"
@@ -20,14 +20,19 @@
 
     </android.support.design.widget.AppBarLayout>
 
-    <include layout="@layout/content_intention" />
+    <include
+        android:id="@+id/include"
+        layout="@layout/content_intention" />
 
     <android.support.design.widget.FloatingActionButton
         android:id="@+id/fab"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_height="84dp"
         android:layout_gravity="bottom|end"
-        android:layout_margin="@dimen/fab_margin"
-        app:srcCompat="@android:drawable/ic_dialog_email" />
+        android:layout_marginRight="20dp"
+        android:layout_marginBottom="60dp"
+        android:src="@drawable/ic_add_black_24dp"
+        app:layout_anchor="@+id/include"
+        app:layout_anchorGravity="right|bottom" />
 
 </android.support.design.widget.CoordinatorLayout>

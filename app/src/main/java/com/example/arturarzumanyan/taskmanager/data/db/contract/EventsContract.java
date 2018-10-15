@@ -1,4 +1,4 @@
-package com.example.arturarzumanyan.taskmanager.db;
+package com.example.arturarzumanyan.taskmanager.data.db.contract;
 
 import android.provider.BaseColumns;
 

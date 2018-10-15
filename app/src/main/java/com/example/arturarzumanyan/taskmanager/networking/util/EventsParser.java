@@ -13,12 +13,22 @@ import java.util.ArrayList;
 import java.util.Date;
 
 public class EventsParser {
+    private static final String ITEMS_KEY = "items";
+    private static final String DESCRIPTION_KEY = "description";
+    private static final String COLOR_ID_KEY = "colorId";
+    private static final String START_KEY = "start";
+    private static final String END_KEY = "end";
+    private static final String DATETIME_KEY = "dateTime";
+    private static final String REMINDERS_KEY = "reminders";
+    private static final String OVERRIDES_KEY = "overrides";
+    private static final String ID_KEY = "id";
+    private static final String SUMMARY_KEY = "summary";
 
     public ArrayList<Event> parseEvents(String buffer) throws JSONException, ParseException {
 
         ArrayList<Event> eventsList = new ArrayList<>();
         JSONObject jsonobject = new JSONObject(buffer);
-        JSONArray jsonArray = jsonobject.getJSONArray("items");
+        JSONArray jsonArray = jsonobject.getJSONArray(ITEMS_KEY);
         for (int i = 0; i < jsonArray.length(); i++) {
             JSONObject explrObject = jsonArray.getJSONObject(i);
             eventsList.add(parseEvent(explrObject));
@@ -29,37 +39,36 @@ public class EventsParser {
     private Event parseEvent(JSONObject jsonObject) throws JSONException, ParseException {
 
         String description;
-        if (!jsonObject.isNull("description")) {
-            description = jsonObject.getString("description");
+        if (!jsonObject.isNull(DESCRIPTION_KEY)) {
+            description = jsonObject.getString(DESCRIPTION_KEY);
         } else {
             description = "";
         }
 
         int colorId;
-        if (!jsonObject.isNull("colorId")) {
-            colorId = jsonObject.getInt("colorId");
+        if (!jsonObject.isNull(COLOR_ID_KEY)) {
+            colorId = jsonObject.getInt(COLOR_ID_KEY);
         } else {
             colorId = 9;
         }
 
-        DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ");
-        JSONObject startTimeJsonObject = jsonObject.getJSONObject("start");
-        JSONObject endTimeJsonObject = jsonObject.getJSONObject("end");
+        JSONObject startTimeJsonObject = jsonObject.getJSONObject(START_KEY);
+        JSONObject endTimeJsonObject = jsonObject.getJSONObject(END_KEY);
 
-        Date startDate = dateFormat.parse(startTimeJsonObject.getString("dateTime"));
+        Date startDate = DateUtils.getEventDateFromString(startTimeJsonObject.getString(DATETIME_KEY));
 
-        Date endDate = dateFormat.parse(endTimeJsonObject.getString("dateTime"));
+        Date endDate = DateUtils.getEventDateFromString(endTimeJsonObject.getString(DATETIME_KEY));
 
         Boolean isNotify;
-        JSONObject reminderJsonObject = jsonObject.getJSONObject("reminders");
-        if (!reminderJsonObject.isNull("overrides")) {
+        JSONObject reminderJsonObject = jsonObject.getJSONObject(REMINDERS_KEY);
+        if (!reminderJsonObject.isNull(OVERRIDES_KEY)) {
             isNotify = true;
         } else {
             isNotify = false;
         }
 
-        Event event = new Event(jsonObject.getString("id"),
-                jsonObject.getString("summary"),
+        Event event = new Event(jsonObject.getString(ID_KEY),
+                jsonObject.getString(SUMMARY_KEY),
                 description,
                 colorId,
                 startDate,
