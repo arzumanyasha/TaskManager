@@ -26,14 +26,14 @@ public class TasksDbStore {
     }
 
     public void addTask(Task task) {
-
+        mSqliteDbHelper.insertTask(task);
     }
 
-    public void updateTaskList(Task task) {
-
+    public void updateTask(Task task) {
+        mSqliteDbHelper.updateTask(task);
     }
 
     public void deleteTask(Task task) {
-
+        mSqliteDbHelper.deleteTask(task);
     }
 }

@@ -52,4 +52,16 @@ public class TasksRepository {
 
         void onfail();
     }
+
+    public void addTask(Task task){
+        mTasksDbStore.addTask(task);
+    }
+
+    public void updateTask(Task task){
+        mTasksDbStore.updateTask(task);
+    }
+
+    public void deleteTask(Task task){
+        mTasksDbStore.deleteTask(task);
+    }
 }

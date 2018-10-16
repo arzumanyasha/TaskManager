@@ -27,6 +27,7 @@ import com.example.arturarzumanyan.taskmanager.data.repository.tasklists.TaskLis
 import com.example.arturarzumanyan.taskmanager.domain.Event;
 import com.example.arturarzumanyan.taskmanager.domain.TaskList;
 import com.example.arturarzumanyan.taskmanager.ui.dialog.EventsDialog;
+import com.example.arturarzumanyan.taskmanager.ui.dialog.TasksDialog;
 import com.example.arturarzumanyan.taskmanager.ui.fragment.EventsFragment;
 import com.example.arturarzumanyan.taskmanager.ui.fragment.TasksFragment;
 import com.squareup.picasso.Picasso;
@@ -34,9 +35,11 @@ import com.squareup.picasso.Picasso;
 import java.util.ArrayList;
 
 import static com.example.arturarzumanyan.taskmanager.ui.fragment.TasksFragment.TASK_LIST_ID_KEY;
+import static com.example.arturarzumanyan.taskmanager.ui.fragment.TasksFragment.TASK_LIST_TITLE_KEY;
 
 public class IntentionActivity extends AppCompatActivity {
-    private final String EVENTS_KEY = "Events";
+    public static final String EVENTS_KEY = "Events";
+    public static final String TASKS_KEY = "Tasks";
     private final String CHANNEL_ID = "notification_channel";
     private final int NOTIFICATION_ID = 001;
     private NavigationView mNavigationView;
@@ -51,16 +54,6 @@ public class IntentionActivity extends AppCompatActivity {
         setContentView(R.layout.activity_intention);
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-
-        FloatingActionButton fab = findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if (getTitle() == EVENTS_KEY) {
-                    openEventsDialog();
-                }
-            }
-        });
 
         mDrawer = findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
@@ -123,9 +116,25 @@ public class IntentionActivity extends AppCompatActivity {
 
         Bundle bundle = new Bundle();
         bundle.putString(TASK_LIST_ID_KEY, "1");
+        bundle.putString(TASK_LIST_TITLE_KEY, mTaskLists.get(0).getTitle());
         TasksFragment tasksFragment = new TasksFragment();
         tasksFragment.setArguments(bundle);
         openFragment(tasksFragment);
+
+        FloatingActionButton fab = findViewById(R.id.fab);
+        fab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (getTitle() == EVENTS_KEY) {
+                    openEventsDialog();
+                }
+                for (int i = 0; i < mTaskLists.size(); i++) {
+                    if (getTitle() == mTaskLists.get(i).getTitle()) {
+                        openTasksDialog();
+                    }
+                }
+            }
+        });
     }
 
     private void displayMenu() {
@@ -163,7 +172,8 @@ public class IntentionActivity extends AppCompatActivity {
                 @Override
                 public boolean onMenuItemClick(MenuItem item) {
                     Bundle bundle = new Bundle();
-                    bundle.putString(TASK_LIST_ID_KEY, Integer.toString(position));
+                    bundle.putInt(TASK_LIST_ID_KEY, position);
+                    bundle.putString(TASK_LIST_TITLE_KEY, mTaskLists.get(position - 1).getTitle());
                     TasksFragment tasksFragment = new TasksFragment();
                     tasksFragment.setArguments(bundle);
                     openFragment(tasksFragment);
@@ -173,7 +183,7 @@ public class IntentionActivity extends AppCompatActivity {
         }
     }
 
-    private void notifyDataLoaded(){
+    private void notifyDataLoaded() {
         NotificationCompat.Builder builder = new NotificationCompat.Builder(this, CHANNEL_ID);
         builder.setSmallIcon(R.drawable.ic_event_black_24dp);
         builder.setContentTitle(getString(R.string.app_name));
@@ -184,9 +194,21 @@ public class IntentionActivity extends AppCompatActivity {
         notificationManagerCompat.notify(NOTIFICATION_ID, builder.build());
     }
 
-    private void openEventsDialog(){
+    private void openEventsDialog() {
         EventsDialog eventsDialog = new EventsDialog();
         eventsDialog.show(getSupportFragmentManager(), EVENTS_KEY);
+    }
+
+    private void openTasksDialog() {
+        TasksDialog tasksDialog = new TasksDialog();
+        for (int i = 0; i < mTaskLists.size(); i++) {
+            if(getTitle().equals(mTaskLists.get(i).getTitle())){
+                Bundle bundle = new Bundle();
+                bundle.putInt(TASK_LIST_ID_KEY, mTaskLists.get(i).getId());
+                tasksDialog.setArguments(bundle);
+            }
+        }
+        tasksDialog.show(getSupportFragmentManager(), TASKS_KEY);
     }
 
     private void openFragment(Fragment fragment) {

@@ -31,11 +31,41 @@ public class TasksAdapter extends RecyclerView.Adapter<TasksAdapter.ViewHolder> 
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
         Task task = mDataset.get(position);
+
+        holder.itemView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (mListener != null) {
+                    int position = (int) v.getTag();
+                    if (position != RecyclerView.NO_POSITION) {
+                        Task task = mDataset.get(position);
+                        mListener.onItemClick(task);
+                        notifyItemChanged(position);
+                        notifyItemRangeChanged(position, mDataset.size());
+                    }
+                }
+            }
+        });
         holder.taskName.setText(task.getName());
         holder.taskDescription.setText(task.getDescription().replaceAll("[\n]", ""));
 
-        //holder.taskDelete.setOnClickListener(this);
+        holder.taskDelete.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (mListener != null) {
+                    int position = (int) v.getTag();
+                    if (position != RecyclerView.NO_POSITION) {
+                        Task task = mDataset.get(position);
+                        mListener.onItemDelete(task);
+                        mDataset.remove(task);
+                        notifyItemRemoved(position);
+                        notifyItemRangeChanged(position, mDataset.size());
+                    }
+                }
+            }
+        });
         holder.taskDelete.setTag(position);
+        holder.itemView.setTag(position);
         holder.isExecutedCheckBox.setChecked(task.isExecuted());
     }
 
@@ -81,5 +111,6 @@ public class TasksAdapter extends RecyclerView.Adapter<TasksAdapter.ViewHolder> 
 
     public interface OnItemClickListener {
         void onItemDelete(Task task);
+        void onItemClick(Task task);
     }
 }

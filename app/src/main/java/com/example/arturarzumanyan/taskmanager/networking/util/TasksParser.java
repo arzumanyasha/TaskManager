@@ -59,8 +59,8 @@ public class TasksParser {
                     jsonObject.getString(TITLE_KEY),
                     description,
                     isExecuted,
-                    date,
-                    taskListId);
+                    taskListId,
+                    date);
         } else {
             task = new Task(jsonObject.getString(ID_KEY),
                     jsonObject.getString(TITLE_KEY),

@@ -20,10 +20,10 @@ import android.widget.TimePicker;
 import android.widget.Toast;
 
 import com.example.arturarzumanyan.taskmanager.R;
+import com.example.arturarzumanyan.taskmanager.networking.util.DateUtils;
 import com.example.arturarzumanyan.taskmanager.ui.adapter.ColorPalette;
 
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 
@@ -56,26 +56,25 @@ public class EventsDialog extends AppCompatDialogFragment {
 
                     }
                 })
-                .setPositiveButton("Create", new DialogInterface.OnClickListener() {
+                .setPositiveButton("Ok", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         if (mStartTime.getTime() < mEndTime.getTime()) {
 
                         } else {
                             Toast.makeText(getContext(),
-                                    R.string.TimeErrorMsg,
+                                    R.string.time_error_msg,
                                     Toast.LENGTH_LONG).show();
                         }
                     }
                 });
 
-        Calendar c = Calendar.getInstance();
-        mHour = c.get(Calendar.HOUR_OF_DAY);
-        mMinute = c.get(Calendar.MINUTE);
+        mHour = DateUtils.getHour();
+        mMinute = DateUtils.getMinute();
 
-        mDay = c.get(Calendar.DAY_OF_MONTH);
-        mMonth = c.get(Calendar.MONTH);
-        mYear = c.get(Calendar.YEAR);
+        mDay = DateUtils.getDay();
+        mMonth = DateUtils.getMonth();
+        mYear = DateUtils.getYear();
 
         mStartTime = new Date(0, 0, 0, mHour, mMinute);
         mEndTime = new Date(0, 0, 0, mHour + 1, mMinute);

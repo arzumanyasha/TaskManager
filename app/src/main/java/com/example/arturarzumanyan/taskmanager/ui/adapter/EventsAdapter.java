@@ -47,9 +47,8 @@ public class EventsAdapter extends RecyclerView.Adapter<EventsAdapter.ViewHolder
         HashMap<Integer, Integer> map = colorPalette.getColorPalette();
         holder.linearLayout.setBackgroundColor(map.get(event.getColorId()));
 
-        DateUtils dateUtils = new DateUtils();
-        holder.eventTime.setText(dateUtils.formatTime(event.getStartTime())
-                + " - " + dateUtils.formatTime(event.getEndTime()));
+        holder.eventTime.setText(DateUtils.formatTime(event.getStartTime())
+                + " - " + DateUtils.formatTime(event.getEndTime()));
     }
 
     @Override

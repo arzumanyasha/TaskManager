@@ -1,8 +1,13 @@
 package com.example.arturarzumanyan.taskmanager.domain;
 
+import android.os.Parcel;
+import android.os.Parcelable;
+
+import com.example.arturarzumanyan.taskmanager.networking.util.DateUtils;
+
 import java.util.Date;
 
-public class Task {
+public class Task implements Parcelable {
     private String id;
     private String name;
     private String description;
@@ -14,14 +19,14 @@ public class Task {
                 String name,
                 String description,
                 boolean isExecuted,
-                Date date,
-                int listId) {
+                int listId,
+                Date date) {
         this.id = id;
         this.name = name;
         this.description = description;
         this.isExecuted = isExecuted;
-        this.date = date;
         this.listId = listId;
+        this.date = date;
     }
 
     public Task(String id,
@@ -35,6 +40,30 @@ public class Task {
         this.isExecuted = isExecuted;
         this.listId = listId;
     }
+
+    protected Task(Parcel in) {
+        id = in.readString();
+        name = in.readString();
+        description = in.readString();
+        isExecuted = in.readByte() != 0;
+        listId = in.readInt();
+
+        if (in.dataAvail() > 0) {
+            date = DateUtils.getTaskDateFromString(in.readString());
+        }
+    }
+
+    public static final Creator<Task> CREATOR = new Creator<Task>() {
+        @Override
+        public Task createFromParcel(Parcel in) {
+            return new Task(in);
+        }
+
+        @Override
+        public Task[] newArray(int size) {
+            return new Task[size];
+        }
+    };
 
     public String getId() {
         return id;
@@ -82,5 +111,22 @@ public class Task {
 
     public void setListId(int listId) {
         this.listId = listId;
+    }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeString(id);
+        dest.writeString(name);
+        dest.writeString(description);
+        dest.writeByte((byte) (isExecuted ? 1 : 0));
+        dest.writeInt(listId);
+        if (date != null) {
+            dest.writeString(DateUtils.formatTaskDate(date));
+        }
     }
 }
