@@ -22,7 +22,7 @@ import java.util.Date;
 
 public class SQLiteDbHelper extends SQLiteOpenHelper {
     private static final String DATABASE_NAME = "Tasks.db";
-    private static final int DATABASE_VERSION = 26;
+    private static final int DATABASE_VERSION = 27;
 
     private SQLiteDatabase mDb;
 
@@ -278,5 +278,28 @@ public class SQLiteDbHelper extends SQLiteOpenHelper {
 
         c.close();
         return taskListArrayList;
+    }
+
+    public TaskList getTaskList(int id) {
+        mDb = getReadableDatabase();
+
+        String[] selectionArgs = new String[]{Integer.toString(id)};
+        Cursor c = mDb.rawQuery("SELECT * FROM " + TaskListTable.TABLE_NAME +
+                " WHERE " + TaskListTable._ID + " = ?", selectionArgs);
+
+        if (c.moveToFirst()) {
+            do {
+                TaskList taskList = new TaskList(c.getInt(c.getColumnIndex(TaskListTable._ID)),
+                        c.getString(c.getColumnIndex(TaskListTable.COLUMN_LIST_ID)),
+                        c.getString(c.getColumnIndex(TaskListTable.COLUMN_TITLE))
+                );
+
+                return taskList;
+
+            } while (c.moveToNext());
+        }
+
+        c.close();
+        return null;
     }
 }

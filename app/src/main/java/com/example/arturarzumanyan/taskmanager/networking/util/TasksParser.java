@@ -6,9 +6,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.text.DateFormat;
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 
@@ -17,19 +15,25 @@ import static com.example.arturarzumanyan.taskmanager.networking.util.TaskListsP
 import static com.example.arturarzumanyan.taskmanager.networking.util.TaskListsParser.TITLE_KEY;
 
 public class TasksParser {
-    private static final String NOTES_KEY = "notes";
-    private static final String STATUS_KEY = "status";
-    private static final String COMPLETED_KEY = "completed";
-    private static final String DUE_KEY = "due";
+    public static final String NOTES_KEY = "notes";
+    public static final String STATUS_KEY = "status";
+    public static final String COMPLETED_KEY = "completed";
+    public static final String DUE_KEY = "due";
 
-    public ArrayList<Task> parseTasks(String buffer, int taskListId) throws JSONException, ParseException {
+    public ArrayList<Task> parseTasks(String buffer, int taskListId) {
 
         ArrayList<Task> tasksList = new ArrayList<>();
-        JSONObject jsonobject = new JSONObject(buffer);
-        JSONArray jsonArray = jsonobject.getJSONArray(ITEMS_KEY);
-        for (int i = 0; i < jsonArray.length(); i++) {
-            JSONObject explrObject = jsonArray.getJSONObject(i);
-            tasksList.add(parseTask(explrObject, taskListId));
+        try {
+            JSONObject jsonobject = new JSONObject(buffer);
+            JSONArray jsonArray = jsonobject.getJSONArray(ITEMS_KEY);
+            for (int i = 0; i < jsonArray.length(); i++) {
+                JSONObject explrObject = jsonArray.getJSONObject(i);
+                tasksList.add(parseTask(explrObject, taskListId));
+            }
+        } catch (ParseException e) {
+            e.printStackTrace();
+        } catch (JSONException e) {
+            e.printStackTrace();
         }
         return tasksList;
     }
@@ -70,5 +74,17 @@ public class TasksParser {
         }
 
         return task;
+    }
+
+    public Task parseTask(String buffer, int taskListId) {
+        try {
+            JSONObject jsonobject = new JSONObject(buffer);
+            return parseTask(jsonobject, taskListId);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 }

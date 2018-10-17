@@ -13,7 +13,7 @@ import com.example.arturarzumanyan.taskmanager.networking.base.RequestParameters
 import java.util.HashMap;
 
 public class RepositoryLoadHelper {
-    private static final String AUTHORIZATION_KEY = "Authorization";
+    public static final String AUTHORIZATION_KEY = "Authorization";
 
     private Context mContext;
 

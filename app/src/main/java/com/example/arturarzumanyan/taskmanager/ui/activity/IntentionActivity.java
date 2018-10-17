@@ -89,6 +89,13 @@ public class IntentionActivity extends AppCompatActivity {
                 mTaskLists = taskLists;
                 displayMenu();
                 notifyDataLoaded();
+
+                Bundle bundle = new Bundle();
+                bundle.putInt(TASK_LIST_ID_KEY, 1);
+                bundle.putString(TASK_LIST_TITLE_KEY, mTaskLists.get(0).getTitle());
+                TasksFragment tasksFragment = new TasksFragment();
+                tasksFragment.setArguments(bundle);
+                openFragment(tasksFragment);
             }
 
             @Override
@@ -113,13 +120,6 @@ public class IntentionActivity extends AppCompatActivity {
         });
 */
         mDrawer.closeDrawers();
-
-        Bundle bundle = new Bundle();
-        bundle.putString(TASK_LIST_ID_KEY, "1");
-        bundle.putString(TASK_LIST_TITLE_KEY, mTaskLists.get(0).getTitle());
-        TasksFragment tasksFragment = new TasksFragment();
-        tasksFragment.setArguments(bundle);
-        openFragment(tasksFragment);
 
         FloatingActionButton fab = findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
@@ -202,7 +202,7 @@ public class IntentionActivity extends AppCompatActivity {
     private void openTasksDialog() {
         TasksDialog tasksDialog = new TasksDialog();
         for (int i = 0; i < mTaskLists.size(); i++) {
-            if(getTitle().equals(mTaskLists.get(i).getTitle())){
+            if (getTitle().equals(mTaskLists.get(i).getTitle())) {
                 Bundle bundle = new Bundle();
                 bundle.putInt(TASK_LIST_ID_KEY, mTaskLists.get(i).getId());
                 tasksDialog.setArguments(bundle);

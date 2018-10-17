@@ -5,6 +5,9 @@ import android.net.Uri;
 import com.example.arturarzumanyan.taskmanager.auth.AccessTokenAsyncTask;
 import com.example.arturarzumanyan.taskmanager.auth.FirebaseWebService;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -18,6 +21,8 @@ import java.net.URL;
 import java.util.HashMap;
 
 public class BaseHttpUrlConnection {
+    public static final String JSON_CONTENT_TYPE_VALUE = "application/json";
+    private Boolean isJson;
 
     public String getResult(String url,
                             FirebaseWebService.RequestMethods requestMethod,
@@ -26,17 +31,26 @@ public class BaseHttpUrlConnection {
         HttpURLConnection connection = null;
         BufferedReader reader = null;
         Uri.Builder uriBuilder;
+        isJson = false;
+
         String query = "";
         try {
             connection = getConnectionSettings(connection, url, requestMethod, requestHeaderParameters);
             uriBuilder = new Uri.Builder();
-            if (requestMethod == FirebaseWebService.RequestMethods.POST) {
+            if ((requestMethod == FirebaseWebService.RequestMethods.POST) && !isJson) {
                 for (HashMap.Entry<String, String> map : requestBodyParameters.entrySet()) {
                     uriBuilder.appendQueryParameter(map.getKey(), map.getValue());
                 }
-            }
 
-            query = uriBuilder.build().getEncodedQuery();
+                query = uriBuilder.build().getEncodedQuery();
+            } else if (((requestMethod == FirebaseWebService.RequestMethods.POST) ||
+                    (requestMethod == FirebaseWebService.RequestMethods.PATCH)) && isJson) {
+                JSONObject jsonObject = new JSONObject();
+                for (HashMap.Entry<String, String> map : requestBodyParameters.entrySet()) {
+                    jsonObject.put(map.getKey(), map.getValue());
+                }
+                query = jsonObject.toString();
+            }
 
             setConnection(connection, query, requestMethod);
 
@@ -49,8 +63,12 @@ public class BaseHttpUrlConnection {
                 return buffer;
             } else if (responseCode == HttpURLConnection.HTTP_UNAUTHORIZED) {
                 return "";
+            } else if (responseCode == HttpURLConnection.HTTP_NO_CONTENT) {
+                return "ok";
             }
         } catch (IOException e) {
+            e.printStackTrace();
+        } catch (JSONException e) {
             e.printStackTrace();
         } finally {
             if (connection != null) {
@@ -79,19 +97,26 @@ public class BaseHttpUrlConnection {
         connection.setConnectTimeout(15000);
         connection.setInstanceFollowRedirects(true);
         connection.setRequestMethod(requestMethod.toString());
-        if (requestMethod == FirebaseWebService.RequestMethods.POST) {
+        if ((requestMethod == FirebaseWebService.RequestMethods.POST) ||
+                (requestMethod == FirebaseWebService.RequestMethods.PATCH)) {
             connection.setDoOutput(true);
         }
         connection.setDoInput(true);
         for (HashMap.Entry<String, String> map : requestHeaderParameters.entrySet()) {
             connection.setRequestProperty(map.getKey(), map.getValue());
+            if (map.getValue().equals(JSON_CONTENT_TYPE_VALUE)) {
+                isJson = true;
+            }
         }
 
         return connection;
     }
 
-    private void setConnection(HttpURLConnection connection, String query, FirebaseWebService.RequestMethods requestMethod) throws IOException {
-        if (requestMethod == FirebaseWebService.RequestMethods.POST) {
+    private void setConnection(HttpURLConnection connection,
+                               String query,
+                               FirebaseWebService.RequestMethods requestMethod) throws IOException {
+        if ((requestMethod == FirebaseWebService.RequestMethods.POST) ||
+                (requestMethod == FirebaseWebService.RequestMethods.PATCH)) {
             OutputStream os = connection.getOutputStream();
             BufferedWriter writer = new BufferedWriter(
                     new OutputStreamWriter(os, "UTF-8"));
