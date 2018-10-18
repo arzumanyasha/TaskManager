@@ -20,6 +20,8 @@ import android.widget.TimePicker;
 import android.widget.Toast;
 
 import com.example.arturarzumanyan.taskmanager.R;
+import com.example.arturarzumanyan.taskmanager.data.repository.events.EventsRepository;
+import com.example.arturarzumanyan.taskmanager.domain.Event;
 import com.example.arturarzumanyan.taskmanager.networking.util.DateUtils;
 import com.example.arturarzumanyan.taskmanager.ui.adapter.ColorPalette;
 
@@ -28,6 +30,8 @@ import java.util.Date;
 import java.util.HashMap;
 
 import petrov.kristiyan.colorpicker.ColorPicker;
+
+import static com.example.arturarzumanyan.taskmanager.ui.activity.IntentionActivity.EVENTS_KEY;
 
 public class EventsDialog extends AppCompatDialogFragment {
     private EditText mEditTextEventName, mEditTextEventDescription;
@@ -48,6 +52,8 @@ public class EventsDialog extends AppCompatDialogFragment {
         LayoutInflater inflater = getActivity().getLayoutInflater();
         View view = inflater.inflate(R.layout.dialog_events, null);
 
+        final Bundle bundle = getArguments();
+
         builder.setView(view)
                 .setTitle(getString(R.string.events_title))
                 .setNegativeButton(getString(R.string.cancel_button), new DialogInterface.OnClickListener() {
@@ -59,8 +65,12 @@ public class EventsDialog extends AppCompatDialogFragment {
                 .setPositiveButton(getString(R.string.ok_button), new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        if (mStartTime.getTime() < mEndTime.getTime()) {
-
+                        EventsRepository eventsRepository = new EventsRepository(getActivity());
+                        if (mStartTime.getTime() < mEndTime.getTime() &&
+                                !mEditTextEventName.getText().toString().isEmpty() &&
+                                bundle.getParcelable(EVENTS_KEY) != null) {
+                            Event event = bundle.getParcelable(EVENTS_KEY);
+                            eventsRepository.addEvent(event);
                         } else {
                             Toast.makeText(getContext(),
                                     R.string.time_error_msg,

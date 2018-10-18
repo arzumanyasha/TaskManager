@@ -24,9 +24,14 @@ public class DateUtils {
         return simpleDateFormat.format(getTaskDateFromString(date));
     }
 
-    public static Date getEventDateFromString(String date) throws ParseException {
+    public static Date getEventDateFromString(String date) {
         DateFormat dateFormat = new SimpleDateFormat(EVENT_TIME_PATTERN);
-        return dateFormat.parse(date);
+        try {
+            return dateFormat.parse(date);
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 
     public static Date getTaskDateFromString(String date) {

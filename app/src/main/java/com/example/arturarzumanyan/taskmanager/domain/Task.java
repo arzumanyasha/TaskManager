@@ -105,15 +105,6 @@ public class Task implements Parcelable {
         this.isExecuted = isExecuted;
     }
 
-/*
-    public boolean isExecuted() {
-        return isExecuted;
-    }
-
-    public void setExecuted(boolean executed) {
-        isExecuted = executed;
-    }*/
-
     public int getListId() {
         return listId;
     }
