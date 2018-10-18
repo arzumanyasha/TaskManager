@@ -72,7 +72,9 @@ public class TasksRepository {
     public void deleteTask(Task task) {
         if (mRepositoryLoadHelper.isOnline()) {
             mTasksCloudStore.deleteTask(task);
+        } else {
+            mTasksDbStore.deleteTask(task);
         }
-        mTasksDbStore.deleteTask(task);
+
     }
 }

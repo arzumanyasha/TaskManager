@@ -121,7 +121,7 @@ public class TasksCloudStore {
         });
     }
 
-    public void deleteTask(Task task) {
+    public void deleteTask(final Task task) {
         final String url = BASE_TASKS_URL +
                 mTaskListsDbStore.getTaskList(task.getListId()).getTaskListId() +
                 "/tasks/" +
@@ -144,6 +144,9 @@ public class TasksCloudStore {
                 if (response.equals("")) {
                     FirebaseWebService firebaseWebService = new FirebaseWebService();
                     firebaseWebService.refreshAccessToken(mContext);
+                } else if (response.equals("ok")){
+                    TasksDbStore tasksDbStore = new TasksDbStore(mContext);
+                    tasksDbStore.deleteTask(task);
                 }
             }
         });
