@@ -23,17 +23,13 @@ public class RepositoryLoadHelper {
     }
 
     public void requestUserData(UserDataAsyncTask asyncTask, String url) {
-        TokenStorage tokenStorage = new TokenStorage();
-
         FirebaseWebService.RequestMethods requestMethod = FirebaseWebService.RequestMethods.GET;
-        HashMap<String, String> requestBodyParameters = new HashMap<>();
-        HashMap<String, String> requestHeaderParameters = new HashMap<>();
-        String token = tokenStorage.getAccessToken(mContext);
-        requestHeaderParameters.put(AUTHORIZATION_KEY, "Bearer " + tokenStorage.getAccessToken(mContext));
-        RequestParameters requestParameters = new RequestParameters(url,
+        RequestParameters requestParameters = new RequestParameters(mContext,
+                url,
                 requestMethod,
-                requestBodyParameters,
-                requestHeaderParameters);
+                new HashMap<String, String>()
+        );
+        requestParameters.setRequestHeaderParameters(new HashMap<String, String>());
         asyncTask.executeOnExecutor(AsyncTask.SERIAL_EXECUTOR, requestParameters);
     }
 

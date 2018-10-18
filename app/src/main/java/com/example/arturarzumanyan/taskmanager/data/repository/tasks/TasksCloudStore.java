@@ -76,28 +76,28 @@ public class TasksCloudStore {
     }
 
     private void sendRequest(final Task task, String url, final FirebaseWebService.RequestMethods requestMethod) {
-        TokenStorage tokenStorage = new TokenStorage();
+        HashMap<String, String> requestBody = new HashMap<>();
 
-        HashMap<String, String> requestBodyParameters = new HashMap<>();
-
-        requestBodyParameters.put(TITLE_KEY, task.getName());
+        requestBody.put(TITLE_KEY, task.getName());
 
         if (!task.getDescription().isEmpty()) {
-            requestBodyParameters.put(NOTES_KEY, task.getDescription());
+            requestBody.put(NOTES_KEY, task.getDescription());
         }
 
         if (task.getDate() != null) {
-            requestBodyParameters.put(DUE_KEY, DateUtils.formatTaskDate(task.getDate()));
+            requestBody.put(DUE_KEY, DateUtils.formatTaskDate(task.getDate()));
         }
 
         HashMap<String, String> requestHeaderParameters = new HashMap<>();
-        String token = tokenStorage.getAccessToken(mContext);
-        requestHeaderParameters.put(AUTHORIZATION_KEY, "Bearer " + tokenStorage.getAccessToken(mContext));
+
         requestHeaderParameters.put("Content-Type", JSON_CONTENT_TYPE_VALUE);
-        RequestParameters requestParameters = new RequestParameters(url,
+
+        RequestParameters requestParameters = new RequestParameters(mContext,
+                url,
                 requestMethod,
-                requestBodyParameters,
-                requestHeaderParameters);
+                requestBody);
+        requestParameters.setRequestHeaderParameters(requestHeaderParameters);
+
         UserDataAsyncTask userDataAsyncTask = new UserDataAsyncTask();
         userDataAsyncTask.executeOnExecutor(AsyncTask.SERIAL_EXECUTOR, requestParameters);
 
@@ -127,17 +127,13 @@ public class TasksCloudStore {
                 "/tasks/" +
                 task.getId();
 
-        TokenStorage tokenStorage = new TokenStorage();
-
-        HashMap<String, String> requestBodyParameters = new HashMap<>();
-        HashMap<String, String> requestHeaderParameters = new HashMap<>();
-        String token = tokenStorage.getAccessToken(mContext);
-        requestHeaderParameters.put(AUTHORIZATION_KEY, "Bearer " + tokenStorage.getAccessToken(mContext));
-
-        RequestParameters requestParameters = new RequestParameters(url,
+        RequestParameters requestParameters = new RequestParameters(
+                mContext,
+                url,
                 FirebaseWebService.RequestMethods.DELETE,
-                requestBodyParameters,
-                requestHeaderParameters);
+                new HashMap<String, String>()
+        );
+        requestParameters.setRequestHeaderParameters(new HashMap<String, String>());
         UserDataAsyncTask userDataAsyncTask = new UserDataAsyncTask();
 
         userDataAsyncTask.executeOnExecutor(AsyncTask.SERIAL_EXECUTOR, requestParameters);
