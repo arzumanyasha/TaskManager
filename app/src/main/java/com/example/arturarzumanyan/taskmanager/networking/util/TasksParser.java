@@ -47,11 +47,11 @@ public class TasksParser {
             description = "";
         }
 
-        Boolean isExecuted;
+        int isExecuted;
         if (jsonObject.getString(STATUS_KEY).equals(COMPLETED_KEY)) {
-            isExecuted = true;
+            isExecuted = 1;
         } else {
-            isExecuted = false;
+            isExecuted = 0;
         }
 
         Task task;

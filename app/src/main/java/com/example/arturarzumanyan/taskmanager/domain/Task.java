@@ -11,14 +11,14 @@ public class Task implements Parcelable {
     private String id;
     private String name;
     private String description;
-    private boolean isExecuted;
+    private int isExecuted;
     private Date date;
     private int listId;
 
     public Task(String id,
                 String name,
                 String description,
-                boolean isExecuted,
+                int isExecuted,
                 int listId,
                 Date date) {
         this.id = id;
@@ -32,7 +32,7 @@ public class Task implements Parcelable {
     public Task(String id,
                 String name,
                 String description,
-                boolean isExecuted,
+                int isExecuted,
                 int listId) {
         this.id = id;
         this.name = name;
@@ -45,7 +45,7 @@ public class Task implements Parcelable {
         id = in.readString();
         name = in.readString();
         description = in.readString();
-        isExecuted = in.readByte() != 0;
+        isExecuted = in.readInt();
         listId = in.readInt();
 
         if (in.dataAvail() > 0) {
@@ -97,13 +97,22 @@ public class Task implements Parcelable {
         this.date = date;
     }
 
+    public int getIsExecuted() {
+        return isExecuted;
+    }
+
+    public void setIsExecuted(int isExecuted) {
+        this.isExecuted = isExecuted;
+    }
+
+/*
     public boolean isExecuted() {
         return isExecuted;
     }
 
     public void setExecuted(boolean executed) {
         isExecuted = executed;
-    }
+    }*/
 
     public int getListId() {
         return listId;
@@ -123,7 +132,7 @@ public class Task implements Parcelable {
         dest.writeString(id);
         dest.writeString(name);
         dest.writeString(description);
-        dest.writeByte((byte) (isExecuted ? 1 : 0));
+        dest.writeInt(isExecuted);
         dest.writeInt(listId);
         if (date != null) {
             dest.writeString(DateUtils.formatTaskDate(date));

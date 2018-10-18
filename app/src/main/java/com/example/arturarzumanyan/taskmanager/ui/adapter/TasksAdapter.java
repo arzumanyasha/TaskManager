@@ -66,7 +66,11 @@ public class TasksAdapter extends RecyclerView.Adapter<TasksAdapter.ViewHolder> 
         });
         holder.taskDelete.setTag(position);
         holder.itemView.setTag(position);
-        holder.isExecutedCheckBox.setChecked(task.isExecuted());
+        if (task.getIsExecuted() == 1) {
+            holder.isExecutedCheckBox.setChecked(true);
+        } else {
+            holder.isExecutedCheckBox.setChecked(false);
+        }
     }
 
     @Override
@@ -111,6 +115,7 @@ public class TasksAdapter extends RecyclerView.Adapter<TasksAdapter.ViewHolder> 
 
     public interface OnItemClickListener {
         void onItemDelete(Task task);
+
         void onItemClick(Task task);
     }
 }

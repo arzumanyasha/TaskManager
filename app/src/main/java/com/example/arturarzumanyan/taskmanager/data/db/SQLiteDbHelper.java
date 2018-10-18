@@ -127,13 +127,14 @@ public class SQLiteDbHelper extends SQLiteOpenHelper {
         cv.put(TasksTable.COLUMN_TASK_ID, task.getId());
         cv.put(TasksTable.COLUMN_TITLE, task.getName());
         cv.put(TasksTable.COLUMN_NOTES, task.getDescription());
-
+/*
         if (task.isExecuted()) {
             cv.put(TasksTable.COLUMN_STATUS, 1);
         } else {
             cv.put(TasksTable.COLUMN_STATUS, 0);
         }
-
+*/
+        cv.put(TasksTable.COLUMN_STATUS, task.getIsExecuted());
         if (task.getDate() != null) {
             cv.put(TasksTable.COLUMN_DUE, DateUtils.formatTaskDate(task.getDate()));
         }
@@ -150,11 +151,7 @@ public class SQLiteDbHelper extends SQLiteOpenHelper {
         cv.put(TasksTable.COLUMN_TITLE, task.getName());
         cv.put(TasksTable.COLUMN_NOTES, task.getDescription());
 
-        if (task.isExecuted()) {
-            cv.put(TasksTable.COLUMN_STATUS, 1);
-        } else {
-            cv.put(TasksTable.COLUMN_STATUS, 0);
-        }
+        cv.put(TasksTable.COLUMN_STATUS, task.getIsExecuted());
 
         if (task.getDate() != null) {
             cv.put(TasksTable.COLUMN_DUE, DateUtils.formatTaskDate(task.getDate()));
@@ -226,12 +223,6 @@ public class SQLiteDbHelper extends SQLiteOpenHelper {
 
         if (c.moveToFirst()) {
             do {
-                Boolean isExecuted;
-                if (c.getInt(c.getColumnIndex(TasksTable.COLUMN_STATUS)) == 1) {
-                    isExecuted = true;
-                } else
-                    isExecuted = false;
-
                 Task task;
 
                 if (c.getString(c.getColumnIndex(TasksTable.COLUMN_DUE)) != null) {
@@ -240,14 +231,14 @@ public class SQLiteDbHelper extends SQLiteOpenHelper {
                     task = new Task(c.getString(c.getColumnIndex(TasksTable.COLUMN_TASK_ID)),
                             c.getString(c.getColumnIndex(TasksTable.COLUMN_TITLE)),
                             c.getString(c.getColumnIndex(TasksTable.COLUMN_NOTES)),
-                            isExecuted,
+                            c.getInt(c.getColumnIndex(TasksTable.COLUMN_STATUS)),
                             tasksListId,
                             date
                     );
                 } else task = new Task(c.getString(c.getColumnIndex(TasksTable.COLUMN_TASK_ID)),
                         c.getString(c.getColumnIndex(TasksTable.COLUMN_TITLE)),
                         c.getString(c.getColumnIndex(TasksTable.COLUMN_NOTES)),
-                        isExecuted,
+                        c.getInt(c.getColumnIndex(TasksTable.COLUMN_STATUS)),
                         tasksListId
                 );
 

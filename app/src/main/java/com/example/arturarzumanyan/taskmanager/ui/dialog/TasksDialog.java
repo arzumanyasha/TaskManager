@@ -66,14 +66,14 @@ public class TasksDialog extends AppCompatDialogFragment {
                                 task = new Task(UUID.randomUUID().toString(),
                                         mEditTextTaskName.getText().toString(),
                                         mEditTextTaskDescription.getText().toString(),
-                                        false,
+                                        0,
                                         bundle.getInt(TASK_LIST_ID_KEY)
                                 );
                             } else {
                                 task = new Task(UUID.randomUUID().toString(),
                                         mEditTextTaskName.getText().toString(),
                                         mEditTextTaskDescription.getText().toString(),
-                                        false,
+                                        0,
                                         bundle.getInt(TASK_LIST_ID_KEY),
                                         DateUtils.getTaskDateFromString(mTextViewTaskDate.getText().toString())
                                 );
