@@ -1,15 +1,28 @@
 <resources>
+    <!--App-->
     <string name="app_name">TaskManager</string>
+
+    <!--SignIn Activity-->
+    <string name="logged_in_message">Logged in</string>
+
+    <!--Intention Activity-->
     <string name="title_activity_intention">IntentionActivity</string>
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
-    <string name="nav_header_title">Android Studio</string>
-    <string name="nav_header_subtitle">android.studio@android.com</string>
-    <string name="nav_header_desc">Navigation header</string>
-    <string name="logged_in_message">Logged in</string>
     <string name="action_settings">action</string>
     <string name="data_loaded_message">Data loaded</string>
     <string name="network_error">Check network connection</string>
-    <string name="hello_blank_fragment">Hello blank fragment</string>
+
+    <!--Navigation header-->
+    <string name="nav_header_title">Android Studio</string>
+    <string name="nav_header_subtitle">android.studio@android.com</string>
+    <string name="nav_header_desc">Navigation header</string>
+
+    <!--Dialogs-->
     <string name="time_error_msg">End time might be bigger than start time</string>
+    <string name="events_title">Events</string>
+    <string name="tasks_title">Tasks</string>
+    <string name="ok_button">OK</string>
+    <string name="cancel_button">Cancel</string>
+
 </resources>

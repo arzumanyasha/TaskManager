@@ -49,14 +49,14 @@ public class EventsDialog extends AppCompatDialogFragment {
         View view = inflater.inflate(R.layout.dialog_events, null);
 
         builder.setView(view)
-                .setTitle("Events")
-                .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                .setTitle(getString(R.string.events_title))
+                .setNegativeButton(getString(R.string.cancel_button), new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
 
                     }
                 })
-                .setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+                .setPositiveButton(getString(R.string.ok_button), new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         if (mStartTime.getTime() < mEndTime.getTime()) {

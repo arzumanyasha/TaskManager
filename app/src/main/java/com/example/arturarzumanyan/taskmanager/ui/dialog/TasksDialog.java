@@ -43,14 +43,14 @@ public class TasksDialog extends AppCompatDialogFragment {
         mTextViewTaskDate = view.findViewById(R.id.textViewTaskDate);
 
         builder.setView(view)
-                .setTitle("Tasks")
-                .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                .setTitle(getString(R.string.tasks_title))
+                .setNegativeButton(getString(R.string.cancel_button), new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
 
                     }
                 })
-                .setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+                .setPositiveButton(getString(R.string.ok_button), new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         TasksRepository tasksRepository = new TasksRepository(getActivity());
@@ -62,19 +62,24 @@ public class TasksDialog extends AppCompatDialogFragment {
                             tasksRepository.updateTask(task);
                         } else if (!mEditTextTaskName.getText().toString().isEmpty() && (bundle.getParcelable(TASKS_KEY) == null)) {
                             Task task;
+                            String taskId = UUID.randomUUID().toString();
+                            String taskName = mEditTextTaskName.getText().toString();
+                            String taskDescription = mEditTextTaskDescription.getText().toString();
+                            int isExecuted = 0;
+                            int taskListId = bundle.getInt(TASK_LIST_ID_KEY);
                             if (mTextViewTaskDate.getText().equals("Set task date")) {
-                                task = new Task(UUID.randomUUID().toString(),
-                                        mEditTextTaskName.getText().toString(),
-                                        mEditTextTaskDescription.getText().toString(),
-                                        0,
-                                        bundle.getInt(TASK_LIST_ID_KEY)
+                                task = new Task(taskId,
+                                        taskName,
+                                        taskDescription,
+                                        isExecuted,
+                                        taskListId
                                 );
                             } else {
-                                task = new Task(UUID.randomUUID().toString(),
-                                        mEditTextTaskName.getText().toString(),
-                                        mEditTextTaskDescription.getText().toString(),
-                                        0,
-                                        bundle.getInt(TASK_LIST_ID_KEY),
+                                task = new Task(taskId,
+                                        taskName,
+                                        taskDescription,
+                                        isExecuted,
+                                        taskListId,
                                         DateUtils.getTaskDateFromString(mTextViewTaskDate.getText().toString())
                                 );
                             }

@@ -6,7 +6,6 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Date;
 
@@ -30,15 +29,13 @@ public class TasksParser {
                 JSONObject explrObject = jsonArray.getJSONObject(i);
                 tasksList.add(parseTask(explrObject, taskListId));
             }
-        } catch (ParseException e) {
-            e.printStackTrace();
         } catch (JSONException e) {
             e.printStackTrace();
         }
         return tasksList;
     }
 
-    private Task parseTask(JSONObject jsonObject, int taskListId) throws JSONException, ParseException {
+    private Task parseTask(JSONObject jsonObject, int taskListId) throws JSONException {
 
         String description;
         if (!jsonObject.isNull(NOTES_KEY)) {
@@ -56,18 +53,21 @@ public class TasksParser {
 
         Task task;
 
+        String id = jsonObject.getString(ID_KEY);
+        String name = jsonObject.getString(TITLE_KEY);
+
         if (!jsonObject.isNull(DUE_KEY)) {
             Date date = DateUtils.getTaskDateFromString(jsonObject.getString(DUE_KEY));
 
-            task = new Task(jsonObject.getString(ID_KEY),
-                    jsonObject.getString(TITLE_KEY),
+            task = new Task(id,
+                    name,
                     description,
                     isExecuted,
                     taskListId,
                     date);
         } else {
-            task = new Task(jsonObject.getString(ID_KEY),
-                    jsonObject.getString(TITLE_KEY),
+            task = new Task(id,
+                    name,
                     description,
                     isExecuted,
                     taskListId);
@@ -81,8 +81,6 @@ public class TasksParser {
             JSONObject jsonobject = new JSONObject(buffer);
             return parseTask(jsonobject, taskListId);
         } catch (JSONException e) {
-            e.printStackTrace();
-        } catch (ParseException e) {
             e.printStackTrace();
         }
         return null;
