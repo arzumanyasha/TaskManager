@@ -1,8 +1,13 @@
 package com.example.arturarzumanyan.taskmanager.domain;
 
+import android.os.Parcel;
+import android.os.Parcelable;
+
+import com.example.arturarzumanyan.taskmanager.networking.util.DateUtils;
+
 import java.util.Date;
 
-public class Event {
+public class Event implements Parcelable{
     private String id;
     private String name;
     private String description;
@@ -26,6 +31,28 @@ public class Event {
         this.endTime = endTime;
         this.isNotify = isNotify;
     }
+
+    protected Event(Parcel in) {
+        id = in.readString();
+        name = in.readString();
+        description = in.readString();
+        colorId = in.readInt();
+        startTime = DateUtils.getEventDateFromString(in.readString());
+        endTime = DateUtils.getEventDateFromString(in.readString());
+        isNotify = in.readByte() != 0;
+    }
+
+    public static final Creator<Event> CREATOR = new Creator<Event>() {
+        @Override
+        public Event createFromParcel(Parcel in) {
+            return new Event(in);
+        }
+
+        @Override
+        public Event[] newArray(int size) {
+            return new Event[size];
+        }
+    };
 
     public String getId() {
         return id;
@@ -81,5 +108,21 @@ public class Event {
 
     public void setNotify(boolean notify) {
         isNotify = notify;
+    }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeString(id);
+        dest.writeString(name);
+        dest.writeString(description);
+        dest.writeInt(colorId);
+        dest.writeString(DateUtils.formatTaskDate(startTime));
+        dest.writeString(DateUtils.formatTaskDate(endTime));
+        dest.writeByte((byte) (isNotify ? 1 : 0));
     }
 }

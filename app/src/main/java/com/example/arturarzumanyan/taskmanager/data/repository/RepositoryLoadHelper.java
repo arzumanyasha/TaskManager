@@ -10,10 +10,11 @@ import com.example.arturarzumanyan.taskmanager.auth.TokenStorage;
 import com.example.arturarzumanyan.taskmanager.networking.UserDataAsyncTask;
 import com.example.arturarzumanyan.taskmanager.networking.base.RequestParameters;
 
+import java.io.IOException;
 import java.util.HashMap;
 
 public class RepositoryLoadHelper {
-    private static final String AUTHORIZATION_KEY = "Authorization";
+    public static final String AUTHORIZATION_KEY = "Authorization";
 
     private Context mContext;
 
@@ -22,27 +23,28 @@ public class RepositoryLoadHelper {
     }
 
     public void requestUserData(UserDataAsyncTask asyncTask, String url) {
-        TokenStorage tokenStorage = new TokenStorage();
-
         FirebaseWebService.RequestMethods requestMethod = FirebaseWebService.RequestMethods.GET;
-        HashMap<String, String> requestBodyParameters = new HashMap<>();
-        HashMap<String, String> requestHeaderParameters = new HashMap<>();
-        String token = tokenStorage.getAccessToken(mContext);
-        requestHeaderParameters.put(AUTHORIZATION_KEY, "Bearer " + tokenStorage.getAccessToken(mContext));
-        RequestParameters requestParameters = new RequestParameters(url,
+        RequestParameters requestParameters = new RequestParameters(mContext,
+                url,
                 requestMethod,
-                requestBodyParameters,
-                requestHeaderParameters);
+                new HashMap<String, String>()
+        );
+        requestParameters.setRequestHeaderParameters(new HashMap<String, String>());
         asyncTask.executeOnExecutor(AsyncTask.SERIAL_EXECUTOR, requestParameters);
     }
 
     public boolean isOnline() {
-        ConnectivityManager cm =
-                (ConnectivityManager) mContext.getSystemService(Context.CONNECTIVITY_SERVICE);
-        NetworkInfo netInfo = cm.getActiveNetworkInfo();
-        if (netInfo != null && netInfo.isConnectedOrConnecting()) {
-            return true;
+        Runtime runtime = Runtime.getRuntime();
+        try {
+            Process ipProcess = runtime.exec("/system/bin/ping -c 1 8.8.8.8");
+            int exitValue = ipProcess.waitFor();
+            return (exitValue == 0);
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
         }
+
         return false;
     }
 }

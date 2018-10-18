@@ -22,7 +22,7 @@ import java.util.Date;
 
 public class SQLiteDbHelper extends SQLiteOpenHelper {
     private static final String DATABASE_NAME = "Tasks.db";
-    private static final int DATABASE_VERSION = 26;
+    private static final int DATABASE_VERSION = 27;
 
     private SQLiteDatabase mDb;
 
@@ -116,25 +116,54 @@ public class SQLiteDbHelper extends SQLiteOpenHelper {
     public void insertTasks(ArrayList<Task> tasksArrayList) {
         mDb = getWritableDatabase();
         for (int i = 0; i < tasksArrayList.size(); i++) {
-            ContentValues cv = new ContentValues();
-
-            cv.put(TasksTable.COLUMN_TASK_ID, tasksArrayList.get(i).getId());
-            cv.put(TasksTable.COLUMN_TITLE, tasksArrayList.get(i).getName());
-            cv.put(TasksTable.COLUMN_NOTES, tasksArrayList.get(i).getDescription());
-
-            if (tasksArrayList.get(i).isExecuted()) {
-                cv.put(TasksTable.COLUMN_STATUS, 1);
-            } else {
-                cv.put(TasksTable.COLUMN_STATUS, 0);
-            }
-
-            if (tasksArrayList.get(i).getDate() != null) {
-                cv.put(TasksTable.COLUMN_DUE, DateUtils.formatTaskDate(tasksArrayList.get(i).getDate()));
-            }
-            cv.put(TasksTable.COLUMN_LIST_ID, tasksArrayList.get(i).getListId());
-
-            mDb.insert(TasksTable.TABLE_NAME, null, cv);
+            insertTask(tasksArrayList.get(i));
         }
+    }
+
+    public void insertTask(Task task) {
+        mDb = getWritableDatabase();
+        ContentValues cv = new ContentValues();
+
+        cv.put(TasksTable.COLUMN_TASK_ID, task.getId());
+        cv.put(TasksTable.COLUMN_TITLE, task.getName());
+        cv.put(TasksTable.COLUMN_NOTES, task.getDescription());
+/*
+        if (task.isExecuted()) {
+            cv.put(TasksTable.COLUMN_STATUS, 1);
+        } else {
+            cv.put(TasksTable.COLUMN_STATUS, 0);
+        }
+*/
+        cv.put(TasksTable.COLUMN_STATUS, task.getIsExecuted());
+        if (task.getDate() != null) {
+            cv.put(TasksTable.COLUMN_DUE, DateUtils.formatTaskDate(task.getDate()));
+        }
+        cv.put(TasksTable.COLUMN_LIST_ID, task.getListId());
+
+        mDb.insert(TasksTable.TABLE_NAME, null, cv);
+    }
+
+    public void updateTask(Task task) {
+        mDb = getWritableDatabase();
+
+        ContentValues cv = new ContentValues();
+
+        cv.put(TasksTable.COLUMN_TITLE, task.getName());
+        cv.put(TasksTable.COLUMN_NOTES, task.getDescription());
+
+        cv.put(TasksTable.COLUMN_STATUS, task.getIsExecuted());
+
+        if (task.getDate() != null) {
+            cv.put(TasksTable.COLUMN_DUE, DateUtils.formatTaskDate(task.getDate()));
+        }
+        cv.put(TasksTable.COLUMN_LIST_ID, task.getListId());
+
+        mDb.update(TasksTable.TABLE_NAME, cv, "id = ?", new String[]{task.getId()});
+    }
+
+    public void deleteTask(Task task) {
+        mDb = getWritableDatabase();
+        mDb.delete(TasksTable.TABLE_NAME, "id = ?", new String[]{task.getId()});
     }
 
     public ArrayList<Event> getEvents() {
@@ -186,49 +215,39 @@ public class SQLiteDbHelper extends SQLiteOpenHelper {
 
     public ArrayList<Task> getTasksFromList(int tasksListId) {
         ArrayList<Task> tasksList = new ArrayList<>();
-        try {
-            mDb = getReadableDatabase();
+        mDb = getReadableDatabase();
 
-            String[] selectionArgs = new String[]{Integer.toString(tasksListId)};
-            Cursor c = mDb.rawQuery("SELECT * FROM " + TasksTable.TABLE_NAME +
-                    " WHERE " + TasksTable.COLUMN_LIST_ID + " = ?", selectionArgs);
+        String[] selectionArgs = new String[]{Integer.toString(tasksListId)};
+        Cursor c = mDb.rawQuery("SELECT * FROM " + TasksTable.TABLE_NAME +
+                " WHERE " + TasksTable.COLUMN_LIST_ID + " = ?", selectionArgs);
 
-            if (c.moveToFirst()) {
-                do {
-                    Boolean isExecuted;
-                    if (c.getInt(c.getColumnIndex(TasksTable.COLUMN_STATUS)) == 1) {
-                        isExecuted = true;
-                    } else
-                        isExecuted = false;
+        if (c.moveToFirst()) {
+            do {
+                Task task;
 
-                    Task task;
+                if (c.getString(c.getColumnIndex(TasksTable.COLUMN_DUE)) != null) {
+                    Date date = DateUtils.getTaskDateFromString(c.getString(c.getColumnIndex(TasksTable.COLUMN_DUE)));
 
-                    if (c.getString(c.getColumnIndex(TasksTable.COLUMN_DUE)) != null) {
-                        Date date = DateUtils.getTaskDateFromString(c.getString(c.getColumnIndex(TasksTable.COLUMN_DUE)));
-
-                        task = new Task(c.getString(c.getColumnIndex(TasksTable.COLUMN_TASK_ID)),
-                                c.getString(c.getColumnIndex(TasksTable.COLUMN_TITLE)),
-                                c.getString(c.getColumnIndex(TasksTable.COLUMN_NOTES)),
-                                isExecuted,
-                                date,
-                                tasksListId
-                        );
-                    } else task = new Task(c.getString(c.getColumnIndex(TasksTable.COLUMN_TASK_ID)),
+                    task = new Task(c.getString(c.getColumnIndex(TasksTable.COLUMN_TASK_ID)),
                             c.getString(c.getColumnIndex(TasksTable.COLUMN_TITLE)),
                             c.getString(c.getColumnIndex(TasksTable.COLUMN_NOTES)),
-                            isExecuted,
-                            tasksListId
+                            c.getInt(c.getColumnIndex(TasksTable.COLUMN_STATUS)),
+                            tasksListId,
+                            date
                     );
+                } else task = new Task(c.getString(c.getColumnIndex(TasksTable.COLUMN_TASK_ID)),
+                        c.getString(c.getColumnIndex(TasksTable.COLUMN_TITLE)),
+                        c.getString(c.getColumnIndex(TasksTable.COLUMN_NOTES)),
+                        c.getInt(c.getColumnIndex(TasksTable.COLUMN_STATUS)),
+                        tasksListId
+                );
 
-                    tasksList.add(task);
-                } while (c.moveToNext());
-            }
-
-            c.close();
-            return tasksList;
-        } catch (ParseException e) {
-            return tasksList;
+                tasksList.add(task);
+            } while (c.moveToNext());
         }
+
+        c.close();
+        return tasksList;
     }
 
     public ArrayList<TaskList> getTaskLists() {
@@ -250,5 +269,28 @@ public class SQLiteDbHelper extends SQLiteOpenHelper {
 
         c.close();
         return taskListArrayList;
+    }
+
+    public TaskList getTaskList(int id) {
+        mDb = getReadableDatabase();
+
+        String[] selectionArgs = new String[]{Integer.toString(id)};
+        Cursor c = mDb.rawQuery("SELECT * FROM " + TaskListTable.TABLE_NAME +
+                " WHERE " + TaskListTable._ID + " = ?", selectionArgs);
+
+        if (c.moveToFirst()) {
+            do {
+                TaskList taskList = new TaskList(c.getInt(c.getColumnIndex(TaskListTable._ID)),
+                        c.getString(c.getColumnIndex(TaskListTable.COLUMN_LIST_ID)),
+                        c.getString(c.getColumnIndex(TaskListTable.COLUMN_TITLE))
+                );
+
+                return taskList;
+
+            } while (c.moveToNext());
+        }
+
+        c.close();
+        return null;
     }
 }

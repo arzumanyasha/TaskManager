@@ -52,4 +52,29 @@ public class TasksRepository {
 
         void onfail();
     }
+
+    public void addTask(Task task) {
+        if (mRepositoryLoadHelper.isOnline()) {
+            mTasksCloudStore.addTask(task);
+        } else {
+            mTasksDbStore.addTask(task);
+        }
+    }
+
+    public void updateTask(Task task) {
+        if (mRepositoryLoadHelper.isOnline()) {
+            mTasksCloudStore.updateTask(task);
+        } else {
+            mTasksDbStore.updateTask(task);
+        }
+    }
+
+    public void deleteTask(Task task) {
+        if (mRepositoryLoadHelper.isOnline()) {
+            mTasksCloudStore.deleteTask(task);
+        } else {
+            mTasksDbStore.deleteTask(task);
+        }
+
+    }
 }

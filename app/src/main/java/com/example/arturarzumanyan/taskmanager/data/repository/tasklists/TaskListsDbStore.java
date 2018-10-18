@@ -28,6 +28,9 @@ public class TaskListsDbStore {
 
     }
 
+    public TaskList getTaskList(int id) {
+        return mSqliteDbHelper.getTaskList(id);
+    }
 
     public void updateTaskList(TaskList taskList) {
 

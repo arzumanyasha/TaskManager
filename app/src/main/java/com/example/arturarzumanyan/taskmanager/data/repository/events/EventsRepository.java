@@ -45,7 +45,8 @@ public class EventsRepository {
         return mEventsDbStore.getDailyEvents();
     }
 
-    public void addEvent() {
+    public void addEvent(Event event) {
+        mEventsDbStore.addEvent(event);
     }
 
     public void updateEvent() {
