@@ -13,23 +13,38 @@ public class TaskListsParser {
     public static final String ID_KEY = "id";
     public static final String TITLE_KEY = "title";
 
-    public ArrayList<TaskList> parseTaskLists(String buffer) throws JSONException {
+    public ArrayList<TaskList> parseTaskLists(String buffer) {
 
         ArrayList<TaskList> taskListArrayList = new ArrayList<>();
-        JSONObject jsonobject = new JSONObject(buffer);
-        JSONArray jsonArray = jsonobject.getJSONArray(ITEMS_KEY);
-        for (int i = 0; i < jsonArray.length(); i++) {
-            JSONObject explrObject = jsonArray.getJSONObject(i);
-            taskListArrayList.add(parseTaskLists(explrObject));
+        try {
+            JSONObject jsonobject = new JSONObject(buffer);
+            JSONArray jsonArray = jsonobject.getJSONArray(ITEMS_KEY);
+            for (int i = 0; i < jsonArray.length(); i++) {
+                JSONObject explrObject = jsonArray.getJSONObject(i);
+                taskListArrayList.add(parseTaskList(explrObject));
+            }
+        } catch (JSONException e) {
+            e.printStackTrace();
         }
+
         return taskListArrayList;
     }
 
-    private TaskList parseTaskLists(JSONObject jsonObject) throws JSONException {
+    private TaskList parseTaskList(JSONObject jsonObject) throws JSONException {
 
         TaskList taskList = new TaskList(jsonObject.getString(ID_KEY),
                 jsonObject.getString(TITLE_KEY));
 
         return taskList;
+    }
+
+    public TaskList parseTaskList(String buffer) {
+        try {
+            JSONObject jsonobject = new JSONObject(buffer);
+            return parseTaskList(jsonobject);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 }

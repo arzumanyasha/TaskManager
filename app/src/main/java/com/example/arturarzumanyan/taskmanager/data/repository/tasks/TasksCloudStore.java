@@ -75,7 +75,10 @@ public class TasksCloudStore {
         sendRequest(task, url, FirebaseWebService.RequestMethods.PATCH);
     }
 
-    private void sendRequest(final Task task, String url, final FirebaseWebService.RequestMethods requestMethod) {
+    private void sendRequest(final Task task,
+                             String url,
+                             final FirebaseWebService.RequestMethods requestMethod) {
+
         HashMap<String, String> requestBody = new HashMap<>();
 
         requestBody.put(TITLE_KEY, task.getName());
@@ -105,7 +108,6 @@ public class TasksCloudStore {
             @Override
             public void onDataLoaded(String response) {
                 if (!response.equals("")) {
-                    String asdfa = response;
                     TasksDbStore tasksDbStore = new TasksDbStore(mContext);
                     TasksParser tasksParser = new TasksParser();
                     if (requestMethod == FirebaseWebService.RequestMethods.POST) {

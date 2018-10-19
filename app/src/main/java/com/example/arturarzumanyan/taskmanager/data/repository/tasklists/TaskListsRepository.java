@@ -66,13 +66,28 @@ public class TaskListsRepository {
         }
     }
 
-    public void addTaskList() {
+    public void addTaskList(TaskList taskList) {
+        if (mRepositoryLoadHelper.isOnline()) {
+            mTaskListsCloudStore.addTaskList(taskList);
+        } else {
+            mTaskListsDbStore.addTaskList(taskList);
+        }
     }
 
-    public void updateTaskList() {
+    public void updateTaskList(TaskList taskList) {
+        if (mRepositoryLoadHelper.isOnline()) {
+            mTaskListsCloudStore.updateTaskList(taskList);
+        } else {
+            mTaskListsDbStore.updateTaskList(taskList);
+        }
     }
 
-    public void deleteTaskList() {
+    public void deleteTaskList(TaskList taskList) {
+        if (mRepositoryLoadHelper.isOnline()) {
+            mTaskListsCloudStore.deleteTaskList(taskList);
+        } else {
+            mTaskListsDbStore.deleteTaskList(taskList);
+        }
     }
 
     public interface OnTaskListsLoadedListener {

@@ -27,6 +27,7 @@ import com.example.arturarzumanyan.taskmanager.data.repository.tasklists.TaskLis
 import com.example.arturarzumanyan.taskmanager.domain.Event;
 import com.example.arturarzumanyan.taskmanager.domain.TaskList;
 import com.example.arturarzumanyan.taskmanager.ui.dialog.EventsDialog;
+import com.example.arturarzumanyan.taskmanager.ui.dialog.TaskListsDialog;
 import com.example.arturarzumanyan.taskmanager.ui.dialog.TasksDialog;
 import com.example.arturarzumanyan.taskmanager.ui.fragment.EventsFragment;
 import com.example.arturarzumanyan.taskmanager.ui.fragment.TasksFragment;
@@ -40,6 +41,7 @@ import static com.example.arturarzumanyan.taskmanager.ui.fragment.TasksFragment.
 public class IntentionActivity extends AppCompatActivity {
     public static final String EVENTS_KEY = "Events";
     public static final String TASKS_KEY = "Tasks";
+    public static final String TASK_LISTS_KEY = "TaskLists";
     private final String CHANNEL_ID = "notification_channel";
     private final int NOTIFICATION_ID = 001;
     private NavigationView mNavigationView;
@@ -147,6 +149,9 @@ public class IntentionActivity extends AppCompatActivity {
         TextView userEmailTextView = mNavigationView
                 .getHeaderView(0)
                 .findViewById(R.id.textViewUserEmail);
+        TextView addTaskListTextView = mNavigationView
+                .findViewById(R.id.textViewAddTaskList);
+
         userNameTextView.setText(mUserData.getStringExtra(SignInActivity.EXTRA_USER_NAME));
         userEmailTextView.setText(mUserData.getStringExtra(SignInActivity.EXTRA_USER_EMAIL));
         Picasso.get()
@@ -181,6 +186,22 @@ public class IntentionActivity extends AppCompatActivity {
                 }
             });
         }
+
+        addTaskListTextView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                openTaskListCreatingDialog();
+            }
+        });
+        /*
+        taskListsMenu.add("Add")
+                .setIcon(R.drawable.ic_add_black_24dp)
+                .setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
+                    @Override
+                    public boolean onMenuItemClick(MenuItem item) {
+                        return false;
+                    }
+                });*/
     }
 
     private void notifyDataLoaded() {
@@ -211,6 +232,11 @@ public class IntentionActivity extends AppCompatActivity {
         tasksDialog.show(getSupportFragmentManager(), TASKS_KEY);
     }
 
+    private void openTaskListCreatingDialog() {
+        TaskListsDialog taskListsDialog = new TaskListsDialog();
+        taskListsDialog.show(getSupportFragmentManager(), TASK_LISTS_KEY);
+    }
+
     private void openFragment(Fragment fragment) {
         FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
         transaction.replace(R.id.main_container, fragment);
@@ -239,8 +265,25 @@ public class IntentionActivity extends AppCompatActivity {
 
         int id = item.getItemId();
 
-        if (id == R.id.action_settings) {
-            return true;
+        TaskList taskList = null;
+
+        for (int i = 0; i < mTaskLists.size(); i++) {
+            if (getTitle() == mTaskLists.get(i).getTitle()) {
+                taskList = mTaskLists.get(i);
+            }
+        }
+
+        if (id == R.id.update_task_list) {
+            TaskListsDialog taskListsDialog = new TaskListsDialog();
+            Bundle bundle = new Bundle();
+
+            bundle.putParcelable(TASK_LISTS_KEY, taskList);
+            taskListsDialog.setArguments(bundle);
+            taskListsDialog.show(getSupportFragmentManager(), TASK_LISTS_KEY);
+
+        } else if (id == R.id.delete_task_list) {
+            TaskListsRepository taskListsRepository = new TaskListsRepository(IntentionActivity.this);
+            taskListsRepository.deleteTaskList(taskList);
         }
 
         return super.onOptionsItemSelected(item);

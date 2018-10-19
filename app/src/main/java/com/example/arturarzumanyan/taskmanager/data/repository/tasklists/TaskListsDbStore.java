@@ -25,7 +25,7 @@ public class TaskListsDbStore {
     }
 
     public void addTaskList(TaskList taskList) {
-
+        mSqliteDbHelper.insertTaskList(taskList);
     }
 
     public TaskList getTaskList(int id) {
@@ -33,10 +33,10 @@ public class TaskListsDbStore {
     }
 
     public void updateTaskList(TaskList taskList) {
-
+        mSqliteDbHelper.updateTaskList(taskList);
     }
 
     public void deleteTaskList(TaskList taskList) {
-
+        mSqliteDbHelper.deleteTaskList(taskList);
     }
 }

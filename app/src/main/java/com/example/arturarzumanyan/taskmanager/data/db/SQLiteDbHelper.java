@@ -104,13 +104,38 @@ public class SQLiteDbHelper extends SQLiteOpenHelper {
     public void insertTaskLists(ArrayList<TaskList> taskListArrayList) {
         mDb = getWritableDatabase();
         for (int i = 0; i < taskListArrayList.size(); i++) {
-            ContentValues cv = new ContentValues();
-
-            cv.put(TaskListTable.COLUMN_LIST_ID, taskListArrayList.get(i).getTaskListId());
-            cv.put(TaskListTable.COLUMN_TITLE, taskListArrayList.get(i).getTitle());
-
-            mDb.insert(TaskListTable.TABLE_NAME, null, cv);
+            insertTaskList(taskListArrayList.get(i));
         }
+    }
+
+    public void insertTaskList(TaskList taskList) {
+        mDb = getWritableDatabase();
+
+        ContentValues cv = new ContentValues();
+
+        cv.put(TaskListTable.COLUMN_LIST_ID, taskList.getTaskListId());
+        cv.put(TaskListTable.COLUMN_TITLE, taskList.getTitle());
+
+        mDb.insert(TaskListTable.TABLE_NAME, null, cv);
+    }
+
+
+    public void updateTaskList(TaskList taskList) {
+        mDb = getWritableDatabase();
+
+        ContentValues cv = new ContentValues();
+
+        cv.put(TaskListTable.COLUMN_LIST_ID, taskList.getTaskListId());
+        cv.put(TaskListTable.COLUMN_TITLE, taskList.getTitle());
+
+        mDb.update(TaskListTable.TABLE_NAME, cv, "_id = ",
+                new String[]{Integer.toString(taskList.getId())});
+    }
+
+    public void deleteTaskList(TaskList taskList) {
+        mDb = getWritableDatabase();
+        mDb.delete(TaskListTable.TABLE_NAME, "_id = ?",
+                new String[]{Integer.toString(taskList.getId())});
     }
 
     public void insertTasks(ArrayList<Task> tasksArrayList) {
@@ -127,13 +152,7 @@ public class SQLiteDbHelper extends SQLiteOpenHelper {
         cv.put(TasksTable.COLUMN_TASK_ID, task.getId());
         cv.put(TasksTable.COLUMN_TITLE, task.getName());
         cv.put(TasksTable.COLUMN_NOTES, task.getDescription());
-/*
-        if (task.isExecuted()) {
-            cv.put(TasksTable.COLUMN_STATUS, 1);
-        } else {
-            cv.put(TasksTable.COLUMN_STATUS, 0);
-        }
-*/
+
         cv.put(TasksTable.COLUMN_STATUS, task.getIsExecuted());
         if (task.getDate() != null) {
             cv.put(TasksTable.COLUMN_DUE, DateUtils.formatTaskDate(task.getDate()));
@@ -181,35 +200,31 @@ public class SQLiteDbHelper extends SQLiteOpenHelper {
 
     private ArrayList<Event> getEventsFromCursor(Cursor c) {
         ArrayList<Event> eventsList = new ArrayList<>();
-        try {
-            if (c.moveToFirst()) {
-                do {
-                    Date startDate = DateUtils.getEventDateFromString(c.getString(c.getColumnIndex(EventsTable.COLUMN_START_TIME)));
-                    Date endDate = DateUtils.getEventDateFromString(c.getString(c.getColumnIndex(EventsTable.COLUMN_END_TIME)));
-                    Boolean isNotify;
-                    if (c.getInt(c.getColumnIndex(EventsTable.COLUMN_REMINDER)) == 1) {
-                        isNotify = true;
-                    } else
-                        isNotify = false;
+        if (c.moveToFirst()) {
+            do {
+                Date startDate = DateUtils.getEventDateFromString(c.getString(c.getColumnIndex(EventsTable.COLUMN_START_TIME)));
+                Date endDate = DateUtils.getEventDateFromString(c.getString(c.getColumnIndex(EventsTable.COLUMN_END_TIME)));
+                Boolean isNotify;
+                if (c.getInt(c.getColumnIndex(EventsTable.COLUMN_REMINDER)) == 1) {
+                    isNotify = true;
+                } else
+                    isNotify = false;
 
-                    Event event = new Event(c.getString(c.getColumnIndex(EventsTable.COLUMN_EVENT_ID)),
-                            c.getString(c.getColumnIndex(EventsTable.COLUMN_NAME)),
-                            c.getString(c.getColumnIndex(EventsTable.COLUMN_DESCRIPTION)),
-                            c.getInt(c.getColumnIndex(EventsTable.COLUMN_COLOR_ID)),
-                            startDate,
-                            endDate,
-                            isNotify
-                    );
+                Event event = new Event(c.getString(c.getColumnIndex(EventsTable.COLUMN_EVENT_ID)),
+                        c.getString(c.getColumnIndex(EventsTable.COLUMN_NAME)),
+                        c.getString(c.getColumnIndex(EventsTable.COLUMN_DESCRIPTION)),
+                        c.getInt(c.getColumnIndex(EventsTable.COLUMN_COLOR_ID)),
+                        startDate,
+                        endDate,
+                        isNotify
+                );
 
-                    eventsList.add(event);
-                } while (c.moveToNext());
-            }
-
-            c.close();
-            return eventsList;
-        } catch (ParseException e) {
-            return eventsList;
+                eventsList.add(event);
+            } while (c.moveToNext());
         }
+
+        c.close();
+        return eventsList;
 
     }
 

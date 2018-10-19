@@ -25,6 +25,9 @@
         <!--Tasks Dialog-->
             <string name="tasks_title">Tasks</string>
 
+        <!--TaskLists Dialog-->
+            <string name="task_lists_add_title">Add new list</string>
+
     <!--Res-->
         <!--Navigation header-->
             <string name="nav_header_title">Android Studio</string>

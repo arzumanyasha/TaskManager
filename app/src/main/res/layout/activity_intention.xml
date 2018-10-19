@@ -20,7 +20,28 @@
         android:layout_gravity="start"
         android:fitsSystemWindows="true"
         app:headerLayout="@layout/nav_header_intention"
-        app:menu="@menu/activity_intention_drawer" />
+        app:menu="@menu/activity_intention_drawer">
+
+        <RelativeLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:gravity="bottom">
+
+            <TextView
+                android:id="@+id/textViewAddTaskList"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_alignParentBottom="true"
+                android:text=" + Add list"
+                android:textAlignment="textStart"
+                android:textColor="@android:color/black"
+                android:textSize="24sp"
+                android:layout_gravity="start"
+                android:clickable="true"/>
+        </RelativeLayout>
+
+    </android.support.design.widget.NavigationView>
 
 
 </android.support.v4.widget.DrawerLayout>
