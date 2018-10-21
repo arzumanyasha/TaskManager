@@ -274,16 +274,19 @@ public class IntentionActivity extends AppCompatActivity {
         }
 
         if (id == R.id.update_task_list) {
-            TaskListsDialog taskListsDialog = new TaskListsDialog();
-            Bundle bundle = new Bundle();
+            if (!getTitle().equals(EVENTS_KEY)) {
+                TaskListsDialog taskListsDialog = new TaskListsDialog();
+                Bundle bundle = new Bundle();
 
-            bundle.putParcelable(TASK_LISTS_KEY, taskList);
-            taskListsDialog.setArguments(bundle);
-            taskListsDialog.show(getSupportFragmentManager(), TASK_LISTS_KEY);
-
+                bundle.putParcelable(TASK_LISTS_KEY, taskList);
+                taskListsDialog.setArguments(bundle);
+                taskListsDialog.show(getSupportFragmentManager(), TASK_LISTS_KEY);
+            }
         } else if (id == R.id.delete_task_list) {
-            TaskListsRepository taskListsRepository = new TaskListsRepository(IntentionActivity.this);
-            taskListsRepository.deleteTaskList(taskList);
+            if (!getTitle().equals(EVENTS_KEY)) {
+                TaskListsRepository taskListsRepository = new TaskListsRepository(IntentionActivity.this);
+                taskListsRepository.deleteTaskList(taskList);
+            }
         }
 
         return super.onOptionsItemSelected(item);

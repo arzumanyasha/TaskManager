@@ -152,7 +152,7 @@ public class FirebaseWebService implements GoogleApiClient.OnConnectionFailedLis
         mAccessTokenAsyncTask.execute(requestParameters);
     }
 
-    public void refreshAccessToken(Context context) {
+    public void refreshAccessToken(Context context, final AccessTokenUpdatedListener listener) {
         mContext = context;
         AccessTokenAsyncTask accessTokenAsyncTask = new AccessTokenAsyncTask();
         accessTokenAsyncTask.setTokensLoadingListener(new AccessTokenAsyncTask.TokensLoadingListener() {
@@ -161,6 +161,7 @@ public class FirebaseWebService implements GoogleApiClient.OnConnectionFailedLis
                 String accessToken = getAccessTokenFromBuffer(buffer);
 
                 mTokenStorage.writeAccessToken(mContext, accessToken);
+                listener.onAccessTokenUpdated();
             }
         });
 
@@ -206,4 +207,15 @@ public class FirebaseWebService implements GoogleApiClient.OnConnectionFailedLis
     }
 
     private UserInfoLoadingListener userInfoLoadingListener;
+
+    public interface AccessTokenUpdatedListener {
+        void onAccessTokenUpdated();
+    }
+
+    public void setAccessTokenUpdatedListener(AccessTokenUpdatedListener listener) {
+        this.accessTokenUpdatedListener = listener;
+    }
+
+    private AccessTokenUpdatedListener accessTokenUpdatedListener;
+
 }
