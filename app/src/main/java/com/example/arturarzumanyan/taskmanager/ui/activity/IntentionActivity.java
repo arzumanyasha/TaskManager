@@ -25,6 +25,7 @@ import com.example.arturarzumanyan.taskmanager.R;
 import com.example.arturarzumanyan.taskmanager.data.repository.events.EventsRepository;
 import com.example.arturarzumanyan.taskmanager.data.repository.tasklists.TaskListsRepository;
 import com.example.arturarzumanyan.taskmanager.domain.Event;
+import com.example.arturarzumanyan.taskmanager.domain.Task;
 import com.example.arturarzumanyan.taskmanager.domain.TaskList;
 import com.example.arturarzumanyan.taskmanager.ui.dialog.EventsDialog;
 import com.example.arturarzumanyan.taskmanager.ui.dialog.TaskListsDialog;
@@ -227,6 +228,12 @@ public class IntentionActivity extends AppCompatActivity {
                 Bundle bundle = new Bundle();
                 bundle.putInt(TASK_LIST_ID_KEY, mTaskLists.get(i).getId());
                 tasksDialog.setArguments(bundle);
+                tasksDialog.setTasksReadyListener(new TasksDialog.TasksReadyListener() {
+                    @Override
+                    public void onTasksReady(ArrayList<Task> tasks) {
+                        taskFragmentInteractionListener.onTasksReady(tasks);
+                    }
+                });
             }
         }
         tasksDialog.show(getSupportFragmentManager(), TASKS_KEY);
@@ -291,4 +298,15 @@ public class IntentionActivity extends AppCompatActivity {
 
         return super.onOptionsItemSelected(item);
     }
+
+    public interface TaskFragmentInteractionListener {
+        void onTasksReady(ArrayList<Task> tasks);
+    }
+
+    public void setTaskFragmentInteractionListener(TaskFragmentInteractionListener listener){
+        this.taskFragmentInteractionListener = listener;
+    }
+
+    private TaskFragmentInteractionListener taskFragmentInteractionListener;
 }
+

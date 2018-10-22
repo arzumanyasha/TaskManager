@@ -24,15 +24,22 @@ public class EventsParser {
     private static final String ID_KEY = "id";
     private static final String SUMMARY_KEY = "summary";
 
-    public ArrayList<Event> parseEvents(String buffer) throws JSONException, ParseException {
+    public ArrayList<Event> parseEvents(String buffer) {
 
         ArrayList<Event> eventsList = new ArrayList<>();
-        JSONObject jsonobject = new JSONObject(buffer);
-        JSONArray jsonArray = jsonobject.getJSONArray(ITEMS_KEY);
-        for (int i = 0; i < jsonArray.length(); i++) {
-            JSONObject explrObject = jsonArray.getJSONObject(i);
-            eventsList.add(parseEvent(explrObject));
+        try {
+            JSONObject jsonobject = new JSONObject(buffer);
+            JSONArray jsonArray = jsonobject.getJSONArray(ITEMS_KEY);
+            for (int i = 0; i < jsonArray.length(); i++) {
+                JSONObject explrObject = jsonArray.getJSONObject(i);
+                eventsList.add(parseEvent(explrObject));
+            }
+        } catch (ParseException e) {
+            e.printStackTrace();
+        } catch (JSONException e) {
+            e.printStackTrace();
         }
+
         return eventsList;
     }
 

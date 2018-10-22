@@ -60,26 +60,27 @@ public class TasksCloudStore {
 
     }
 
-    public void addTask(Task task) {
+    public void addTask(Task task, final OnTaskCompletedListener listener) {
         final String url = BASE_TASKS_URL +
                 mTaskListsDbStore.getTaskList(task.getListId()).getTaskListId() +
                 "/tasks";
 
-        sendRequest(task, url, FirebaseWebService.RequestMethods.POST);
+        sendRequest(task, url, FirebaseWebService.RequestMethods.POST, listener);
     }
 
-    public void updateTask(Task task) {
+    public void updateTask(Task task, final OnTaskCompletedListener listener) {
         final String url = BASE_TASKS_URL +
                 mTaskListsDbStore.getTaskList(task.getListId()).getTaskListId() +
                 "/tasks/" +
                 task.getId();
 
-        sendRequest(task, url, FirebaseWebService.RequestMethods.PATCH);
+        sendRequest(task, url, FirebaseWebService.RequestMethods.PATCH, listener);
     }
 
     private void sendRequest(final Task task,
                              final String url,
-                             final FirebaseWebService.RequestMethods requestMethod) {
+                             final FirebaseWebService.RequestMethods requestMethod,
+                             final OnTaskCompletedListener listener) {
 
         UserDataAsyncTask userDataAsyncTask = new UserDataAsyncTask();
         userDataAsyncTask.executeOnExecutor(AsyncTask.SERIAL_EXECUTOR,
@@ -90,6 +91,7 @@ public class TasksCloudStore {
             public void onDataLoaded(String response) {
                 if (!response.equals("")) {
                     createOrUpdateTaskInDb(response, task, requestMethod);
+                    listener.onSuccess(mTasksDbStore.getTasksFromTaskList(task.getListId()));
                 } else {
                     FirebaseWebService firebaseWebService = new FirebaseWebService();
                     firebaseWebService.refreshAccessToken(mContext, new FirebaseWebService.AccessTokenUpdatedListener() {
@@ -100,6 +102,7 @@ public class TasksCloudStore {
                                 @Override
                                 public void onDataLoaded(String response) {
                                     createOrUpdateTaskInDb(response, task, requestMethod);
+                                    listener.onSuccess(mTasksDbStore.getTasksFromTaskList(task.getListId()));
                                 }
                             });
                             updatedUserDataAsyncTask.executeOnExecutor(AsyncTask.SERIAL_EXECUTOR,

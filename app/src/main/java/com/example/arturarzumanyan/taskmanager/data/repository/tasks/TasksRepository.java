@@ -53,17 +53,17 @@ public class TasksRepository {
         void onfail();
     }
 
-    public void addTask(Task task) {
+    public void addTask(Task task, TasksCloudStore.OnTaskCompletedListener listener) {
         if (mRepositoryLoadHelper.isOnline()) {
-            mTasksCloudStore.addTask(task);
+            mTasksCloudStore.addTask(task, listener);
         } else {
             mTasksDbStore.addTask(task);
         }
     }
 
-    public void updateTask(Task task) {
+    public void updateTask(Task task, TasksCloudStore.OnTaskCompletedListener listener) {
         if (mRepositoryLoadHelper.isOnline()) {
-            mTasksCloudStore.updateTask(task);
+            mTasksCloudStore.updateTask(task, listener);
         } else {
             mTasksDbStore.updateTask(task);
         }
@@ -78,3 +78,4 @@ public class TasksRepository {
 
     }
 }
+

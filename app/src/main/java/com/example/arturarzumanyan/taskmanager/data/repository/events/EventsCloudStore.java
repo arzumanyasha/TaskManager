@@ -36,7 +36,7 @@ public class EventsCloudStore {
 
         mUserEventsAsyncTask.setDataInfoLoadingListener(new UserDataAsyncTask.UserDataLoadingListener() {
             @Override
-            public void onDataLoaded(String response) throws JSONException, ParseException {
+            public void onDataLoaded(String response) {
                 if (response.equals("")) {
                     FirebaseWebService firebaseWebService = new FirebaseWebService();
                     firebaseWebService.refreshAccessToken(mContext, new FirebaseWebService.AccessTokenUpdatedListener() {
@@ -46,7 +46,7 @@ public class EventsCloudStore {
                             mRepositoryLoadHelper.requestUserData(updatedUserDataAsyncTask, eventsUrl);
                             updatedUserDataAsyncTask.setDataInfoLoadingListener(new UserDataAsyncTask.UserDataLoadingListener() {
                                 @Override
-                                public void onDataLoaded(String response) throws JSONException, ParseException {
+                                public void onDataLoaded(String response) {
                                     EventsParser eventsParser = new EventsParser();
                                     mEventsList = eventsParser.parseEvents(response);
                                     listener.onSuccess(mEventsList);

@@ -16,6 +16,7 @@ import com.example.arturarzumanyan.taskmanager.data.repository.tasks.TasksDbStor
 import com.example.arturarzumanyan.taskmanager.data.repository.tasks.TasksRepository;
 import com.example.arturarzumanyan.taskmanager.domain.Task;
 import com.example.arturarzumanyan.taskmanager.networking.util.DateUtils;
+import com.example.arturarzumanyan.taskmanager.ui.activity.IntentionActivity;
 import com.example.arturarzumanyan.taskmanager.ui.adapter.TasksAdapter;
 import com.example.arturarzumanyan.taskmanager.ui.dialog.TasksDialog;
 
@@ -23,7 +24,7 @@ import java.util.ArrayList;
 
 import static com.example.arturarzumanyan.taskmanager.ui.activity.IntentionActivity.TASKS_KEY;
 
-public class TasksFragment extends Fragment {
+public class TasksFragment extends Fragment{
     private static final String ARG_PARAM1 = "param1";
     private static final String ARG_PARAM2 = "param2";
     public static final String TASK_LIST_ID_KEY = "taskListId";
@@ -34,6 +35,7 @@ public class TasksFragment extends Fragment {
 
     private RecyclerView mTasksRecyclerView;
     private ArrayList<Task> mTasks;
+    private TasksAdapter mTasksAdapter;
 
     private int mParam1;
     private String mParam2;
@@ -81,7 +83,7 @@ public class TasksFragment extends Fragment {
         mTasks = tasksDbStore.getTasksFromTaskList(mParam1);
         getActivity().setTitle(mParam2);
 
-        TasksAdapter tasksAdapter = new TasksAdapter(mTasks, new TasksAdapter.OnItemClickListener() {
+        mTasksAdapter = new TasksAdapter(mTasks, new TasksAdapter.OnItemClickListener() {
             @Override
             public void onItemDelete(Task task) {
                 TasksRepository tasksRepository = new TasksRepository(getActivity());
@@ -93,7 +95,13 @@ public class TasksFragment extends Fragment {
                 openTasksDialog(task);
             }
         });
-        mTasksRecyclerView.setAdapter(tasksAdapter);
+        ((IntentionActivity)getActivity()).setTaskFragmentInteractionListener(new IntentionActivity.TaskFragmentInteractionListener() {
+            @Override
+            public void onTasksReady(ArrayList<Task> tasks) {
+                mTasksAdapter.updateList(tasks);
+            }
+        });
+        mTasksRecyclerView.setAdapter(mTasksAdapter);
     }
 
     private void openTasksDialog(Task task) {
@@ -102,6 +110,12 @@ public class TasksFragment extends Fragment {
         bundle.putParcelable(TASKS_KEY, task);
         bundle.putInt(TASK_LIST_ID_KEY, mParam1);
         tasksDialog.setArguments(bundle);
+        tasksDialog.setTasksReadyListener(new TasksDialog.TasksReadyListener() {
+            @Override
+            public void onTasksReady(ArrayList<Task> tasks) {
+                mTasksAdapter.updateList(tasks);
+            }
+        });
         tasksDialog.show(getFragmentManager(), TASKS_KEY);
     }
 
