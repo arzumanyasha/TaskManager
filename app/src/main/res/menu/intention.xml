@@ -2,8 +2,14 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
     <item
-        android:id="@+id/action_settings"
+        android:id="@+id/update_task_list"
         android:orderInCategory="100"
-        android:title="@string/action_settings"
+        android:title="Update task list"
+        app:showAsAction="never" />
+
+    <item
+        android:id="@+id/delete_task_list"
+        android:orderInCategory="100"
+        android:title="Delete task list"
         app:showAsAction="never" />
 </menu>

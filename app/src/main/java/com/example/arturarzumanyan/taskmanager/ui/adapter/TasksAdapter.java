@@ -13,7 +13,7 @@ import com.example.arturarzumanyan.taskmanager.domain.Task;
 
 import java.util.List;
 
-public class TasksAdapter extends RecyclerView.Adapter<TasksAdapter.ViewHolder> implements View.OnClickListener {
+public class TasksAdapter extends RecyclerView.Adapter<TasksAdapter.ViewHolder> {
     private List<Task> mDataset;
     private OnItemClickListener mListener;
 
@@ -70,20 +70,6 @@ public class TasksAdapter extends RecyclerView.Adapter<TasksAdapter.ViewHolder> 
             holder.isExecutedCheckBox.setChecked(true);
         } else {
             holder.isExecutedCheckBox.setChecked(false);
-        }
-    }
-
-    @Override
-    public void onClick(View v) {
-        if (mListener != null) {
-            int position = (int) v.getTag();
-            if (position != RecyclerView.NO_POSITION) {
-                Task task = mDataset.get(position);
-                mListener.onItemDelete(task);
-                mDataset.remove(task);
-                notifyItemRemoved(position);
-                notifyItemRangeChanged(position, mDataset.size());
-            }
         }
     }
 

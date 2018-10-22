@@ -31,6 +31,7 @@ public class TasksCloudStore {
     private static final String BASE_TASKS_URL = "https://www.googleapis.com/tasks/v1/lists/";
 
     private TaskListsDbStore mTaskListsDbStore;
+    private TasksDbStore mTasksDbStore;
     private RepositoryLoadHelper mRepositoryLoadHelper;
     private ArrayList<UserDataAsyncTask> mUserTasksAsyncTaskList = new ArrayList<>();
 
@@ -40,6 +41,7 @@ public class TasksCloudStore {
         this.mContext = context;
         mRepositoryLoadHelper = new RepositoryLoadHelper(mContext);
         mTaskListsDbStore = new TaskListsDbStore(mContext);
+        mTasksDbStore = new TasksDbStore(mContext);
     }
 
     public void getTasksFromTaskList(TaskList taskList, final OnTaskCompletedListener listener) {
@@ -50,7 +52,7 @@ public class TasksCloudStore {
         mRepositoryLoadHelper.requestUserData(mUserTasksAsyncTaskList.get(position), url);
         mUserTasksAsyncTaskList.get(position).setDataInfoLoadingListener(new UserDataAsyncTask.UserDataLoadingListener() {
             @Override
-            public void onDataLoaded(String response) throws JSONException, ParseException {
+            public void onDataLoaded(String response) {
                 TasksParser tasksParser = new TasksParser();
                 listener.onSuccess(tasksParser.parseTasks(response, taskListId));
             }
@@ -75,50 +77,51 @@ public class TasksCloudStore {
         sendRequest(task, url, FirebaseWebService.RequestMethods.PATCH);
     }
 
-    private void sendRequest(final Task task, String url, final FirebaseWebService.RequestMethods requestMethod) {
-        HashMap<String, String> requestBody = new HashMap<>();
-
-        requestBody.put(TITLE_KEY, task.getName());
-
-        if (!task.getDescription().isEmpty()) {
-            requestBody.put(NOTES_KEY, task.getDescription());
-        }
-
-        if (task.getDate() != null) {
-            requestBody.put(DUE_KEY, DateUtils.formatTaskDate(task.getDate()));
-        }
-
-        HashMap<String, String> requestHeaderParameters = new HashMap<>();
-
-        requestHeaderParameters.put("Content-Type", JSON_CONTENT_TYPE_VALUE);
-
-        RequestParameters requestParameters = new RequestParameters(mContext,
-                url,
-                requestMethod,
-                requestBody);
-        requestParameters.setRequestHeaderParameters(requestHeaderParameters);
+    private void sendRequest(final Task task,
+                             final String url,
+                             final FirebaseWebService.RequestMethods requestMethod) {
 
         UserDataAsyncTask userDataAsyncTask = new UserDataAsyncTask();
-        userDataAsyncTask.executeOnExecutor(AsyncTask.SERIAL_EXECUTOR, requestParameters);
+        userDataAsyncTask.executeOnExecutor(AsyncTask.SERIAL_EXECUTOR,
+                mRepositoryLoadHelper.getTaskCreateOrUpdateParameters(task, url, requestMethod));
 
         userDataAsyncTask.setDataInfoLoadingListener(new UserDataAsyncTask.UserDataLoadingListener() {
             @Override
             public void onDataLoaded(String response) {
                 if (!response.equals("")) {
-                    String asdfa = response;
-                    TasksDbStore tasksDbStore = new TasksDbStore(mContext);
-                    TasksParser tasksParser = new TasksParser();
-                    if (requestMethod == FirebaseWebService.RequestMethods.POST) {
-                        tasksDbStore.addTask(tasksParser.parseTask(response, task.getListId()));
-                    } else if (requestMethod == FirebaseWebService.RequestMethods.PATCH) {
-                        tasksDbStore.updateTask(tasksParser.parseTask(response, task.getListId()));
-                    }
+                    createOrUpdateTaskInDb(response, task, requestMethod);
                 } else {
                     FirebaseWebService firebaseWebService = new FirebaseWebService();
-                    firebaseWebService.refreshAccessToken(mContext);
+                    firebaseWebService.refreshAccessToken(mContext, new FirebaseWebService.AccessTokenUpdatedListener() {
+                        @Override
+                        public void onAccessTokenUpdated() {
+                            UserDataAsyncTask updatedUserDataAsyncTask = new UserDataAsyncTask();
+                            updatedUserDataAsyncTask.setDataInfoLoadingListener(new UserDataAsyncTask.UserDataLoadingListener() {
+                                @Override
+                                public void onDataLoaded(String response) {
+                                    createOrUpdateTaskInDb(response, task, requestMethod);
+                                }
+                            });
+                            updatedUserDataAsyncTask.executeOnExecutor(AsyncTask.SERIAL_EXECUTOR,
+                                    mRepositoryLoadHelper.getTaskCreateOrUpdateParameters(task, url, requestMethod));
+
+                        }
+                    });
+
                 }
             }
         });
+    }
+
+    private void createOrUpdateTaskInDb(String response,
+                                        Task task,
+                                        FirebaseWebService.RequestMethods requestMethod) {
+        TasksParser tasksParser = new TasksParser();
+        if (requestMethod == FirebaseWebService.RequestMethods.POST) {
+            mTasksDbStore.addTask(tasksParser.parseTask(response, task.getListId()));
+        } else if (requestMethod == FirebaseWebService.RequestMethods.PATCH) {
+            mTasksDbStore.updateTask(tasksParser.parseTask(response, task.getListId()));
+        }
     }
 
     public void deleteTask(final Task task) {
@@ -127,26 +130,33 @@ public class TasksCloudStore {
                 "/tasks/" +
                 task.getId();
 
-        RequestParameters requestParameters = new RequestParameters(
-                mContext,
-                url,
-                FirebaseWebService.RequestMethods.DELETE,
-                new HashMap<String, String>()
-        );
-        requestParameters.setRequestHeaderParameters(new HashMap<String, String>());
         UserDataAsyncTask userDataAsyncTask = new UserDataAsyncTask();
 
-        userDataAsyncTask.executeOnExecutor(AsyncTask.SERIAL_EXECUTOR, requestParameters);
+        userDataAsyncTask.executeOnExecutor(AsyncTask.SERIAL_EXECUTOR, mRepositoryLoadHelper.getTaskDeleteParameters(url));
 
         userDataAsyncTask.setDataInfoLoadingListener(new UserDataAsyncTask.UserDataLoadingListener() {
             @Override
             public void onDataLoaded(String response) {
                 if (response.equals("")) {
                     FirebaseWebService firebaseWebService = new FirebaseWebService();
-                    firebaseWebService.refreshAccessToken(mContext);
-                } else if (response.equals("ok")){
-                    TasksDbStore tasksDbStore = new TasksDbStore(mContext);
-                    tasksDbStore.deleteTask(task);
+                    firebaseWebService.refreshAccessToken(mContext, new FirebaseWebService.AccessTokenUpdatedListener() {
+                        @Override
+                        public void onAccessTokenUpdated() {
+                            UserDataAsyncTask updatedUserDataAsyncTask = new UserDataAsyncTask();
+
+                            updatedUserDataAsyncTask.setDataInfoLoadingListener(new UserDataAsyncTask.UserDataLoadingListener() {
+                                @Override
+                                public void onDataLoaded(String response) {
+                                    mTasksDbStore.deleteTask(task);
+                                }
+                            });
+
+                            updatedUserDataAsyncTask.executeOnExecutor(AsyncTask.SERIAL_EXECUTOR,
+                                    mRepositoryLoadHelper.getTaskDeleteParameters(url));
+                        }
+                    });
+                } else if (response.equals("ok")) {
+                    mTasksDbStore.deleteTask(task);
                 }
             }
         });

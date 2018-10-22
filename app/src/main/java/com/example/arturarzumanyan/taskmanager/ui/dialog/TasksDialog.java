@@ -54,16 +54,16 @@ public class TasksDialog extends AppCompatDialogFragment {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         TasksRepository tasksRepository = new TasksRepository(getActivity());
-                        if (!mEditTextTaskName.getText().toString().isEmpty() && (bundle.getParcelable(TASKS_KEY) != null)) {
+                        String taskName = mEditTextTaskName.getText().toString();
+                        if (!taskName.isEmpty() && (bundle.getParcelable(TASKS_KEY) != null)) {
                             Task task = bundle.getParcelable(TASKS_KEY);
-                            task.setName(mEditTextTaskName.getText().toString());
+                            task.setName(taskName);
                             task.setDescription(mEditTextTaskDescription.getText().toString());
                             task.setDate(taskDate);
                             tasksRepository.updateTask(task);
-                        } else if (!mEditTextTaskName.getText().toString().isEmpty() && (bundle.getParcelable(TASKS_KEY) == null)) {
+                        } else if (!taskName.isEmpty() && (bundle.getParcelable(TASKS_KEY) == null)) {
                             Task task;
                             String taskId = UUID.randomUUID().toString();
-                            String taskName = mEditTextTaskName.getText().toString();
                             String taskDescription = mEditTextTaskDescription.getText().toString();
                             int isExecuted = 0;
                             int taskListId = bundle.getInt(TASK_LIST_ID_KEY);
