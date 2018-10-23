@@ -14,9 +14,13 @@ import android.view.ViewGroup;
 import com.example.arturarzumanyan.taskmanager.R;
 import com.example.arturarzumanyan.taskmanager.data.repository.events.EventsRepository;
 import com.example.arturarzumanyan.taskmanager.domain.Event;
+import com.example.arturarzumanyan.taskmanager.ui.activity.IntentionActivity;
 import com.example.arturarzumanyan.taskmanager.ui.adapter.EventsAdapter;
+import com.example.arturarzumanyan.taskmanager.ui.dialog.EventsDialog;
 
 import java.util.ArrayList;
+
+import static com.example.arturarzumanyan.taskmanager.ui.activity.IntentionActivity.EVENTS_KEY;
 
 public class DailyEventsFragment extends Fragment {
     private static final String ARG_PARAM1 = "param1";
@@ -26,6 +30,8 @@ public class DailyEventsFragment extends Fragment {
 
     private String mParam1;
     private String mParam2;
+
+    private EventsAdapter mEventsAdapter;
 
     private OnFragmentInteractionListener mListener;
 
@@ -62,19 +68,45 @@ public class DailyEventsFragment extends Fragment {
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-        EventsRepository eventsRepository = new EventsRepository(getActivity());
+        final EventsRepository eventsRepository = new EventsRepository(getActivity());
         ArrayList<Event> events = eventsRepository.getDailyEvents();
 
         LinearLayoutManager layoutManager = new LinearLayoutManager(getActivity());
         mEventsRecyclerView.setLayoutManager(layoutManager);
 
-        EventsAdapter eventsAdapter = new EventsAdapter(getActivity(), events, new EventsAdapter.OnItemClickListener() {
+        mEventsAdapter = new EventsAdapter(getActivity(), events, new EventsAdapter.OnItemClickListener() {
             @Override
             public void onItemDelete(Event event) {
+                eventsRepository.deleteEvent(event);
+            }
 
+            @Override
+            public void onItemClick(Event event) {
+                openEventsDialog(event);
             }
         });
-        mEventsRecyclerView.setAdapter(eventsAdapter);
+
+        ((IntentionActivity)getActivity()).setEventFragmentInteractionListener(new IntentionActivity.EventFragmentInteractionListener() {
+            @Override
+            public void onEventsReady(ArrayList<Event> events) {
+                mEventsAdapter.updateList(events);
+            }
+        });
+        mEventsRecyclerView.setAdapter(mEventsAdapter);
+    }
+
+    private void openEventsDialog(Event event) {
+        EventsDialog eventsDialog = new EventsDialog();
+        Bundle bundle = new Bundle();
+        bundle.putParcelable(EVENTS_KEY, event);
+        eventsDialog.setArguments(bundle);
+        eventsDialog.setEventsReadyListener(new EventsDialog.EventsReadyListener() {
+            @Override
+            public void onEventsReady(ArrayList<Event> events) {
+                mEventsAdapter.updateList(events);
+            }
+        });
+        eventsDialog.show(getFragmentManager(), EVENTS_KEY);
     }
 
     public void onButtonPressed(Uri uri) {

@@ -105,7 +105,7 @@ public class TaskListsCloudStore {
         UserDataAsyncTask userDataAsyncTask = new UserDataAsyncTask();
 
         userDataAsyncTask.executeOnExecutor(AsyncTask.SERIAL_EXECUTOR,
-                mRepositoryLoadHelper.getTaskListDeleteParameters(url));
+                mRepositoryLoadHelper.getDeleteParameters(url));
 
         userDataAsyncTask.setDataInfoLoadingListener(new UserDataAsyncTask.UserDataLoadingListener() {
             @Override
@@ -125,7 +125,7 @@ public class TaskListsCloudStore {
                             });
 
                             updatedUserDataAsyncTask.executeOnExecutor(AsyncTask.SERIAL_EXECUTOR,
-                                    mRepositoryLoadHelper.getTaskListDeleteParameters(url));
+                                    mRepositoryLoadHelper.getDeleteParameters(url));
                         }
                     });
                 } else if (response.equals("ok")) {

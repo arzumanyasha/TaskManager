@@ -95,6 +95,7 @@ public class TasksFragment extends Fragment{
                 openTasksDialog(task);
             }
         });
+
         ((IntentionActivity)getActivity()).setTaskFragmentInteractionListener(new IntentionActivity.TaskFragmentInteractionListener() {
             @Override
             public void onTasksReady(ArrayList<Task> tasks) {

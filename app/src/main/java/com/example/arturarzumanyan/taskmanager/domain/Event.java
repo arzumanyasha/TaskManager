@@ -14,7 +14,7 @@ public class Event implements Parcelable{
     private int colorId;
     private Date startTime;
     private Date endTime;
-    private boolean isNotify;
+    private int isNotify;
 
     public Event(String id,
                  String name,
@@ -22,7 +22,7 @@ public class Event implements Parcelable{
                  int colorId,
                  Date startTime,
                  Date endTime,
-                 boolean isNotify) {
+                 int isNotify) {
         this.id = id;
         this.name = name;
         this.description = description;
@@ -39,7 +39,7 @@ public class Event implements Parcelable{
         colorId = in.readInt();
         startTime = DateUtils.getEventDateFromString(in.readString());
         endTime = DateUtils.getEventDateFromString(in.readString());
-        isNotify = in.readByte() != 0;
+        isNotify = in.readInt();
     }
 
     public static final Creator<Event> CREATOR = new Creator<Event>() {
@@ -102,12 +102,12 @@ public class Event implements Parcelable{
         this.endTime = endTime;
     }
 
-    public boolean isNotify() {
+    public int getIsNotify() {
         return isNotify;
     }
 
-    public void setNotify(boolean notify) {
-        isNotify = notify;
+    public void setIsNotify(int isNotify) {
+        this.isNotify = isNotify;
     }
 
     @Override
@@ -123,6 +123,6 @@ public class Event implements Parcelable{
         dest.writeInt(colorId);
         dest.writeString(DateUtils.formatTaskDate(startTime));
         dest.writeString(DateUtils.formatTaskDate(endTime));
-        dest.writeByte((byte) (isNotify ? 1 : 0));
+        dest.writeInt(isNotify);
     }
 }

@@ -9,7 +9,8 @@ import java.util.Date;
 public class DateUtils {
     private static final String EVENT_TIME_PATTERN = "yyyy-MM-dd'T'HH:mm:ssZ";
     private static final String TASK_DATE_PATTERN = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'";
-    private static final String HOUR_MINUTE_TIME_PATTERN = "HH:mm a";
+    private static final String HOUR_MINUTE_TIME_A_PATTERN = "HH:mm a";
+    private static final String HOUR_MINUTE_TIME_PATTERN = "HH:mm";
     private static final String YEAR_MONTH_DAY_DATE_PATTERN = "yyyy-MM-dd";
 
     public static String getCurrentTime() {
@@ -34,6 +35,11 @@ public class DateUtils {
         return null;
     }
 
+    public static String getEventDate(Date eventDate){
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat(YEAR_MONTH_DAY_DATE_PATTERN);
+        return simpleDateFormat.format(eventDate);
+    }
+
     public static Date getTaskDateFromString(String date) {
         DateFormat dateFormat = new SimpleDateFormat(TASK_DATE_PATTERN);
         if (isValidFormat(TASK_DATE_PATTERN, date)) {
@@ -53,9 +59,35 @@ public class DateUtils {
         return null;
     }
 
+    public static Date getEventDate(String date, Date time) {
+        DateFormat dateFormat = new SimpleDateFormat(EVENT_TIME_PATTERN);
+        String fullDate = date + "T" + time.getHours() + ":" + time.getMinutes() + ":00+0300";
+        try {
+            return dateFormat.parse(fullDate);
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
     public static String formatTime(Date time) {
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat(HOUR_MINUTE_TIME_A_PATTERN);
+        return simpleDateFormat.format(time);
+    }
+
+    public static String formatTimeWithoutA(Date time) {
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat(HOUR_MINUTE_TIME_PATTERN);
         return simpleDateFormat.format(time);
+    }
+
+    public static Date getTimeWithoutA(String time){
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat(HOUR_MINUTE_TIME_PATTERN);
+        try {
+            return simpleDateFormat.parse(time);
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 
     public static String formatEventTime(Date time) {

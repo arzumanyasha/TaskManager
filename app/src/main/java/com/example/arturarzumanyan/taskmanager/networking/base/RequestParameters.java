@@ -13,12 +13,12 @@ public class RequestParameters {
     private Context mContext;
     private String url;
     private FirebaseWebService.RequestMethods requestMethod;
-    private HashMap<String, String> requestBodyParameters;
+    private HashMap<String, Object> requestBodyParameters;
     private HashMap<String, String> requestHeaderParameters;
 
     public RequestParameters(String url,
                              FirebaseWebService.RequestMethods requestMethod,
-                             HashMap<String, String> requestBodyParameters,
+                             HashMap<String, Object> requestBodyParameters,
                              HashMap<String, String> requestHeaderParameters) {
         this.url = url;
         this.requestMethod = requestMethod;
@@ -29,7 +29,7 @@ public class RequestParameters {
     public RequestParameters(Context mContext,
                              String url,
                              FirebaseWebService.RequestMethods requestMethod,
-                             HashMap<String, String> requestBodyParameters) {
+                             HashMap<String, Object> requestBodyParameters) {
         this.mContext = mContext;
         this.url = url;
         this.requestMethod = requestMethod;
@@ -44,7 +44,7 @@ public class RequestParameters {
         return requestMethod;
     }
 
-    public HashMap<String, String> getRequestBodyParameters() {
+    public HashMap<String, Object> getRequestBodyParameters() {
         return requestBodyParameters;
     }
 
@@ -52,7 +52,7 @@ public class RequestParameters {
         return requestHeaderParameters;
     }
 
-    public void setRequestBodyParameters(HashMap<String, String> requestBodyParameters) {
+    public void setRequestBodyParameters(HashMap<String, Object> requestBodyParameters) {
 
         this.requestBodyParameters = requestBodyParameters;
     }

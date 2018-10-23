@@ -107,21 +107,6 @@ public class IntentionActivity extends AppCompatActivity {
             }
         });
 
-        /*
-        TasksRepository tasksRepository = new TasksRepository(this);
-
-        tasksRepository.loadTasks(mTaskLists.get(0), new TasksRepository.OnTasksLoadedListener() {
-            @Override
-            public void onSuccess(ArrayList<Task> tasks) {
-                displayMenu();
-            }
-
-            @Override
-            public void onfail() {
-
-            }
-        });
-*/
         mDrawer.closeDrawers();
 
         FloatingActionButton fab = findViewById(R.id.fab);
@@ -218,6 +203,12 @@ public class IntentionActivity extends AppCompatActivity {
 
     private void openEventsDialog() {
         EventsDialog eventsDialog = new EventsDialog();
+        eventsDialog.setEventsReadyListener(new EventsDialog.EventsReadyListener() {
+            @Override
+            public void onEventsReady(ArrayList<Event> events) {
+                eventFragmentInteractionListener.onEventsReady(events);
+            }
+        });
         eventsDialog.show(getSupportFragmentManager(), EVENTS_KEY);
     }
 
@@ -308,5 +299,16 @@ public class IntentionActivity extends AppCompatActivity {
     }
 
     private TaskFragmentInteractionListener taskFragmentInteractionListener;
+
+    public interface EventFragmentInteractionListener {
+        void onEventsReady(ArrayList<Event> events);
+    }
+
+    public void setEventFragmentInteractionListener(EventFragmentInteractionListener listener){
+        this.eventFragmentInteractionListener = listener;
+    }
+
+    private EventFragmentInteractionListener eventFragmentInteractionListener;
+
 }
 

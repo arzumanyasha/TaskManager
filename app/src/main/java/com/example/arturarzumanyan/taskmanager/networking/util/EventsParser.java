@@ -34,8 +34,6 @@ public class EventsParser {
                 JSONObject explrObject = jsonArray.getJSONObject(i);
                 eventsList.add(parseEvent(explrObject));
             }
-        } catch (ParseException e) {
-            e.printStackTrace();
         } catch (JSONException e) {
             e.printStackTrace();
         }
@@ -43,7 +41,7 @@ public class EventsParser {
         return eventsList;
     }
 
-    private Event parseEvent(JSONObject jsonObject) throws JSONException, ParseException {
+    private Event parseEvent(JSONObject jsonObject) throws JSONException {
 
         String description;
         if (!jsonObject.isNull(DESCRIPTION_KEY)) {
@@ -66,12 +64,12 @@ public class EventsParser {
 
         Date endDate = DateUtils.getEventDateFromString(endTimeJsonObject.getString(DATETIME_KEY));
 
-        Boolean isNotify;
+        int isNotify;
         JSONObject reminderJsonObject = jsonObject.getJSONObject(REMINDERS_KEY);
         if (!reminderJsonObject.isNull(OVERRIDES_KEY)) {
-            isNotify = true;
+            isNotify = 1;
         } else {
-            isNotify = false;
+            isNotify = 0;
         }
 
         Event event = new Event(jsonObject.getString(ID_KEY),
@@ -83,5 +81,15 @@ public class EventsParser {
                 isNotify);
 
         return event;
+    }
+
+    public Event parseEvent(String buffer){
+        try {
+            JSONObject jsonobject = new JSONObject(buffer);
+            return parseEvent(jsonobject);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 }
