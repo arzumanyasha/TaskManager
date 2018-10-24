@@ -23,6 +23,7 @@ import android.widget.Toast;
 
 import com.example.arturarzumanyan.taskmanager.R;
 import com.example.arturarzumanyan.taskmanager.data.repository.events.EventsRepository;
+import com.example.arturarzumanyan.taskmanager.data.repository.tasklists.TaskListsCloudStore;
 import com.example.arturarzumanyan.taskmanager.data.repository.tasklists.TaskListsRepository;
 import com.example.arturarzumanyan.taskmanager.domain.Event;
 import com.example.arturarzumanyan.taskmanager.domain.Task;
@@ -48,6 +49,8 @@ public class IntentionActivity extends AppCompatActivity {
     private NavigationView mNavigationView;
     private DrawerLayout mDrawer;
     private Intent mUserData;
+
+    private SubMenu mTaskListsMenu;
 
     private ArrayList<TaskList> mTaskLists;
 
@@ -80,7 +83,7 @@ public class IntentionActivity extends AppCompatActivity {
             }
 
             @Override
-            public void onfail() {
+            public void onFail() {
 
             }
         });
@@ -102,7 +105,7 @@ public class IntentionActivity extends AppCompatActivity {
             }
 
             @Override
-            public void onfail() {
+            public void onFail() {
 
             }
         });
@@ -156,10 +159,10 @@ public class IntentionActivity extends AppCompatActivity {
                     }
                 });
 
-        final SubMenu taskListsMenu = menu.addSubMenu("TaskLists");
+        mTaskListsMenu = menu.addSubMenu("TaskLists");
         for (int i = 0; i < mTaskLists.size(); i++) {
             final int position = i + 1;
-            taskListsMenu.add(mTaskLists.get(i).getTitle()).setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
+            mTaskListsMenu.add(mTaskLists.get(i).getTitle()).setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
                 @Override
                 public boolean onMenuItemClick(MenuItem item) {
                     Bundle bundle = new Bundle();
@@ -232,6 +235,23 @@ public class IntentionActivity extends AppCompatActivity {
 
     private void openTaskListCreatingDialog() {
         TaskListsDialog taskListsDialog = new TaskListsDialog();
+        taskListsDialog.setTaskListReadyListener(new TaskListsDialog.TaskListReadyListener() {
+            @Override
+            public void onTaskListReady(TaskList taskList) {
+                mTaskListsMenu.add(taskList.getTitle()).setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
+                    @Override
+                    public boolean onMenuItemClick(MenuItem item) {
+                        Bundle bundle = new Bundle();
+                        bundle.putInt(TASK_LIST_ID_KEY, mTaskLists.size() + 1);
+                        bundle.putString(TASK_LIST_TITLE_KEY, mTaskLists.get(mTaskLists.size()).getTitle());
+                        TasksFragment tasksFragment = new TasksFragment();
+                        tasksFragment.setArguments(bundle);
+                        openFragment(tasksFragment);
+                        return false;
+                    }
+                });
+            }
+        });
         taskListsDialog.show(getSupportFragmentManager(), TASK_LISTS_KEY);
     }
 
@@ -275,15 +295,36 @@ public class IntentionActivity extends AppCompatActivity {
             if (!getTitle().equals(EVENTS_KEY)) {
                 TaskListsDialog taskListsDialog = new TaskListsDialog();
                 Bundle bundle = new Bundle();
-
                 bundle.putParcelable(TASK_LISTS_KEY, taskList);
                 taskListsDialog.setArguments(bundle);
+
+                taskListsDialog.setTaskListReadyListener(new TaskListsDialog.TaskListReadyListener() {
+                    @Override
+                    public void onTaskListReady(TaskList taskList) {
+                        mTaskListsMenu.getItem(taskList.getId()).setTitle(taskList.getTitle());
+                    }
+                });
                 taskListsDialog.show(getSupportFragmentManager(), TASK_LISTS_KEY);
             }
         } else if (id == R.id.delete_task_list) {
             if (!getTitle().equals(EVENTS_KEY)) {
                 TaskListsRepository taskListsRepository = new TaskListsRepository(IntentionActivity.this);
-                taskListsRepository.deleteTaskList(taskList);
+                taskListsRepository.deleteTaskList(taskList, new TaskListsCloudStore.OnTaskCompletedListener() {
+                    @Override
+                    public void onSuccess(TaskList taskList) {
+                        mTaskListsMenu.removeItem(taskList.getId());
+                    }
+
+                    @Override
+                    public void onSuccess(ArrayList<TaskList> taskListArrayList) {
+
+                    }
+
+                    @Override
+                    public void onFail() {
+
+                    }
+                });
             }
         }
 

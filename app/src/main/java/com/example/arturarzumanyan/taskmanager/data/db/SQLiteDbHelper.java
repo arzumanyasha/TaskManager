@@ -240,13 +240,7 @@ public class SQLiteDbHelper extends SQLiteOpenHelper {
             do {
                 Date startDate = DateUtils.getEventDateFromString(c.getString(c.getColumnIndex(EventsTable.COLUMN_START_TIME)));
                 Date endDate = DateUtils.getEventDateFromString(c.getString(c.getColumnIndex(EventsTable.COLUMN_END_TIME)));
-                /*
-                Boolean isNotify;
-                if (c.getInt(c.getColumnIndex(EventsTable.COLUMN_REMINDER)) == 1) {
-                    isNotify = true;
-                } else
-                    isNotify = false;
-*/
+
                 Event event = new Event(c.getString(c.getColumnIndex(EventsTable.COLUMN_EVENT_ID)),
                         c.getString(c.getColumnIndex(EventsTable.COLUMN_NAME)),
                         c.getString(c.getColumnIndex(EventsTable.COLUMN_DESCRIPTION)),

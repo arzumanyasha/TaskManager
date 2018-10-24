@@ -5,6 +5,7 @@ import android.os.AsyncTask;
 
 import com.example.arturarzumanyan.taskmanager.auth.FirebaseWebService;
 import com.example.arturarzumanyan.taskmanager.data.repository.RepositoryLoadHelper;
+import com.example.arturarzumanyan.taskmanager.data.repository.events.EventsCloudStore;
 import com.example.arturarzumanyan.taskmanager.domain.TaskList;
 import com.example.arturarzumanyan.taskmanager.networking.UserDataAsyncTask;
 import com.example.arturarzumanyan.taskmanager.networking.base.RequestParameters;
@@ -45,21 +46,22 @@ public class TaskListsCloudStore {
         });
     }
 
-    public void addTaskList(final TaskList taskList) {
+    public void addTaskList(final TaskList taskList, OnTaskCompletedListener listener) {
         final String url = BASE_TASK_LISTS_URL;
 
-        sendRequest(taskList, url, FirebaseWebService.RequestMethods.POST);
+        sendRequest(taskList, url, FirebaseWebService.RequestMethods.POST, listener);
     }
 
-    public void updateTaskList(TaskList taskList) {
+    public void updateTaskList(TaskList taskList, OnTaskCompletedListener listener) {
         final String url = BASE_TASK_LISTS_URL + taskList.getTaskListId();
 
-        sendRequest(taskList, url, FirebaseWebService.RequestMethods.PATCH);
+        sendRequest(taskList, url, FirebaseWebService.RequestMethods.PATCH, listener);
     }
 
     private void sendRequest(final TaskList taskList,
                              final String url,
-                             final FirebaseWebService.RequestMethods requestMethod) {
+                             final FirebaseWebService.RequestMethods requestMethod,
+                             final OnTaskCompletedListener listener) {
 
         UserDataAsyncTask userDataAsyncTask = new UserDataAsyncTask();
         userDataAsyncTask.executeOnExecutor(AsyncTask.SERIAL_EXECUTOR,
@@ -69,6 +71,7 @@ public class TaskListsCloudStore {
             @Override
             public void onDataLoaded(String response) {
                 createOrUpdateTaskListInDb(response, requestMethod);
+                listener.onSuccess(taskList);
             }
 
             @Override
@@ -82,14 +85,17 @@ public class TaskListsCloudStore {
                             @Override
                             public void onDataLoaded(String response) {
                                 createOrUpdateTaskListInDb(response, requestMethod);
+                                listener.onSuccess(taskList);
                             }
 
                             @Override
                             public void onFail() {
                                 if (requestMethod == FirebaseWebService.RequestMethods.POST) {
                                     mTaskListsDbStore.addTaskList(taskList);
+                                    listener.onSuccess(taskList);
                                 } else if (requestMethod == FirebaseWebService.RequestMethods.PATCH) {
                                     mTaskListsDbStore.updateTaskList(taskList);
+                                    listener.onSuccess(taskList);
                                 }
                             }
                         });
@@ -112,7 +118,7 @@ public class TaskListsCloudStore {
         }
     }
 
-    public void deleteTaskList(final TaskList taskList) {
+    public void deleteTaskList(final TaskList taskList, final OnTaskCompletedListener listener) {
         final String url = BASE_TASK_LISTS_URL + taskList.getTaskListId();
 
         UserDataAsyncTask userDataAsyncTask = new UserDataAsyncTask();
@@ -124,6 +130,7 @@ public class TaskListsCloudStore {
             @Override
             public void onDataLoaded(String response) {
                 mTaskListsDbStore.deleteTaskList(taskList);
+                listener.onSuccess(taskList);
             }
 
             @Override
@@ -138,6 +145,7 @@ public class TaskListsCloudStore {
                             @Override
                             public void onDataLoaded(String response) {
                                 mTaskListsDbStore.deleteTaskList(taskList);
+                                listener.onSuccess(taskList);
                             }
 
                             @Override
@@ -155,8 +163,8 @@ public class TaskListsCloudStore {
     }
 
     public interface OnTaskCompletedListener {
+        void onSuccess(TaskList taskList);
         void onSuccess(ArrayList<TaskList> taskListArrayList);
-
         void onFail();
     }
 }

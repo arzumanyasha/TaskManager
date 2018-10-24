@@ -72,6 +72,6 @@ public class EventsRepository {
     public interface OnEventsLoadedListener {
         void onSuccess(ArrayList<Event> eventsList);
 
-        void onfail();
+        void onFail();
     }
 }

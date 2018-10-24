@@ -10,15 +10,22 @@ import android.view.View;
 import android.widget.EditText;
 
 import com.example.arturarzumanyan.taskmanager.R;
+import com.example.arturarzumanyan.taskmanager.data.repository.tasklists.TaskListsCloudStore;
 import com.example.arturarzumanyan.taskmanager.data.repository.tasklists.TaskListsRepository;
+import com.example.arturarzumanyan.taskmanager.domain.Task;
 import com.example.arturarzumanyan.taskmanager.domain.TaskList;
 
+import java.util.ArrayList;
 import java.util.UUID;
 
 import static com.example.arturarzumanyan.taskmanager.ui.activity.IntentionActivity.TASK_LISTS_KEY;
 
 public class TaskListsDialog extends AppCompatDialogFragment {
     private EditText mEditTextTaskListTitle;
+
+    public TaskListsDialog() {
+        this.taskListReadyListener = null;
+    }
 
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
@@ -47,11 +54,41 @@ public class TaskListsDialog extends AppCompatDialogFragment {
                         if (!taskListName.isEmpty() && bundle != null) {
                             TaskList taskList = bundle.getParcelable(TASK_LISTS_KEY);
                             taskList.setTitle(taskListName);
-                            taskListsRepository.updateTaskList(taskList);
+                            taskListsRepository.updateTaskList(taskList, new TaskListsCloudStore.OnTaskCompletedListener() {
+                                @Override
+                                public void onSuccess(TaskList taskList) {
+                                    taskListReadyListener.onTaskListReady(taskList);
+                                }
+
+                                @Override
+                                public void onSuccess(ArrayList<TaskList> taskListArrayList) {
+
+                                }
+
+                                @Override
+                                public void onFail() {
+
+                                }
+                            });
                         } else if (!taskListName.isEmpty() && bundle == null) {
                             TaskList taskList = new TaskList(UUID.randomUUID().toString(),
                                     taskListName);
-                            taskListsRepository.addTaskList(taskList);
+                            taskListsRepository.addTaskList(taskList, new TaskListsCloudStore.OnTaskCompletedListener() {
+                                @Override
+                                public void onSuccess(TaskList taskList) {
+                                    taskListReadyListener.onTaskListReady(taskList);
+                                }
+
+                                @Override
+                                public void onSuccess(ArrayList<TaskList> taskListArrayList) {
+
+                                }
+
+                                @Override
+                                public void onFail() {
+
+                                }
+                            });
                         }
                     }
                 });
@@ -62,4 +99,14 @@ public class TaskListsDialog extends AppCompatDialogFragment {
         }
         return builder.create();
     }
+
+    public interface TaskListReadyListener {
+        void onTaskListReady(TaskList taskList);
+    }
+
+    public void setTaskListReadyListener(TaskListReadyListener listener) {
+        this.taskListReadyListener = listener;
+    }
+
+    private TaskListReadyListener taskListReadyListener;
 }
