@@ -49,7 +49,7 @@ public class TaskListsRepository {
                             }
 
                             @Override
-                            public void onfail() {
+                            public void onFail() {
 
                             }
                         });
@@ -57,7 +57,7 @@ public class TaskListsRepository {
                 }
 
                 @Override
-                public void onfail() {
+                public void onFail() {
 
                 }
             });

@@ -34,10 +34,13 @@ public class TaskListsCloudStore {
         mUserTaskListsAsyncTask.setDataInfoLoadingListener(new UserDataAsyncTask.UserDataLoadingListener() {
             @Override
             public void onDataLoaded(String response) {
-                if (!response.equals("")) {
-                    TaskListsParser taskListsParser = new TaskListsParser();
-                    listener.onSuccess(taskListsParser.parseTaskLists(response));
-                }
+                TaskListsParser taskListsParser = new TaskListsParser();
+                listener.onSuccess(taskListsParser.parseTaskLists(response));
+            }
+
+            @Override
+            public void onFail() {
+                listener.onSuccess(mTaskListsDbStore.getTaskLists());
             }
         });
     }
@@ -65,26 +68,36 @@ public class TaskListsCloudStore {
         userDataAsyncTask.setDataInfoLoadingListener(new UserDataAsyncTask.UserDataLoadingListener() {
             @Override
             public void onDataLoaded(String response) {
-                if (!response.equals("")) {
-                    createOrUpdateTaskListInDb(response, requestMethod);
-                } else {
-                    FirebaseWebService firebaseWebService = new FirebaseWebService();
-                    firebaseWebService.refreshAccessToken(mContext, new FirebaseWebService.AccessTokenUpdatedListener() {
-                        @Override
-                        public void onAccessTokenUpdated() {
-                            UserDataAsyncTask updatedUserDataAsyncTask = new UserDataAsyncTask();
-                            updatedUserDataAsyncTask.setDataInfoLoadingListener(new UserDataAsyncTask.UserDataLoadingListener() {
-                                @Override
-                                public void onDataLoaded(String response) {
-                                    createOrUpdateTaskListInDb(response, requestMethod);
-                                }
-                            });
-                            updatedUserDataAsyncTask.executeOnExecutor(AsyncTask.SERIAL_EXECUTOR,
-                                    mRepositoryLoadHelper.getTaskListCreateOrUpdateParameters(taskList, url, requestMethod));
+                createOrUpdateTaskListInDb(response, requestMethod);
+            }
 
-                        }
-                    });
-                }
+            @Override
+            public void onFail() {
+                FirebaseWebService firebaseWebService = new FirebaseWebService();
+                firebaseWebService.refreshAccessToken(mContext, new FirebaseWebService.AccessTokenUpdatedListener() {
+                    @Override
+                    public void onAccessTokenUpdated() {
+                        UserDataAsyncTask updatedUserDataAsyncTask = new UserDataAsyncTask();
+                        updatedUserDataAsyncTask.setDataInfoLoadingListener(new UserDataAsyncTask.UserDataLoadingListener() {
+                            @Override
+                            public void onDataLoaded(String response) {
+                                createOrUpdateTaskListInDb(response, requestMethod);
+                            }
+
+                            @Override
+                            public void onFail() {
+                                if (requestMethod == FirebaseWebService.RequestMethods.POST) {
+                                    mTaskListsDbStore.addTaskList(taskList);
+                                } else if (requestMethod == FirebaseWebService.RequestMethods.PATCH) {
+                                    mTaskListsDbStore.updateTaskList(taskList);
+                                }
+                            }
+                        });
+                        updatedUserDataAsyncTask.executeOnExecutor(AsyncTask.SERIAL_EXECUTOR,
+                                mRepositoryLoadHelper.getTaskListCreateOrUpdateParameters(taskList, url, requestMethod));
+
+                    }
+                });
             }
         });
     }
@@ -110,27 +123,33 @@ public class TaskListsCloudStore {
         userDataAsyncTask.setDataInfoLoadingListener(new UserDataAsyncTask.UserDataLoadingListener() {
             @Override
             public void onDataLoaded(String response) {
-                if (response.equals("")) {
-                    FirebaseWebService firebaseWebService = new FirebaseWebService();
-                    firebaseWebService.refreshAccessToken(mContext, new FirebaseWebService.AccessTokenUpdatedListener() {
-                        @Override
-                        public void onAccessTokenUpdated() {
-                            UserDataAsyncTask updatedUserDataAsyncTask = new UserDataAsyncTask();
+                mTaskListsDbStore.deleteTaskList(taskList);
+            }
 
-                            updatedUserDataAsyncTask.setDataInfoLoadingListener(new UserDataAsyncTask.UserDataLoadingListener() {
-                                @Override
-                                public void onDataLoaded(String response) {
-                                    mTaskListsDbStore.deleteTaskList(taskList);
-                                }
-                            });
+            @Override
+            public void onFail() {
+                FirebaseWebService firebaseWebService = new FirebaseWebService();
+                firebaseWebService.refreshAccessToken(mContext, new FirebaseWebService.AccessTokenUpdatedListener() {
+                    @Override
+                    public void onAccessTokenUpdated() {
+                        UserDataAsyncTask updatedUserDataAsyncTask = new UserDataAsyncTask();
 
-                            updatedUserDataAsyncTask.executeOnExecutor(AsyncTask.SERIAL_EXECUTOR,
-                                    mRepositoryLoadHelper.getDeleteParameters(url));
-                        }
-                    });
-                } else if (response.equals("ok")) {
-                    mTaskListsDbStore.deleteTaskList(taskList);
-                }
+                        updatedUserDataAsyncTask.setDataInfoLoadingListener(new UserDataAsyncTask.UserDataLoadingListener() {
+                            @Override
+                            public void onDataLoaded(String response) {
+                                mTaskListsDbStore.deleteTaskList(taskList);
+                            }
+
+                            @Override
+                            public void onFail() {
+                                mTaskListsDbStore.deleteTaskList(taskList);
+                            }
+                        });
+
+                        updatedUserDataAsyncTask.executeOnExecutor(AsyncTask.SERIAL_EXECUTOR,
+                                mRepositoryLoadHelper.getDeleteParameters(url));
+                    }
+                });
             }
         });
     }
@@ -138,6 +157,6 @@ public class TaskListsCloudStore {
     public interface OnTaskCompletedListener {
         void onSuccess(ArrayList<TaskList> taskListArrayList);
 
-        void onfail();
+        void onFail();
     }
 }

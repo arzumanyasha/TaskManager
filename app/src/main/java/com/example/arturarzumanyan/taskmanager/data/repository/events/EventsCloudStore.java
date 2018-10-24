@@ -20,6 +20,7 @@ public class EventsCloudStore {
     private UserDataAsyncTask mUserEventsAsyncTask;
     private EventsDbStore mEventsDbStore;
     private ArrayList<Event> mEventsList;
+    private EventsParser mEventsParser;
     private RepositoryLoadHelper mRepositoryLoadHelper;
     private FirebaseWebService mFirebaseWebService;
     private Context mContext;
@@ -30,6 +31,7 @@ public class EventsCloudStore {
         mUserEventsAsyncTask = new UserDataAsyncTask();
         mRepositoryLoadHelper = new RepositoryLoadHelper(mContext);
         mFirebaseWebService = new FirebaseWebService();
+        mEventsParser = new EventsParser();
         mEventsDbStore = new EventsDbStore(mContext);
     }
 
@@ -42,28 +44,33 @@ public class EventsCloudStore {
         mUserEventsAsyncTask.setDataInfoLoadingListener(new UserDataAsyncTask.UserDataLoadingListener() {
             @Override
             public void onDataLoaded(String response) {
-                if (response.equals("")) {
-                    FirebaseWebService firebaseWebService = new FirebaseWebService();
-                    firebaseWebService.refreshAccessToken(mContext, new FirebaseWebService.AccessTokenUpdatedListener() {
-                        @Override
-                        public void onAccessTokenUpdated() {
-                            UserDataAsyncTask updatedUserDataAsyncTask = new UserDataAsyncTask();
-                            mRepositoryLoadHelper.requestUserData(updatedUserDataAsyncTask, eventsUrl);
-                            updatedUserDataAsyncTask.setDataInfoLoadingListener(new UserDataAsyncTask.UserDataLoadingListener() {
-                                @Override
-                                public void onDataLoaded(String response) {
-                                    EventsParser eventsParser = new EventsParser();
-                                    mEventsList = eventsParser.parseEvents(response);
-                                    listener.onSuccess(mEventsList);
-                                }
-                            });
-                        }
-                    });
-                } else {
-                    EventsParser eventsParser = new EventsParser();
-                    mEventsList = eventsParser.parseEvents(response);
-                    listener.onSuccess(mEventsList);
-                }
+                mEventsList = mEventsParser.parseEvents(response);
+                listener.onSuccess(mEventsList);
+            }
+
+            @Override
+            public void onFail() {
+                FirebaseWebService firebaseWebService = new FirebaseWebService();
+                firebaseWebService.refreshAccessToken(mContext, new FirebaseWebService.AccessTokenUpdatedListener() {
+                    @Override
+                    public void onAccessTokenUpdated() {
+                        UserDataAsyncTask updatedUserDataAsyncTask = new UserDataAsyncTask();
+                        mRepositoryLoadHelper.requestUserData(updatedUserDataAsyncTask, eventsUrl);
+                        updatedUserDataAsyncTask.setDataInfoLoadingListener(new UserDataAsyncTask.UserDataLoadingListener() {
+                            @Override
+                            public void onDataLoaded(String response) {
+                                mEventsList = mEventsParser.parseEvents(response);
+                                listener.onSuccess(mEventsList);
+                            }
+
+                            @Override
+                            public void onFail() {
+                                mEventsList = mEventsDbStore.getEvents();
+                                listener.onSuccess(mEventsList);
+                            }
+                        });
+                    }
+                });
             }
         });
     }
@@ -96,37 +103,47 @@ public class EventsCloudStore {
         userDataAsyncTask.setDataInfoLoadingListener(new UserDataAsyncTask.UserDataLoadingListener() {
             @Override
             public void onDataLoaded(String response) {
-                if (!response.equals("")) {
-                    createOrUpdateEventInDb(response, requestMethod);
-                    listener.onSuccess(mEventsDbStore.getEvents());
-                } else {
-                    mFirebaseWebService.refreshAccessToken(mContext, new FirebaseWebService.AccessTokenUpdatedListener() {
-                        @Override
-                        public void onAccessTokenUpdated() {
-                            UserDataAsyncTask updatedUserDataAsyncTask = new UserDataAsyncTask();
-                            updatedUserDataAsyncTask.setDataInfoLoadingListener(new UserDataAsyncTask.UserDataLoadingListener() {
-                                @Override
-                                public void onDataLoaded(String response) {
-                                    createOrUpdateEventInDb(response, requestMethod);
-                                    listener.onSuccess(mEventsDbStore.getEvents());
+                createOrUpdateEventInDb(response, requestMethod);
+                listener.onSuccess(mEventsDbStore.getEvents());
+
+            }
+
+            @Override
+            public void onFail() {
+                mFirebaseWebService.refreshAccessToken(mContext, new FirebaseWebService.AccessTokenUpdatedListener() {
+                    @Override
+                    public void onAccessTokenUpdated() {
+                        UserDataAsyncTask updatedUserDataAsyncTask = new UserDataAsyncTask();
+                        updatedUserDataAsyncTask.setDataInfoLoadingListener(new UserDataAsyncTask.UserDataLoadingListener() {
+                            @Override
+                            public void onDataLoaded(String response) {
+                                createOrUpdateEventInDb(response, requestMethod);
+                                listener.onSuccess(mEventsDbStore.getEvents());
+                            }
+
+                            @Override
+                            public void onFail() {
+                                if (requestMethod == FirebaseWebService.RequestMethods.POST) {
+                                    mEventsDbStore.addEvent(event);
+                                } else if (requestMethod == FirebaseWebService.RequestMethods.PATCH) {
+                                    mEventsDbStore.updateEvent(event);
                                 }
-                            });
-                            updatedUserDataAsyncTask.executeOnExecutor(AsyncTask.SERIAL_EXECUTOR,
-                                    mRepositoryLoadHelper.getEventCreateOrUpdateParameters(event, url, requestMethod));
-                        }
-                    });
-                }
+                            }
+                        });
+                        updatedUserDataAsyncTask.executeOnExecutor(AsyncTask.SERIAL_EXECUTOR,
+                                mRepositoryLoadHelper.getEventCreateOrUpdateParameters(event, url, requestMethod));
+                    }
+                });
             }
         });
     }
 
     private void createOrUpdateEventInDb(String response,
                                          FirebaseWebService.RequestMethods requestMethod) {
-        EventsParser eventsParser = new EventsParser();
         if (requestMethod == FirebaseWebService.RequestMethods.POST) {
-            mEventsDbStore.addEvent(eventsParser.parseEvent(response));
+            mEventsDbStore.addEvent(mEventsParser.parseEvent(response));
         } else if (requestMethod == FirebaseWebService.RequestMethods.PATCH) {
-            mEventsDbStore.updateEvent(eventsParser.parseEvent(response));
+            mEventsDbStore.updateEvent(mEventsParser.parseEvent(response));
         }
     }
 
@@ -145,26 +162,32 @@ public class EventsCloudStore {
         userDataAsyncTask.setDataInfoLoadingListener(new UserDataAsyncTask.UserDataLoadingListener() {
             @Override
             public void onDataLoaded(String response) {
-                if (response.equals("")) {
-                    mFirebaseWebService.refreshAccessToken(mContext, new FirebaseWebService.AccessTokenUpdatedListener() {
-                        @Override
-                        public void onAccessTokenUpdated() {
-                            UserDataAsyncTask updatedUserDataAsyncTask = new UserDataAsyncTask();
+                mEventsDbStore.deleteEvent(event);
+            }
 
-                            updatedUserDataAsyncTask.setDataInfoLoadingListener(new UserDataAsyncTask.UserDataLoadingListener() {
-                                @Override
-                                public void onDataLoaded(String response) {
-                                    mEventsDbStore.deleteEvent(event);
-                                }
-                            });
+            @Override
+            public void onFail() {
+                mFirebaseWebService.refreshAccessToken(mContext, new FirebaseWebService.AccessTokenUpdatedListener() {
+                    @Override
+                    public void onAccessTokenUpdated() {
+                        UserDataAsyncTask updatedUserDataAsyncTask = new UserDataAsyncTask();
 
-                            updatedUserDataAsyncTask.executeOnExecutor(AsyncTask.SERIAL_EXECUTOR,
-                                    mRepositoryLoadHelper.getDeleteParameters(url));
-                        }
-                    });
-                } else if (response.equals("ok")) {
-                    mEventsDbStore.deleteEvent(event);
-                }
+                        updatedUserDataAsyncTask.setDataInfoLoadingListener(new UserDataAsyncTask.UserDataLoadingListener() {
+                            @Override
+                            public void onDataLoaded(String response) {
+                                mEventsDbStore.deleteEvent(event);
+                            }
+
+                            @Override
+                            public void onFail() {
+                                mEventsDbStore.deleteEvent(event);
+                            }
+                        });
+
+                        updatedUserDataAsyncTask.executeOnExecutor(AsyncTask.SERIAL_EXECUTOR,
+                                mRepositoryLoadHelper.getDeleteParameters(url));
+                    }
+                });
             }
         });
     }
@@ -172,6 +195,6 @@ public class EventsCloudStore {
     public interface OnTaskCompletedListener {
         void onSuccess(ArrayList<Event> eventsList);
 
-        void onfail();
+        void onFail();
     }
 }

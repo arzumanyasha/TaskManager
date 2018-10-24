@@ -37,13 +37,17 @@ public class UserDataAsyncTask extends AsyncTask<RequestParameters, Void, String
     @Override
     protected void onPostExecute(String s) {
         super.onPostExecute(s);
-        if (userDataLoadingListener != null) {
+        if (userDataLoadingListener != null && !mBuffer.equals("")) {
             userDataLoadingListener.onDataLoaded(mBuffer);
+        } else if (userDataLoadingListener != null && mBuffer.equals("")) {
+            userDataLoadingListener.onFail();
         }
     }
 
     public interface UserDataLoadingListener {
         void onDataLoaded(String response);
+
+        void onFail();
     }
 
     public void setDataInfoLoadingListener(UserDataLoadingListener listener) {

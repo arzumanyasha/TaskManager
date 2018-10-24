@@ -24,7 +24,7 @@ import java.util.ArrayList;
 
 import static com.example.arturarzumanyan.taskmanager.ui.activity.IntentionActivity.TASKS_KEY;
 
-public class TasksFragment extends Fragment{
+public class TasksFragment extends Fragment {
     private static final String ARG_PARAM1 = "param1";
     private static final String ARG_PARAM2 = "param2";
     public static final String TASK_LIST_ID_KEY = "taskListId";
@@ -96,7 +96,7 @@ public class TasksFragment extends Fragment{
             }
         });
 
-        ((IntentionActivity)getActivity()).setTaskFragmentInteractionListener(new IntentionActivity.TaskFragmentInteractionListener() {
+        ((IntentionActivity) getActivity()).setTaskFragmentInteractionListener(new IntentionActivity.TaskFragmentInteractionListener() {
             @Override
             public void onTasksReady(ArrayList<Task> tasks) {
                 mTasksAdapter.updateList(tasks);

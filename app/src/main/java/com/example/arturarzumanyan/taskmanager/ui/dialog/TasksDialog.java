@@ -73,7 +73,7 @@ public class TasksDialog extends AppCompatDialogFragment {
                                 }
 
                                 @Override
-                                public void onfail() {
+                                public void onFail() {
 
                                 }
                             });
@@ -106,7 +106,7 @@ public class TasksDialog extends AppCompatDialogFragment {
                                 }
 
                                 @Override
-                                public void onfail() {
+                                public void onFail() {
 
                                 }
                             });

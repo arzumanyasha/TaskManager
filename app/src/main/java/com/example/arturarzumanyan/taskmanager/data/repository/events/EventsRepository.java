@@ -32,7 +32,7 @@ public class EventsRepository {
                 }
 
                 @Override
-                public void onfail() {
+                public void onFail() {
 
                 }
             });
