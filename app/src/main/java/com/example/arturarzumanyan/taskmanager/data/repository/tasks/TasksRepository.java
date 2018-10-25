@@ -38,7 +38,7 @@ public class TasksRepository {
                 }
 
                 @Override
-                public void onfail() {
+                public void onFail() {
 
                 }
             });
@@ -50,20 +50,20 @@ public class TasksRepository {
     public interface OnTasksLoadedListener {
         void onSuccess(ArrayList<Task> taskArrayList);
 
-        void onfail();
+        void onFail();
     }
 
-    public void addTask(Task task) {
+    public void addTask(Task task, TasksCloudStore.OnTaskCompletedListener listener) {
         if (mRepositoryLoadHelper.isOnline()) {
-            mTasksCloudStore.addTask(task);
+            mTasksCloudStore.addTask(task, listener);
         } else {
             mTasksDbStore.addTask(task);
         }
     }
 
-    public void updateTask(Task task) {
+    public void updateTask(Task task, TasksCloudStore.OnTaskCompletedListener listener) {
         if (mRepositoryLoadHelper.isOnline()) {
-            mTasksCloudStore.updateTask(task);
+            mTasksCloudStore.updateTask(task, listener);
         } else {
             mTasksDbStore.updateTask(task);
         }
@@ -78,3 +78,4 @@ public class TasksRepository {
 
     }
 }
+

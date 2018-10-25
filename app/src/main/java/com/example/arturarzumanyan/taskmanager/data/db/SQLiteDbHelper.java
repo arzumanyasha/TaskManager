@@ -80,25 +80,61 @@ public class SQLiteDbHelper extends SQLiteOpenHelper {
     public void insertEvents(ArrayList<Event> eventsList) {
         mDb = getWritableDatabase();
         for (int i = 0; i < eventsList.size(); i++) {
-            ContentValues cv = new ContentValues();
-
-            cv.put(EventsTable.COLUMN_EVENT_ID, eventsList.get(i).getId());
-            cv.put(EventsTable.COLUMN_NAME, eventsList.get(i).getName());
-            cv.put(EventsTable.COLUMN_DESCRIPTION, eventsList.get(i).getDescription());
-            cv.put(EventsTable.COLUMN_COLOR_ID, eventsList.get(i).getColorId());
-
-            cv.put(EventsTable.COLUMN_START_TIME, DateUtils.formatEventTime(eventsList.get(i).getStartTime()));
-
-            cv.put(EventsTable.COLUMN_END_TIME, DateUtils.formatEventTime(eventsList.get(i).getEndTime()));
-
-            if (eventsList.get(i).isNotify()) {
-                cv.put(EventsTable.COLUMN_REMINDER, 1);
-            } else {
-                cv.put(EventsTable.COLUMN_REMINDER, 0);
-            }
-
-            mDb.insert(EventsTable.TABLE_NAME, null, cv);
+            insertEvent(eventsList.get(i));
         }
+    }
+
+    public void insertEvent(Event event){
+        mDb = getWritableDatabase();
+
+        ContentValues cv = new ContentValues();
+
+        cv.put(EventsTable.COLUMN_EVENT_ID, event.getId());
+        cv.put(EventsTable.COLUMN_NAME, event.getName());
+        cv.put(EventsTable.COLUMN_DESCRIPTION, event.getDescription());
+        cv.put(EventsTable.COLUMN_COLOR_ID, event.getColorId());
+
+        cv.put(EventsTable.COLUMN_START_TIME, DateUtils.formatEventTime(event.getStartTime()));
+
+        cv.put(EventsTable.COLUMN_END_TIME, DateUtils.formatEventTime(event.getEndTime()));
+        cv.put(EventsTable.COLUMN_REMINDER, event.getIsNotify());
+        /*
+        if (event.isNotify()) {
+            cv.put(EventsTable.COLUMN_REMINDER, 1);
+        } else {
+            cv.put(EventsTable.COLUMN_REMINDER, 0);
+        }*/
+
+        mDb.insert(EventsTable.TABLE_NAME, null, cv);
+    }
+
+    public void updateEvent(Event event){
+        mDb = getWritableDatabase();
+
+        ContentValues cv = new ContentValues();
+
+        cv.put(EventsTable.COLUMN_NAME, event.getName());
+        cv.put(EventsTable.COLUMN_DESCRIPTION, event.getDescription());
+        cv.put(EventsTable.COLUMN_COLOR_ID, event.getColorId());
+
+        cv.put(EventsTable.COLUMN_START_TIME, DateUtils.formatEventTime(event.getStartTime()));
+
+        cv.put(EventsTable.COLUMN_END_TIME, DateUtils.formatEventTime(event.getEndTime()));
+
+        cv.put(EventsTable.COLUMN_REMINDER, event.getIsNotify());
+/*
+        if (event.isNotify()) {
+            cv.put(EventsTable.COLUMN_REMINDER, 1);
+        } else {
+            cv.put(EventsTable.COLUMN_REMINDER, 0);
+        }
+*/
+        mDb.update(EventsTable.TABLE_NAME, cv, "id = ?", new String[]{event.getId()});
+    }
+
+    public void deleteEvent(Event event){
+        mDb = getWritableDatabase();
+        mDb.delete(EventsTable.TABLE_NAME, "id = ?", new String[]{event.getId()});
     }
 
     public void insertTaskLists(ArrayList<TaskList> taskListArrayList) {
@@ -125,11 +161,10 @@ public class SQLiteDbHelper extends SQLiteOpenHelper {
 
         ContentValues cv = new ContentValues();
 
-        cv.put(TaskListTable.COLUMN_LIST_ID, taskList.getTaskListId());
         cv.put(TaskListTable.COLUMN_TITLE, taskList.getTitle());
 
-        mDb.update(TaskListTable.TABLE_NAME, cv, "_id = ",
-                new String[]{Integer.toString(taskList.getId())});
+        mDb.update(TaskListTable.TABLE_NAME, cv, "id = ?",
+                new String[]{taskList.getTaskListId()});
     }
 
     public void deleteTaskList(TaskList taskList) {
@@ -204,11 +239,6 @@ public class SQLiteDbHelper extends SQLiteOpenHelper {
             do {
                 Date startDate = DateUtils.getEventDateFromString(c.getString(c.getColumnIndex(EventsTable.COLUMN_START_TIME)));
                 Date endDate = DateUtils.getEventDateFromString(c.getString(c.getColumnIndex(EventsTable.COLUMN_END_TIME)));
-                Boolean isNotify;
-                if (c.getInt(c.getColumnIndex(EventsTable.COLUMN_REMINDER)) == 1) {
-                    isNotify = true;
-                } else
-                    isNotify = false;
 
                 Event event = new Event(c.getString(c.getColumnIndex(EventsTable.COLUMN_EVENT_ID)),
                         c.getString(c.getColumnIndex(EventsTable.COLUMN_NAME)),
@@ -216,7 +246,7 @@ public class SQLiteDbHelper extends SQLiteOpenHelper {
                         c.getInt(c.getColumnIndex(EventsTable.COLUMN_COLOR_ID)),
                         startDate,
                         endDate,
-                        isNotify
+                        c.getInt(c.getColumnIndex(EventsTable.COLUMN_REMINDER))
                 );
 
                 eventsList.add(event);
@@ -292,6 +322,29 @@ public class SQLiteDbHelper extends SQLiteOpenHelper {
         String[] selectionArgs = new String[]{Integer.toString(id)};
         Cursor c = mDb.rawQuery("SELECT * FROM " + TaskListTable.TABLE_NAME +
                 " WHERE " + TaskListTable._ID + " = ?", selectionArgs);
+
+        if (c.moveToFirst()) {
+            do {
+                TaskList taskList = new TaskList(c.getInt(c.getColumnIndex(TaskListTable._ID)),
+                        c.getString(c.getColumnIndex(TaskListTable.COLUMN_LIST_ID)),
+                        c.getString(c.getColumnIndex(TaskListTable.COLUMN_TITLE))
+                );
+
+                return taskList;
+
+            } while (c.moveToNext());
+        }
+
+        c.close();
+        return null;
+    }
+
+    public TaskList getTaskList(String title) {
+        mDb = getReadableDatabase();
+
+        String[] selectionArgs = new String[]{title};
+        Cursor c = mDb.rawQuery("SELECT * FROM " + TaskListTable.TABLE_NAME +
+                " WHERE " + TaskListTable.COLUMN_TITLE + " = ?", selectionArgs);
 
         if (c.moveToFirst()) {
             do {

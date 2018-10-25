@@ -4,7 +4,9 @@ import android.net.Uri;
 
 import com.example.arturarzumanyan.taskmanager.auth.AccessTokenAsyncTask;
 import com.example.arturarzumanyan.taskmanager.auth.FirebaseWebService;
+import com.example.arturarzumanyan.taskmanager.networking.util.Converter;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -19,6 +21,8 @@ import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class BaseHttpUrlConnection {
     public static final String JSON_CONTENT_TYPE_VALUE = "application/json";
@@ -26,7 +30,7 @@ public class BaseHttpUrlConnection {
 
     public String getResult(String url,
                             FirebaseWebService.RequestMethods requestMethod,
-                            HashMap<String, String> requestBodyParameters,
+                            HashMap<String, Object> requestBodyParameters,
                             HashMap<String, String> requestHeaderParameters) {
         HttpURLConnection connection = null;
         BufferedReader reader = null;
@@ -38,17 +42,16 @@ public class BaseHttpUrlConnection {
             connection = getConnectionSettings(connection, url, requestMethod, requestHeaderParameters);
             uriBuilder = new Uri.Builder();
             if ((requestMethod == FirebaseWebService.RequestMethods.POST) && !isJson) {
-                for (HashMap.Entry<String, String> map : requestBodyParameters.entrySet()) {
-                    uriBuilder.appendQueryParameter(map.getKey(), map.getValue());
+                for (HashMap.Entry<String, Object> map : requestBodyParameters.entrySet()) {
+                    uriBuilder.appendQueryParameter(map.getKey(), map.getValue().toString());
                 }
 
                 query = uriBuilder.build().getEncodedQuery();
             } else if (((requestMethod == FirebaseWebService.RequestMethods.POST) ||
                     (requestMethod == FirebaseWebService.RequestMethods.PATCH)) && isJson) {
-                JSONObject jsonObject = new JSONObject();
-                for (HashMap.Entry<String, String> map : requestBodyParameters.entrySet()) {
-                    jsonObject.put(map.getKey(), map.getValue());
-                }
+
+                JSONObject jsonObject = Converter.fromMapToJson(requestBodyParameters);
+
                 query = jsonObject.toString();
             }
 
@@ -68,8 +71,6 @@ public class BaseHttpUrlConnection {
             }
         } catch (IOException e) {
             e.printStackTrace();
-        } catch (JSONException e) {
-            e.printStackTrace();
         } finally {
             if (connection != null) {
                 connection.disconnect();
@@ -85,7 +86,6 @@ public class BaseHttpUrlConnection {
         }
         return "";
     }
-
 
     private HttpURLConnection getConnectionSettings(HttpURLConnection connection,
                                                     String url,

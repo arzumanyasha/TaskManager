@@ -32,7 +32,7 @@ public class EventsRepository {
                 }
 
                 @Override
-                public void onfail() {
+                public void onFail() {
 
                 }
             });
@@ -45,19 +45,33 @@ public class EventsRepository {
         return mEventsDbStore.getDailyEvents();
     }
 
-    public void addEvent(Event event) {
-        mEventsDbStore.addEvent(event);
+    public void addEvent(Event event, final EventsCloudStore.OnTaskCompletedListener listener) {
+        if (mRepositoryLoadHelper.isOnline()) {
+            mEventsCloudStore.addEvent(event, listener);
+        } else {
+            mEventsDbStore.addEvent(event);
+        }
     }
 
-    public void updateEvent() {
+    public void updateEvent(Event event, final EventsCloudStore.OnTaskCompletedListener listener) {
+        if (mRepositoryLoadHelper.isOnline()) {
+            mEventsCloudStore.updateEvent(event, listener);
+        } else {
+            mEventsDbStore.updateEvent(event);
+        }
     }
 
-    public void deleteEvent() {
+    public void deleteEvent(Event event) {
+        if (mRepositoryLoadHelper.isOnline()) {
+            mEventsCloudStore.deleteEvent(event);
+        } else {
+            mEventsDbStore.deleteEvent(event);
+        }
     }
 
     public interface OnEventsLoadedListener {
         void onSuccess(ArrayList<Event> eventsList);
 
-        void onfail();
+        void onFail();
     }
 }

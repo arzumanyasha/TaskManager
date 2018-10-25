@@ -33,6 +33,11 @@ public class TaskListsRepository {
         if ((mRepositoryLoadHelper.isOnline()) && (taskLists.size() == 0)) {
             mTaskListsCloudStore.getTaskLists(new TaskListsCloudStore.OnTaskCompletedListener() {
                 @Override
+                public void onSuccess(TaskList taskList) {
+
+                }
+
+                @Override
                 public void onSuccess(ArrayList<TaskList> taskListArrayList) {
                     mTaskListsDbStore.addTaskLists(taskListArrayList);
                     ArrayList<TaskList> taskLists = mTaskListsDbStore.getTaskLists();
@@ -49,7 +54,7 @@ public class TaskListsRepository {
                             }
 
                             @Override
-                            public void onfail() {
+                            public void onFail() {
 
                             }
                         });
@@ -57,7 +62,7 @@ public class TaskListsRepository {
                 }
 
                 @Override
-                public void onfail() {
+                public void onFail() {
 
                 }
             });
@@ -66,33 +71,33 @@ public class TaskListsRepository {
         }
     }
 
-    public void addTaskList(TaskList taskList) {
+    public void addTaskList(TaskList taskList, TaskListsCloudStore.OnTaskCompletedListener listener) {
         if (mRepositoryLoadHelper.isOnline()) {
-            mTaskListsCloudStore.addTaskList(taskList);
+            mTaskListsCloudStore.addTaskList(taskList, listener);
         } else {
             mTaskListsDbStore.addTaskList(taskList);
         }
     }
 
-    public void updateTaskList(TaskList taskList) {
+    public void updateTaskList(TaskList taskList, TaskListsCloudStore.OnTaskCompletedListener listener) {
         if (mRepositoryLoadHelper.isOnline()) {
-            mTaskListsCloudStore.updateTaskList(taskList);
+            mTaskListsCloudStore.updateTaskList(taskList, listener);
         } else {
             mTaskListsDbStore.updateTaskList(taskList);
         }
     }
 
-    public void deleteTaskList(TaskList taskList) {
+    public void deleteTaskList(TaskList taskList, TaskListsCloudStore.OnTaskCompletedListener listener) {
         if (mRepositoryLoadHelper.isOnline()) {
-            mTaskListsCloudStore.deleteTaskList(taskList);
+            mTaskListsCloudStore.deleteTaskList(taskList, listener);
         } else {
             mTaskListsDbStore.deleteTaskList(taskList);
         }
     }
 
     public interface OnTaskListsLoadedListener {
-        void onSuccess(ArrayList<TaskList> taskLists);
+        void onSuccess(ArrayList<TaskList> taskListArrayList);
 
-        void onfail();
+        void onFail();
     }
 }

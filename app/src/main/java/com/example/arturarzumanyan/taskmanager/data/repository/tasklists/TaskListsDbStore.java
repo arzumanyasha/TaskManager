@@ -28,6 +28,10 @@ public class TaskListsDbStore {
         mSqliteDbHelper.insertTaskList(taskList);
     }
 
+    public TaskList getTaskList(String title){
+        return mSqliteDbHelper.getTaskList(title);
+    }
+
     public TaskList getTaskList(int id) {
         return mSqliteDbHelper.getTaskList(id);
     }

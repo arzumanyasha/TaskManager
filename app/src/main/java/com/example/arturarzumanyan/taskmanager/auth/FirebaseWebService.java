@@ -136,7 +136,7 @@ public class FirebaseWebService implements GoogleApiClient.OnConnectionFailedLis
         });
 
         RequestMethods requestMethod = RequestMethods.POST;
-        HashMap<String, String> requestBodyParameters = new HashMap<>();
+        HashMap<String, Object> requestBodyParameters = new HashMap<>();
         requestBodyParameters.put("code", authCode);
         requestBodyParameters.put("client_id", CLIENT_ID);
         requestBodyParameters.put("client_secret", CLIENT_SECRET);
@@ -166,7 +166,7 @@ public class FirebaseWebService implements GoogleApiClient.OnConnectionFailedLis
         });
 
         FirebaseWebService.RequestMethods requestMethod = FirebaseWebService.RequestMethods.POST;
-        HashMap<String, String> requestBodyParameters = new HashMap<>();
+        HashMap<String, Object> requestBodyParameters = new HashMap<>();
         requestBodyParameters.put("refresh_token", mTokenStorage.getRefreshToken(context));
         requestBodyParameters.put("client_id", CLIENT_ID);
         requestBodyParameters.put("client_secret", CLIENT_SECRET);

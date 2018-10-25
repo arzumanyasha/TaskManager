@@ -23,7 +23,7 @@ public class UserDataAsyncTask extends AsyncTask<RequestParameters, Void, String
     protected String doInBackground(RequestParameters... requestParameters) {
         String url = requestParameters[0].getUrl();
         FirebaseWebService.RequestMethods requestMethod = requestParameters[0].getRequestMethod();
-        HashMap<String, String> requestBodyParameters = requestParameters[0].getRequestBodyParameters();
+        HashMap<String, Object> requestBodyParameters = requestParameters[0].getRequestBodyParameters();
         HashMap<String, String> requestHeaderParameters = requestParameters[0].getRequestHeaderParameters();
 
         BaseHttpUrlConnection baseHttpUrlConnection = new BaseHttpUrlConnection();
@@ -37,17 +37,17 @@ public class UserDataAsyncTask extends AsyncTask<RequestParameters, Void, String
     @Override
     protected void onPostExecute(String s) {
         super.onPostExecute(s);
-        if (userDataLoadingListener != null) {
-            try {
-                userDataLoadingListener.onDataLoaded(mBuffer);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
+        if (userDataLoadingListener != null && !mBuffer.equals("")) {
+            userDataLoadingListener.onDataLoaded(mBuffer);
+        } else if (userDataLoadingListener != null && mBuffer.equals("")) {
+            userDataLoadingListener.onFail();
         }
     }
 
     public interface UserDataLoadingListener {
-        void onDataLoaded(String response) throws JSONException, ParseException;
+        void onDataLoaded(String response);
+
+        void onFail();
     }
 
     public void setDataInfoLoadingListener(UserDataLoadingListener listener) {

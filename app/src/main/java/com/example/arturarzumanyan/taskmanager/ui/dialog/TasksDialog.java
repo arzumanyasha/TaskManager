@@ -1,6 +1,7 @@
 package com.example.arturarzumanyan.taskmanager.ui.dialog;
 
 import com.example.arturarzumanyan.taskmanager.R;
+import com.example.arturarzumanyan.taskmanager.data.repository.tasks.TasksCloudStore;
 import com.example.arturarzumanyan.taskmanager.data.repository.tasks.TasksRepository;
 import com.example.arturarzumanyan.taskmanager.domain.Task;
 import com.example.arturarzumanyan.taskmanager.networking.util.DateUtils;
@@ -18,6 +19,7 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.UUID;
 
@@ -28,6 +30,10 @@ public class TasksDialog extends AppCompatDialogFragment {
     private EditText mEditTextTaskName, mEditTextTaskDescription;
     private TextView mTextViewTaskDate;
     private Date taskDate;
+
+    public TasksDialog() {
+        this.tasksReadyListener = null;
+    }
 
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
@@ -60,7 +66,17 @@ public class TasksDialog extends AppCompatDialogFragment {
                             task.setName(taskName);
                             task.setDescription(mEditTextTaskDescription.getText().toString());
                             task.setDate(taskDate);
-                            tasksRepository.updateTask(task);
+                            tasksRepository.updateTask(task, new TasksCloudStore.OnTaskCompletedListener() {
+                                @Override
+                                public void onSuccess(ArrayList<Task> taskArrayList) {
+                                    tasksReadyListener.onTasksReady(taskArrayList);
+                                }
+
+                                @Override
+                                public void onFail() {
+
+                                }
+                            });
                         } else if (!taskName.isEmpty() && (bundle.getParcelable(TASKS_KEY) == null)) {
                             Task task;
                             String taskId = UUID.randomUUID().toString();
@@ -83,7 +99,17 @@ public class TasksDialog extends AppCompatDialogFragment {
                                         DateUtils.getTaskDateFromString(mTextViewTaskDate.getText().toString())
                                 );
                             }
-                            tasksRepository.addTask(task);
+                            tasksRepository.addTask(task, new TasksCloudStore.OnTaskCompletedListener() {
+                                @Override
+                                public void onSuccess(ArrayList<Task> taskArrayList) {
+                                    tasksReadyListener.onTasksReady(taskArrayList);
+                                }
+
+                                @Override
+                                public void onFail() {
+
+                                }
+                            });
 
                         }
                     }
@@ -118,4 +144,14 @@ public class TasksDialog extends AppCompatDialogFragment {
         }
         return builder.create();
     }
+
+    public interface TasksReadyListener {
+        void onTasksReady(ArrayList<Task> tasks);
+    }
+
+    public void setTasksReadyListener(TasksReadyListener listener) {
+        this.tasksReadyListener = listener;
+    }
+
+    private TasksReadyListener tasksReadyListener;
 }

@@ -24,19 +24,24 @@ public class EventsParser {
     private static final String ID_KEY = "id";
     private static final String SUMMARY_KEY = "summary";
 
-    public ArrayList<Event> parseEvents(String buffer) throws JSONException, ParseException {
+    public ArrayList<Event> parseEvents(String buffer) {
 
         ArrayList<Event> eventsList = new ArrayList<>();
-        JSONObject jsonobject = new JSONObject(buffer);
-        JSONArray jsonArray = jsonobject.getJSONArray(ITEMS_KEY);
-        for (int i = 0; i < jsonArray.length(); i++) {
-            JSONObject explrObject = jsonArray.getJSONObject(i);
-            eventsList.add(parseEvent(explrObject));
+        try {
+            JSONObject jsonobject = new JSONObject(buffer);
+            JSONArray jsonArray = jsonobject.getJSONArray(ITEMS_KEY);
+            for (int i = 0; i < jsonArray.length(); i++) {
+                JSONObject explrObject = jsonArray.getJSONObject(i);
+                eventsList.add(parseEvent(explrObject));
+            }
+        } catch (JSONException e) {
+            e.printStackTrace();
         }
+
         return eventsList;
     }
 
-    private Event parseEvent(JSONObject jsonObject) throws JSONException, ParseException {
+    private Event parseEvent(JSONObject jsonObject) throws JSONException {
 
         String description;
         if (!jsonObject.isNull(DESCRIPTION_KEY)) {
@@ -59,12 +64,12 @@ public class EventsParser {
 
         Date endDate = DateUtils.getEventDateFromString(endTimeJsonObject.getString(DATETIME_KEY));
 
-        Boolean isNotify;
+        int isNotify;
         JSONObject reminderJsonObject = jsonObject.getJSONObject(REMINDERS_KEY);
         if (!reminderJsonObject.isNull(OVERRIDES_KEY)) {
-            isNotify = true;
+            isNotify = 1;
         } else {
-            isNotify = false;
+            isNotify = 0;
         }
 
         Event event = new Event(jsonObject.getString(ID_KEY),
@@ -76,5 +81,15 @@ public class EventsParser {
                 isNotify);
 
         return event;
+    }
+
+    public Event parseEvent(String buffer){
+        try {
+            JSONObject jsonobject = new JSONObject(buffer);
+            return parseEvent(jsonobject);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 }

@@ -43,14 +43,14 @@ public class EventsDbStore {
     }
 
     public void addEvent(Event event) {
-
+        mSqliteDbHelper.insertEvent(event);
     }
 
     public void updateEvent(Event event) {
-
+        mSqliteDbHelper.updateEvent(event);
     }
 
     public void deleteEvent(Event event) {
-
+        mSqliteDbHelper.deleteEvent(event);
     }
 }

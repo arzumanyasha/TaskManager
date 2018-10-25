@@ -37,11 +37,41 @@ public class EventsAdapter extends RecyclerView.Adapter<EventsAdapter.ViewHolder
     @Override
     public void onBindViewHolder(EventsAdapter.ViewHolder holder, int position) {
         Event event = mDataset.get(position);
+
+        holder.itemView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (mListener != null) {
+                    int position = (int) v.getTag();
+                    if (position != RecyclerView.NO_POSITION) {
+                        Event event = mDataset.get(position);
+                        mListener.onItemClick(event);
+                        notifyItemChanged(position);
+                        notifyItemRangeChanged(position, mDataset.size());
+                    }
+                }
+            }
+        });
         holder.eventName.setText(event.getName());
         holder.eventDescription.setText(event.getDescription().replaceAll("[\n]", ""));
 
-        //holder.taskDelete.setOnClickListener(this);
+        holder.eventDelete.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (mListener != null) {
+                    int position = (int) v.getTag();
+                    if (position != RecyclerView.NO_POSITION) {
+                        Event event = mDataset.get(position);
+                        mListener.onItemDelete(event);
+                        mDataset.remove(event);
+                        notifyItemRemoved(position);
+                        notifyItemRangeChanged(position, mDataset.size());
+                    }
+                }
+            }
+        });
         holder.eventDelete.setTag(position);
+        holder.itemView.setTag(position);
 
         ColorPalette colorPalette = new ColorPalette(mContext);
         HashMap<Integer, Integer> map = colorPalette.getColorPalette();
@@ -94,5 +124,7 @@ public class EventsAdapter extends RecyclerView.Adapter<EventsAdapter.ViewHolder
 
     public interface OnItemClickListener {
         void onItemDelete(Event event);
+
+        void onItemClick(Event event);
     }
 }
