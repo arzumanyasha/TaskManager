@@ -50,6 +50,7 @@ public class IntentionActivity extends AppCompatActivity {
     private DrawerLayout mDrawer;
     private Intent mUserData;
 
+    private TaskListsRepository mTaskListsRepository;
     private SubMenu mTaskListsMenu;
 
     private ArrayList<TaskList> mTaskLists;
@@ -88,8 +89,8 @@ public class IntentionActivity extends AppCompatActivity {
             }
         });
 
-        TaskListsRepository taskListsRepository = new TaskListsRepository(this);
-        taskListsRepository.loadTaskLists(new TaskListsRepository.OnTaskListsLoadedListener() {
+        mTaskListsRepository = new TaskListsRepository(this);
+        mTaskListsRepository.loadTaskLists(new TaskListsRepository.OnTaskListsLoadedListener() {
             @Override
             public void onSuccess(ArrayList<TaskList> taskLists) {
                 mTaskLists = taskLists;
@@ -161,16 +162,11 @@ public class IntentionActivity extends AppCompatActivity {
 
         mTaskListsMenu = menu.addSubMenu("TaskLists");
         for (int i = 0; i < mTaskLists.size(); i++) {
-            final int position = i + 1;
+            final int position = i;
             mTaskListsMenu.add(mTaskLists.get(i).getTitle()).setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
                 @Override
                 public boolean onMenuItemClick(MenuItem item) {
-                    Bundle bundle = new Bundle();
-                    bundle.putInt(TASK_LIST_ID_KEY, position);
-                    bundle.putString(TASK_LIST_TITLE_KEY, mTaskLists.get(position - 1).getTitle());
-                    TasksFragment tasksFragment = new TasksFragment();
-                    tasksFragment.setArguments(bundle);
-                    openFragment(tasksFragment);
+                    openTaskFragment(mTaskLists.get(position).getId(), mTaskLists.get(position).getTitle());
                     return false;
                 }
             });
@@ -237,22 +233,27 @@ public class IntentionActivity extends AppCompatActivity {
         TaskListsDialog taskListsDialog = new TaskListsDialog();
         taskListsDialog.setTaskListReadyListener(new TaskListsDialog.TaskListReadyListener() {
             @Override
-            public void onTaskListReady(TaskList taskList) {
+            public void onTaskListReady(final TaskList taskList) {
+                mTaskLists.add(taskList);
                 mTaskListsMenu.add(taskList.getTitle()).setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
                     @Override
                     public boolean onMenuItemClick(MenuItem item) {
-                        Bundle bundle = new Bundle();
-                        bundle.putInt(TASK_LIST_ID_KEY, mTaskLists.size() + 1);
-                        bundle.putString(TASK_LIST_TITLE_KEY, mTaskLists.get(mTaskLists.size()).getTitle());
-                        TasksFragment tasksFragment = new TasksFragment();
-                        tasksFragment.setArguments(bundle);
-                        openFragment(tasksFragment);
+                        openTaskFragment(taskList.getId(), taskList.getTitle());
                         return false;
                     }
                 });
             }
         });
         taskListsDialog.show(getSupportFragmentManager(), TASK_LISTS_KEY);
+    }
+
+    private void openTaskFragment(int taskListId, String taskListTitle){
+        Bundle bundle = new Bundle();
+        bundle.putInt(TASK_LIST_ID_KEY, taskListId);
+        bundle.putString(TASK_LIST_TITLE_KEY, taskListTitle);
+        TasksFragment tasksFragment = new TasksFragment();
+        tasksFragment.setArguments(bundle);
+        openFragment(tasksFragment);
     }
 
     private void openFragment(Fragment fragment) {
@@ -301,7 +302,14 @@ public class IntentionActivity extends AppCompatActivity {
                 taskListsDialog.setTaskListReadyListener(new TaskListsDialog.TaskListReadyListener() {
                     @Override
                     public void onTaskListReady(TaskList taskList) {
-                        mTaskListsMenu.getItem(taskList.getId()).setTitle(taskList.getTitle());
+                        for (int i = 0; i < mTaskListsMenu.size(); i++) {
+                            if (mTaskLists.get(i).getId() == taskList.getId()) {
+                                mTaskLists.get(i).setTitle(taskList.getTitle());
+                                mTaskListsMenu.getItem(i).setTitle(taskList.getTitle());
+                                taskListFragmentInteractionListener.onTaskListReady(taskList);
+                            }
+                        }
+
                     }
                 });
                 taskListsDialog.show(getSupportFragmentManager(), TASK_LISTS_KEY);
@@ -312,7 +320,18 @@ public class IntentionActivity extends AppCompatActivity {
                 taskListsRepository.deleteTaskList(taskList, new TaskListsCloudStore.OnTaskCompletedListener() {
                     @Override
                     public void onSuccess(TaskList taskList) {
-                        mTaskListsMenu.removeItem(taskList.getId());
+                        int menuSize = mTaskListsMenu.size();
+                        TaskList previousTaskList = null;
+                        for (int i = 0; i < menuSize; i++) {
+                            if (mTaskLists.get(i).getId() == taskList.getId()) {
+                                mTaskListsMenu.getItem(i).setVisible(false);
+                                mTaskListsMenu.removeItem(i);
+                                mTaskLists.remove(i);
+                                previousTaskList = mTaskLists.get(i - 1);
+                            }
+                        }
+
+                        openTaskFragment(previousTaskList.getId(), previousTaskList.getTitle());
                     }
 
                     @Override
@@ -335,7 +354,7 @@ public class IntentionActivity extends AppCompatActivity {
         void onTasksReady(ArrayList<Task> tasks);
     }
 
-    public void setTaskFragmentInteractionListener(TaskFragmentInteractionListener listener){
+    public void setTaskFragmentInteractionListener(TaskFragmentInteractionListener listener) {
         this.taskFragmentInteractionListener = listener;
     }
 
@@ -345,11 +364,20 @@ public class IntentionActivity extends AppCompatActivity {
         void onEventsReady(ArrayList<Event> events);
     }
 
-    public void setEventFragmentInteractionListener(EventFragmentInteractionListener listener){
+    public void setEventFragmentInteractionListener(EventFragmentInteractionListener listener) {
         this.eventFragmentInteractionListener = listener;
     }
 
     private EventFragmentInteractionListener eventFragmentInteractionListener;
 
+    public interface TaskListFragmentInteractionListener {
+        void onTaskListReady(TaskList taskList);
+    }
+
+    public void setTaskListFragmentInteractionListener(TaskListFragmentInteractionListener listener) {
+        this.taskListFragmentInteractionListener = listener;
+    }
+
+    private TaskListFragmentInteractionListener taskListFragmentInteractionListener;
 }
 

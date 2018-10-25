@@ -71,7 +71,7 @@ public class TaskListsCloudStore {
             @Override
             public void onDataLoaded(String response) {
                 createOrUpdateTaskListInDb(response, requestMethod);
-                listener.onSuccess(taskList);
+                listener.onSuccess(mTaskListsDbStore.getTaskList(taskList.getTitle()));
             }
 
             @Override
@@ -85,7 +85,7 @@ public class TaskListsCloudStore {
                             @Override
                             public void onDataLoaded(String response) {
                                 createOrUpdateTaskListInDb(response, requestMethod);
-                                listener.onSuccess(taskList);
+                                listener.onSuccess(mTaskListsDbStore.getTaskList(taskList.getTitle()));
                             }
 
                             @Override
@@ -164,7 +164,9 @@ public class TaskListsCloudStore {
 
     public interface OnTaskCompletedListener {
         void onSuccess(TaskList taskList);
+
         void onSuccess(ArrayList<TaskList> taskListArrayList);
+
         void onFail();
     }
 }

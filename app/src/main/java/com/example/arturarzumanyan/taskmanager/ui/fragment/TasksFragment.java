@@ -15,6 +15,7 @@ import com.example.arturarzumanyan.taskmanager.R;
 import com.example.arturarzumanyan.taskmanager.data.repository.tasks.TasksDbStore;
 import com.example.arturarzumanyan.taskmanager.data.repository.tasks.TasksRepository;
 import com.example.arturarzumanyan.taskmanager.domain.Task;
+import com.example.arturarzumanyan.taskmanager.domain.TaskList;
 import com.example.arturarzumanyan.taskmanager.networking.util.DateUtils;
 import com.example.arturarzumanyan.taskmanager.ui.activity.IntentionActivity;
 import com.example.arturarzumanyan.taskmanager.ui.adapter.TasksAdapter;
@@ -100,6 +101,13 @@ public class TasksFragment extends Fragment {
             @Override
             public void onTasksReady(ArrayList<Task> tasks) {
                 mTasksAdapter.updateList(tasks);
+            }
+        });
+
+        ((IntentionActivity) getActivity()).setTaskListFragmentInteractionListener(new IntentionActivity.TaskListFragmentInteractionListener() {
+            @Override
+            public void onTaskListReady(TaskList taskList) {
+                getActivity().setTitle(taskList.getTitle());
             }
         });
         mTasksRecyclerView.setAdapter(mTasksAdapter);

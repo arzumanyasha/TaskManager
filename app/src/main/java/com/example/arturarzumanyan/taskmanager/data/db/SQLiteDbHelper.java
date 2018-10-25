@@ -161,11 +161,10 @@ public class SQLiteDbHelper extends SQLiteOpenHelper {
 
         ContentValues cv = new ContentValues();
 
-        cv.put(TaskListTable.COLUMN_LIST_ID, taskList.getTaskListId());
         cv.put(TaskListTable.COLUMN_TITLE, taskList.getTitle());
 
-        mDb.update(TaskListTable.TABLE_NAME, cv, "_id = ",
-                new String[]{Integer.toString(taskList.getId())});
+        mDb.update(TaskListTable.TABLE_NAME, cv, "id = ?",
+                new String[]{taskList.getTaskListId()});
     }
 
     public void deleteTaskList(TaskList taskList) {
@@ -323,6 +322,29 @@ public class SQLiteDbHelper extends SQLiteOpenHelper {
         String[] selectionArgs = new String[]{Integer.toString(id)};
         Cursor c = mDb.rawQuery("SELECT * FROM " + TaskListTable.TABLE_NAME +
                 " WHERE " + TaskListTable._ID + " = ?", selectionArgs);
+
+        if (c.moveToFirst()) {
+            do {
+                TaskList taskList = new TaskList(c.getInt(c.getColumnIndex(TaskListTable._ID)),
+                        c.getString(c.getColumnIndex(TaskListTable.COLUMN_LIST_ID)),
+                        c.getString(c.getColumnIndex(TaskListTable.COLUMN_TITLE))
+                );
+
+                return taskList;
+
+            } while (c.moveToNext());
+        }
+
+        c.close();
+        return null;
+    }
+
+    public TaskList getTaskList(String title) {
+        mDb = getReadableDatabase();
+
+        String[] selectionArgs = new String[]{title};
+        Cursor c = mDb.rawQuery("SELECT * FROM " + TaskListTable.TABLE_NAME +
+                " WHERE " + TaskListTable.COLUMN_TITLE + " = ?", selectionArgs);
 
         if (c.moveToFirst()) {
             do {
