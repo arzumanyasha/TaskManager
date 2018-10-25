@@ -30,12 +30,9 @@ public class EventsDbStore {
         return mSqliteDbHelper.getDailyEvents(date);
     }
 
-    public ArrayList<Event> getWeeklyEvents() {
-        return null;
-    }
-
-    public ArrayList<Event> getMonthlyEvents() {
-        return null;
+    public ArrayList<Event> getEventsFromDate(Date eventDate) {
+        String date = DateUtils.getEventDate(eventDate);
+        return mSqliteDbHelper.getDailyEvents(date);
     }
 
     public void addEvents(ArrayList<Event> eventList) {

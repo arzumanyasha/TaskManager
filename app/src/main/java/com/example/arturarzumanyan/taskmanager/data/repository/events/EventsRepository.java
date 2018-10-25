@@ -6,6 +6,7 @@ import com.example.arturarzumanyan.taskmanager.data.repository.RepositoryLoadHel
 import com.example.arturarzumanyan.taskmanager.domain.Event;
 
 import java.util.ArrayList;
+import java.util.Date;
 
 public class EventsRepository {
     private EventsDbStore mEventsDbStore;
@@ -43,6 +44,10 @@ public class EventsRepository {
 
     public ArrayList<Event> getDailyEvents() {
         return mEventsDbStore.getDailyEvents();
+    }
+
+    public ArrayList<Event> getEventsFromDate(Date date){
+        return mEventsDbStore.getEventsFromDate(date);
     }
 
     public void addEvent(Event event, final EventsCloudStore.OnTaskCompletedListener listener) {
