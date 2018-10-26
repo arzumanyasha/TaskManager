@@ -46,6 +46,14 @@ public class EventsRepository {
         return mEventsDbStore.getDailyEvents();
     }
 
+    public ArrayList<Event> getWeeklyEvents() {
+        return mEventsDbStore.getWeeklyEvents();
+    }
+
+    public ArrayList<Event> getMonthlyEvents() {
+        return mEventsDbStore.getMonthlyEvents();
+    }
+
     public ArrayList<Event> getEventsFromDate(Date date){
         return mEventsDbStore.getEventsFromDate(date);
     }

@@ -30,17 +30,13 @@ public class WeekDashboardFragment extends Fragment {
     private String mParam1;
     private String mParam2;
 
-    private LinearLayout linearLayoutMon;
-    private LinearLayout linearLayoutTue;
-    private LinearLayout linearLayoutWed;
-    private LinearLayout linearLayoutThu;
-    private LinearLayout linearLayoutFri;
-    private LinearLayout linearLayoutSat;
-    private LinearLayout linearLayoutSun;
-
-    private ArrayList<Date> weekDateList;
-    private HashMap<Date, ArrayList<Event>> weeklyEvents;
-    private ArrayList<LinearLayout> linearLayouts;
+    private LinearLayout mLinearLayoutMon;
+    private LinearLayout mLinearLayoutTue;
+    private LinearLayout mLinearLayoutWed;
+    private LinearLayout mLinearLayoutThu;
+    private LinearLayout mLinearLayoutFri;
+    private LinearLayout mLinearLayoutSat;
+    private LinearLayout mLinearLayoutSun;
 
     private OnFragmentInteractionListener mListener;
 
@@ -69,13 +65,13 @@ public class WeekDashboardFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_week_dashboard, container, false);
-        linearLayoutMon = view.findViewById(R.id.linearLayoutMon);
-        linearLayoutTue = view.findViewById(R.id.linearLayoutTue);
-        linearLayoutWed = view.findViewById(R.id.linearLayoutWed);
-        linearLayoutThu = view.findViewById(R.id.linearLayoutThu);
-        linearLayoutFri = view.findViewById(R.id.linearLayoutFri);
-        linearLayoutSat = view.findViewById(R.id.linearLayoutSat);
-        linearLayoutSun = view.findViewById(R.id.linearLayoutSun);
+        mLinearLayoutMon = view.findViewById(R.id.linearLayoutMon);
+        mLinearLayoutTue = view.findViewById(R.id.linearLayoutTue);
+        mLinearLayoutWed = view.findViewById(R.id.linearLayoutWed);
+        mLinearLayoutThu = view.findViewById(R.id.linearLayoutThu);
+        mLinearLayoutFri = view.findViewById(R.id.linearLayoutFri);
+        mLinearLayoutSat = view.findViewById(R.id.linearLayoutSat);
+        mLinearLayoutSun = view.findViewById(R.id.linearLayoutSun);
         return view;
     }
 
@@ -86,18 +82,18 @@ public class WeekDashboardFragment extends Fragment {
         int date = DateUtils.getEventWeek(DateUtils.getCurrentTime()) - 1;
         Date mondayDate = DateUtils.getMondayDate(date - 1);
 
-        linearLayouts = new ArrayList<>();
-        linearLayouts.add(linearLayoutMon);
-        linearLayouts.add(linearLayoutTue);
-        linearLayouts.add(linearLayoutWed);
-        linearLayouts.add(linearLayoutThu);
-        linearLayouts.add(linearLayoutFri);
-        linearLayouts.add(linearLayoutSat);
-        linearLayouts.add(linearLayoutSun);
+        ArrayList<LinearLayout> linearLayouts = new ArrayList<>();
+        linearLayouts.add(mLinearLayoutMon);
+        linearLayouts.add(mLinearLayoutTue);
+        linearLayouts.add(mLinearLayoutWed);
+        linearLayouts.add(mLinearLayoutThu);
+        linearLayouts.add(mLinearLayoutFri);
+        linearLayouts.add(mLinearLayoutSat);
+        linearLayouts.add(mLinearLayoutSun);
 
         Date nextDate = mondayDate;
-        weekDateList = new ArrayList<>();
-        weeklyEvents = new HashMap<>();
+        ArrayList<Date> weekDateList = new ArrayList<>();
+        HashMap<Date, ArrayList<Event>> weeklyEvents = new HashMap<>();
 
         EventsRepository eventsRepository = new EventsRepository(getActivity());
 
