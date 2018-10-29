@@ -7,6 +7,7 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.app.NotificationManagerCompat;
+import android.view.Gravity;
 import android.view.SubMenu;
 import android.view.View;
 import android.support.design.widget.NavigationView;
@@ -156,6 +157,7 @@ public class IntentionActivity extends AppCompatActivity {
                     public boolean onMenuItemClick(MenuItem item) {
                         EventsFragment eventsFragment = new EventsFragment();
                         openFragment(eventsFragment);
+                        mDrawer.closeDrawer(Gravity.START);
                         return false;
                     }
                 });
@@ -167,6 +169,7 @@ public class IntentionActivity extends AppCompatActivity {
                 @Override
                 public boolean onMenuItemClick(MenuItem item) {
                     openTaskFragment(mTaskLists.get(position).getId(), mTaskLists.get(position).getTitle());
+                    mDrawer.closeDrawer(Gravity.START);
                     return false;
                 }
             });
@@ -175,6 +178,7 @@ public class IntentionActivity extends AppCompatActivity {
         addTaskListTextView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                mDrawer.closeDrawer(Gravity.START);
                 openTaskListCreatingDialog();
             }
         });
