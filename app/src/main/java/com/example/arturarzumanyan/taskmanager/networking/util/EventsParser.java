@@ -14,15 +14,15 @@ import java.util.Date;
 
 public class EventsParser {
     private static final String ITEMS_KEY = "items";
-    private static final String DESCRIPTION_KEY = "description";
-    private static final String COLOR_ID_KEY = "colorId";
-    private static final String START_KEY = "start";
-    private static final String END_KEY = "end";
-    private static final String DATETIME_KEY = "dateTime";
-    private static final String REMINDERS_KEY = "reminders";
-    private static final String OVERRIDES_KEY = "overrides";
+    public static final String DESCRIPTION_KEY = "description";
+    public static final String COLOR_ID_KEY = "colorId";
+    public static final String START_KEY = "start";
+    public static final String END_KEY = "end";
+    public static final String DATETIME_KEY = "dateTime";
+    public static final String REMINDERS_KEY = "reminders";
+    public static final String OVERRIDES_KEY = "overrides";
     private static final String ID_KEY = "id";
-    private static final String SUMMARY_KEY = "summary";
+    public static final String SUMMARY_KEY = "summary";
 
     public ArrayList<Event> parseEvents(String buffer) {
 

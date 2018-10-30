@@ -12,6 +12,7 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.example.arturarzumanyan.taskmanager.R;
+import com.example.arturarzumanyan.taskmanager.data.repository.tasks.TasksCloudStore;
 import com.example.arturarzumanyan.taskmanager.data.repository.tasks.TasksDbStore;
 import com.example.arturarzumanyan.taskmanager.data.repository.tasks.TasksRepository;
 import com.example.arturarzumanyan.taskmanager.domain.Task;
@@ -30,12 +31,8 @@ public class TasksFragment extends Fragment {
     private static final String ARG_PARAM2 = "param2";
     public static final String TASK_LIST_ID_KEY = "taskListId";
     public static final String TASK_LIST_TITLE_KEY = "taskListTitle";
-    public static final String DESCRIPTION_KEY = "description";
-    public static final String NAME_KEY = "name";
-    public static final String DATE_KEY = "date";
 
     private RecyclerView mTasksRecyclerView;
-    private ArrayList<Task> mTasks;
     private TasksAdapter mTasksAdapter;
 
     private int mParam1;
@@ -81,7 +78,7 @@ public class TasksFragment extends Fragment {
 
         TasksDbStore tasksDbStore = new TasksDbStore(getActivity());
 
-        mTasks = tasksDbStore.getTasksFromTaskList(mParam1);
+        ArrayList<Task> mTasks = tasksDbStore.getTasksFromTaskList(mParam1);
         getActivity().setTitle(mParam2);
 
         mTasksAdapter = new TasksAdapter(mTasks, new TasksAdapter.OnItemClickListener() {
@@ -94,6 +91,22 @@ public class TasksFragment extends Fragment {
             @Override
             public void onItemClick(Task task) {
                 openTasksDialog(task);
+            }
+
+            @Override
+            public void onChangeItemExecuted(Task task) {
+                TasksRepository tasksRepository = new TasksRepository(getActivity());
+                tasksRepository.updateTask(task, new TasksCloudStore.OnTaskCompletedListener() {
+                    @Override
+                    public void onSuccess(ArrayList<Task> taskArrayList) {
+
+                    }
+
+                    @Override
+                    public void onFail() {
+
+                    }
+                });
             }
         });
 

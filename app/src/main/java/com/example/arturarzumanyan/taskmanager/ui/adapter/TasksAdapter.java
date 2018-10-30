@@ -64,13 +64,38 @@ public class TasksAdapter extends RecyclerView.Adapter<TasksAdapter.ViewHolder> 
                 }
             }
         });
-        holder.taskDelete.setTag(position);
-        holder.itemView.setTag(position);
+
         if (task.getIsExecuted() == 1) {
             holder.isExecutedCheckBox.setChecked(true);
         } else {
             holder.isExecutedCheckBox.setChecked(false);
         }
+
+        holder.isExecutedCheckBox.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (mListener != null) {
+                    int position = (int) v.getTag();
+                    if (position != RecyclerView.NO_POSITION) {
+                        Task task = mDataset.get(position);
+                        if (task.getIsExecuted() == 1) {
+                            mDataset.get(position).setIsExecuted(0);
+                            task.setIsExecuted(0);
+                            mListener.onChangeItemExecuted(task);
+                        } else {
+                            mDataset.get(position).setIsExecuted(1);
+                            task.setIsExecuted(1);
+                            mListener.onChangeItemExecuted(task);
+                        }
+                        notifyItemChanged(position);
+                    }
+                }
+            }
+        });
+
+        holder.taskDelete.setTag(position);
+        holder.itemView.setTag(position);
+        holder.isExecutedCheckBox.setTag(position);
     }
 
     @Override
@@ -103,5 +128,7 @@ public class TasksAdapter extends RecyclerView.Adapter<TasksAdapter.ViewHolder> 
         void onItemDelete(Task task);
 
         void onItemClick(Task task);
+
+        void onChangeItemExecuted(Task task);
     }
 }
