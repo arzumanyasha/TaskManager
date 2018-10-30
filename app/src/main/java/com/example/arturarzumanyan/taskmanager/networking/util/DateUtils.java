@@ -12,6 +12,12 @@ public class DateUtils {
     private static final String HOUR_MINUTE_TIME_A_PATTERN = "HH:mm a";
     private static final String HOUR_MINUTE_TIME_PATTERN = "HH:mm";
     private static final String YEAR_MONTH_DAY_DATE_PATTERN = "yyyy-MM-dd";
+    private static final String YEAR_MONTH_DAY_PATTERN = "yyyyMMdd";
+    private static final int HOURS_IN_DAY = 24;
+    private static final int MILLIS_IN_SECONDS = 1000;
+    private static final int SECONDS_IN_MINUTES = 60;
+    public static final int MINUTES_IN_HOUR = 60;
+    public static final int DAYS_IN_WEEK = 7;
 
     public static String getCurrentTime() {
         Calendar c = Calendar.getInstance();
@@ -35,7 +41,7 @@ public class DateUtils {
         return null;
     }
 
-    public static String getEventDate(Date eventDate){
+    public static String getEventDate(Date eventDate) {
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat(YEAR_MONTH_DAY_DATE_PATTERN);
         return simpleDateFormat.format(eventDate);
     }
@@ -70,6 +76,17 @@ public class DateUtils {
         return null;
     }
 
+    public static int getDaysInCurrentMonth() {
+        Calendar c = Calendar.getInstance();
+        return c.getActualMaximum(Calendar.DAY_OF_MONTH);
+    }
+
+    public static Date getFirstDateOfMonth() {
+        Calendar c = Calendar.getInstance();
+        c.set(Calendar.DAY_OF_MONTH, 1);
+        return c.getTime();
+    }
+
     public static String formatTime(Date time) {
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat(HOUR_MINUTE_TIME_A_PATTERN);
         return simpleDateFormat.format(time);
@@ -80,7 +97,7 @@ public class DateUtils {
         return simpleDateFormat.format(time);
     }
 
-    public static Date getTimeWithoutA(String time){
+    public static Date getTimeWithoutA(String time) {
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat(HOUR_MINUTE_TIME_PATTERN);
         try {
             return simpleDateFormat.parse(time);
@@ -98,6 +115,38 @@ public class DateUtils {
     public static String formatTaskDate(Date date) {
         DateFormat dateFormat = new SimpleDateFormat(TASK_DATE_PATTERN);
         return dateFormat.format(date);
+    }
+
+    public static int getEventWeek(String eventDate) {
+        SimpleDateFormat df = new SimpleDateFormat(YEAR_MONTH_DAY_DATE_PATTERN);
+        Date date = null;
+        try {
+            date = df.parse(eventDate);
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+        Calendar cal = Calendar.getInstance();
+        cal.setTime(date);
+        return cal.get(Calendar.DAY_OF_WEEK);
+    }
+
+    public static Date getMondayDate(int currentWeekDay) {
+        SimpleDateFormat df = new SimpleDateFormat(YEAR_MONTH_DAY_PATTERN);
+        Calendar c = Calendar.getInstance();
+        Date currentDate = null;
+        try {
+            currentDate = df.parse(df.format(c.getTime()));
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+        Date monday = new Date(currentDate.getTime() - currentWeekDay * MILLIS_IN_SECONDS
+                * SECONDS_IN_MINUTES * MINUTES_IN_HOUR * HOURS_IN_DAY);
+        return monday;
+    }
+
+    public static Date getNextDate(Date date) {
+        return new Date(date.getTime() + MILLIS_IN_SECONDS
+                * SECONDS_IN_MINUTES * MINUTES_IN_HOUR * HOURS_IN_DAY);
     }
 
     public static int getHour() {

@@ -33,5 +33,10 @@
             <string name="nav_header_title">Android Studio</string>
             <string name="nav_header_subtitle">android.studio@android.com</string>
             <string name="nav_header_desc">Navigation header</string>
-
+        <!--Spinner Mode-->
+            <string-array name="modes">
+                <item>Day</item>
+                <item>Week</item>
+                <item>Month</item>
+            </string-array>
 </resources>

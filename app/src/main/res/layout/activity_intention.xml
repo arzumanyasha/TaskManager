@@ -38,6 +38,7 @@
                 android:textColor="@android:color/black"
                 android:textSize="24sp"
                 android:layout_gravity="start"
+                android:foreground="?android:attr/selectableItemBackground"
                 android:clickable="true"/>
         </RelativeLayout>
 

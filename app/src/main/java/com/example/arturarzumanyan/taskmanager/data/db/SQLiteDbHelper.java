@@ -98,12 +98,6 @@ public class SQLiteDbHelper extends SQLiteOpenHelper {
 
         cv.put(EventsTable.COLUMN_END_TIME, DateUtils.formatEventTime(event.getEndTime()));
         cv.put(EventsTable.COLUMN_REMINDER, event.getIsNotify());
-        /*
-        if (event.isNotify()) {
-            cv.put(EventsTable.COLUMN_REMINDER, 1);
-        } else {
-            cv.put(EventsTable.COLUMN_REMINDER, 0);
-        }*/
 
         mDb.insert(EventsTable.TABLE_NAME, null, cv);
     }
@@ -122,13 +116,7 @@ public class SQLiteDbHelper extends SQLiteOpenHelper {
         cv.put(EventsTable.COLUMN_END_TIME, DateUtils.formatEventTime(event.getEndTime()));
 
         cv.put(EventsTable.COLUMN_REMINDER, event.getIsNotify());
-/*
-        if (event.isNotify()) {
-            cv.put(EventsTable.COLUMN_REMINDER, 1);
-        } else {
-            cv.put(EventsTable.COLUMN_REMINDER, 0);
-        }
-*/
+
         mDb.update(EventsTable.TABLE_NAME, cv, "id = ?", new String[]{event.getId()});
     }
 
