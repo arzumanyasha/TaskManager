@@ -35,7 +35,6 @@ import com.example.arturarzumanyan.taskmanager.networking.util.DateUtils;
 import com.example.arturarzumanyan.taskmanager.ui.dialog.EventsDialog;
 import com.example.arturarzumanyan.taskmanager.ui.dialog.TaskListsDialog;
 import com.example.arturarzumanyan.taskmanager.ui.dialog.TasksDialog;
-import com.example.arturarzumanyan.taskmanager.ui.fragment.DailyEventsFragment;
 import com.example.arturarzumanyan.taskmanager.ui.fragment.EventsFragment;
 import com.example.arturarzumanyan.taskmanager.ui.fragment.TasksFragment;
 import com.squareup.picasso.Picasso;
@@ -267,7 +266,6 @@ public class IntentionActivity extends AppCompatActivity {
     private void openFragment(Fragment fragment) {
         FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
         transaction.replace(R.id.main_container, fragment);
-        transaction.addToBackStack(null);
         transaction.commit();
     }
 
