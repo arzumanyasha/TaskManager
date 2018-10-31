@@ -353,17 +353,19 @@ public class IntentionActivity extends AppCompatActivity {
                 });
             }
         } else if (id == R.id.pick_date) {
-            DatePickerDialog datePickerDialog = new DatePickerDialog(this, new DatePickerDialog.OnDateSetListener() {
+            if (getTitle().equals(EVENTS_KEY)) {
+                DatePickerDialog datePickerDialog = new DatePickerDialog(this, new DatePickerDialog.OnDateSetListener() {
 
-                @Override
-                public void onDateSet(DatePicker view, int year, int monthOfYear, int dayOfMonth) {
-                    EventsRepository eventsRepository = new EventsRepository(IntentionActivity.this);
+                    @Override
+                    public void onDateSet(DatePicker view, int year, int monthOfYear, int dayOfMonth) {
+                        EventsRepository eventsRepository = new EventsRepository(IntentionActivity.this);
 
-                    eventFragmentInteractionListener.onEventsReady(eventsRepository.getEventsFromDate(
-                            DateUtils.getDateFromString(DateUtils.getStringDateFromInt(year, monthOfYear, dayOfMonth))));
-                }
-            }, DateUtils.getYear(), DateUtils.getMonth(), DateUtils.getDay());
-            datePickerDialog.show();
+                        eventFragmentInteractionListener.onEventsReady(eventsRepository.getEventsFromDate(
+                                DateUtils.getDateFromString(DateUtils.getStringDateFromInt(year, monthOfYear, dayOfMonth))));
+                    }
+                }, DateUtils.getYear(), DateUtils.getMonth(), DateUtils.getDay());
+                datePickerDialog.show();
+            }
         }
 
         return super.onOptionsItemSelected(item);
