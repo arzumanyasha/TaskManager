@@ -1,5 +1,6 @@
 package com.example.arturarzumanyan.taskmanager.ui.activity;
 
+import android.app.DatePickerDialog;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
@@ -18,6 +19,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.DatePicker;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -29,9 +31,11 @@ import com.example.arturarzumanyan.taskmanager.data.repository.tasklists.TaskLis
 import com.example.arturarzumanyan.taskmanager.domain.Event;
 import com.example.arturarzumanyan.taskmanager.domain.Task;
 import com.example.arturarzumanyan.taskmanager.domain.TaskList;
+import com.example.arturarzumanyan.taskmanager.networking.util.DateUtils;
 import com.example.arturarzumanyan.taskmanager.ui.dialog.EventsDialog;
 import com.example.arturarzumanyan.taskmanager.ui.dialog.TaskListsDialog;
 import com.example.arturarzumanyan.taskmanager.ui.dialog.TasksDialog;
+import com.example.arturarzumanyan.taskmanager.ui.fragment.DailyEventsFragment;
 import com.example.arturarzumanyan.taskmanager.ui.fragment.EventsFragment;
 import com.example.arturarzumanyan.taskmanager.ui.fragment.TasksFragment;
 import com.squareup.picasso.Picasso;
@@ -86,7 +90,7 @@ public class IntentionActivity extends AppCompatActivity {
 
             @Override
             public void onFail() {
-
+                Toast.makeText(IntentionActivity.this, R.string.network_error, Toast.LENGTH_LONG).show();
             }
         });
 
@@ -108,7 +112,7 @@ public class IntentionActivity extends AppCompatActivity {
 
             @Override
             public void onFail() {
-
+                Toast.makeText(IntentionActivity.this, R.string.network_error, Toast.LENGTH_LONG).show();
             }
         });
 
@@ -251,7 +255,7 @@ public class IntentionActivity extends AppCompatActivity {
         taskListsDialog.show(getSupportFragmentManager(), TASK_LISTS_KEY);
     }
 
-    private void openTaskFragment(int taskListId, String taskListTitle){
+    private void openTaskFragment(int taskListId, String taskListTitle) {
         Bundle bundle = new Bundle();
         bundle.putInt(TASK_LIST_ID_KEY, taskListId);
         bundle.putString(TASK_LIST_TITLE_KEY, taskListTitle);
@@ -279,6 +283,7 @@ public class IntentionActivity extends AppCompatActivity {
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.date_picking_menu, menu);
         getMenuInflater().inflate(R.menu.intention, menu);
         return true;
     }
@@ -349,6 +354,18 @@ public class IntentionActivity extends AppCompatActivity {
                     }
                 });
             }
+        } else if (id == R.id.pick_date) {
+            DatePickerDialog datePickerDialog = new DatePickerDialog(this, new DatePickerDialog.OnDateSetListener() {
+
+                @Override
+                public void onDateSet(DatePicker view, int year, int monthOfYear, int dayOfMonth) {
+                    EventsRepository eventsRepository = new EventsRepository(IntentionActivity.this);
+
+                    eventFragmentInteractionListener.onEventsReady(eventsRepository.getEventsFromDate(
+                            DateUtils.getDateFromString(DateUtils.getStringDateFromInt(year, monthOfYear, dayOfMonth))));
+                }
+            }, DateUtils.getYear(), DateUtils.getMonth(), DateUtils.getDay());
+            datePickerDialog.show();
         }
 
         return super.onOptionsItemSelected(item);

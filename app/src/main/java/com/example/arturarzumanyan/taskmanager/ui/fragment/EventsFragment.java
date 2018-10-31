@@ -14,6 +14,8 @@ import android.view.ViewGroup;
 
 import com.example.arturarzumanyan.taskmanager.R;
 
+import static com.example.arturarzumanyan.taskmanager.ui.activity.IntentionActivity.EVENTS_KEY;
+
 public class EventsFragment extends Fragment {
     private static final String ARG_PARAM1 = "param1";
     private static final String ARG_PARAM2 = "param2";
@@ -90,7 +92,7 @@ public class EventsFragment extends Fragment {
                     new DailyEventsFragment()).commit();
         }
 
-        getActivity().setTitle("Events");
+        getActivity().setTitle(EVENTS_KEY);
     }
 
     public void onButtonPressed(Uri uri) {

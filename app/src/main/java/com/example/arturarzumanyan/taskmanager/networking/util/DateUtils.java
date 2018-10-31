@@ -144,6 +144,20 @@ public class DateUtils {
         return monday;
     }
 
+    public static Date getDateFromString(String date){
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat(YEAR_MONTH_DAY_PATTERN);
+        try {
+            return simpleDateFormat.parse(date);
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    public static String getStringDateFromInt(int year, int month, int day){
+        return Integer.toString(year) + Integer.toString(month + 1) + Integer.toString(day);
+    }
+
     public static Date getNextDate(Date date) {
         return new Date(date.getTime() + MILLIS_IN_SECONDS
                 * SECONDS_IN_MINUTES * MINUTES_IN_HOUR * HOURS_IN_DAY);

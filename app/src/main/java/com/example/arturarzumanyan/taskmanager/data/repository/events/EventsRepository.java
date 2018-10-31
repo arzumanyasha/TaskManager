@@ -37,8 +37,11 @@ public class EventsRepository {
 
                 }
             });
-        } else if ((mRepositoryLoadHelper.isOnline()) && (events.size() != 0)) {
+        } else if ((mRepositoryLoadHelper.isOnline() && (events.size() != 0)) ||
+                (!mRepositoryLoadHelper.isOnline() && (events.size() != 0))) {
             listener.onSuccess(events);
+        } else {
+            listener.onFail();
         }
     }
 
@@ -54,7 +57,7 @@ public class EventsRepository {
         return mEventsDbStore.getMonthlyEvents();
     }
 
-    public ArrayList<Event> getEventsFromDate(Date date){
+    public ArrayList<Event> getEventsFromDate(Date date) {
         return mEventsDbStore.getEventsFromDate(date);
     }
 

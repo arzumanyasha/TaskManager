@@ -76,9 +76,9 @@ public class TasksFragment extends Fragment {
         LinearLayoutManager layoutManager = new LinearLayoutManager(getActivity());
         mTasksRecyclerView.setLayoutManager(layoutManager);
 
-        TasksDbStore tasksDbStore = new TasksDbStore(getActivity());
+        TasksRepository tasksRepository = new TasksRepository(getActivity());
 
-        ArrayList<Task> mTasks = tasksDbStore.getTasksFromTaskList(mParam1);
+        ArrayList<Task> mTasks = tasksRepository.getTasksFromTaskList(mParam1);
         getActivity().setTitle(mParam2);
 
         mTasksAdapter = new TasksAdapter(mTasks, new TasksAdapter.OnItemClickListener() {
