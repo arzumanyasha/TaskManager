@@ -23,13 +23,28 @@ import java.util.HashMap;
 import java.util.List;
 
 import static com.example.arturarzumanyan.taskmanager.networking.base.BaseHttpUrlConnection.JSON_CONTENT_TYPE_VALUE;
+import static com.example.arturarzumanyan.taskmanager.networking.util.EventsParser.COLOR_ID_KEY;
+import static com.example.arturarzumanyan.taskmanager.networking.util.EventsParser.DATETIME_KEY;
+import static com.example.arturarzumanyan.taskmanager.networking.util.EventsParser.DESCRIPTION_KEY;
+import static com.example.arturarzumanyan.taskmanager.networking.util.EventsParser.END_KEY;
+import static com.example.arturarzumanyan.taskmanager.networking.util.EventsParser.OVERRIDES_KEY;
+import static com.example.arturarzumanyan.taskmanager.networking.util.EventsParser.REMINDERS_KEY;
+import static com.example.arturarzumanyan.taskmanager.networking.util.EventsParser.START_KEY;
+import static com.example.arturarzumanyan.taskmanager.networking.util.EventsParser.SUMMARY_KEY;
 import static com.example.arturarzumanyan.taskmanager.networking.util.TaskListsParser.TITLE_KEY;
+import static com.example.arturarzumanyan.taskmanager.networking.util.TasksParser.COMPLETED_KEY;
 import static com.example.arturarzumanyan.taskmanager.networking.util.TasksParser.DUE_KEY;
 import static com.example.arturarzumanyan.taskmanager.networking.util.TasksParser.NOTES_KEY;
+import static com.example.arturarzumanyan.taskmanager.networking.util.TasksParser.STATUS_KEY;
 
 public class RepositoryLoadHelper {
     public static final String AUTHORIZATION_KEY = "Authorization";
     private static final String CONTENT_TYPE_KEY = "Content-Type";
+    private static final String NEEDS_ACTION_KEY = "needsAction";
+    private static final String POPUP_KEY = "popup";
+    private static final String METHOD_KEY = "method";
+    private static final String USE_DEFAULT_KEY = "useDefault";
+    private static final String MINUTES_KEY = "minutes";
 
     private Context mContext;
 
@@ -55,36 +70,36 @@ public class RepositoryLoadHelper {
 
         HashMap<String, String> startTimeMap = new HashMap<>();
         HashMap<String, String> endTimeMap = new HashMap<>();
-        startTimeMap.put("dateTime", DateUtils.formatEventTime(event.getStartTime()));
-        endTimeMap.put("dateTime", DateUtils.formatEventTime(event.getEndTime()));
+        startTimeMap.put(DATETIME_KEY, DateUtils.formatEventTime(event.getStartTime()));
+        endTimeMap.put(DATETIME_KEY, DateUtils.formatEventTime(event.getEndTime()));
 
-        requestBody.put("summary", event.getName());
+        requestBody.put(SUMMARY_KEY, event.getName());
 
         if (!event.getDescription().isEmpty()) {
-            requestBody.put("description", event.getDescription());
+            requestBody.put(DESCRIPTION_KEY, event.getDescription());
         }
 
-        requestBody.put("colorId", Integer.toString(event.getColorId()));
+        requestBody.put(COLOR_ID_KEY, Integer.toString(event.getColorId()));
 
-        requestBody.put("start", startTimeMap);
-        requestBody.put("end", endTimeMap);
+        requestBody.put(START_KEY, startTimeMap);
+        requestBody.put(END_KEY, endTimeMap);
 
         if (event.getIsNotify() == 1) {
             HashMap<String, Object> remindersMap = new HashMap<>();
             List<Object> overrides = new ArrayList<>();
 
             HashMap<String, Object> overridesMap = new HashMap<>();
-            overridesMap.put("method", "popup");
-            overridesMap.put("minutes", 10);
+            overridesMap.put(METHOD_KEY, POPUP_KEY);
+            overridesMap.put(MINUTES_KEY, 10);
             overrides.add(overridesMap);
-            remindersMap.put("overrides", overrides);
-            remindersMap.put("useDefault", false);
+            remindersMap.put(OVERRIDES_KEY, overrides);
+            remindersMap.put(USE_DEFAULT_KEY, false);
 
-            requestBody.put("reminders", remindersMap);
+            requestBody.put(REMINDERS_KEY, remindersMap);
         } else {
             HashMap<String, Object> remindersMap = new HashMap<>();
-            remindersMap.put("useDefault", false);
-            requestBody.put("reminders", remindersMap);
+            remindersMap.put(USE_DEFAULT_KEY, false);
+            requestBody.put(REMINDERS_KEY, remindersMap);
         }
 
         HashMap<String, String> requestHeaderParameters = new HashMap<>();
@@ -114,6 +129,15 @@ public class RepositoryLoadHelper {
 
         if (task.getDate() != null) {
             requestBody.put(DUE_KEY, DateUtils.formatTaskDate(task.getDate()));
+        }
+
+        if (task.getIsExecuted() == 1) {
+            requestBody.put(STATUS_KEY, COMPLETED_KEY);
+        } else {
+            requestBody.put(STATUS_KEY, NEEDS_ACTION_KEY);
+            if(requestMethod.equals(FirebaseWebService.RequestMethods.PATCH)){
+                requestBody.put(COMPLETED_KEY, null);
+            }
         }
 
         HashMap<String, String> requestHeaderParameters = new HashMap<>();

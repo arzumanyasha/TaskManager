@@ -42,9 +42,16 @@ public class TasksRepository {
 
                 }
             });
-        } else if ((mRepositoryLoadHelper.isOnline()) && (tasks.size() != 0)) {
+        } else if ((mRepositoryLoadHelper.isOnline() && (tasks.size() != 0)) ||
+                (!mRepositoryLoadHelper.isOnline() && (tasks.size() != 0))) {
             listener.onSuccess(tasks);
+        } else {
+            listener.onFail();
         }
+    }
+
+    public ArrayList<Task> getTasksFromTaskList(int taskListId) {
+        return mTasksDbStore.getTasksFromTaskList(taskListId);
     }
 
     public interface OnTasksLoadedListener {

@@ -17,15 +17,12 @@ public class Converter {
                 Object obj = map.get(key);
                 if (obj instanceof Map) {
                     jsonObject.put(key, fromMapToJson((HashMap) obj));
-                }
-                else if (obj instanceof List) {
+                } else if (obj instanceof List) {
                     jsonObject.put(key, fromListToJson((List) obj));
+                } else {
+                    jsonObject.put(key, map.get(key) == null ? JSONObject.NULL : map.get(key));
                 }
-                else {
-                    jsonObject.put(key, map.get(key));
-                }
-            }
-            catch (JSONException jsone) {
+            } catch (JSONException jsone) {
 
             }
         }
@@ -39,11 +36,9 @@ public class Converter {
         for (Object obj : list) {
             if (obj instanceof HashMap) {
                 jsonArray.put(fromMapToJson((HashMap) obj));
-            }
-            else if (obj instanceof List) {
+            } else if (obj instanceof List) {
                 jsonArray.put(fromListToJson((List) obj));
-            }
-            else {
+            } else {
                 jsonArray.put(obj);
             }
         }

@@ -66,8 +66,11 @@ public class TaskListsRepository {
 
                 }
             });
-        } else if ((mRepositoryLoadHelper.isOnline()) && (taskLists.size() != 0)) {
+        } else if ((mRepositoryLoadHelper.isOnline() && (taskLists.size() != 0)) ||
+                (!mRepositoryLoadHelper.isOnline() && (taskLists.size() != 0))) {
             listener.onSuccess(taskLists);
+        } else {
+            listener.onFail();
         }
     }
 
