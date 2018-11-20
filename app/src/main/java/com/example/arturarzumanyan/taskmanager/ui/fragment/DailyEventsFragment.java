@@ -62,7 +62,7 @@ public class DailyEventsFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_daily_events, container, false);
-        mEventsRecyclerView = view.findViewById(R.id.recyclerViewEvents);
+        mEventsRecyclerView = view.findViewById(R.id.recycler_events);
         return view;
     }
 

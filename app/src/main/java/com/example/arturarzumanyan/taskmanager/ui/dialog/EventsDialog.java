@@ -169,11 +169,11 @@ public class EventsDialog extends AppCompatDialogFragment {
 
         mEditTextEventName = view.findViewById(R.id.editTextEventName);
         mEditTextEventDescription = view.findViewById(R.id.editTextEventDescription);
-        mImageButtonColorPicker = view.findViewById(R.id.imageButtonColorPicker);
-        mTextViewStartTime = view.findViewById(R.id.textViewStartTime);
-        mTextViewEndTime = view.findViewById(R.id.textViewEndTime);
-        mTextViewDate = view.findViewById(R.id.textViewEventDate);
-        mSwitchNotification = view.findViewById(R.id.switchNotification);
+        mImageButtonColorPicker = view.findViewById(R.id.image_button_color_picker);
+        mTextViewStartTime = view.findViewById(R.id.text_start_time);
+        mTextViewEndTime = view.findViewById(R.id.text_end_time);
+        mTextViewDate = view.findViewById(R.id.text_event_date);
+        mSwitchNotification = view.findViewById(R.id.switch_notification);
 
         mTextViewStartTime.setText(mHour + ":" + mMinute);
         mTextViewEndTime.setText((mHour + 1) + ":" + mMinute);

@@ -65,7 +65,7 @@ public class TasksFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_tasks, container, false);
-        mTasksRecyclerView = view.findViewById(R.id.recyclerViewTasks);
+        mTasksRecyclerView = view.findViewById(R.id.recycler_tasks);
         return view;
     }
 

@@ -5,7 +5,7 @@
         android:id="@+id/pick_date"
         android:icon="@drawable/ic_event_white_24dp"
         android:orderInCategory="100"
-        android:title="Pick date"
+        android:title="@string/pick_date_title"
         app:showAsAction="always">
     </item>
 </menu>

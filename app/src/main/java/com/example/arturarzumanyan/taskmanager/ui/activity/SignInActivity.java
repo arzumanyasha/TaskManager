@@ -22,7 +22,7 @@ public class SignInActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+        setContentView(R.layout.activity_sign_in);
 
         mFirebaseWebService = new FirebaseWebService();
         mFirebaseWebService.setGoogleClient(this);
@@ -33,7 +33,7 @@ public class SignInActivity extends AppCompatActivity {
             }
         });
 
-        SignInButton signInButton = findViewById(R.id.button_sign_in);
+        SignInButton signInButton = findViewById(R.id.btn_sign_in);
         signInButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {

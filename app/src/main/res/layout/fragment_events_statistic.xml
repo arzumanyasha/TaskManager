@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -11,18 +11,18 @@
         android:orientation="vertical">
 
         <com.github.mikephil.charting.charts.PieChart
-            android:id="@+id/pieChart"
+            android:id="@+id/pie_chart"
             android:layout_width="match_parent"
-            android:layout_height="400sp">
+            android:layout_height="400dp">
 
         </com.github.mikephil.charting.charts.PieChart>
 
         <Spinner
-            android:id="@+id/spinnerMode"
+            android:id="@+id/spinner_mode"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:spinnerMode="dialog"
             android:padding="20dp"/>
     </LinearLayout>
 
-</FrameLayout>
+</android.support.constraint.ConstraintLayout>

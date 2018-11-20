@@ -1,46 +1,47 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:padding="16dp">
 
     <LinearLayout
-        android:id="@+id/linearLayoutTasks"
+        android:id="@+id/linear_layout_tasks"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_alignParentStart="true"
+        tools:layout_alignParentStart="true"
         android:layout_alignParentTop="true"
         android:orientation="vertical">
 
         <EditText
-            android:id="@+id/editTextTaskName"
+            android:id="@+id/edit_text_task_name"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_alignParentStart="true"
-            android:layout_alignParentTop="true"
+            tools:layout_alignParentStart="true"
+            tools:layout_alignParentTop="true"
             android:ems="10"
-            android:hint="Name"
+            tools:hint="@string/name_hint"
             android:inputType="textPersonName" />
 
         <EditText
-            android:id="@+id/editTextTaskDescription"
+            android:id="@+id/edit_text_task_description"
             android:layout_width="match_parent"
             android:layout_height="150dp"
-            android:layout_alignParentStart="true"
-            android:layout_below="@+id/editTextEventName"
+            tools:layout_alignParentStart="true"
+            tools:layout_below="@+id/editTextEventName"
             android:ems="10"
-            android:hint="description"
+            tools:hint="@string/description_hint"
             android:inputType="textMultiLine" />
 
         <TextView
-            android:id="@+id/textViewTaskDate"
+            android:id="@+id/text_task_date"
             android:layout_width="match_parent"
             android:layout_height="40dp"
             android:clickable="true"
-            android:text="Set task date"
+            tools:text="@string/set_task_date_title"
             android:textAlignment="center"
             android:textSize="20sp" />
 
     </LinearLayout>
-</RelativeLayout>
+</android.support.constraint.ConstraintLayout>

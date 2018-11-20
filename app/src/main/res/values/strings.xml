@@ -29,14 +29,63 @@
             <string name="task_lists_add_title">Add new list</string>
 
     <!--Res-->
-        <!--Navigation header-->
-            <string name="nav_header_title">Android Studio</string>
-            <string name="nav_header_subtitle">android.studio@android.com</string>
-            <string name="nav_header_desc">Navigation header</string>
-        <!--Spinner Mode-->
-            <string-array name="modes">
-                <item>Day</item>
-                <item>Week</item>
-                <item>Month</item>
-            </string-array>
+        <!--layout-->
+            <string name="default_textview_title">TextView</string>
+            <string name="name_hint">Name</string>
+            <string name="description_hint">description</string>
+
+            <!--Navigation header-->
+                <string name="nav_header_title">Android Studio</string>
+                <string name="nav_header_subtitle">android.studio@android.com</string>
+                <string name="nav_header_desc">Navigation header</string>
+
+            <!--Spinner Mode-->
+                <string-array name="modes">
+                    <item>Day</item>
+                    <item>Week</item>
+                    <item>Month</item>
+                </string-array>
+
+            <!--activity_intention-->
+                <string name="add_task_list"> + Add list</string>
+
+            <!--dialog_events-->
+                <string name="notification_text">Notification</string>
+
+            <!--dialog_tasklists-->
+                <string name="tasklist_name_hint">Title</string>
+
+            <!--dialog_tasks-->
+                <string name="set_task_date_title">Set task date</string>
+
+            <!--item_event-->
+                <string name="event_name">Event title</string>
+                <string name="event_time">Event time</string>
+                <string name="event_description">Event description</string>
+
+            <!--fragment_week_dashboard-->
+                <string name="monday_name">Mon</string>
+                <string name="tuesday_name">Tue</string>
+                <string name="wednesday_name">wed</string>
+                <string name="thursday_name">Thu</string>
+                <string name="friday_name">Fri</string>
+                <string name="saturday_name">Sat</string>
+                <string name="sunday_name">Sun</string>
+
+            <!--item_task-->
+                <string name="task_name">Task title</string>
+                <string name="task_description">Task description</string>
+
+        <!--menu-->
+            <!--bottom_navigation-->
+                <string name="week_title">Week</string>
+                <string name="today_title">Today</string>
+                <string name="statistic_title">Statistic</string>
+
+            <!--date_picking-->
+                <string name="pick_date_title">Pick date</string>
+
+            <!--intention-->
+                <string name="update_tasklist_title">Update task list</string>
+                <string name="delete_tasklist_title">Delete task list</string>
 </resources>

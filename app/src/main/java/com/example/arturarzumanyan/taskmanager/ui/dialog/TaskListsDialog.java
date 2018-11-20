@@ -36,7 +36,7 @@ public class TaskListsDialog extends AppCompatDialogFragment {
 
         final Bundle bundle = getArguments();
 
-        mEditTextTaskListTitle = view.findViewById(R.id.editTextTaskListName);
+        mEditTextTaskListTitle = view.findViewById(R.id.edit_text_tasklist_name);
 
         builder.setView(view)
                 .setTitle(R.string.task_lists_add_title)

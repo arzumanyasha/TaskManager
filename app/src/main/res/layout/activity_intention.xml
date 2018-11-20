@@ -29,11 +29,11 @@
             android:gravity="bottom">
 
             <TextView
-                android:id="@+id/textViewAddTaskList"
+                android:id="@+id/text_add_task_list"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_alignParentBottom="true"
-                android:text=" + Add list"
+                tools:text="@string/add_task_list"
                 android:textAlignment="textStart"
                 android:textColor="@android:color/black"
                 android:textSize="24sp"
