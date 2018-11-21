@@ -1,47 +1,34 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/linear_layout_tasks"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
     android:padding="16dp">
 
-    <LinearLayout
-        android:id="@+id/linear_layout_tasks"
+    <EditText
+        android:id="@+id/edit_text_task_name"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        tools:layout_alignParentStart="true"
-        android:layout_alignParentTop="true"
-        android:orientation="vertical">
+        android:ems="10"
+        android:hint="@string/name_hint"
+        android:inputType="textPersonName"/>
 
-        <EditText
-            android:id="@+id/edit_text_task_name"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            tools:layout_alignParentStart="true"
-            tools:layout_alignParentTop="true"
-            android:ems="10"
-            tools:hint="@string/name_hint"
-            android:inputType="textPersonName" />
+    <EditText
+        android:id="@+id/edit_text_task_description"
+        android:layout_width="match_parent"
+        android:layout_height="150dp"
+        android:ems="10"
+        android:inputType="textMultiLine"
+        android:hint="@string/description_hint" />
 
-        <EditText
-            android:id="@+id/edit_text_task_description"
-            android:layout_width="match_parent"
-            android:layout_height="150dp"
-            tools:layout_alignParentStart="true"
-            tools:layout_below="@+id/editTextEventName"
-            android:ems="10"
-            tools:hint="@string/description_hint"
-            android:inputType="textMultiLine" />
+    <TextView
+        android:id="@+id/text_task_date"
+        android:layout_width="match_parent"
+        android:layout_height="40dp"
+        android:clickable="true"
+        android:text="@string/set_task_date_title"
+        android:textAlignment="center"
+        android:textSize="20sp" />
 
-        <TextView
-            android:id="@+id/text_task_date"
-            android:layout_width="match_parent"
-            android:layout_height="40dp"
-            android:clickable="true"
-            tools:text="@string/set_task_date_title"
-            android:textAlignment="center"
-            android:textSize="20sp" />
-
-    </LinearLayout>
-</android.support.constraint.ConstraintLayout>
+</LinearLayout>

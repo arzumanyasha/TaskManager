@@ -33,16 +33,13 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_alignParentBottom="true"
-                tools:text="@string/add_task_list"
+                android:layout_gravity="start"
+                android:clickable="true"
+                android:foreground="?android:attr/selectableItemBackground"
                 android:textAlignment="textStart"
                 android:textColor="@android:color/black"
                 android:textSize="24sp"
-                android:layout_gravity="start"
-                android:foreground="?android:attr/selectableItemBackground"
-                android:clickable="true"/>
+                android:text="@string/add_task_list" />
         </RelativeLayout>
-
     </android.support.design.widget.NavigationView>
-
-
 </android.support.v4.widget.DrawerLayout>
