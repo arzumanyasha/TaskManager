@@ -44,9 +44,9 @@ public class TasksDialog extends AppCompatDialogFragment {
 
         final Bundle bundle = getArguments();
 
-        mEditTextTaskName = view.findViewById(R.id.editTextTaskName);
-        mEditTextTaskDescription = view.findViewById(R.id.editTextTaskDescription);
-        mTextViewTaskDate = view.findViewById(R.id.textViewTaskDate);
+        mEditTextTaskName = view.findViewById(R.id.edit_text_task_name);
+        mEditTextTaskDescription = view.findViewById(R.id.edit_text_task_description);
+        mTextViewTaskDate = view.findViewById(R.id.text_task_date);
 
         builder.setView(view)
                 .setTitle(getString(R.string.tasks_title))

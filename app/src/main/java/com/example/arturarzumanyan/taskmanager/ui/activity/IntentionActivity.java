@@ -136,15 +136,15 @@ public class IntentionActivity extends AppCompatActivity {
     private void displayMenu() {
         ImageView userPhotoImageView = mNavigationView
                 .getHeaderView(0)
-                .findViewById(R.id.imageViewUserPhoto);
+                .findViewById(R.id.image_user_photo);
         TextView userNameTextView = mNavigationView
                 .getHeaderView(0)
-                .findViewById(R.id.textViewUserName);
+                .findViewById(R.id.text_user_name);
         TextView userEmailTextView = mNavigationView
                 .getHeaderView(0)
-                .findViewById(R.id.textViewUserEmail);
+                .findViewById(R.id.text_user_email);
         TextView addTaskListTextView = mNavigationView
-                .findViewById(R.id.textViewAddTaskList);
+                .findViewById(R.id.text_add_task_list);
 
         userNameTextView.setText(mUserData.getStringExtra(SignInActivity.EXTRA_USER_NAME));
         userEmailTextView.setText(mUserData.getStringExtra(SignInActivity.EXTRA_USER_EMAIL));
@@ -281,7 +281,7 @@ public class IntentionActivity extends AppCompatActivity {
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.date_picking_menu, menu);
+        getMenuInflater().inflate(R.menu.date_picking, menu);
         getMenuInflater().inflate(R.menu.intention, menu);
         return true;
     }

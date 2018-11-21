@@ -65,13 +65,13 @@ public class WeekDashboardFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_week_dashboard, container, false);
-        mLinearLayoutMon = view.findViewById(R.id.linearLayoutMon);
-        mLinearLayoutTue = view.findViewById(R.id.linearLayoutTue);
-        mLinearLayoutWed = view.findViewById(R.id.linearLayoutWed);
-        mLinearLayoutThu = view.findViewById(R.id.linearLayoutThu);
-        mLinearLayoutFri = view.findViewById(R.id.linearLayoutFri);
-        mLinearLayoutSat = view.findViewById(R.id.linearLayoutSat);
-        mLinearLayoutSun = view.findViewById(R.id.linearLayoutSun);
+        mLinearLayoutMon = view.findViewById(R.id.linear_layout_mon);
+        mLinearLayoutTue = view.findViewById(R.id.linear_layout_tue);
+        mLinearLayoutWed = view.findViewById(R.id.linear_layout_wed);
+        mLinearLayoutThu = view.findViewById(R.id.linear_layout_thu);
+        mLinearLayoutFri = view.findViewById(R.id.linear_layout_fri);
+        mLinearLayoutSat = view.findViewById(R.id.linear_layout_sat);
+        mLinearLayoutSun = view.findViewById(R.id.linear_layout_sun);
         return view;
     }
 

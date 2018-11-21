@@ -1,7 +1,7 @@
 package com.example.arturarzumanyan.taskmanager.ui.adapter;
 
 import android.content.Context;
-import android.support.v4.content.res.ResourcesCompat;
+import android.support.constraint.ConstraintLayout;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -30,7 +30,7 @@ public class EventsAdapter extends RecyclerView.Adapter<EventsAdapter.ViewHolder
 
     @Override
     public EventsAdapter.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.event_item, parent, false);
+        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_event, parent, false);
         return new EventsAdapter.ViewHolder(view, mListener);
     }
 
@@ -75,7 +75,7 @@ public class EventsAdapter extends RecyclerView.Adapter<EventsAdapter.ViewHolder
 
         ColorPalette colorPalette = new ColorPalette(mContext);
         HashMap<Integer, Integer> map = colorPalette.getColorPalette();
-        holder.linearLayout.setBackgroundColor(map.get(event.getColorId()));
+        holder.constraintLayout.setBackgroundColor(map.get(event.getColorId()));
 
         holder.eventTime.setText(DateUtils.formatTime(event.getStartTime())
                 + " - " + DateUtils.formatTime(event.getEndTime()));
@@ -107,18 +107,18 @@ public class EventsAdapter extends RecyclerView.Adapter<EventsAdapter.ViewHolder
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
         View mView;
-        LinearLayout linearLayout;
+        ConstraintLayout constraintLayout;
         TextView eventName, eventDescription, eventTime;
         ImageView eventDelete;
 
         public ViewHolder(View view, final EventsAdapter.OnItemClickListener listener) {
             super(view);
             mView = view;
-            linearLayout = view.findViewById(R.id.linearLayoutEvents);
-            eventName = view.findViewById(R.id.textViewEventName);
-            eventDescription = view.findViewById(R.id.textViewEventDescription);
+            constraintLayout = view.findViewById(R.id.constraint_layout_events_holder);
+            eventName = view.findViewById(R.id.text_event_name);
+            eventDescription = view.findViewById(R.id.text_event_description);
             eventDelete = view.findViewById(R.id.imageViewDeleteEvent);
-            eventTime = view.findViewById(R.id.textViewEventTime);
+            eventTime = view.findViewById(R.id.text_event_time);
         }
     }
 

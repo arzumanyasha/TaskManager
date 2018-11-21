@@ -24,7 +24,7 @@ public class TasksAdapter extends RecyclerView.Adapter<TasksAdapter.ViewHolder> 
 
     @Override
     public TasksAdapter.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.task_item, parent, false);
+        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_task, parent, false);
         return new ViewHolder(view, mListener);
     }
 
@@ -117,10 +117,10 @@ public class TasksAdapter extends RecyclerView.Adapter<TasksAdapter.ViewHolder> 
         public ViewHolder(View view, final OnItemClickListener listener) {
             super(view);
             mView = view;
-            taskName = view.findViewById(R.id.textViewTaskName);
-            taskDescription = view.findViewById(R.id.textViewTaskDescription);
-            taskDelete = view.findViewById(R.id.imageViewDelete);
-            isExecutedCheckBox = view.findViewById(R.id.checkBoxIsExecuted);
+            taskName = view.findViewById(R.id.text_task_name);
+            taskDescription = view.findViewById(R.id.text_task_description);
+            taskDelete = view.findViewById(R.id.image_delete);
+            isExecutedCheckBox = view.findViewById(R.id.chb_is_executed);
         }
     }
 

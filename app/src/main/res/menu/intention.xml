@@ -4,12 +4,12 @@
     <item
         android:id="@+id/update_task_list"
         android:orderInCategory="100"
-        android:title="Update task list"
+        android:title="@string/update_tasklist_title"
         app:showAsAction="never" />
 
     <item
         android:id="@+id/delete_task_list"
         android:orderInCategory="100"
-        android:title="Delete task list"
+        android:title="@string/delete_tasklist_title"
         app:showAsAction="never" />
 </menu>
