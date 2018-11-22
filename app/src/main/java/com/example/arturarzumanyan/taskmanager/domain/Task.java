@@ -29,6 +29,8 @@ public class Task implements Parcelable {
         this.date = date;
     }
 
+
+    /*
     public Task(String id,
                 String name,
                 String description,
@@ -39,7 +41,7 @@ public class Task implements Parcelable {
         this.description = description;
         this.isExecuted = isExecuted;
         this.listId = listId;
-    }
+    }*/
 
     protected Task(Parcel in) {
         id = in.readString();

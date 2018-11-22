@@ -78,27 +78,24 @@ public class TasksDialog extends AppCompatDialogFragment {
                                 }
                             });
                         } else if (!taskName.isEmpty() && (bundle.getParcelable(TASKS_KEY) == null)) {
-                            Task task;
                             String taskId = UUID.randomUUID().toString();
                             String taskDescription = mEditTextTaskDescription.getText().toString();
                             int isExecuted = 0;
                             int taskListId = bundle.getInt(TASK_LIST_ID_KEY);
-                            if (mTextViewTaskDate.getText().equals("Set task date")) {
-                                task = new Task(taskId,
-                                        taskName,
-                                        taskDescription,
-                                        isExecuted,
-                                        taskListId
-                                );
-                            } else {
-                                task = new Task(taskId,
-                                        taskName,
-                                        taskDescription,
-                                        isExecuted,
-                                        taskListId,
-                                        DateUtils.getTaskDateFromString(mTextViewTaskDate.getText().toString())
-                                );
+                            Date date = null;
+
+                            if (!mTextViewTaskDate.getText().equals("Set task date")) {
+                                date = DateUtils.getTaskDateFromString(mTextViewTaskDate.getText().toString());
                             }
+
+                            Task task = new Task(taskId,
+                                    taskName,
+                                    taskDescription,
+                                    isExecuted,
+                                    taskListId,
+                                    date
+                            );
+                            
                             tasksRepository.addTask(task, new TasksCloudStore.OnTaskCompletedListener() {
                                 @Override
                                 public void onSuccess(ArrayList<Task> taskArrayList) {
