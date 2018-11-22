@@ -5,14 +5,11 @@ import android.os.AsyncTask;
 
 import com.example.arturarzumanyan.taskmanager.auth.FirebaseWebService;
 import com.example.arturarzumanyan.taskmanager.data.repository.RepositoryLoadHelper;
-import com.example.arturarzumanyan.taskmanager.data.repository.events.EventsCloudStore;
 import com.example.arturarzumanyan.taskmanager.domain.TaskList;
 import com.example.arturarzumanyan.taskmanager.networking.UserDataAsyncTask;
-import com.example.arturarzumanyan.taskmanager.networking.base.RequestParameters;
 import com.example.arturarzumanyan.taskmanager.networking.util.TaskListsParser;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 
 public class TaskListsCloudStore {
     private static final String BASE_TASK_LISTS_URL = "https://www.googleapis.com/tasks/v1/users/@me/lists/";

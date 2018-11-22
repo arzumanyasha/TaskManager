@@ -17,7 +17,6 @@ import android.view.View;
 import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -78,27 +77,24 @@ public class TasksDialog extends AppCompatDialogFragment {
                                 }
                             });
                         } else if (!taskName.isEmpty() && (bundle.getParcelable(TASKS_KEY) == null)) {
-                            Task task;
                             String taskId = UUID.randomUUID().toString();
                             String taskDescription = mEditTextTaskDescription.getText().toString();
                             int isExecuted = 0;
                             int taskListId = bundle.getInt(TASK_LIST_ID_KEY);
-                            if (mTextViewTaskDate.getText().equals("Set task date")) {
-                                task = new Task(taskId,
-                                        taskName,
-                                        taskDescription,
-                                        isExecuted,
-                                        taskListId
-                                );
-                            } else {
-                                task = new Task(taskId,
-                                        taskName,
-                                        taskDescription,
-                                        isExecuted,
-                                        taskListId,
-                                        DateUtils.getTaskDateFromString(mTextViewTaskDate.getText().toString())
-                                );
+                            Date date = null;
+
+                            if (!mTextViewTaskDate.getText().equals(getString(R.string.set_task_date_title))) {
+                                date = DateUtils.getTaskDateFromString(mTextViewTaskDate.getText().toString());
                             }
+
+                            Task task = new Task(taskId,
+                                    taskName,
+                                    taskDescription,
+                                    isExecuted,
+                                    taskListId,
+                                    date
+                            );
+                            
                             tasksRepository.addTask(task, new TasksCloudStore.OnTaskCompletedListener() {
                                 @Override
                                 public void onSuccess(ArrayList<Task> taskArrayList) {

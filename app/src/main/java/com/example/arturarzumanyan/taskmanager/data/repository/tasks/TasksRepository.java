@@ -3,9 +3,6 @@ package com.example.arturarzumanyan.taskmanager.data.repository.tasks;
 import android.content.Context;
 
 import com.example.arturarzumanyan.taskmanager.data.repository.RepositoryLoadHelper;
-import com.example.arturarzumanyan.taskmanager.data.repository.events.EventsCloudStore;
-import com.example.arturarzumanyan.taskmanager.data.repository.events.EventsRepository;
-import com.example.arturarzumanyan.taskmanager.domain.Event;
 import com.example.arturarzumanyan.taskmanager.domain.Task;
 import com.example.arturarzumanyan.taskmanager.domain.TaskList;
 

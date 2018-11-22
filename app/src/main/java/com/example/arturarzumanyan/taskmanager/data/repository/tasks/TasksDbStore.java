@@ -2,38 +2,35 @@ package com.example.arturarzumanyan.taskmanager.data.repository.tasks;
 
 import android.content.Context;
 
-import com.example.arturarzumanyan.taskmanager.data.db.SQLiteDbHelper;
+import com.example.arturarzumanyan.taskmanager.data.db.DbHelper;
 import com.example.arturarzumanyan.taskmanager.domain.Task;
 
-import java.text.ParseException;
 import java.util.ArrayList;
 
 public class TasksDbStore {
-    private SQLiteDbHelper mSqliteDbHelper;
     private Context mContext;
 
     public TasksDbStore(Context context) {
         this.mContext = context;
-        mSqliteDbHelper = new SQLiteDbHelper(mContext);
     }
 
     public ArrayList<Task> getTasksFromTaskList(int taskListId) {
-        return mSqliteDbHelper.getTasksFromList(taskListId);
+        return DbHelper.getDbHelper(mContext).getTasksFromList(taskListId);
     }
 
     public void addTasks(ArrayList<Task> tasks) {
-        mSqliteDbHelper.insertTasks(tasks);
+        DbHelper.getDbHelper(mContext).insertTasks(tasks);
     }
 
     public void addTask(Task task) {
-        mSqliteDbHelper.insertTask(task);
+        DbHelper.getDbHelper(mContext).insertTask(task);
     }
 
     public void updateTask(Task task) {
-        mSqliteDbHelper.updateTask(task);
+        DbHelper.getDbHelper(mContext).updateTask(task);
     }
 
     public void deleteTask(Task task) {
-        mSqliteDbHelper.deleteTask(task);
+        DbHelper.getDbHelper(mContext).deleteTask(task);
     }
 }
