@@ -9,9 +9,6 @@ import com.example.arturarzumanyan.taskmanager.domain.Event;
 import com.example.arturarzumanyan.taskmanager.networking.UserDataAsyncTask;
 import com.example.arturarzumanyan.taskmanager.networking.util.EventsParser;
 
-import org.json.JSONException;
-
-import java.text.ParseException;
 import java.util.ArrayList;
 
 public class EventsCloudStore {

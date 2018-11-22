@@ -3,7 +3,6 @@ package com.example.arturarzumanyan.taskmanager.data.repository.tasklists;
 import android.content.Context;
 
 import com.example.arturarzumanyan.taskmanager.data.db.DbHelper;
-import com.example.arturarzumanyan.taskmanager.data.db.SQLiteDbHelper;
 import com.example.arturarzumanyan.taskmanager.domain.TaskList;
 
 import java.util.ArrayList;

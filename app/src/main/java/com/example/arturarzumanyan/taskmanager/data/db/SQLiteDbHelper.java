@@ -67,14 +67,6 @@ public class SQLiteDbHelper extends SQLiteOpenHelper {
         db.execSQL(SQL_CREATE_TASKS_TABLE);
     }
 
-    public SQLiteDatabase getReadableDb(){
-        return getReadableDatabase();
-    }
-
-    public SQLiteDatabase getWritableDb(){
-        return getWritableDatabase();
-    }
-
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
         db.execSQL("DROP TABLE IF EXISTS " + EventsTable.TABLE_NAME);

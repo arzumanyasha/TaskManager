@@ -4,28 +4,14 @@ import android.content.Context;
 import android.os.AsyncTask;
 
 import com.example.arturarzumanyan.taskmanager.auth.FirebaseWebService;
-import com.example.arturarzumanyan.taskmanager.auth.TokenStorage;
 import com.example.arturarzumanyan.taskmanager.data.repository.RepositoryLoadHelper;
 import com.example.arturarzumanyan.taskmanager.data.repository.tasklists.TaskListsDbStore;
 import com.example.arturarzumanyan.taskmanager.domain.Task;
 import com.example.arturarzumanyan.taskmanager.domain.TaskList;
 import com.example.arturarzumanyan.taskmanager.networking.UserDataAsyncTask;
-import com.example.arturarzumanyan.taskmanager.networking.base.RequestParameters;
-import com.example.arturarzumanyan.taskmanager.networking.util.DateUtils;
 import com.example.arturarzumanyan.taskmanager.networking.util.TasksParser;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import java.text.ParseException;
 import java.util.ArrayList;
-import java.util.HashMap;
-
-import static com.example.arturarzumanyan.taskmanager.data.repository.RepositoryLoadHelper.AUTHORIZATION_KEY;
-import static com.example.arturarzumanyan.taskmanager.networking.base.BaseHttpUrlConnection.JSON_CONTENT_TYPE_VALUE;
-import static com.example.arturarzumanyan.taskmanager.networking.util.TaskListsParser.TITLE_KEY;
-import static com.example.arturarzumanyan.taskmanager.networking.util.TasksParser.DUE_KEY;
-import static com.example.arturarzumanyan.taskmanager.networking.util.TasksParser.NOTES_KEY;
 
 public class TasksCloudStore {
     private static final String BASE_TASKS_URL = "https://www.googleapis.com/tasks/v1/lists/";

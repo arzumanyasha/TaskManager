@@ -16,34 +16,37 @@ import java.util.ArrayList;
 import java.util.Date;
 
 public class DbHelper {
-    private static final DbHelper mDbInstance = new DbHelper();
+    private static DbHelper mDbInstance;
     private SQLiteDatabase mDbSqlite;
     private static SQLiteDbHelper mSqLiteDbHelper;
 
-    public static DbHelper getDbHelper(Context context) {
-        mSqLiteDbHelper = new SQLiteDbHelper(context);
+    public synchronized static DbHelper getDbHelper(Context context) {
+        if (mDbInstance == null) {
+            mDbInstance = new DbHelper(context);
+        }
         return mDbInstance;
     }
 
-    private DbHelper() {
+    private DbHelper(Context context) {
+        mSqLiteDbHelper = new SQLiteDbHelper(context);
     }
 
     public void insertEvents(ArrayList<Event> eventsList) {
-        mDbSqlite = mSqLiteDbHelper.getWritableDb();
+        mDbSqlite = mSqLiteDbHelper.getWritableDatabase();
         for (int i = 0; i < eventsList.size(); i++) {
             insertEvent(eventsList.get(i));
         }
     }
 
     public void insertEvent(Event event) {
-        mDbSqlite = mSqLiteDbHelper.getWritableDb();
+        mDbSqlite = mSqLiteDbHelper.getWritableDatabase();
 
         mDbSqlite.insert(EventsContract.EventsTable.TABLE_NAME, null,
                 createEventContentValues(event));
     }
 
     public void updateEvent(Event event) {
-        mDbSqlite = mSqLiteDbHelper.getWritableDb();
+        mDbSqlite = mSqLiteDbHelper.getWritableDatabase();
 
         mDbSqlite.update(EventsContract.EventsTable.TABLE_NAME, createEventContentValues(event),
                 "id = ?", new String[]{event.getId()});
@@ -68,21 +71,21 @@ public class DbHelper {
     }
 
     public void deleteEvent(Event event) {
-        mDbSqlite = mSqLiteDbHelper.getWritableDb();
+        mDbSqlite = mSqLiteDbHelper.getWritableDatabase();
         mDbSqlite.delete(EventsContract.EventsTable.TABLE_NAME,
                 "id = ?",
                 new String[]{event.getId()});
     }
 
     public void insertTaskLists(ArrayList<TaskList> taskListArrayList) {
-        mDbSqlite = mSqLiteDbHelper.getWritableDb();
+        mDbSqlite = mSqLiteDbHelper.getWritableDatabase();
         for (int i = 0; i < taskListArrayList.size(); i++) {
             insertTaskList(taskListArrayList.get(i));
         }
     }
 
     public void insertTaskList(TaskList taskList) {
-        mDbSqlite = mSqLiteDbHelper.getWritableDb();
+        mDbSqlite = mSqLiteDbHelper.getWritableDatabase();
 
         mDbSqlite.insert(TasksContract.TaskListTable.TABLE_NAME,
                 null, createTaskListContentValues(taskList));
@@ -90,7 +93,7 @@ public class DbHelper {
 
 
     public void updateTaskList(TaskList taskList) {
-        mDbSqlite = mSqLiteDbHelper.getWritableDb();
+        mDbSqlite = mSqLiteDbHelper.getWritableDatabase();
 
         mDbSqlite.update(TasksContract.TaskListTable.TABLE_NAME,
                 createTaskListContentValues(taskList),
@@ -108,27 +111,27 @@ public class DbHelper {
     }
 
     public void deleteTaskList(TaskList taskList) {
-        mDbSqlite = mSqLiteDbHelper.getWritableDb();
+        mDbSqlite = mSqLiteDbHelper.getWritableDatabase();
         mDbSqlite.delete(TasksContract.TaskListTable.TABLE_NAME, "_id = ?",
                 new String[]{Integer.toString(taskList.getId())});
     }
 
     public void insertTasks(ArrayList<Task> tasksArrayList) {
-        mDbSqlite = mSqLiteDbHelper.getWritableDb();
+        mDbSqlite = mSqLiteDbHelper.getWritableDatabase();
         for (int i = 0; i < tasksArrayList.size(); i++) {
             insertTask(tasksArrayList.get(i));
         }
     }
 
     public void insertTask(Task task) {
-        mDbSqlite = mSqLiteDbHelper.getWritableDb();
+        mDbSqlite = mSqLiteDbHelper.getWritableDatabase();
 
         mDbSqlite.insert(TasksContract.TasksTable.TABLE_NAME, null,
                 createTaskContentValues(task));
     }
 
     public void updateTask(Task task) {
-        mDbSqlite = mSqLiteDbHelper.getWritableDb();
+        mDbSqlite = mSqLiteDbHelper.getWritableDatabase();
 
         mDbSqlite.update(TasksContract.TasksTable.TABLE_NAME, createTaskContentValues(task),
                 "id = ?", new String[]{task.getId()});
@@ -152,19 +155,19 @@ public class DbHelper {
     }
 
     public void deleteTask(Task task) {
-        mDbSqlite = mSqLiteDbHelper.getWritableDb();
+        mDbSqlite = mSqLiteDbHelper.getWritableDatabase();
         mDbSqlite.delete(TasksContract.TasksTable.TABLE_NAME,
                 "id = ?", new String[]{task.getId()});
     }
 
     public ArrayList<Event> getEvents() {
-        mDbSqlite = mSqLiteDbHelper.getReadableDb();
+        mDbSqlite = mSqLiteDbHelper.getReadableDatabase();
         Cursor c = mDbSqlite.rawQuery("SELECT * FROM " + EventsContract.EventsTable.TABLE_NAME, null);
         return getEventsFromCursor(c);
     }
 
     public ArrayList<Event> getDailyEvents(String date) {
-        mDbSqlite = mSqLiteDbHelper.getReadableDb();
+        mDbSqlite = mSqLiteDbHelper.getReadableDatabase();
         Cursor c = mDbSqlite.rawQuery("SELECT * FROM " + EventsContract.EventsTable.TABLE_NAME +
                 " WHERE " + EventsContract.EventsTable.COLUMN_START_TIME + " LIKE '" + date + "%'", null);
         return getEventsFromCursor(c);
@@ -199,7 +202,7 @@ public class DbHelper {
 
     public ArrayList<Task> getTasksFromList(int tasksListId) {
         ArrayList<Task> tasksList = new ArrayList<>();
-        mDbSqlite = mSqLiteDbHelper.getReadableDb();
+        mDbSqlite = mSqLiteDbHelper.getReadableDatabase();
 
         String[] selectionArgs = new String[]{Integer.toString(tasksListId)};
         Cursor c = mDbSqlite.rawQuery("SELECT * FROM " + TasksContract.TasksTable.TABLE_NAME +
@@ -232,7 +235,7 @@ public class DbHelper {
 
     public ArrayList<TaskList> getTaskLists() {
         ArrayList<TaskList> taskListArrayList = new ArrayList<>();
-        mDbSqlite = mSqLiteDbHelper.getReadableDb();
+        mDbSqlite = mSqLiteDbHelper.getReadableDatabase();
 
         Cursor c = mDbSqlite.rawQuery("SELECT * FROM " + TasksContract.TaskListTable.TABLE_NAME, null);
 
@@ -252,13 +255,13 @@ public class DbHelper {
     }
 
     public TaskList getTaskList(int id) {
-        mDbSqlite = mSqLiteDbHelper.getReadableDb();
+        mDbSqlite = mSqLiteDbHelper.getReadableDatabase();
 
         return getTaskListFromCursor(Integer.toString(id), TasksContract.TaskListTable._ID);
     }
 
     public TaskList getTaskList(String title) {
-        mDbSqlite = mSqLiteDbHelper.getReadableDb();
+        mDbSqlite = mSqLiteDbHelper.getReadableDatabase();
 
         return getTaskListFromCursor(title, TasksContract.TaskListTable.COLUMN_TITLE);
     }

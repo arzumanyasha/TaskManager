@@ -3,14 +3,10 @@ package com.example.arturarzumanyan.taskmanager.data.repository.events;
 import android.content.Context;
 
 import com.example.arturarzumanyan.taskmanager.data.db.DbHelper;
-import com.example.arturarzumanyan.taskmanager.data.db.SQLiteDbHelper;
 import com.example.arturarzumanyan.taskmanager.domain.Event;
 import com.example.arturarzumanyan.taskmanager.networking.util.DateUtils;
 
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Date;
 
 import static com.example.arturarzumanyan.taskmanager.networking.util.DateUtils.DAYS_IN_WEEK;

@@ -3,10 +3,8 @@ package com.example.arturarzumanyan.taskmanager.data.repository.tasks;
 import android.content.Context;
 
 import com.example.arturarzumanyan.taskmanager.data.db.DbHelper;
-import com.example.arturarzumanyan.taskmanager.data.db.SQLiteDbHelper;
 import com.example.arturarzumanyan.taskmanager.domain.Task;
 
-import java.text.ParseException;
 import java.util.ArrayList;
 
 public class TasksDbStore {

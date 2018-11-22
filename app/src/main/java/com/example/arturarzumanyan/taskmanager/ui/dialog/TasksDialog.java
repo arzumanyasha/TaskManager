@@ -17,7 +17,6 @@ import android.view.View;
 import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -84,7 +83,7 @@ public class TasksDialog extends AppCompatDialogFragment {
                             int taskListId = bundle.getInt(TASK_LIST_ID_KEY);
                             Date date = null;
 
-                            if (!mTextViewTaskDate.getText().equals("Set task date")) {
+                            if (!mTextViewTaskDate.getText().equals(getString(R.string.set_task_date_title))) {
                                 date = DateUtils.getTaskDateFromString(mTextViewTaskDate.getText().toString());
                             }
 
