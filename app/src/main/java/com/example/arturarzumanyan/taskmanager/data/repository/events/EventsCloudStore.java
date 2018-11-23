@@ -7,12 +7,15 @@ import com.example.arturarzumanyan.taskmanager.auth.FirebaseWebService;
 import com.example.arturarzumanyan.taskmanager.data.repository.RepositoryLoadHelper;
 import com.example.arturarzumanyan.taskmanager.domain.Event;
 import com.example.arturarzumanyan.taskmanager.networking.UserDataAsyncTask;
+import com.example.arturarzumanyan.taskmanager.networking.base.BaseHttpUrlConnection;
+import com.example.arturarzumanyan.taskmanager.networking.base.RequestParameters;
 import com.example.arturarzumanyan.taskmanager.networking.util.EventsParser;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
 public class EventsCloudStore {
-    private static final String BASE_EVENTS_URL = "https://www.googleapis.com/calendar/v3/calendars/";
+    public static final String BASE_EVENTS_URL = "https://www.googleapis.com/calendar/v3/calendars/";
 
     private UserDataAsyncTask mUserEventsAsyncTask;
     private EventsDbStore mEventsDbStore;
