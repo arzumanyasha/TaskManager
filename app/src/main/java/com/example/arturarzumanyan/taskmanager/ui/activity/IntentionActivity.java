@@ -26,6 +26,7 @@ import android.widget.Toast;
 
 import com.example.arturarzumanyan.taskmanager.R;
 import com.example.arturarzumanyan.taskmanager.data.repository.events.EventsRepository;
+import com.example.arturarzumanyan.taskmanager.data.repository.events.specification.EventsFromDateSpecification;
 import com.example.arturarzumanyan.taskmanager.data.repository.tasklists.TaskListsCloudStore;
 import com.example.arturarzumanyan.taskmanager.data.repository.tasklists.TaskListsRepository;
 import com.example.arturarzumanyan.taskmanager.domain.Event;
@@ -39,7 +40,7 @@ import com.example.arturarzumanyan.taskmanager.ui.fragment.EventsFragment;
 import com.example.arturarzumanyan.taskmanager.ui.fragment.TasksFragment;
 import com.squareup.picasso.Picasso;
 
-import java.util.ArrayList;
+import java.util.List;
 
 import static com.example.arturarzumanyan.taskmanager.ui.fragment.TasksFragment.TASK_LIST_ID_KEY;
 import static com.example.arturarzumanyan.taskmanager.ui.fragment.TasksFragment.TASK_LIST_TITLE_KEY;
@@ -57,7 +58,7 @@ public class IntentionActivity extends AppCompatActivity {
     private TaskListsRepository mTaskListsRepository;
     private SubMenu mTaskListsMenu;
 
-    private ArrayList<TaskList> mTaskLists;
+    private List<TaskList> mTaskLists;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -80,7 +81,7 @@ public class IntentionActivity extends AppCompatActivity {
 
         mNavigationView = findViewById(R.id.nav_view);
 
-        EventsRepository eventsRepository = new EventsRepository(this);
+        EventsRepository eventsRepository = new EventsRepository(this);/*
         eventsRepository.loadEvents(new EventsRepository.OnEventsLoadedListener() {
             @Override
             public void onSuccess(ArrayList<Event> eventsList) {
@@ -91,12 +92,12 @@ public class IntentionActivity extends AppCompatActivity {
             public void onFail() {
                 Toast.makeText(IntentionActivity.this, R.string.network_error, Toast.LENGTH_LONG).show();
             }
-        });
+        });*/
 
         mTaskListsRepository = new TaskListsRepository(this);
         mTaskListsRepository.loadTaskLists(new TaskListsRepository.OnTaskListsLoadedListener() {
             @Override
-            public void onSuccess(ArrayList<TaskList> taskLists) {
+            public void onSuccess(List<TaskList> taskLists) {
                 mTaskLists = taskLists;
                 displayMenu();
                 notifyDataLoaded();
@@ -211,7 +212,7 @@ public class IntentionActivity extends AppCompatActivity {
         EventsDialog eventsDialog = new EventsDialog();
         eventsDialog.setEventsReadyListener(new EventsDialog.EventsReadyListener() {
             @Override
-            public void onEventsReady(ArrayList<Event> events) {
+            public void onEventsReady(List<Event> events) {
                 eventFragmentInteractionListener.onEventsReady(events);
             }
         });
@@ -227,7 +228,7 @@ public class IntentionActivity extends AppCompatActivity {
                 tasksDialog.setArguments(bundle);
                 tasksDialog.setTasksReadyListener(new TasksDialog.TasksReadyListener() {
                     @Override
-                    public void onTasksReady(ArrayList<Task> tasks) {
+                    public void onTasksReady(List<Task> tasks) {
                         taskFragmentInteractionListener.onTasksReady(tasks);
                     }
                 });
@@ -342,7 +343,7 @@ public class IntentionActivity extends AppCompatActivity {
                     }
 
                     @Override
-                    public void onSuccess(ArrayList<TaskList> taskListArrayList) {
+                    public void onSuccess(List<TaskList> taskListArrayList) {
 
                     }
 
@@ -360,8 +361,23 @@ public class IntentionActivity extends AppCompatActivity {
                     public void onDateSet(DatePicker view, int year, int monthOfYear, int dayOfMonth) {
                         EventsRepository eventsRepository = new EventsRepository(IntentionActivity.this);
 
+                        EventsFromDateSpecification eventsFromDateSpecification = new EventsFromDateSpecification();
+                        eventsFromDateSpecification.setDate(DateUtils.getStringDateFromInt(year, monthOfYear, dayOfMonth));
+
+                        eventsRepository.getEvents(eventsFromDateSpecification, new EventsRepository.OnEventsLoadedListener() {
+                            @Override
+                            public void onSuccess(List<Event> eventsList) {
+
+                            }
+
+                            @Override
+                            public void onFail() {
+
+                            }
+                        });
+                       /*
                         eventFragmentInteractionListener.onEventsReady(eventsRepository.getEventsFromDate(
-                                DateUtils.getDateFromString(DateUtils.getStringDateFromInt(year, monthOfYear, dayOfMonth))));
+                                DateUtils.getDateFromString(DateUtils.getStringDateFromInt(year, monthOfYear, dayOfMonth))));*/
                     }
                 }, DateUtils.getYear(), DateUtils.getMonth(), DateUtils.getDay());
                 datePickerDialog.show();
@@ -372,7 +388,7 @@ public class IntentionActivity extends AppCompatActivity {
     }
 
     public interface TaskFragmentInteractionListener {
-        void onTasksReady(ArrayList<Task> tasks);
+        void onTasksReady(List<Task> tasks);
     }
 
     public void setTaskFragmentInteractionListener(TaskFragmentInteractionListener listener) {
@@ -382,7 +398,7 @@ public class IntentionActivity extends AppCompatActivity {
     private TaskFragmentInteractionListener taskFragmentInteractionListener;
 
     public interface EventFragmentInteractionListener {
-        void onEventsReady(ArrayList<Event> events);
+        void onEventsReady(List<Event> events);
     }
 
     public void setEventFragmentInteractionListener(EventFragmentInteractionListener listener) {

@@ -1,61 +1,65 @@
 package com.example.arturarzumanyan.taskmanager.data.repository.events;
 
-import android.annotation.SuppressLint;
 import android.content.Context;
 import android.os.AsyncTask;
 
 import com.example.arturarzumanyan.taskmanager.auth.FirebaseWebService;
+import com.example.arturarzumanyan.taskmanager.data.repository.BaseDataLoadingAsyncTask;
 import com.example.arturarzumanyan.taskmanager.data.repository.RepositoryLoadHelper;
+import com.example.arturarzumanyan.taskmanager.data.repository.events.specification.AllEventsSpecification;
+import com.example.arturarzumanyan.taskmanager.data.repository.events.specification.Specification;
 import com.example.arturarzumanyan.taskmanager.domain.Event;
-import com.example.arturarzumanyan.taskmanager.networking.base.BaseHttpUrlConnection;
 import com.example.arturarzumanyan.taskmanager.networking.base.RequestParameters;
+import com.example.arturarzumanyan.taskmanager.networking.util.DateUtils;
 import com.example.arturarzumanyan.taskmanager.networking.util.EventsParser;
 
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
+import java.util.List;
 
+import static com.example.arturarzumanyan.taskmanager.auth.FirebaseWebService.RequestMethods.GET;
 import static com.example.arturarzumanyan.taskmanager.data.repository.events.EventsCloudStore.BASE_EVENTS_URL;
 
 public class EventsRepository {
-    @SuppressLint("StaticFieldLeak")
-    private static EventsDbStore mEventsDbStore;
+    private EventsDbStore mEventsDbStore;
     private EventsCloudStore mEventsCloudStore;
-    @SuppressLint("StaticFieldLeak")
-    private static Context mContext;
+    private Context mContext;
     private RepositoryLoadHelper mRepositoryLoadHelper;
+    private FirebaseWebService mFirebaseWebService;
 
     public EventsRepository(Context context) {
         mContext = context;
         mEventsCloudStore = new EventsCloudStore(mContext);
         mEventsDbStore = new EventsDbStore(mContext);
         mRepositoryLoadHelper = new RepositoryLoadHelper(mContext);
+        mFirebaseWebService = new FirebaseWebService(mContext);
     }
 
-    public void loadEvents(final OnEventsLoadedListener listener) {
-        ArrayList<Event> events = mEventsDbStore.getEvents();
+    /*
+        public void loadEvents(final OnEventsLoadedListener listener) {
+            List<Event> events = mEventsDbStore.getEvents();
 
-        if ((mRepositoryLoadHelper.isOnline()) && (events.size() == 0)) {
-            mEventsCloudStore.getEvents(new EventsCloudStore.OnTaskCompletedListener() {
-                @Override
-                public void onSuccess(ArrayList<Event> eventsList) {
-                    listener.onSuccess(eventsList);
-                    mEventsDbStore.addEvents(eventsList);
-                }
+            if ((mRepositoryLoadHelper.isOnline()) && (events.size() == 0)) {
+                mEventsCloudStore.getEvents(new EventsCloudStore.OnTaskCompletedListener() {
+                    @Override
+                    public void onSuccess(ArrayList<Event> eventsList) {
+                        listener.onSuccess(eventsList);
+                        mEventsDbStore.addEvents(eventsList);
+                    }
 
-                @Override
-                public void onFail() {
+                    @Override
+                    public void onFail() {
 
-                }
-            });
-        } else if ((mRepositoryLoadHelper.isOnline() && (events.size() != 0)) ||
-                (!mRepositoryLoadHelper.isOnline() && (events.size() != 0))) {
-            listener.onSuccess(events);
-        } else {
-            listener.onFail();
-        }
-    }
-
+                    }
+                });
+            } else if ((mRepositoryLoadHelper.isOnline() && (events.size() != 0)) ||
+                    (!mRepositoryLoadHelper.isOnline() && (events.size() != 0))) {
+                listener.onSuccess(events);
+            } else {
+                listener.onFail();
+            }
+        }*/
+/*
     public ArrayList<Event> getDailyEvents() {
         return mEventsDbStore.getDailyEvents();
     }
@@ -71,22 +75,48 @@ public class EventsRepository {
     public ArrayList<Event> getEventsFromDate(Date date) {
         return mEventsDbStore.getEventsFromDate(date);
     }
+*/
+    public void getEvents(Specification specification, final OnEventsLoadedListener listener) {
+        String eventsUrl = "";
+        if (specification.getStartDate().isEmpty() && specification.getEndDate().isEmpty()) {
+            eventsUrl = BASE_EVENTS_URL + mFirebaseWebService.getCurrentUser().getEmail() + "/events";
+        } else {
+            eventsUrl = BASE_EVENTS_URL + mFirebaseWebService.getCurrentUser().getEmail() + "/events?" +
+                    "timeMax=" + DateUtils.decodeDate(specification.getEndDate()) +
+                    "&timeMin=" + DateUtils.decodeDate(specification.getStartDate());
+        }
 
-    public void addEvent(Event event, final EventsCloudStore.OnTaskCompletedListener listener) {
-        FirebaseWebService firebaseWebService = new FirebaseWebService();
-        String url = BASE_EVENTS_URL + firebaseWebService.getCurrentUser().getEmail() + "/events";
-        RepositoryLoadHelper repositoryLoadHelper = new RepositoryLoadHelper(mContext);
-        RequestParameters requestParameters = repositoryLoadHelper.getEventCreateOrUpdateParameters(event, url, FirebaseWebService.RequestMethods.POST);
-        EventsAsyncTask eventsAsyncTask = new EventsAsyncTask(event);
-        eventsAsyncTask.setEventDataLoadingListener(new EventsAsyncTask.EventDataLoadingListener() {
+        EventsAsyncTask eventsAsyncTask = new EventsAsyncTask(null, mContext,
+                mRepositoryLoadHelper, mFirebaseWebService, mEventsDbStore, specification, listener);
+
+        eventsAsyncTask.setDataInfoLoadingListener(new BaseDataLoadingAsyncTask.UserDataLoadingListener<Event>() {
             @Override
-            public void onSuccess(ArrayList<Event> events) {
-                listener.onSuccess(events);
+            public void onSuccess(List<Event> list) {
+                listener.onSuccess(list);
             }
 
             @Override
             public void onFail() {
+                listener.onFail();
+            }
+        });
+        mRepositoryLoadHelper.requestUserData(eventsAsyncTask, eventsUrl);
+    }
 
+    public void addEvent(Event event, final OnEventsLoadedListener listener) {
+        String url = BASE_EVENTS_URL + mFirebaseWebService.getCurrentUser().getEmail() + "/events";
+        RequestParameters requestParameters = mRepositoryLoadHelper.getEventCreateOrUpdateParameters(event, url, FirebaseWebService.RequestMethods.POST);
+        EventsAsyncTask eventsAsyncTask = new EventsAsyncTask(event, mContext,
+                mRepositoryLoadHelper, mFirebaseWebService, mEventsDbStore, null, null);
+        eventsAsyncTask.setDataInfoLoadingListener(new BaseDataLoadingAsyncTask.UserDataLoadingListener<Event>() {
+            @Override
+            public void onSuccess(List<Event> list) {
+                listener.onSuccess(list);
+            }
+
+            @Override
+            public void onFail() {
+                listener.onFail();
             }
         });
         eventsAsyncTask.executeOnExecutor(AsyncTask.SERIAL_EXECUTOR, requestParameters);
@@ -110,94 +140,109 @@ public class EventsRepository {
     }
 
     public interface OnEventsLoadedListener {
-        void onSuccess(ArrayList<Event> eventsList);
+        void onSuccess(List<Event> eventsList);
 
         void onFail();
     }
 
+    public static class EventsAsyncTask extends BaseDataLoadingAsyncTask<Event> {
 
-    public static class EventsAsyncTask extends AsyncTask<RequestParameters, Void, ArrayList<Event>> {
-
-        private String mBuffer;
         private Event mEvent;
+        //private WeakReference<Context> mContextWeakReference;
+        private RepositoryLoadHelper mRepositoryLoadHelper;
+        private FirebaseWebService mFirebaseWebService;
+        private EventsDbStore mEventsDbStore;
+        private Specification mSpecification;
+        private OnEventsLoadedListener mListener;
 
-        public EventsAsyncTask(Event event) {
+        public EventsAsyncTask(Event event,
+                               Context context,
+                               RepositoryLoadHelper repositoryLoadHelper,
+                               FirebaseWebService firebaseWebService,
+                               EventsDbStore eventsDbStore,
+                               Specification specification,
+                               OnEventsLoadedListener listener) {
             this.mEvent = event;
+            //this.mContextWeakReference = new WeakReference<>(context);
+            this.mRepositoryLoadHelper = repositoryLoadHelper;
+            this.mFirebaseWebService = firebaseWebService;
+            this.mEventsDbStore = eventsDbStore;
+            this.mSpecification = specification;
+            this.mListener = listener;
         }
 
         @Override
-        protected ArrayList<Event> doInBackground(final RequestParameters... requestParameters) {
-            RepositoryLoadHelper repositoryLoadHelper = new RepositoryLoadHelper(mContext);
-            if (repositoryLoadHelper.isOnline() && requestParameters[0].getRequestMethod()!= FirebaseWebService.RequestMethods.GET) {
+        protected List<Event> doInBackground(final RequestParameters... requestParameters) {
+            if (mRepositoryLoadHelper.isOnline()) {
                 String dataFromServer = getResultFromServer(requestParameters[0]);
                 if (dataFromServer.isEmpty()) {
-                    FirebaseWebService firebaseWebService = new FirebaseWebService();
-                    firebaseWebService.refreshAccessToken(mContext, new FirebaseWebService.AccessTokenUpdatedListener() {
-                        @Override
-                        public void onAccessTokenUpdated() {
-                            String dataFromServer = getResultFromServer(requestParameters[0]);
-                            dbQuery(dataFromServer, requestParameters[0]);
-                        }
-                    });
+                    retryGetResultFromServer(requestParameters[0]);
                 }
 
-                dbQuery(dataFromServer, requestParameters[0]);
+                if (requestParameters[0].getRequestMethod() != GET) {
+                    dbQuery(parseEvent(dataFromServer), requestParameters[0]);
+                } else {
+                    updateDbQuery(parseEventsData(dataFromServer));
+                }
 
             } else {
-                if (requestParameters[0].getRequestMethod() == FirebaseWebService.RequestMethods.POST) {
-                    mEventsDbStore.addEvent(mEvent);
-                } else if (requestParameters[0].getRequestMethod() == FirebaseWebService.RequestMethods.PATCH) {
-                    mEventsDbStore.updateEvent(mEvent);
-                } else if (requestParameters[0].getRequestMethod() == FirebaseWebService.RequestMethods.DELETE) {
-                    mEventsDbStore.deleteEvent(mEvent);
+                if (requestParameters[0].getRequestMethod() != GET) {
+                    dbQuery(mEvent, requestParameters[0]);
+                } else {
+                    return mEventsDbStore.getEvents(mSpecification);
                 }
             }
 
-            return mEventsDbStore.getEvents();
+            return mEventsDbStore.getEvents(mSpecification);
         }
 
-        private String getResultFromServer(RequestParameters requestParameters) {
-            String url = requestParameters.getUrl();
-            FirebaseWebService.RequestMethods requestMethod = requestParameters.getRequestMethod();
-            HashMap<String, Object> requestBodyParameters = requestParameters.getRequestBodyParameters();
-            HashMap<String, String> requestHeaderParameters = requestParameters.getRequestHeaderParameters();
+        private void retryGetResultFromServer(final RequestParameters requestParameters) {
+            mFirebaseWebService.refreshAccessToken(new FirebaseWebService.AccessTokenUpdatedListener() {
+                @Override
+                public void onAccessTokenUpdated() {
+                    EventsAsyncTask eventsAsyncTask = new EventsAsyncTask(null, null,
+                            mRepositoryLoadHelper, mFirebaseWebService, mEventsDbStore, mSpecification, mListener);
+                    eventsAsyncTask.setDataInfoLoadingListener(new UserDataLoadingListener<Event>() {
+                        @Override
+                        public void onSuccess(List<Event> list) {
+                            mListener.onSuccess(list);
+                        }
 
-            BaseHttpUrlConnection baseHttpUrlConnection = new BaseHttpUrlConnection();
-            mBuffer = baseHttpUrlConnection.getResult(url,
-                    requestMethod,
-                    requestBodyParameters,
-                    requestHeaderParameters);
-            return mBuffer;
+                        @Override
+                        public void onFail() {
+                            mListener.onFail();
+                        }
+                    });
+
+                    eventsAsyncTask.executeOnExecutor(SERIAL_EXECUTOR, requestParameters);
+                }
+            });
         }
 
-        private void dbQuery(String data, RequestParameters requestParameters){
+        private Event parseEvent(String data) {
+            EventsParser eventsParser = new EventsParser();
+            return eventsParser.parseEvent(data);
+        }
+
+        private List<Event> parseEventsData(String data) {
+            EventsParser eventsParser = new EventsParser();
+            return eventsParser.parseEvents(data);
+        }
+
+        private void dbQuery(Event event, RequestParameters requestParameters) {
             if (requestParameters.getRequestMethod() == FirebaseWebService.RequestMethods.POST) {
-                EventsParser eventsParser = new EventsParser();
-                mEventsDbStore.addEvent(eventsParser.parseEvent(data));
+                mEventsDbStore.addEvent(event);
             } else if (requestParameters.getRequestMethod() == FirebaseWebService.RequestMethods.PATCH) {
-                EventsParser eventsParser = new EventsParser();
-                mEventsDbStore.updateEvent(eventsParser.parseEvent(data));
+                mEventsDbStore.updateEvent(event);
             } else if (requestParameters.getRequestMethod() == FirebaseWebService.RequestMethods.DELETE) {
-                mEventsDbStore.deleteEvent(mEvent);
+                mEventsDbStore.deleteEvent(event);
             }
         }
 
-        @Override
-        protected void onPostExecute(ArrayList<Event> events) {
-            super.onPostExecute(events);
-            eventDataLoadingListener.onSuccess(events);
+        private void updateDbQuery(List<Event> events) {
+            mEventsDbStore.updateEvents(events);
+            mEventsDbStore.getEvents(mSpecification);
         }
 
-        public interface EventDataLoadingListener {
-            void onSuccess(ArrayList<Event> events);
-
-            void onFail();
-        }
-
-        public void setEventDataLoadingListener(EventDataLoadingListener listener) {
-            this.eventDataLoadingListener = listener;
-        }
-
-        private EventDataLoadingListener eventDataLoadingListener;
     }
 }

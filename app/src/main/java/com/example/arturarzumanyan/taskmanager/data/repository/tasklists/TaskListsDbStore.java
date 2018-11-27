@@ -5,7 +5,7 @@ import android.content.Context;
 import com.example.arturarzumanyan.taskmanager.data.db.DbHelper;
 import com.example.arturarzumanyan.taskmanager.domain.TaskList;
 
-import java.util.ArrayList;
+import java.util.List;
 
 public class TaskListsDbStore {
     private Context mContext;
@@ -14,11 +14,11 @@ public class TaskListsDbStore {
         this.mContext = context;
     }
 
-    public ArrayList<TaskList> getTaskLists() {
+    public List<TaskList> getTaskLists() {
         return DbHelper.getDbHelper(mContext).getTaskLists();
     }
 
-    public void addTaskLists(ArrayList<TaskList> taskListArrayList) {
+    public void addTaskLists(List<TaskList> taskListArrayList) {
         DbHelper.getDbHelper(mContext).insertTaskLists(taskListArrayList);
     }
 

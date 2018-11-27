@@ -9,6 +9,7 @@ import com.example.arturarzumanyan.taskmanager.domain.Task;
 import com.example.arturarzumanyan.taskmanager.domain.TaskList;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class TaskListsRepository {
     private TaskListsCloudStore mTaskListsCloudStore;
@@ -28,7 +29,7 @@ public class TaskListsRepository {
     }
 
     public void loadTaskLists(final OnTaskListsLoadedListener listener) {
-        ArrayList<TaskList> taskLists = mTaskListsDbStore.getTaskLists();
+        List<TaskList> taskLists = mTaskListsDbStore.getTaskLists();
 
         if ((mRepositoryLoadHelper.isOnline()) && (taskLists.size() == 0)) {
             mTaskListsCloudStore.getTaskLists(new TaskListsCloudStore.OnTaskCompletedListener() {
@@ -38,15 +39,15 @@ public class TaskListsRepository {
                 }
 
                 @Override
-                public void onSuccess(ArrayList<TaskList> taskListArrayList) {
+                public void onSuccess(List<TaskList> taskListArrayList) {
                     mTaskListsDbStore.addTaskLists(taskListArrayList);
-                    ArrayList<TaskList> taskLists = mTaskListsDbStore.getTaskLists();
+                    List<TaskList> taskLists = mTaskListsDbStore.getTaskLists();
                     //listener.onSuccess(taskListsDbStore.getTaskLists());
                     for (int i = 0; i < taskLists.size(); i++) {
                         final int position = i;
                         mTasksCloudStore.getTasksFromTaskList(taskLists.get(i), new TasksCloudStore.OnTaskCompletedListener() {
                             @Override
-                            public void onSuccess(ArrayList<Task> taskArrayList) {
+                            public void onSuccess(List<Task> taskArrayList) {
                                 mTasksDbStore.addTasks(taskArrayList);
                                 if (position == mTaskListsDbStore.getTaskLists().size() - 1) {
                                     listener.onSuccess(mTaskListsDbStore.getTaskLists());
@@ -99,7 +100,7 @@ public class TaskListsRepository {
     }
 
     public interface OnTaskListsLoadedListener {
-        void onSuccess(ArrayList<TaskList> taskListArrayList);
+        void onSuccess(List<TaskList> taskListArrayList);
 
         void onFail();
     }

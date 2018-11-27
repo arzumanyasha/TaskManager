@@ -6,7 +6,7 @@ import com.example.arturarzumanyan.taskmanager.data.repository.RepositoryLoadHel
 import com.example.arturarzumanyan.taskmanager.domain.Task;
 import com.example.arturarzumanyan.taskmanager.domain.TaskList;
 
-import java.util.ArrayList;
+import java.util.List;
 
 public class TasksRepository {
     private TasksDbStore mTasksDbStore;
@@ -24,12 +24,12 @@ public class TasksRepository {
     }
 
     public void loadTasks(TaskList taskList, final OnTasksLoadedListener listener) {
-        ArrayList<Task> tasks = mTasksDbStore.getTasksFromTaskList(taskList.getId());
+        List<Task> tasks = mTasksDbStore.getTasksFromTaskList(taskList.getId());
 
         if ((mRepositoryLoadHelper.isOnline()) && (tasks.size() == 0)) {
             mTasksCloudStore.getTasksFromTaskList(taskList, new TasksCloudStore.OnTaskCompletedListener() {
                 @Override
-                public void onSuccess(ArrayList<Task> taskArrayList) {
+                public void onSuccess(List<Task> taskArrayList) {
                     listener.onSuccess(taskArrayList);
                     mTasksDbStore.addTasks(taskArrayList);
                 }
@@ -47,12 +47,12 @@ public class TasksRepository {
         }
     }
 
-    public ArrayList<Task> getTasksFromTaskList(int taskListId) {
+    public List<Task> getTasksFromTaskList(int taskListId) {
         return mTasksDbStore.getTasksFromTaskList(taskListId);
     }
 
     public interface OnTasksLoadedListener {
-        void onSuccess(ArrayList<Task> taskArrayList);
+        void onSuccess(List<Task> taskArrayList);
 
         void onFail();
     }

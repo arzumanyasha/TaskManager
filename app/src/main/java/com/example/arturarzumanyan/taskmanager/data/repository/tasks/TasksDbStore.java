@@ -6,6 +6,7 @@ import com.example.arturarzumanyan.taskmanager.data.db.DbHelper;
 import com.example.arturarzumanyan.taskmanager.domain.Task;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class TasksDbStore {
     private Context mContext;
@@ -14,11 +15,11 @@ public class TasksDbStore {
         this.mContext = context;
     }
 
-    public ArrayList<Task> getTasksFromTaskList(int taskListId) {
+    public List<Task> getTasksFromTaskList(int taskListId) {
         return DbHelper.getDbHelper(mContext).getTasksFromList(taskListId);
     }
 
-    public void addTasks(ArrayList<Task> tasks) {
+    public void addTasks(List<Task> tasks) {
         DbHelper.getDbHelper(mContext).insertTasks(tasks);
     }
 

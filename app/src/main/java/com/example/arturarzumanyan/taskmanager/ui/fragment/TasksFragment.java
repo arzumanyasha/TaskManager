@@ -23,6 +23,7 @@ import com.example.arturarzumanyan.taskmanager.ui.adapter.TasksAdapter;
 import com.example.arturarzumanyan.taskmanager.ui.dialog.TasksDialog;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import static com.example.arturarzumanyan.taskmanager.ui.activity.IntentionActivity.TASKS_KEY;
 
@@ -75,7 +76,7 @@ public class TasksFragment extends Fragment {
 
         LinearLayoutManager layoutManager = new LinearLayoutManager(getActivity());
         mTasksRecyclerView.setLayoutManager(layoutManager);
-
+/*
         TasksRepository tasksRepository = new TasksRepository(getActivity());
 
         ArrayList<Task> mTasks = tasksRepository.getTasksFromTaskList(mParam1);
@@ -123,7 +124,7 @@ public class TasksFragment extends Fragment {
                 getActivity().setTitle(taskList.getTitle());
             }
         });
-        mTasksRecyclerView.setAdapter(mTasksAdapter);
+        mTasksRecyclerView.setAdapter(mTasksAdapter);*/
     }
 
     private void openTasksDialog(Task task) {
@@ -134,7 +135,7 @@ public class TasksFragment extends Fragment {
         tasksDialog.setArguments(bundle);
         tasksDialog.setTasksReadyListener(new TasksDialog.TasksReadyListener() {
             @Override
-            public void onTasksReady(ArrayList<Task> tasks) {
+            public void onTasksReady(List<Task> tasks) {
                 mTasksAdapter.updateList(tasks);
             }
         });

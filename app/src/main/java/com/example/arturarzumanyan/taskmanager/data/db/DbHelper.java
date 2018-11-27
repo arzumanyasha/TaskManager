@@ -14,6 +14,7 @@ import com.example.arturarzumanyan.taskmanager.networking.util.DateUtils;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 public class DbHelper {
     private static DbHelper mDbInstance;
@@ -31,10 +32,21 @@ public class DbHelper {
         mSqLiteDbHelper = new SQLiteDbHelper(context);
     }
 
-    public void insertEvents(ArrayList<Event> eventsList) {
+    public void updateEvents(List<Event> eventsList) {
         mDbSqlite = mSqLiteDbHelper.getWritableDatabase();
+
+        List<Event> oldEventsList = getEvents();
         for (int i = 0; i < eventsList.size(); i++) {
-            insertEvent(eventsList.get(i));
+            for (int j = 0; j < oldEventsList.size(); j++) {
+                if (eventsList.get(i).getId().equals(oldEventsList.get(j).getId())) {
+                    updateEvent(eventsList.get(i));
+                    break;
+                }
+
+                if (j == oldEventsList.size() - 1){
+                    insertEvent(eventsList.get(i));
+                }
+            }
         }
     }
 
@@ -77,7 +89,7 @@ public class DbHelper {
                 new String[]{event.getId()});
     }
 
-    public void insertTaskLists(ArrayList<TaskList> taskListArrayList) {
+    public void insertTaskLists(List<TaskList> taskListArrayList) {
         mDbSqlite = mSqLiteDbHelper.getWritableDatabase();
         for (int i = 0; i < taskListArrayList.size(); i++) {
             insertTaskList(taskListArrayList.get(i));
@@ -116,7 +128,7 @@ public class DbHelper {
                 new String[]{Integer.toString(taskList.getId())});
     }
 
-    public void insertTasks(ArrayList<Task> tasksArrayList) {
+    public void insertTasks(List<Task> tasksArrayList) {
         mDbSqlite = mSqLiteDbHelper.getWritableDatabase();
         for (int i = 0; i < tasksArrayList.size(); i++) {
             insertTask(tasksArrayList.get(i));
@@ -149,6 +161,7 @@ public class DbHelper {
             cv.put(TasksContract.TasksTable.COLUMN_DUE,
                     DateUtils.formatTaskDate(task.getDate()));
         }
+
         cv.put(TasksContract.TasksTable.COLUMN_LIST_ID, task.getListId());
 
         return cv;
@@ -160,21 +173,24 @@ public class DbHelper {
                 "id = ?", new String[]{task.getId()});
     }
 
-    public ArrayList<Event> getEvents() {
+    public List<Event> getEvents() {
         mDbSqlite = mSqLiteDbHelper.getReadableDatabase();
         Cursor c = mDbSqlite.rawQuery("SELECT * FROM " + EventsContract.EventsTable.TABLE_NAME, null);
         return getEventsFromCursor(c);
     }
 
-    public ArrayList<Event> getDailyEvents(String date) {
+    public List<Event> getDailyEvents(String date) {
+        if(DateUtils.isMatchesEventFormat(date)){
+            date = DateUtils.trimEventDate(date);
+        }
         mDbSqlite = mSqLiteDbHelper.getReadableDatabase();
         Cursor c = mDbSqlite.rawQuery("SELECT * FROM " + EventsContract.EventsTable.TABLE_NAME +
                 " WHERE " + EventsContract.EventsTable.COLUMN_START_TIME + " LIKE '" + date + "%'", null);
         return getEventsFromCursor(c);
     }
 
-    private ArrayList<Event> getEventsFromCursor(Cursor c) {
-        ArrayList<Event> eventsList = new ArrayList<>();
+    private List<Event> getEventsFromCursor(Cursor c) {
+        List<Event> eventsList = new ArrayList<>();
         if (c.moveToFirst()) {
             do {
                 Date startDate = DateUtils.getEventDateFromString(
@@ -200,8 +216,8 @@ public class DbHelper {
 
     }
 
-    public ArrayList<Task> getTasksFromList(int tasksListId) {
-        ArrayList<Task> tasksList = new ArrayList<>();
+    public List<Task> getTasksFromList(int tasksListId) {
+        List<Task> tasksList = new ArrayList<>();
         mDbSqlite = mSqLiteDbHelper.getReadableDatabase();
 
         String[] selectionArgs = new String[]{Integer.toString(tasksListId)};
@@ -233,8 +249,8 @@ public class DbHelper {
         return tasksList;
     }
 
-    public ArrayList<TaskList> getTaskLists() {
-        ArrayList<TaskList> taskListArrayList = new ArrayList<>();
+    public List<TaskList> getTaskLists() {
+        List<TaskList> taskListArrayList = new ArrayList<>();
         mDbSqlite = mSqLiteDbHelper.getReadableDatabase();
 
         Cursor c = mDbSqlite.rawQuery("SELECT * FROM " + TasksContract.TaskListTable.TABLE_NAME, null);

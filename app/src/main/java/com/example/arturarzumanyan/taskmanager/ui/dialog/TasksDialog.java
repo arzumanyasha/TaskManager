@@ -20,6 +20,7 @@ import android.widget.TextView;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.UUID;
 
 import static com.example.arturarzumanyan.taskmanager.ui.activity.IntentionActivity.TASKS_KEY;
@@ -67,7 +68,7 @@ public class TasksDialog extends AppCompatDialogFragment {
                             task.setDate(taskDate);
                             tasksRepository.updateTask(task, new TasksCloudStore.OnTaskCompletedListener() {
                                 @Override
-                                public void onSuccess(ArrayList<Task> taskArrayList) {
+                                public void onSuccess(List<Task> taskArrayList) {
                                     tasksReadyListener.onTasksReady(taskArrayList);
                                 }
 
@@ -97,7 +98,7 @@ public class TasksDialog extends AppCompatDialogFragment {
                             
                             tasksRepository.addTask(task, new TasksCloudStore.OnTaskCompletedListener() {
                                 @Override
-                                public void onSuccess(ArrayList<Task> taskArrayList) {
+                                public void onSuccess(List<Task> taskArrayList) {
                                     tasksReadyListener.onTasksReady(taskArrayList);
                                 }
 
@@ -142,7 +143,7 @@ public class TasksDialog extends AppCompatDialogFragment {
     }
 
     public interface TasksReadyListener {
-        void onTasksReady(ArrayList<Task> tasks);
+        void onTasksReady(List<Task> tasks);
     }
 
     public void setTasksReadyListener(TasksReadyListener listener) {

@@ -15,7 +15,7 @@ import com.example.arturarzumanyan.taskmanager.data.repository.tasklists.TaskLis
 import com.example.arturarzumanyan.taskmanager.domain.Task;
 import com.example.arturarzumanyan.taskmanager.domain.TaskList;
 
-import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 import static com.example.arturarzumanyan.taskmanager.ui.activity.IntentionActivity.TASK_LISTS_KEY;
@@ -61,7 +61,7 @@ public class TaskListsDialog extends AppCompatDialogFragment {
                                 }
 
                                 @Override
-                                public void onSuccess(ArrayList<TaskList> taskListArrayList) {
+                                public void onSuccess(List<TaskList> taskListArrayList) {
 
                                 }
 
@@ -80,7 +80,7 @@ public class TaskListsDialog extends AppCompatDialogFragment {
                                 }
 
                                 @Override
-                                public void onSuccess(ArrayList<TaskList> taskListArrayList) {
+                                public void onSuccess(List<TaskList> taskListArrayList) {
 
                                 }
 

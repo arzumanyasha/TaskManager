@@ -12,6 +12,7 @@ import android.widget.LinearLayout;
 
 import com.example.arturarzumanyan.taskmanager.R;
 import com.example.arturarzumanyan.taskmanager.data.repository.events.EventsRepository;
+import com.example.arturarzumanyan.taskmanager.data.repository.events.specification.WeeklyEventsSpecification;
 import com.example.arturarzumanyan.taskmanager.domain.Event;
 import com.example.arturarzumanyan.taskmanager.networking.util.DateUtils;
 import com.example.arturarzumanyan.taskmanager.ui.adapter.ColorPalette;
@@ -19,6 +20,7 @@ import com.example.arturarzumanyan.taskmanager.ui.adapter.ColorPalette;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 
 import static com.example.arturarzumanyan.taskmanager.networking.util.DateUtils.DAYS_IN_WEEK;
 import static com.example.arturarzumanyan.taskmanager.networking.util.DateUtils.MINUTES_IN_HOUR;
@@ -95,11 +97,22 @@ public class WeekDashboardFragment extends Fragment {
         ArrayList<Date> weekDateList = new ArrayList<>();
         HashMap<Date, ArrayList<Event>> weeklyEvents = new HashMap<>();
 
+        WeeklyEventsSpecification weeklyEventsSpecification = new WeeklyEventsSpecification();
         EventsRepository eventsRepository = new EventsRepository(getActivity());
+        eventsRepository.getEvents(weeklyEventsSpecification, new EventsRepository.OnEventsLoadedListener() {
+            @Override
+            public void onSuccess(List<Event> eventsList) {
 
+            }
+
+            @Override
+            public void onFail() {
+
+            }
+        });
         for (int i = 0; i < DAYS_IN_WEEK; i++) {
             weekDateList.add(nextDate);
-            weeklyEvents.put(nextDate, eventsRepository.getEventsFromDate(nextDate));
+            //weeklyEvents.put(nextDate, eventsRepository.getEventsFromDate(nextDate));
             nextDate = DateUtils.getNextDate(nextDate);
         }
 

@@ -15,6 +15,10 @@ import android.widget.Spinner;
 
 import com.example.arturarzumanyan.taskmanager.R;
 import com.example.arturarzumanyan.taskmanager.data.repository.events.EventsRepository;
+import com.example.arturarzumanyan.taskmanager.data.repository.events.specification.EventsFromDateSpecification;
+import com.example.arturarzumanyan.taskmanager.data.repository.events.specification.MonthlyEventsSpecification;
+import com.example.arturarzumanyan.taskmanager.data.repository.events.specification.Specification;
+import com.example.arturarzumanyan.taskmanager.data.repository.events.specification.WeeklyEventsSpecification;
 import com.example.arturarzumanyan.taskmanager.domain.Event;
 import com.example.arturarzumanyan.taskmanager.networking.util.DateUtils;
 import com.example.arturarzumanyan.taskmanager.ui.adapter.ColorPalette;
@@ -26,6 +30,7 @@ import com.github.mikephil.charting.data.PieEntry;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 import static com.example.arturarzumanyan.taskmanager.networking.util.DateUtils.MINUTES_IN_HOUR;
 
@@ -91,11 +96,48 @@ public class EventsStatisticFragment extends Fragment {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 if (position == 0) {
-                    makePieChart(mEventsRepository.getDailyEvents(), MINUTES_IN_DAY);
+                    EventsFromDateSpecification eventsFromDateSpecification = new EventsFromDateSpecification();
+                    eventsFromDateSpecification.setDate(DateUtils.getCurrentTime());
+                    mEventsRepository.getEvents(eventsFromDateSpecification, new EventsRepository.OnEventsLoadedListener() {
+                        @Override
+                        public void onSuccess(List<Event> eventsList) {
+                            makePieChart(eventsList, MINUTES_IN_DAY);
+                        }
+
+                        @Override
+                        public void onFail() {
+
+                        }
+                    });
+                    //makePieChart(mEventsRepository.getDailyEvents(), MINUTES_IN_DAY);
                 } else if (position == 1) {
-                    makePieChart(mEventsRepository.getWeeklyEvents(), MINUTES_IN_WEEK);
+                    WeeklyEventsSpecification weeklyEventsSpecification = new WeeklyEventsSpecification();
+                    mEventsRepository.getEvents(weeklyEventsSpecification, new EventsRepository.OnEventsLoadedListener() {
+                        @Override
+                        public void onSuccess(List<Event> eventsList) {
+                            makePieChart(eventsList, MINUTES_IN_WEEK);
+                        }
+
+                        @Override
+                        public void onFail() {
+
+                        }
+                    });
+                    //makePieChart(mEventsRepository.getWeeklyEvents(), MINUTES_IN_WEEK);
                 } else {
-                    makePieChart(mEventsRepository.getMonthlyEvents(), DateUtils.getDaysInCurrentMonth() * MINUTES_IN_DAY);
+                    MonthlyEventsSpecification monthlyEventsSpecification = new MonthlyEventsSpecification();
+                    mEventsRepository.getEvents(monthlyEventsSpecification, new EventsRepository.OnEventsLoadedListener() {
+                        @Override
+                        public void onSuccess(List<Event> eventsList) {
+                            makePieChart(eventsList, DateUtils.getDaysInCurrentMonth() * MINUTES_IN_DAY);
+                        }
+
+                        @Override
+                        public void onFail() {
+
+                        }
+                    });
+                    //makePieChart(mEventsRepository.getMonthlyEvents(), DateUtils.getDaysInCurrentMonth() * MINUTES_IN_DAY);
                 }
             }
 
@@ -107,7 +149,7 @@ public class EventsStatisticFragment extends Fragment {
 
     }
 
-    private void makePieChart(ArrayList<Event> events, int minutes) {
+    private void makePieChart(List<Event> events, int minutes) {
         ArrayList<Integer> mColors = new ArrayList<>();
         HashMap<Integer, Integer> mMinutesOnEvents = new HashMap<>();
 
