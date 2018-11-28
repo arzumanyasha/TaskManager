@@ -1,9 +1,11 @@
 package com.example.arturarzumanyan.taskmanager.data.repository.events.specification;
 
+import com.example.arturarzumanyan.taskmanager.data.db.contract.EventsContract;
+
 public class AllEventsSpecification implements Specification {
     @Override
     public String getSqlQuery() {
-        return null;
+        return "SELECT * FROM " + EventsContract.EventsTable.TABLE_NAME;
     }
 
     @Override

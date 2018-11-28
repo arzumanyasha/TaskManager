@@ -107,7 +107,7 @@ public class EventsDialog extends AppCompatDialogFragment {
                             }
                         }
 
-                        if (mStartTime.getDate() < mEndTime.getDate() &&
+                        if (mEndTime.after(mStartTime) &&
                                 !mEditTextEventName.getText().toString().isEmpty() &&
                                 bundle != null) {
                             final Event event = bundle.getParcelable(EVENTS_KEY);
@@ -117,7 +117,7 @@ public class EventsDialog extends AppCompatDialogFragment {
                             event.setStartTime(startDate);
                             event.setEndTime(endDate);
                             event.setIsNotify(isNotify);
-
+/*
                             mEventsRepository.updateEvent(event, new EventsCloudStore.OnTaskCompletedListener() {
                                 @Override
                                 public void onSuccess(ArrayList<Event> eventsList) {
@@ -141,6 +141,17 @@ public class EventsDialog extends AppCompatDialogFragment {
                                 public void onFail() {
 
                                 }
+                            });*/
+                            mEventsRepository.updateEvent(event, new EventsRepository.OnEventsLoadedListener() {
+                                @Override
+                                public void onSuccess(List<Event> eventsList) {
+                                    eventsReadyListener.onEventsReady(eventsList);
+                                }
+
+                                @Override
+                                public void onFail() {
+
+                                }
                             });
                         } else if (mStartTime.getTime() < mEndTime.getTime() &&
                                 !mEditTextEventName.getText().toString().isEmpty() &&
@@ -153,6 +164,17 @@ public class EventsDialog extends AppCompatDialogFragment {
                                     startDate,
                                     endDate,
                                     isNotify);
+                            mEventsRepository.addEvent(event, new EventsRepository.OnEventsLoadedListener() {
+                                @Override
+                                public void onSuccess(List<Event> eventsList) {
+                                    eventsReadyListener.onEventsReady(eventsList);
+                                }
+
+                                @Override
+                                public void onFail() {
+
+                                }
+                            });
                             //ДОБАВИТЬ AddEvent
                             /*mEventsRepository.addEvent(event, new EventsCloudStore.OnTaskCompletedListener() {
                                 @Override

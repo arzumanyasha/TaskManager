@@ -138,9 +138,9 @@ public class EventsCloudStore {
     private void createOrUpdateEventInDb(String response,
                                          FirebaseWebService.RequestMethods requestMethod) {
         if (requestMethod == FirebaseWebService.RequestMethods.POST) {
-            mEventsDbStore.addEvent(mEventsParser.parseEvent(response));
+            //mEventsDbStore.addEvent(mEventsParser.parseEvent(response));
         } else if (requestMethod == FirebaseWebService.RequestMethods.PATCH) {
-            mEventsDbStore.updateEvent(mEventsParser.parseEvent(response));
+            //mEventsDbStore.updateEvent(mEventsParser.parseEvent(response));
         }
     }
 

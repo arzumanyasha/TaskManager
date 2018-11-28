@@ -91,6 +91,12 @@ public class DateUtils {
         return c.getTime();
     }
 
+    public static Date getLastDateOfMonth() {
+        Calendar c = Calendar.getInstance();
+        c.set(Calendar.DAY_OF_MONTH, getDaysInCurrentMonth());
+        return c.getTime();
+    }
+
     public static String formatTime(Date time) {
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat(HOUR_MINUTE_TIME_A_PATTERN);
         return simpleDateFormat.format(time);
@@ -144,6 +150,19 @@ public class DateUtils {
             e.printStackTrace();
         }
         return new Date(currentDate.getTime() - currentWeekDay * MILLIS_IN_SECONDS
+                * SECONDS_IN_MINUTES * MINUTES_IN_HOUR * HOURS_IN_DAY);
+    }
+
+    public static Date getSundayDate(int currentWeekDay) {
+        SimpleDateFormat df = new SimpleDateFormat(YEAR_MONTH_DAY_PATTERN);
+        Calendar c = Calendar.getInstance();
+        Date currentDate = null;
+        try {
+            currentDate = df.parse(df.format(c.getTime()));
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+        return new Date(currentDate.getTime() - (currentWeekDay - DAYS_IN_WEEK - 1) * MILLIS_IN_SECONDS
                 * SECONDS_IN_MINUTES * MINUTES_IN_HOUR * HOURS_IN_DAY);
     }
 

@@ -7,6 +7,7 @@ import com.example.arturarzumanyan.taskmanager.auth.FirebaseWebService;
 import com.example.arturarzumanyan.taskmanager.data.repository.BaseDataLoadingAsyncTask;
 import com.example.arturarzumanyan.taskmanager.data.repository.RepositoryLoadHelper;
 import com.example.arturarzumanyan.taskmanager.data.repository.events.specification.AllEventsSpecification;
+import com.example.arturarzumanyan.taskmanager.data.repository.events.specification.EventsFromDateSpecification;
 import com.example.arturarzumanyan.taskmanager.data.repository.events.specification.Specification;
 import com.example.arturarzumanyan.taskmanager.domain.Event;
 import com.example.arturarzumanyan.taskmanager.networking.base.RequestParameters;
@@ -18,6 +19,8 @@ import java.util.Date;
 import java.util.List;
 
 import static com.example.arturarzumanyan.taskmanager.auth.FirebaseWebService.RequestMethods.GET;
+import static com.example.arturarzumanyan.taskmanager.auth.FirebaseWebService.RequestMethods.PATCH;
+import static com.example.arturarzumanyan.taskmanager.auth.FirebaseWebService.RequestMethods.POST;
 import static com.example.arturarzumanyan.taskmanager.data.repository.events.EventsCloudStore.BASE_EVENTS_URL;
 
 public class EventsRepository {
@@ -105,9 +108,13 @@ public class EventsRepository {
 
     public void addEvent(Event event, final OnEventsLoadedListener listener) {
         String url = BASE_EVENTS_URL + mFirebaseWebService.getCurrentUser().getEmail() + "/events";
-        RequestParameters requestParameters = mRepositoryLoadHelper.getEventCreateOrUpdateParameters(event, url, FirebaseWebService.RequestMethods.POST);
+        RequestParameters requestParameters = mRepositoryLoadHelper.getEventCreateOrUpdateParameters(event, url, POST);
+
+        EventsFromDateSpecification eventsFromDateSpecification = new EventsFromDateSpecification();
+        eventsFromDateSpecification.setDate(DateUtils.getCurrentTime());
+
         EventsAsyncTask eventsAsyncTask = new EventsAsyncTask(event, mContext,
-                mRepositoryLoadHelper, mFirebaseWebService, mEventsDbStore, null, null);
+                mRepositoryLoadHelper, mFirebaseWebService, mEventsDbStore, eventsFromDateSpecification, null);
         eventsAsyncTask.setDataInfoLoadingListener(new BaseDataLoadingAsyncTask.UserDataLoadingListener<Event>() {
             @Override
             public void onSuccess(List<Event> list) {
@@ -120,23 +127,47 @@ public class EventsRepository {
             }
         });
         eventsAsyncTask.executeOnExecutor(AsyncTask.SERIAL_EXECUTOR, requestParameters);
-
     }
 
-    public void updateEvent(Event event, final EventsCloudStore.OnTaskCompletedListener listener) {
-        if (mRepositoryLoadHelper.isOnline()) {
-            mEventsCloudStore.updateEvent(event, listener);
-        } else {
-            mEventsDbStore.updateEvent(event);
-        }
+    public void updateEvent(Event event, final OnEventsLoadedListener listener) {
+        String url = BASE_EVENTS_URL +
+                mFirebaseWebService.getCurrentUser().getEmail() +
+                "/events/" +
+                event.getId();
+        RequestParameters requestParameters = mRepositoryLoadHelper.getEventCreateOrUpdateParameters(event, url, PATCH);
+
+        EventsFromDateSpecification eventsFromDateSpecification = new EventsFromDateSpecification();
+        eventsFromDateSpecification.setDate(DateUtils.getCurrentTime());
+
+        EventsAsyncTask eventsAsyncTask = new EventsAsyncTask(event, mContext,
+                mRepositoryLoadHelper, mFirebaseWebService, mEventsDbStore, eventsFromDateSpecification, null);
+        eventsAsyncTask.setDataInfoLoadingListener(new BaseDataLoadingAsyncTask.UserDataLoadingListener<Event>() {
+            @Override
+            public void onSuccess(List<Event> list) {
+                listener.onSuccess(list);
+            }
+
+            @Override
+            public void onFail() {
+                listener.onFail();
+            }
+        });
+        eventsAsyncTask.executeOnExecutor(AsyncTask.SERIAL_EXECUTOR, requestParameters);
     }
 
     public void deleteEvent(Event event) {
-        if (mRepositoryLoadHelper.isOnline()) {
-            mEventsCloudStore.deleteEvent(event);
-        } else {
-            mEventsDbStore.deleteEvent(event);
-        }
+        String url = BASE_EVENTS_URL +
+                mFirebaseWebService.getCurrentUser().getEmail() +
+                "/events/" +
+                event.getId();
+        RequestParameters requestParameters = mRepositoryLoadHelper.getDeleteParameters(url);
+
+        EventsFromDateSpecification eventsFromDateSpecification = new EventsFromDateSpecification();
+        eventsFromDateSpecification.setDate(DateUtils.getCurrentTime());
+
+        EventsAsyncTask eventsAsyncTask = new EventsAsyncTask(event, mContext,
+                mRepositoryLoadHelper, mFirebaseWebService, mEventsDbStore, eventsFromDateSpecification, null);
+        eventsAsyncTask.executeOnExecutor(AsyncTask.SERIAL_EXECUTOR, requestParameters);
     }
 
     public interface OnEventsLoadedListener {
@@ -179,10 +210,13 @@ public class EventsRepository {
                     retryGetResultFromServer(requestParameters[0]);
                 }
 
-                if (requestParameters[0].getRequestMethod() != GET) {
+                if (requestParameters[0].getRequestMethod() == POST ||
+                        requestParameters[0].getRequestMethod() == PATCH) {
                     dbQuery(parseEvent(dataFromServer), requestParameters[0]);
-                } else {
+                } else if(requestParameters[0].getRequestMethod() == GET){
                     updateDbQuery(parseEventsData(dataFromServer));
+                } else {
+                    dbQuery(mEvent, requestParameters[0]);
                 }
 
             } else {
@@ -230,10 +264,9 @@ public class EventsRepository {
         }
 
         private void dbQuery(Event event, RequestParameters requestParameters) {
-            if (requestParameters.getRequestMethod() == FirebaseWebService.RequestMethods.POST) {
-                mEventsDbStore.addEvent(event);
-            } else if (requestParameters.getRequestMethod() == FirebaseWebService.RequestMethods.PATCH) {
-                mEventsDbStore.updateEvent(event);
+            if (requestParameters.getRequestMethod() == POST ||
+                    requestParameters.getRequestMethod() == PATCH) {
+                mEventsDbStore.addOrUpdateEvent(event);
             } else if (requestParameters.getRequestMethod() == FirebaseWebService.RequestMethods.DELETE) {
                 mEventsDbStore.deleteEvent(event);
             }

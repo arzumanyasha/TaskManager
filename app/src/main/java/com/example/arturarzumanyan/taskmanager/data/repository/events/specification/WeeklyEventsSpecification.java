@@ -1,5 +1,6 @@
 package com.example.arturarzumanyan.taskmanager.data.repository.events.specification;
 
+import com.example.arturarzumanyan.taskmanager.data.db.contract.EventsContract;
 import com.example.arturarzumanyan.taskmanager.networking.util.DateUtils;
 
 import java.util.Date;
@@ -7,7 +8,9 @@ import java.util.Date;
 public class WeeklyEventsSpecification implements Specification {
     @Override
     public String getSqlQuery() {
-        return null;
+        return "SELECT * FROM " + EventsContract.EventsTable.TABLE_NAME +
+                " WHERE " + EventsContract.EventsTable.COLUMN_START_TIME + " > '" + getStartDate() +
+                "' AND " + EventsContract.EventsTable.COLUMN_START_TIME + " < '" + getEndDate() + "'";
     }
 
     @Override
@@ -25,12 +28,9 @@ public class WeeklyEventsSpecification implements Specification {
 
     @Override
     public String getEndDate() {
-        String date = DateUtils.getCurrentTime();
-        Date endDate = DateUtils.getEventDateFromString(date);
-        Date time = new Date();
-        time.setHours(23);
-        time.setMinutes(59);
-        Date eventsEndTime = DateUtils.getEventDate(DateUtils.formatEventTime(endDate), time);
-        return DateUtils.formatEventTime(eventsEndTime);
+        int date = DateUtils.getEventWeek(DateUtils.getCurrentTime()) - 1;
+        Date sunday = DateUtils.getSundayDate(date - 1);
+        Date sundayDate = DateUtils.getEventDate(DateUtils.formatEventTime(sunday), new Date(0));
+        return DateUtils.formatEventTime(sundayDate);
     }
 }

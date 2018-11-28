@@ -7,6 +7,7 @@ import android.database.sqlite.SQLiteDatabase;
 
 import com.example.arturarzumanyan.taskmanager.data.db.contract.EventsContract;
 import com.example.arturarzumanyan.taskmanager.data.db.contract.TasksContract;
+import com.example.arturarzumanyan.taskmanager.data.repository.events.specification.Specification;
 import com.example.arturarzumanyan.taskmanager.domain.Event;
 import com.example.arturarzumanyan.taskmanager.domain.Task;
 import com.example.arturarzumanyan.taskmanager.domain.TaskList;
@@ -35,33 +36,33 @@ public class DbHelper {
     public void updateEvents(List<Event> eventsList) {
         mDbSqlite = mSqLiteDbHelper.getWritableDatabase();
 
-        List<Event> oldEventsList = getEvents();
-        for (int i = 0; i < eventsList.size(); i++) {
-            for (int j = 0; j < oldEventsList.size(); j++) {
-                if (eventsList.get(i).getId().equals(oldEventsList.get(j).getId())) {
-                    updateEvent(eventsList.get(i));
-                    break;
-                }
-
-                if (j == oldEventsList.size() - 1){
-                    insertEvent(eventsList.get(i));
-                }
-            }
+        for (Event event : eventsList) {
+            insertOrUpdateEvent(event);
         }
     }
 
-    public void insertEvent(Event event) {
-        mDbSqlite = mSqLiteDbHelper.getWritableDatabase();
-
-        mDbSqlite.insert(EventsContract.EventsTable.TABLE_NAME, null,
-                createEventContentValues(event));
+    private boolean isEventExistsInDb(String eventId) {
+        String[] selectionArgs = new String[]{eventId};
+        Cursor c = mDbSqlite.rawQuery("SELECT * FROM " + EventsContract.EventsTable.TABLE_NAME +
+                " WHERE " + EventsContract.EventsTable.COLUMN_EVENT_ID + " = ?", selectionArgs);
+        return getEventsFromCursor(c).size() != 0;
     }
 
-    public void updateEvent(Event event) {
-        mDbSqlite = mSqLiteDbHelper.getWritableDatabase();
+    private void insertOrUpdateEvent(Event event) {
+        mDbSqlite.beginTransaction();
 
-        mDbSqlite.update(EventsContract.EventsTable.TABLE_NAME, createEventContentValues(event),
-                "id = ?", new String[]{event.getId()});
+        try {
+            if (isEventExistsInDb(event.getId())) {
+                mDbSqlite.update(EventsContract.EventsTable.TABLE_NAME, createEventContentValues(event),
+                        "id = ?", new String[]{event.getId()});
+            } else {
+                mDbSqlite.insert(EventsContract.EventsTable.TABLE_NAME, null,
+                        createEventContentValues(event));
+            }
+            mDbSqlite.setTransactionSuccessful();
+        } finally {
+            mDbSqlite.endTransaction();
+        }
     }
 
     private ContentValues createEventContentValues(Event event) {
@@ -84,9 +85,17 @@ public class DbHelper {
 
     public void deleteEvent(Event event) {
         mDbSqlite = mSqLiteDbHelper.getWritableDatabase();
-        mDbSqlite.delete(EventsContract.EventsTable.TABLE_NAME,
-                "id = ?",
-                new String[]{event.getId()});
+
+        mDbSqlite.beginTransaction();
+        try {
+            mDbSqlite.delete(EventsContract.EventsTable.TABLE_NAME,
+                    "id = ?",
+                    new String[]{event.getId()});
+
+            mDbSqlite.setTransactionSuccessful();
+        } finally {
+            mDbSqlite.endTransaction();
+        }
     }
 
     public void insertTaskLists(List<TaskList> taskListArrayList) {
@@ -102,7 +111,6 @@ public class DbHelper {
         mDbSqlite.insert(TasksContract.TaskListTable.TABLE_NAME,
                 null, createTaskListContentValues(taskList));
     }
-
 
     public void updateTaskList(TaskList taskList) {
         mDbSqlite = mSqLiteDbHelper.getWritableDatabase();
@@ -173,19 +181,9 @@ public class DbHelper {
                 "id = ?", new String[]{task.getId()});
     }
 
-    public List<Event> getEvents() {
+    public List<Event> getEvents(Specification specification) {
         mDbSqlite = mSqLiteDbHelper.getReadableDatabase();
-        Cursor c = mDbSqlite.rawQuery("SELECT * FROM " + EventsContract.EventsTable.TABLE_NAME, null);
-        return getEventsFromCursor(c);
-    }
-
-    public List<Event> getDailyEvents(String date) {
-        if(DateUtils.isMatchesEventFormat(date)){
-            date = DateUtils.trimEventDate(date);
-        }
-        mDbSqlite = mSqLiteDbHelper.getReadableDatabase();
-        Cursor c = mDbSqlite.rawQuery("SELECT * FROM " + EventsContract.EventsTable.TABLE_NAME +
-                " WHERE " + EventsContract.EventsTable.COLUMN_START_TIME + " LIKE '" + date + "%'", null);
+        Cursor c = mDbSqlite.rawQuery(specification.getSqlQuery(), null);
         return getEventsFromCursor(c);
     }
 

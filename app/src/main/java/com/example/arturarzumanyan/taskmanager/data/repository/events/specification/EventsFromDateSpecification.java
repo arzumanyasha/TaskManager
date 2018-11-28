@@ -20,6 +20,9 @@ public class EventsFromDateSpecification implements Specification {
     }
 
     public void setDate(String date) {
+        if(DateUtils.isMatchesEventFormat(date)){
+            date = DateUtils.trimEventDate(date);
+        }
         this.mDate = date;
     }
 

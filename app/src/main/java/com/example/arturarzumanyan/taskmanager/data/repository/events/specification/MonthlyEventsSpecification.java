@@ -1,5 +1,6 @@
 package com.example.arturarzumanyan.taskmanager.data.repository.events.specification;
 
+import com.example.arturarzumanyan.taskmanager.data.db.contract.EventsContract;
 import com.example.arturarzumanyan.taskmanager.networking.util.DateUtils;
 
 import java.util.Date;
@@ -7,7 +8,9 @@ import java.util.Date;
 public class MonthlyEventsSpecification implements Specification {
     @Override
     public String getSqlQuery() {
-        return null;
+        return "SELECT * FROM " + EventsContract.EventsTable.TABLE_NAME +
+                " WHERE " + EventsContract.EventsTable.COLUMN_START_TIME + " > '" + getStartDate() +
+                "' AND " + EventsContract.EventsTable.COLUMN_START_TIME + " < '" + getEndDate() + "'";
     }
 
     @Override
@@ -23,8 +26,7 @@ public class MonthlyEventsSpecification implements Specification {
 
     @Override
     public String getEndDate() {
-        String date = DateUtils.getCurrentTime();
-        Date endDate = DateUtils.getEventDateFromString(date);
-        return DateUtils.formatEventTime(endDate);
+        Date date = DateUtils.getLastDateOfMonth();
+        return DateUtils.formatEventTime(date);
     }
 }
