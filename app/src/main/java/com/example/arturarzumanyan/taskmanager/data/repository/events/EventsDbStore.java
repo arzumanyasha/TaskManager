@@ -65,12 +65,8 @@ public class EventsDbStore {
         return events;
     }
 
-    public void updateEvents(List<Event> eventList) {
-        DbHelper.getDbHelper(mContext).updateEvents(eventList);
-    }
-
-    public void addOrUpdateEvent(Event event) {
-        DbHelper.getDbHelper(mContext).updateEvents(Collections.singletonList(event));
+    public void addOrUpdateEvents(List<Event> eventList) {
+        DbHelper.getDbHelper(mContext).addOrUpdateEvents(eventList);
     }
 
     public void deleteEvent(Event event) {

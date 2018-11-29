@@ -33,7 +33,7 @@ public class DbHelper {
         mSqLiteDbHelper = new SQLiteDbHelper(context);
     }
 
-    public void updateEvents(List<Event> eventsList) {
+    public void addOrUpdateEvents(List<Event> eventsList) {
         mDbSqlite = mSqLiteDbHelper.getWritableDatabase();
 
         for (Event event : eventsList) {
@@ -41,28 +41,29 @@ public class DbHelper {
         }
     }
 
-    private boolean isEventExistsInDb(String eventId) {
-        String[] selectionArgs = new String[]{eventId};
-        Cursor c = mDbSqlite.rawQuery("SELECT * FROM " + EventsContract.EventsTable.TABLE_NAME +
-                " WHERE " + EventsContract.EventsTable.COLUMN_EVENT_ID + " = ?", selectionArgs);
-        return getEventsFromCursor(c).size() != 0;
-    }
-
     private void insertOrUpdateEvent(Event event) {
         mDbSqlite.beginTransaction();
 
         try {
+            ContentValues cv = createEventContentValues(event);
             if (isEventExistsInDb(event.getId())) {
-                mDbSqlite.update(EventsContract.EventsTable.TABLE_NAME, createEventContentValues(event),
+                mDbSqlite.update(EventsContract.EventsTable.TABLE_NAME, cv,
                         "id = ?", new String[]{event.getId()});
             } else {
-                mDbSqlite.insert(EventsContract.EventsTable.TABLE_NAME, null,
-                        createEventContentValues(event));
+                mDbSqlite.insert(EventsContract.EventsTable.TABLE_NAME,
+                        null, cv);
             }
             mDbSqlite.setTransactionSuccessful();
         } finally {
             mDbSqlite.endTransaction();
         }
+    }
+
+    private boolean isEventExistsInDb(String eventId) {
+        String[] selectionArgs = new String[]{eventId};
+        Cursor c = mDbSqlite.rawQuery("SELECT * FROM " + EventsContract.EventsTable.TABLE_NAME +
+                " WHERE " + EventsContract.EventsTable.COLUMN_EVENT_ID + " = ?", selectionArgs);
+        return c.getCount() != 0;
     }
 
     private ContentValues createEventContentValues(Event event) {

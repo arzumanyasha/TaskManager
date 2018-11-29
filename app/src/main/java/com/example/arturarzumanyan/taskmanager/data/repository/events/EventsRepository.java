@@ -15,6 +15,7 @@ import com.example.arturarzumanyan.taskmanager.networking.util.DateUtils;
 import com.example.arturarzumanyan.taskmanager.networking.util.EventsParser;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
@@ -266,14 +267,14 @@ public class EventsRepository {
         private void dbQuery(Event event, RequestParameters requestParameters) {
             if (requestParameters.getRequestMethod() == POST ||
                     requestParameters.getRequestMethod() == PATCH) {
-                mEventsDbStore.addOrUpdateEvent(event);
+                mEventsDbStore.addOrUpdateEvents(Collections.singletonList(event));
             } else if (requestParameters.getRequestMethod() == FirebaseWebService.RequestMethods.DELETE) {
                 mEventsDbStore.deleteEvent(event);
             }
         }
 
         private void updateDbQuery(List<Event> events) {
-            mEventsDbStore.updateEvents(events);
+            mEventsDbStore.addOrUpdateEvents(events);
             mEventsDbStore.getEvents(mSpecification);
         }
 
