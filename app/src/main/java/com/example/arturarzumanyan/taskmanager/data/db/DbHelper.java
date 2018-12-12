@@ -7,7 +7,8 @@ import android.database.sqlite.SQLiteDatabase;
 
 import com.example.arturarzumanyan.taskmanager.data.db.contract.EventsContract;
 import com.example.arturarzumanyan.taskmanager.data.db.contract.TasksContract;
-import com.example.arturarzumanyan.taskmanager.data.repository.events.specification.Specification;
+import com.example.arturarzumanyan.taskmanager.data.repository.events.specification.EventsSpecification;
+import com.example.arturarzumanyan.taskmanager.data.repository.tasklists.specification.TaskListsSpecification;
 import com.example.arturarzumanyan.taskmanager.domain.Event;
 import com.example.arturarzumanyan.taskmanager.domain.Task;
 import com.example.arturarzumanyan.taskmanager.domain.TaskList;
@@ -41,6 +42,22 @@ public class DbHelper {
         }
     }
 
+    public void addOrUpdateTaskLists(List<TaskList> taskLists) {
+        mDbSqlite = mSqLiteDbHelper.getWritableDatabase();
+
+        for (TaskList taskList : taskLists) {
+            insertOrUpdateTaskList(taskList);
+        }
+    }
+
+    public void addOrUpdateTasks(List<Task> tasks) {
+        mDbSqlite = mSqLiteDbHelper.getWritableDatabase();
+
+        for (Task task : tasks) {
+            insertOrUpdateTask(task);
+        }
+    }
+
     private void insertOrUpdateEvent(Event event) {
         mDbSqlite.beginTransaction();
 
@@ -59,10 +76,60 @@ public class DbHelper {
         }
     }
 
+    private void insertOrUpdateTaskList(TaskList taskList) {
+        mDbSqlite.beginTransaction();
+
+        try {
+            ContentValues cv = createTaskListContentValues(taskList);
+            if (isTaskListExistsInDb(taskList.getTaskListId())) {
+                mDbSqlite.update(TasksContract.TaskListTable.TABLE_NAME, cv,
+                        "id = ?", new String[]{taskList.getTitle()});
+            } else {
+                mDbSqlite.insert(TasksContract.TaskListTable.TABLE_NAME,
+                        null, cv);
+            }
+            mDbSqlite.setTransactionSuccessful();
+        } finally {
+            mDbSqlite.endTransaction();
+        }
+    }
+
+    private void insertOrUpdateTask(Task task) {
+        mDbSqlite.beginTransaction();
+
+        try {
+            ContentValues cv = createTaskContentValues(task);
+            if (isTaskExistsInDb(task.getId())) {
+                mDbSqlite.update(TasksContract.TasksTable.TABLE_NAME, cv,
+                        "id = ?", new String[]{task.getId()});
+            } else {
+                mDbSqlite.insert(TasksContract.TasksTable.TABLE_NAME,
+                        null, cv);
+            }
+            mDbSqlite.setTransactionSuccessful();
+        } finally {
+            mDbSqlite.endTransaction();
+        }
+    }
+
     private boolean isEventExistsInDb(String eventId) {
         String[] selectionArgs = new String[]{eventId};
         Cursor c = mDbSqlite.rawQuery("SELECT * FROM " + EventsContract.EventsTable.TABLE_NAME +
                 " WHERE " + EventsContract.EventsTable.COLUMN_EVENT_ID + " = ?", selectionArgs);
+        return c.getCount() != 0;
+    }
+
+    private boolean isTaskListExistsInDb(String taskListId) {
+        String[] selectionArgs = new String[]{taskListId};
+        Cursor c = mDbSqlite.rawQuery("SELECT * FROM " + TasksContract.TaskListTable.TABLE_NAME +
+                " WHERE " + TasksContract.TaskListTable.COLUMN_LIST_ID + " = ?", selectionArgs);
+        return c.getCount() != 0;
+    }
+
+    private boolean isTaskExistsInDb(String taskId) {
+        String[] selectionArgs = new String[]{taskId};
+        Cursor c = mDbSqlite.rawQuery("SELECT * FROM " + TasksContract.TasksTable.TABLE_NAME +
+                " WHERE " + TasksContract.TasksTable.COLUMN_TASK_ID + " = ?", selectionArgs);
         return c.getCount() != 0;
     }
 
@@ -99,29 +166,6 @@ public class DbHelper {
         }
     }
 
-    public void insertTaskLists(List<TaskList> taskListArrayList) {
-        mDbSqlite = mSqLiteDbHelper.getWritableDatabase();
-        for (int i = 0; i < taskListArrayList.size(); i++) {
-            insertTaskList(taskListArrayList.get(i));
-        }
-    }
-
-    public void insertTaskList(TaskList taskList) {
-        mDbSqlite = mSqLiteDbHelper.getWritableDatabase();
-
-        mDbSqlite.insert(TasksContract.TaskListTable.TABLE_NAME,
-                null, createTaskListContentValues(taskList));
-    }
-
-    public void updateTaskList(TaskList taskList) {
-        mDbSqlite = mSqLiteDbHelper.getWritableDatabase();
-
-        mDbSqlite.update(TasksContract.TaskListTable.TABLE_NAME,
-                createTaskListContentValues(taskList),
-                "id = ?",
-                new String[]{taskList.getTaskListId()});
-    }
-
     private ContentValues createTaskListContentValues(TaskList taskList) {
         ContentValues cv = new ContentValues();
 
@@ -135,27 +179,6 @@ public class DbHelper {
         mDbSqlite = mSqLiteDbHelper.getWritableDatabase();
         mDbSqlite.delete(TasksContract.TaskListTable.TABLE_NAME, "_id = ?",
                 new String[]{Integer.toString(taskList.getId())});
-    }
-
-    public void insertTasks(List<Task> tasksArrayList) {
-        mDbSqlite = mSqLiteDbHelper.getWritableDatabase();
-        for (int i = 0; i < tasksArrayList.size(); i++) {
-            insertTask(tasksArrayList.get(i));
-        }
-    }
-
-    public void insertTask(Task task) {
-        mDbSqlite = mSqLiteDbHelper.getWritableDatabase();
-
-        mDbSqlite.insert(TasksContract.TasksTable.TABLE_NAME, null,
-                createTaskContentValues(task));
-    }
-
-    public void updateTask(Task task) {
-        mDbSqlite = mSqLiteDbHelper.getWritableDatabase();
-
-        mDbSqlite.update(TasksContract.TasksTable.TABLE_NAME, createTaskContentValues(task),
-                "id = ?", new String[]{task.getId()});
     }
 
     private ContentValues createTaskContentValues(Task task) {
@@ -182,7 +205,7 @@ public class DbHelper {
                 "id = ?", new String[]{task.getId()});
     }
 
-    public List<Event> getEvents(Specification specification) {
+    public List<Event> getEvents(EventsSpecification specification) {
         mDbSqlite = mSqLiteDbHelper.getReadableDatabase();
         Cursor c = mDbSqlite.rawQuery(specification.getSqlQuery(), null);
         return getEventsFromCursor(c);
@@ -212,7 +235,6 @@ public class DbHelper {
 
         c.close();
         return eventsList;
-
     }
 
     public List<Task> getTasksFromList(int tasksListId) {
@@ -248,12 +270,17 @@ public class DbHelper {
         return tasksList;
     }
 
-    public List<TaskList> getTaskLists() {
+    public List<TaskList> getTaskLists(TaskListsSpecification specification) {
         List<TaskList> taskListArrayList = new ArrayList<>();
         mDbSqlite = mSqLiteDbHelper.getReadableDatabase();
 
-        Cursor c = mDbSqlite.rawQuery("SELECT * FROM " + TasksContract.TaskListTable.TABLE_NAME, null);
-
+        Cursor c;
+        if (specification.getSelectionArgs() == null) {
+            c = mDbSqlite.rawQuery(specification.getSqlQuery(), null);
+        } else {
+            c = mDbSqlite.rawQuery(specification.getSqlQuery(),
+                    new String[]{specification.getSelectionArgs()});
+        }
         if (c.moveToFirst()) {
             do {
                 TaskList taskList = new TaskList(c.getInt(c.getColumnIndex(TasksContract.TaskListTable._ID)),
@@ -267,38 +294,5 @@ public class DbHelper {
 
         c.close();
         return taskListArrayList;
-    }
-
-    public TaskList getTaskList(int id) {
-        mDbSqlite = mSqLiteDbHelper.getReadableDatabase();
-
-        return getTaskListFromCursor(Integer.toString(id), TasksContract.TaskListTable._ID);
-    }
-
-    public TaskList getTaskList(String title) {
-        mDbSqlite = mSqLiteDbHelper.getReadableDatabase();
-
-        return getTaskListFromCursor(title, TasksContract.TaskListTable.COLUMN_TITLE);
-    }
-
-    private TaskList getTaskListFromCursor(String selectionArg, String columnName) {
-        String[] selectionArgs = new String[]{selectionArg};
-        Cursor c = mDbSqlite.rawQuery("SELECT * FROM " + TasksContract.TaskListTable.TABLE_NAME +
-                " WHERE " + columnName + " = ?", selectionArgs);
-
-        if (c.moveToFirst()) {
-            do {
-                TaskList taskList = new TaskList(c.getInt(c.getColumnIndex(TasksContract.TaskListTable._ID)),
-                        c.getString(c.getColumnIndex(TasksContract.TaskListTable.COLUMN_LIST_ID)),
-                        c.getString(c.getColumnIndex(TasksContract.TaskListTable.COLUMN_TITLE))
-                );
-
-                return taskList;
-
-            } while (c.moveToNext());
-        }
-
-        c.close();
-        return null;
     }
 }
