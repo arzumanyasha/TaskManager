@@ -5,7 +5,7 @@ import com.example.arturarzumanyan.taskmanager.networking.util.DateUtils;
 
 import java.util.Date;
 
-public class WeeklyEventsSpecification implements Specification {
+public class WeeklyEventsSpecification implements EventsSpecification {
     @Override
     public String getSqlQuery() {
         return "SELECT * FROM " + EventsContract.EventsTable.TABLE_NAME +

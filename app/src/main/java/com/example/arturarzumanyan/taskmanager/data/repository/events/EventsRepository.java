@@ -6,19 +6,20 @@ import android.os.AsyncTask;
 import com.example.arturarzumanyan.taskmanager.auth.FirebaseWebService;
 import com.example.arturarzumanyan.taskmanager.data.repository.BaseDataLoadingAsyncTask;
 import com.example.arturarzumanyan.taskmanager.data.repository.RepositoryLoadHelper;
-import com.example.arturarzumanyan.taskmanager.data.repository.events.specification.AllEventsSpecification;
 import com.example.arturarzumanyan.taskmanager.data.repository.events.specification.EventsFromDateSpecification;
-import com.example.arturarzumanyan.taskmanager.data.repository.events.specification.Specification;
+import com.example.arturarzumanyan.taskmanager.data.repository.events.specification.EventsSpecification;
 import com.example.arturarzumanyan.taskmanager.domain.Event;
+import com.example.arturarzumanyan.taskmanager.domain.ResponseDto;
+import com.example.arturarzumanyan.taskmanager.networking.NetworkUtil;
 import com.example.arturarzumanyan.taskmanager.networking.base.RequestParameters;
 import com.example.arturarzumanyan.taskmanager.networking.util.DateUtils;
 import com.example.arturarzumanyan.taskmanager.networking.util.EventsParser;
 
-import java.util.ArrayList;
+import java.net.HttpURLConnection;
 import java.util.Collections;
-import java.util.Date;
 import java.util.List;
 
+import static com.example.arturarzumanyan.taskmanager.auth.FirebaseWebService.RequestMethods.DELETE;
 import static com.example.arturarzumanyan.taskmanager.auth.FirebaseWebService.RequestMethods.GET;
 import static com.example.arturarzumanyan.taskmanager.auth.FirebaseWebService.RequestMethods.PATCH;
 import static com.example.arturarzumanyan.taskmanager.auth.FirebaseWebService.RequestMethods.POST;
@@ -80,30 +81,31 @@ public class EventsRepository {
         return mEventsDbStore.getEventsFromDate(date);
     }
 */
-    public void getEvents(Specification specification, final OnEventsLoadedListener listener) {
+    public void getEvents(EventsSpecification eventsSpecification, final OnEventsLoadedListener listener) {
         String eventsUrl = "";
-        if (specification.getStartDate().isEmpty() && specification.getEndDate().isEmpty()) {
+        if (eventsSpecification.getStartDate().isEmpty() && eventsSpecification.getEndDate().isEmpty()) {
             eventsUrl = BASE_EVENTS_URL + mFirebaseWebService.getCurrentUser().getEmail() + "/events";
         } else {
             eventsUrl = BASE_EVENTS_URL + mFirebaseWebService.getCurrentUser().getEmail() + "/events?" +
-                    "timeMax=" + DateUtils.decodeDate(specification.getEndDate()) +
-                    "&timeMin=" + DateUtils.decodeDate(specification.getStartDate());
+                    "timeMax=" + DateUtils.decodeDate(eventsSpecification.getEndDate()) +
+                    "&timeMin=" + DateUtils.decodeDate(eventsSpecification.getStartDate());
         }
 
         EventsAsyncTask eventsAsyncTask = new EventsAsyncTask(null, mContext,
-                mRepositoryLoadHelper, mFirebaseWebService, mEventsDbStore, specification, listener);
+                mRepositoryLoadHelper, mFirebaseWebService, mEventsDbStore, eventsSpecification, listener);
 
         eventsAsyncTask.setDataInfoLoadingListener(new BaseDataLoadingAsyncTask.UserDataLoadingListener<Event>() {
             @Override
             public void onSuccess(List<Event> list) {
                 listener.onSuccess(list);
             }
-
+/*
             @Override
             public void onFail() {
                 listener.onFail();
-            }
+            }*/
         });
+
         mRepositoryLoadHelper.requestUserData(eventsAsyncTask, eventsUrl);
     }
 
@@ -121,11 +123,11 @@ public class EventsRepository {
             public void onSuccess(List<Event> list) {
                 listener.onSuccess(list);
             }
-
+/*
             @Override
             public void onFail() {
                 listener.onFail();
-            }
+            }*/
         });
         eventsAsyncTask.executeOnExecutor(AsyncTask.SERIAL_EXECUTOR, requestParameters);
     }
@@ -147,11 +149,11 @@ public class EventsRepository {
             public void onSuccess(List<Event> list) {
                 listener.onSuccess(list);
             }
-
+/*
             @Override
             public void onFail() {
                 listener.onFail();
-            }
+            }*/
         });
         eventsAsyncTask.executeOnExecutor(AsyncTask.SERIAL_EXECUTOR, requestParameters);
     }
@@ -168,6 +170,12 @@ public class EventsRepository {
 
         EventsAsyncTask eventsAsyncTask = new EventsAsyncTask(event, mContext,
                 mRepositoryLoadHelper, mFirebaseWebService, mEventsDbStore, eventsFromDateSpecification, null);
+        eventsAsyncTask.setDataInfoLoadingListener(new BaseDataLoadingAsyncTask.UserDataLoadingListener<Event>() {
+            @Override
+            public void onSuccess(List<Event> list) {
+
+            }
+        });
         eventsAsyncTask.executeOnExecutor(AsyncTask.SERIAL_EXECUTOR, requestParameters);
     }
 
@@ -184,7 +192,7 @@ public class EventsRepository {
         private RepositoryLoadHelper mRepositoryLoadHelper;
         private FirebaseWebService mFirebaseWebService;
         private EventsDbStore mEventsDbStore;
-        private Specification mSpecification;
+        private EventsSpecification mEventsSpecification;
         private OnEventsLoadedListener mListener;
 
         public EventsAsyncTask(Event event,
@@ -192,43 +200,48 @@ public class EventsRepository {
                                RepositoryLoadHelper repositoryLoadHelper,
                                FirebaseWebService firebaseWebService,
                                EventsDbStore eventsDbStore,
-                               Specification specification,
+                               EventsSpecification eventsSpecification,
                                OnEventsLoadedListener listener) {
             this.mEvent = event;
             //this.mContextWeakReference = new WeakReference<>(context);
             this.mRepositoryLoadHelper = repositoryLoadHelper;
             this.mFirebaseWebService = firebaseWebService;
             this.mEventsDbStore = eventsDbStore;
-            this.mSpecification = specification;
+            this.mEventsSpecification = eventsSpecification;
             this.mListener = listener;
         }
 
         @Override
         protected List<Event> doInBackground(final RequestParameters... requestParameters) {
             if (mRepositoryLoadHelper.isOnline()) {
-                String dataFromServer = getResultFromServer(requestParameters[0]);
-                if (dataFromServer.isEmpty()) {
+                ResponseDto responseDto = NetworkUtil.getResultFromServer(requestParameters[0]);
+
+                int responseCode = responseDto.getResponseCode();
+                if (responseCode == HttpURLConnection.HTTP_UNAUTHORIZED) {
                     retryGetResultFromServer(requestParameters[0]);
                 }
 
-                if (requestParameters[0].getRequestMethod() == POST ||
-                        requestParameters[0].getRequestMethod() == PATCH) {
-                    dbQuery(parseEvent(dataFromServer), requestParameters[0]);
-                } else if(requestParameters[0].getRequestMethod() == GET){
-                    updateDbQuery(parseEventsData(dataFromServer));
-                } else {
-                    dbQuery(mEvent, requestParameters[0]);
+                if (responseCode == HttpURLConnection.HTTP_OK ||
+                        responseCode == HttpURLConnection.HTTP_NO_CONTENT) {
+                    if (requestParameters[0].getRequestMethod() == POST ||
+                            requestParameters[0].getRequestMethod() == PATCH) {
+                        dbQuery(parseEvent(responseDto.getResponseData()), requestParameters[0]);
+                    } else if (requestParameters[0].getRequestMethod() == GET) {
+                        updateDbQuery(parseEventsData(responseDto.getResponseData()));
+                    } else {
+                        dbQuery(mEvent, requestParameters[0]);
+                    }
                 }
 
             } else {
                 if (requestParameters[0].getRequestMethod() != GET) {
                     dbQuery(mEvent, requestParameters[0]);
                 } else {
-                    return mEventsDbStore.getEvents(mSpecification);
+                    return mEventsDbStore.getEvents(mEventsSpecification);
                 }
             }
 
-            return mEventsDbStore.getEvents(mSpecification);
+            return mEventsDbStore.getEvents(mEventsSpecification);
         }
 
         private void retryGetResultFromServer(final RequestParameters requestParameters) {
@@ -236,18 +249,22 @@ public class EventsRepository {
                 @Override
                 public void onAccessTokenUpdated() {
                     EventsAsyncTask eventsAsyncTask = new EventsAsyncTask(null, null,
-                            mRepositoryLoadHelper, mFirebaseWebService, mEventsDbStore, mSpecification, mListener);
-                    eventsAsyncTask.setDataInfoLoadingListener(new UserDataLoadingListener<Event>() {
-                        @Override
-                        public void onSuccess(List<Event> list) {
-                            mListener.onSuccess(list);
-                        }
+                            mRepositoryLoadHelper, mFirebaseWebService, mEventsDbStore,
+                            mEventsSpecification, mListener);
 
+                    if (requestParameters.getRequestMethod() != DELETE) {
+                        eventsAsyncTask.setDataInfoLoadingListener(new UserDataLoadingListener<Event>() {
+                            @Override
+                            public void onSuccess(List<Event> list) {
+                                mListener.onSuccess(list);
+                            }
+/*
                         @Override
                         public void onFail() {
                             mListener.onFail();
-                        }
-                    });
+                        }*/
+                        });
+                    }
 
                     eventsAsyncTask.executeOnExecutor(SERIAL_EXECUTOR, requestParameters);
                 }
@@ -275,7 +292,7 @@ public class EventsRepository {
 
         private void updateDbQuery(List<Event> events) {
             mEventsDbStore.addOrUpdateEvents(events);
-            mEventsDbStore.getEvents(mSpecification);
+            mEventsDbStore.getEvents(mEventsSpecification);
         }
 
     }

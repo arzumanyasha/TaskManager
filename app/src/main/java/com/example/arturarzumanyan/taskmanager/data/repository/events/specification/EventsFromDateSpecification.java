@@ -5,7 +5,7 @@ import com.example.arturarzumanyan.taskmanager.networking.util.DateUtils;
 
 import java.util.Date;
 
-public class EventsFromDateSpecification implements Specification {
+public class EventsFromDateSpecification implements EventsSpecification {
     private String mDate;
 
     @Override
