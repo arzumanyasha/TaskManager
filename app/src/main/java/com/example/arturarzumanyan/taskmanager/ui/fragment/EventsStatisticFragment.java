@@ -17,7 +17,6 @@ import com.example.arturarzumanyan.taskmanager.R;
 import com.example.arturarzumanyan.taskmanager.data.repository.events.EventsRepository;
 import com.example.arturarzumanyan.taskmanager.data.repository.events.specification.EventsFromDateSpecification;
 import com.example.arturarzumanyan.taskmanager.data.repository.events.specification.MonthlyEventsSpecification;
-import com.example.arturarzumanyan.taskmanager.data.repository.events.specification.Specification;
 import com.example.arturarzumanyan.taskmanager.data.repository.events.specification.WeeklyEventsSpecification;
 import com.example.arturarzumanyan.taskmanager.domain.Event;
 import com.example.arturarzumanyan.taskmanager.networking.util.DateUtils;
@@ -109,7 +108,6 @@ public class EventsStatisticFragment extends Fragment {
 
                         }
                     });
-                    //makePieChart(mEventsRepository.getDailyEvents(), MINUTES_IN_DAY);
                 } else if (position == 1) {
                     WeeklyEventsSpecification weeklyEventsSpecification = new WeeklyEventsSpecification();
                     mEventsRepository.getEvents(weeklyEventsSpecification, new EventsRepository.OnEventsLoadedListener() {
@@ -123,7 +121,6 @@ public class EventsStatisticFragment extends Fragment {
 
                         }
                     });
-                    //makePieChart(mEventsRepository.getWeeklyEvents(), MINUTES_IN_WEEK);
                 } else {
                     MonthlyEventsSpecification monthlyEventsSpecification = new MonthlyEventsSpecification();
                     mEventsRepository.getEvents(monthlyEventsSpecification, new EventsRepository.OnEventsLoadedListener() {
@@ -137,7 +134,6 @@ public class EventsStatisticFragment extends Fragment {
 
                         }
                     });
-                    //makePieChart(mEventsRepository.getMonthlyEvents(), DateUtils.getDaysInCurrentMonth() * MINUTES_IN_DAY);
                 }
             }
 

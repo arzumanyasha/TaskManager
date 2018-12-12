@@ -15,12 +15,15 @@ import com.example.arturarzumanyan.taskmanager.data.repository.events.EventsRepo
 import com.example.arturarzumanyan.taskmanager.data.repository.events.specification.WeeklyEventsSpecification;
 import com.example.arturarzumanyan.taskmanager.domain.Event;
 import com.example.arturarzumanyan.taskmanager.networking.util.DateUtils;
+import com.example.arturarzumanyan.taskmanager.networking.util.Log;
 import com.example.arturarzumanyan.taskmanager.ui.adapter.ColorPalette;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import static com.example.arturarzumanyan.taskmanager.networking.util.DateUtils.DAYS_IN_WEEK;
 import static com.example.arturarzumanyan.taskmanager.networking.util.DateUtils.MINUTES_IN_HOUR;
@@ -39,6 +42,8 @@ public class WeekDashboardFragment extends Fragment {
     private LinearLayout mLinearLayoutFri;
     private LinearLayout mLinearLayoutSat;
     private LinearLayout mLinearLayoutSun;
+
+    private Map<Date, List<Event>> mWeeklyEvents = new HashMap<>();
 
     private OnFragmentInteractionListener mListener;
 
@@ -84,7 +89,7 @@ public class WeekDashboardFragment extends Fragment {
         int date = DateUtils.getEventWeek(DateUtils.getCurrentTime()) - 1;
         Date mondayDate = DateUtils.getMondayDate(date - 1);
 
-        ArrayList<LinearLayout> linearLayouts = new ArrayList<>();
+        final List<LinearLayout> linearLayouts = new ArrayList<>();
         linearLayouts.add(mLinearLayoutMon);
         linearLayouts.add(mLinearLayoutTue);
         linearLayouts.add(mLinearLayoutWed);
@@ -94,15 +99,27 @@ public class WeekDashboardFragment extends Fragment {
         linearLayouts.add(mLinearLayoutSun);
 
         Date nextDate = mondayDate;
-        ArrayList<Date> weekDateList = new ArrayList<>();
-        HashMap<Date, ArrayList<Event>> weeklyEvents = new HashMap<>();
+        final List<Date> weekDateList = new ArrayList<>();
 
         WeeklyEventsSpecification weeklyEventsSpecification = new WeeklyEventsSpecification();
         EventsRepository eventsRepository = new EventsRepository(getActivity());
         eventsRepository.getEvents(weeklyEventsSpecification, new EventsRepository.OnEventsLoadedListener() {
             @Override
             public void onSuccess(List<Event> eventsList) {
+                Log.v("Weekly events loaded");
+                ArrayList<Event> dailyEventsList;
+                for (Event event : eventsList) {
+                    Date eventDate = DateUtils.getEventDate(DateUtils.getEventDate(event.getStartTime()));
 
+                    if (mWeeklyEvents.containsKey(eventDate)) {
+                        dailyEventsList = new ArrayList<>(mWeeklyEvents.get(eventDate));
+                        dailyEventsList.add(event);
+                        mWeeklyEvents.put(eventDate, dailyEventsList);
+                    } else {
+                        mWeeklyEvents.put(eventDate, Collections.singletonList(event));
+                    }
+                }
+                displayDashboard(linearLayouts, mWeeklyEvents, weekDateList);
             }
 
             @Override
@@ -110,22 +127,30 @@ public class WeekDashboardFragment extends Fragment {
 
             }
         });
+
         for (int i = 0; i < DAYS_IN_WEEK; i++) {
             weekDateList.add(nextDate);
-            //weeklyEvents.put(nextDate, eventsRepository.getEventsFromDate(nextDate));
             nextDate = DateUtils.getNextDate(nextDate);
         }
+    }
 
+    private void displayDashboard(List<LinearLayout> linearLayouts,
+                                  Map<Date, List<Event>> weeklyEvents,
+                                  List<Date> weekDateList) {
+        List<Event> currentEventList;
         int lastMinute = 0;
         for (int i = 0; i < DAYS_IN_WEEK; i++) {
-            for (Event event : weeklyEvents.get(weekDateList.get(i))) {
-                Date startTime = event.getStartTime();
-                int minutes = startTime.getHours() * MINUTES_IN_HOUR + startTime.getMinutes();
-                makeEmptiness(lastMinute, minutes, linearLayouts.get(i));
-                makeEventPart(event, linearLayouts.get(i));
-                lastMinute = event.getEndTime().getHours() * MINUTES_IN_HOUR + event.getEndTime().getMinutes();
+            currentEventList = weeklyEvents.get(weekDateList.get(i));
+            if (currentEventList != null) {
+                for (Event event : currentEventList) {
+                    Date startTime = event.getStartTime();
+                    int minutes = startTime.getHours() * MINUTES_IN_HOUR + startTime.getMinutes();
+                    makeEmptiness(lastMinute, minutes, linearLayouts.get(i));
+                    makeEventPart(event, linearLayouts.get(i));
+                    lastMinute = event.getEndTime().getHours() * MINUTES_IN_HOUR + event.getEndTime().getMinutes();
+                }
+                lastMinute = 0;
             }
-            lastMinute = 0;
         }
     }
 
