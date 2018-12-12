@@ -12,7 +12,7 @@ import com.example.arturarzumanyan.taskmanager.networking.util.TaskListsParser;
 import java.util.List;
 
 public class TaskListsCloudStore {
-    private static final String BASE_TASK_LISTS_URL = "https://www.googleapis.com/tasks/v1/users/@me/lists/";
+    public static final String BASE_TASK_LISTS_URL = "https://www.googleapis.com/tasks/v1/users/@me/lists/";
 
     private TaskListsDbStore mTaskListsDbStore;
     private BaseDataLoadingAsyncTask mUserTaskListsAsyncTask;
@@ -111,9 +111,9 @@ public class TaskListsCloudStore {
                                             FirebaseWebService.RequestMethods requestMethod) {
         TaskListsParser taskListsParser = new TaskListsParser();
         if (requestMethod == FirebaseWebService.RequestMethods.POST) {
-            mTaskListsDbStore.addTaskList(taskListsParser.parseTaskList(response));
+            //mTaskListsDbStore.addTaskList(taskListsParser.parseTaskList(response));
         } else if (requestMethod == FirebaseWebService.RequestMethods.PATCH) {
-            mTaskListsDbStore.updateTaskList(taskListsParser.parseTaskList(response));
+            //mTaskListsDbStore.updateTaskList(taskListsParser.parseTaskList(response));
         }
     }
 

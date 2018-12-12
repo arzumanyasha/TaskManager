@@ -5,6 +5,8 @@ import android.os.AsyncTask;
 
 import com.example.arturarzumanyan.taskmanager.auth.FirebaseWebService;
 import com.example.arturarzumanyan.taskmanager.data.repository.events.EventsRepository;
+import com.example.arturarzumanyan.taskmanager.data.repository.tasklists.TaskListsRepository;
+import com.example.arturarzumanyan.taskmanager.data.repository.tasks.TasksRepository;
 import com.example.arturarzumanyan.taskmanager.domain.Event;
 import com.example.arturarzumanyan.taskmanager.domain.Task;
 import com.example.arturarzumanyan.taskmanager.domain.TaskList;
@@ -47,6 +49,28 @@ public class RepositoryLoadHelper {
     }
 
     public void requestUserData(EventsRepository.EventsAsyncTask asyncTask, String url) {
+        FirebaseWebService.RequestMethods requestMethod = FirebaseWebService.RequestMethods.GET;
+        RequestParameters requestParameters = new RequestParameters(mContext,
+                url,
+                requestMethod,
+                new HashMap<String, Object>()
+        );
+        requestParameters.setRequestHeaderParameters(new HashMap<String, String>());
+        asyncTask.executeOnExecutor(AsyncTask.SERIAL_EXECUTOR, requestParameters);
+    }
+
+    public void requestUserData(TaskListsRepository.TaskListsAsyncTask asyncTask, String url) {
+        FirebaseWebService.RequestMethods requestMethod = FirebaseWebService.RequestMethods.GET;
+        RequestParameters requestParameters = new RequestParameters(mContext,
+                url,
+                requestMethod,
+                new HashMap<String, Object>()
+        );
+        requestParameters.setRequestHeaderParameters(new HashMap<String, String>());
+        asyncTask.executeOnExecutor(AsyncTask.SERIAL_EXECUTOR, requestParameters);
+    }
+
+    public void requestUserData(TasksRepository.TasksAsyncTask asyncTask, String url) {
         FirebaseWebService.RequestMethods requestMethod = FirebaseWebService.RequestMethods.GET;
         RequestParameters requestParameters = new RequestParameters(mContext,
                 url,

@@ -15,7 +15,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class TasksCloudStore {
-    private static final String BASE_TASKS_URL = "https://www.googleapis.com/tasks/v1/lists/";
+    public static final String BASE_TASKS_URL = "https://www.googleapis.com/tasks/v1/lists/";
 
     private TaskListsDbStore mTaskListsDbStore;
     private TasksDbStore mTasksDbStore;
@@ -33,7 +33,7 @@ public class TasksCloudStore {
 
     public void getTasksFromTaskList(TaskList taskList, final OnTaskCompletedListener listener) {
         String url = BASE_TASKS_URL + taskList.getTaskListId() + "/tasks?showHidden=true";
-        final int taskListId = taskList.getId();/*
+        /*final int taskListId = taskList.getId();
         mUserTasksAsyncTaskList.add(new BaseDataLoadingAsyncTask());
         int position = mUserTasksAsyncTaskList.size() - 1;
         mRepositoryLoadHelper.requestUserData(mUserTasksAsyncTaskList.get(position), url);
@@ -53,20 +53,22 @@ public class TasksCloudStore {
     }
 
     public void addTask(Task task, final OnTaskCompletedListener listener) {
+        /*
         final String url = BASE_TASKS_URL +
                 mTaskListsDbStore.getTaskList(task.getListId()).getTaskListId() +
                 "/tasks";
 
-        sendRequest(task, url, FirebaseWebService.RequestMethods.POST, listener);
+        sendRequest(task, url, FirebaseWebService.RequestMethods.POST, listener);*/
     }
 
     public void updateTask(Task task, final OnTaskCompletedListener listener) {
+        /*
         final String url = BASE_TASKS_URL +
                 mTaskListsDbStore.getTaskList(task.getListId()).getTaskListId() +
                 "/tasks/" +
                 task.getId();
 
-        sendRequest(task, url, FirebaseWebService.RequestMethods.PATCH, listener);
+        sendRequest(task, url, FirebaseWebService.RequestMethods.PATCH, listener);*/
     }
 
     private void sendRequest(final Task task,
@@ -122,18 +124,19 @@ public class TasksCloudStore {
                                         FirebaseWebService.RequestMethods requestMethod) {
         TasksParser tasksParser = new TasksParser();
         if (requestMethod == FirebaseWebService.RequestMethods.POST) {
-            mTasksDbStore.addTask(tasksParser.parseTask(response, task.getListId()));
+            //mTasksDbStore.addTask(tasksParser.parseTask(response, task.getListId()));
         } else if (requestMethod == FirebaseWebService.RequestMethods.PATCH) {
-            mTasksDbStore.updateTask(tasksParser.parseTask(response, task.getListId()));
+            //mTasksDbStore.updateTask(tasksParser.parseTask(response, task.getListId()));
         }
     }
 
     public void deleteTask(final Task task) {
-        final String url = BASE_TASKS_URL +
+
+/*        final String url = BASE_TASKS_URL +
                 mTaskListsDbStore.getTaskList(task.getListId()).getTaskListId() +
                 "/tasks/" +
                 task.getId();
-/*
+
         BaseDataLoadingAsyncTask baseDataLoadingAsyncTask = new BaseDataLoadingAsyncTask();
 
         baseDataLoadingAsyncTask.executeOnExecutor(AsyncTask.SERIAL_EXECUTOR,
