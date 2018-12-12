@@ -50,6 +50,16 @@ public class DateUtils {
         return simpleDateFormat.format(eventDate);
     }
 
+    public static Date getEventDate(String date) {
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat(YEAR_MONTH_DAY_DATE_PATTERN);
+        try {
+            return simpleDateFormat.parse(date);
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
     public static Date getTaskDateFromString(String date) {
         DateFormat dateFormat = new SimpleDateFormat(TASK_DATE_PATTERN);
         if (isValidFormat(TASK_DATE_PATTERN, date)) {

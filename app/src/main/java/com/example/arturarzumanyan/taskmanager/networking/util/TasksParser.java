@@ -8,6 +8,7 @@ import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 import static com.example.arturarzumanyan.taskmanager.networking.util.TaskListsParser.ID_KEY;
 import static com.example.arturarzumanyan.taskmanager.networking.util.TaskListsParser.ITEMS_KEY;
@@ -19,9 +20,9 @@ public class TasksParser {
     public static final String COMPLETED_KEY = "completed";
     public static final String DUE_KEY = "due";
 
-    public ArrayList<Task> parseTasks(String buffer, int taskListId) {
+    public List<Task> parseTasks(String buffer, int taskListId) {
 
-        ArrayList<Task> tasksList = new ArrayList<>();
+        List<Task> tasksList = new ArrayList<>();
         try {
             JSONObject jsonobject = new JSONObject(buffer);
             JSONArray jsonArray = jsonobject.getJSONArray(ITEMS_KEY);

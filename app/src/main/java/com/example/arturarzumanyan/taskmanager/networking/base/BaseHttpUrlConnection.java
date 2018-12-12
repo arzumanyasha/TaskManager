@@ -4,6 +4,7 @@ import android.net.Uri;
 
 import com.example.arturarzumanyan.taskmanager.auth.AccessTokenAsyncTask;
 import com.example.arturarzumanyan.taskmanager.auth.FirebaseWebService;
+import com.example.arturarzumanyan.taskmanager.domain.ResponseDto;
 import com.example.arturarzumanyan.taskmanager.networking.util.Converter;
 
 import org.json.JSONArray;
@@ -26,12 +27,13 @@ import java.util.Map;
 
 public class BaseHttpUrlConnection {
     public static final String JSON_CONTENT_TYPE_VALUE = "application/json";
+    public static final String NO_CONTENT_KEY = "no content";
     private Boolean isJson;
 
-    public String getResult(String url,
-                            FirebaseWebService.RequestMethods requestMethod,
-                            HashMap<String, Object> requestBodyParameters,
-                            HashMap<String, String> requestHeaderParameters) {
+    public ResponseDto getResult(String url,
+                                 FirebaseWebService.RequestMethods requestMethod,
+                                 HashMap<String, Object> requestBodyParameters,
+                                 HashMap<String, String> requestHeaderParameters) {
         HttpURLConnection connection = null;
         BufferedReader reader = null;
         Uri.Builder uriBuilder;
@@ -59,16 +61,26 @@ public class BaseHttpUrlConnection {
 
             int responseCode = connection.getResponseCode();
 
+            ResponseDto responseDto = null;
             if (responseCode == HttpURLConnection.HTTP_OK) {
                 reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
                 String buffer;
                 buffer = getInputStream(reader);
-                return buffer;
+                //return buffer;
+                responseDto = new ResponseDto(HttpURLConnection.HTTP_OK, buffer);
+                //return responseDto;
             } else if (responseCode == HttpURLConnection.HTTP_UNAUTHORIZED) {
-                return "";
+                responseDto = new ResponseDto(HttpURLConnection.HTTP_UNAUTHORIZED, "");
+                //return responseDto;
+            } else if (responseCode == HttpURLConnection.HTTP_BAD_REQUEST) {
+                responseDto = new ResponseDto(HttpURLConnection.HTTP_BAD_REQUEST, "");
+                //return responseDto;
             } else if (responseCode == HttpURLConnection.HTTP_NO_CONTENT) {
-                return "ok";
+                responseDto = new ResponseDto(HttpURLConnection.HTTP_NO_CONTENT, NO_CONTENT_KEY);
+                //return responseDto;
             }
+
+            return responseDto;
         } catch (IOException e) {
             e.printStackTrace();
         } finally {
@@ -84,7 +96,7 @@ public class BaseHttpUrlConnection {
 
             }
         }
-        return "";
+        return null;
     }
 
     private HttpURLConnection getConnectionSettings(HttpURLConnection connection,

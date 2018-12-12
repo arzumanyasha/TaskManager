@@ -29,10 +29,12 @@ import com.example.arturarzumanyan.taskmanager.data.repository.events.EventsRepo
 import com.example.arturarzumanyan.taskmanager.data.repository.events.specification.EventsFromDateSpecification;
 import com.example.arturarzumanyan.taskmanager.data.repository.tasklists.TaskListsCloudStore;
 import com.example.arturarzumanyan.taskmanager.data.repository.tasklists.TaskListsRepository;
+import com.example.arturarzumanyan.taskmanager.data.repository.tasklists.specification.AllTaskListsSpecification;
 import com.example.arturarzumanyan.taskmanager.domain.Event;
 import com.example.arturarzumanyan.taskmanager.domain.Task;
 import com.example.arturarzumanyan.taskmanager.domain.TaskList;
 import com.example.arturarzumanyan.taskmanager.networking.util.DateUtils;
+import com.example.arturarzumanyan.taskmanager.networking.util.Log;
 import com.example.arturarzumanyan.taskmanager.ui.dialog.EventsDialog;
 import com.example.arturarzumanyan.taskmanager.ui.dialog.TaskListsDialog;
 import com.example.arturarzumanyan.taskmanager.ui.dialog.TasksDialog;
@@ -43,7 +45,9 @@ import com.squareup.picasso.Picasso;
 import java.util.List;
 
 import static com.example.arturarzumanyan.taskmanager.ui.fragment.TasksFragment.TASK_LIST_ID_KEY;
+import static com.example.arturarzumanyan.taskmanager.ui.fragment.TasksFragment.TASK_LIST_STRING_ID_KEY;
 import static com.example.arturarzumanyan.taskmanager.ui.fragment.TasksFragment.TASK_LIST_TITLE_KEY;
+import static com.example.arturarzumanyan.taskmanager.networking.util.Log.*;
 
 public class IntentionActivity extends AppCompatActivity {
     public static final String EVENTS_KEY = "Events";
@@ -51,6 +55,7 @@ public class IntentionActivity extends AppCompatActivity {
     public static final String TASK_LISTS_KEY = "TaskLists";
     private final String CHANNEL_ID = "notification_channel";
     private final int NOTIFICATION_ID = 001;
+    private final int FIRST_TASKLIST_ID = 1;
     private NavigationView mNavigationView;
     private DrawerLayout mDrawer;
     private Intent mUserData;
@@ -81,30 +86,21 @@ public class IntentionActivity extends AppCompatActivity {
 
         mNavigationView = findViewById(R.id.nav_view);
 
-        EventsRepository eventsRepository = new EventsRepository(this);/*
-        eventsRepository.loadEvents(new EventsRepository.OnEventsLoadedListener() {
-            @Override
-            public void onSuccess(ArrayList<Event> eventsList) {
-
-            }
-
-            @Override
-            public void onFail() {
-                Toast.makeText(IntentionActivity.this, R.string.network_error, Toast.LENGTH_LONG).show();
-            }
-        });*/
+        AllTaskListsSpecification allTaskListsSpecification = new AllTaskListsSpecification();
 
         mTaskListsRepository = new TaskListsRepository(this);
-        mTaskListsRepository.loadTaskLists(new TaskListsRepository.OnTaskListsLoadedListener() {
+        mTaskListsRepository.loadTaskLists(allTaskListsSpecification, new TaskListsRepository.OnTaskListsLoadedListener() {
             @Override
             public void onSuccess(List<TaskList> taskLists) {
+                Log.v("Loaded tasklists");
                 mTaskLists = taskLists;
                 displayMenu();
                 notifyDataLoaded();
 
                 Bundle bundle = new Bundle();
-                bundle.putInt(TASK_LIST_ID_KEY, 1);
+                bundle.putInt(TASK_LIST_ID_KEY, FIRST_TASKLIST_ID);
                 bundle.putString(TASK_LIST_TITLE_KEY, mTaskLists.get(0).getTitle());
+                bundle.putString(TASK_LIST_STRING_ID_KEY, mTaskLists.get(0).getTaskListId());
                 TasksFragment tasksFragment = new TasksFragment();
                 tasksFragment.setArguments(bundle);
                 openFragment(tasksFragment);
@@ -135,6 +131,7 @@ public class IntentionActivity extends AppCompatActivity {
     }
 
     private void displayMenu() {
+        Log.v("Displaying menu");
         ImageView userPhotoImageView = mNavigationView
                 .getHeaderView(0)
                 .findViewById(R.id.image_user_photo);
@@ -159,6 +156,7 @@ public class IntentionActivity extends AppCompatActivity {
                 .setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
                     @Override
                     public boolean onMenuItemClick(MenuItem item) {
+                        Log.v(item.getTitle().toString() + " clicked");
                         EventsFragment eventsFragment = new EventsFragment();
                         openFragment(eventsFragment);
                         mDrawer.closeDrawer(Gravity.START);
@@ -172,7 +170,7 @@ public class IntentionActivity extends AppCompatActivity {
             mTaskListsMenu.add(mTaskLists.get(i).getTitle()).setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
                 @Override
                 public boolean onMenuItemClick(MenuItem item) {
-                    openTaskFragment(mTaskLists.get(position).getId(), mTaskLists.get(position).getTitle());
+                    openTaskFragment(mTaskLists.get(position));
                     mDrawer.closeDrawer(Gravity.START);
                     return false;
                 }
@@ -246,7 +244,7 @@ public class IntentionActivity extends AppCompatActivity {
                 mTaskListsMenu.add(taskList.getTitle()).setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
                     @Override
                     public boolean onMenuItemClick(MenuItem item) {
-                        openTaskFragment(taskList.getId(), taskList.getTitle());
+                        openTaskFragment(taskList);
                         return false;
                     }
                 });
@@ -255,10 +253,11 @@ public class IntentionActivity extends AppCompatActivity {
         taskListsDialog.show(getSupportFragmentManager(), TASK_LISTS_KEY);
     }
 
-    private void openTaskFragment(int taskListId, String taskListTitle) {
+    private void openTaskFragment(TaskList taskList) {
         Bundle bundle = new Bundle();
-        bundle.putInt(TASK_LIST_ID_KEY, taskListId);
-        bundle.putString(TASK_LIST_TITLE_KEY, taskListTitle);
+        bundle.putInt(TASK_LIST_ID_KEY, taskList.getId());
+        bundle.putString(TASK_LIST_TITLE_KEY, taskList.getTitle());
+        bundle.putString(TASK_LIST_STRING_ID_KEY, taskList.getTaskListId());
         TasksFragment tasksFragment = new TasksFragment();
         tasksFragment.setArguments(bundle);
         openFragment(tasksFragment);
@@ -325,7 +324,7 @@ public class IntentionActivity extends AppCompatActivity {
         } else if (id == R.id.delete_task_list) {
             if (!getTitle().equals(EVENTS_KEY)) {
                 TaskListsRepository taskListsRepository = new TaskListsRepository(IntentionActivity.this);
-                taskListsRepository.deleteTaskList(taskList, new TaskListsCloudStore.OnTaskCompletedListener() {
+                /*taskListsRepository.deleteTaskList(taskList, new TaskListsCloudStore.OnTaskCompletedListener() {
                     @Override
                     public void onSuccess(TaskList taskList) {
                         int menuSize = mTaskListsMenu.size();
@@ -342,6 +341,17 @@ public class IntentionActivity extends AppCompatActivity {
                         openTaskFragment(previousTaskList.getId(), previousTaskList.getTitle());
                     }
 
+                    @Override
+                    public void onSuccess(List<TaskList> taskListArrayList) {
+
+                    }
+
+                    @Override
+                    public void onFail() {
+
+                    }
+                });*/
+                taskListsRepository.deleteTaskList(taskList, new TaskListsRepository.OnTaskListsLoadedListener() {
                     @Override
                     public void onSuccess(List<TaskList> taskListArrayList) {
 

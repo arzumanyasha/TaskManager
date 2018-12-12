@@ -72,15 +72,13 @@ public class EventsParser {
             isNotify = 0;
         }
 
-        Event event = new Event(jsonObject.getString(ID_KEY),
+        return new Event(jsonObject.getString(ID_KEY),
                 jsonObject.getString(SUMMARY_KEY),
                 description,
                 colorId,
                 startDate,
                 endDate,
                 isNotify);
-
-        return event;
     }
 
     public Event parseEvent(String buffer){
