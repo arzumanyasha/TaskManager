@@ -175,7 +175,6 @@ public class EventsDialog extends AppCompatDialogFragment {
 
                                 }
                             });
-                            //ДОБАВИТЬ AddEvent
                             /*mEventsRepository.addEvent(event, new EventsCloudStore.OnTaskCompletedListener() {
                                 @Override
                                 public void onSuccess(List<Event> eventsList) {

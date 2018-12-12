@@ -54,6 +54,7 @@ public class TaskListsDialog extends AppCompatDialogFragment {
                         if (!taskListName.isEmpty() && bundle != null) {
                             TaskList taskList = bundle.getParcelable(TASK_LISTS_KEY);
                             taskList.setTitle(taskListName);
+                            /*
                             taskListsRepository.updateTaskList(taskList, new TaskListsCloudStore.OnTaskCompletedListener() {
                                 @Override
                                 public void onSuccess(TaskList taskList) {
@@ -69,16 +70,38 @@ public class TaskListsDialog extends AppCompatDialogFragment {
                                 public void onFail() {
 
                                 }
+                            });*/
+                            taskListsRepository.updateTaskList(taskList, new TaskListsRepository.OnTaskListsLoadedListener() {
+                                @Override
+                                public void onSuccess(List<TaskList> taskListArrayList) {
+
+                                }
+
+                                @Override
+                                public void onFail() {
+
+                                }
                             });
                         } else if (!taskListName.isEmpty() && bundle == null) {
                             TaskList taskList = new TaskList(UUID.randomUUID().toString(),
                                     taskListName);
-                            taskListsRepository.addTaskList(taskList, new TaskListsCloudStore.OnTaskCompletedListener() {
+                            /*taskListsRepository.addTaskList(taskList, new TaskListsCloudStore.OnTaskCompletedListener() {
                                 @Override
                                 public void onSuccess(TaskList taskList) {
                                     taskListReadyListener.onTaskListReady(taskList);
                                 }
 
+                                @Override
+                                public void onSuccess(List<TaskList> taskListArrayList) {
+
+                                }
+
+                                @Override
+                                public void onFail() {
+
+                                }
+                            });*/
+                            taskListsRepository.addTaskList(taskList, new TaskListsRepository.OnTaskListsLoadedListener() {
                                 @Override
                                 public void onSuccess(List<TaskList> taskListArrayList) {
 
