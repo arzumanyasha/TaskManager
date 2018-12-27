@@ -40,47 +40,6 @@ public class EventsRepository {
         mFirebaseWebService = new FirebaseWebService(mContext);
     }
 
-    /*
-        public void loadEvents(final OnEventsLoadedListener listener) {
-            List<Event> events = mEventsDbStore.getEvents();
-
-            if ((mRepositoryLoadHelper.isOnline()) && (events.size() == 0)) {
-                mEventsCloudStore.getEvents(new EventsCloudStore.OnTaskCompletedListener() {
-                    @Override
-                    public void onSuccess(ArrayList<Event> eventsList) {
-                        listener.onSuccess(eventsList);
-                        mEventsDbStore.addEvents(eventsList);
-                    }
-
-                    @Override
-                    public void onFail() {
-
-                    }
-                });
-            } else if ((mRepositoryLoadHelper.isOnline() && (events.size() != 0)) ||
-                    (!mRepositoryLoadHelper.isOnline() && (events.size() != 0))) {
-                listener.onSuccess(events);
-            } else {
-                listener.onFail();
-            }
-        }*/
-/*
-    public ArrayList<Event> getDailyEvents() {
-        return mEventsDbStore.getDailyEvents();
-    }
-
-    public ArrayList<Event> getWeeklyEvents() {
-        return mEventsDbStore.getWeeklyEvents();
-    }
-
-    public ArrayList<Event> getMonthlyEvents() {
-        return mEventsDbStore.getMonthlyEvents();
-    }
-
-    public ArrayList<Event> getEventsFromDate(Date date) {
-        return mEventsDbStore.getEventsFromDate(date);
-    }
-*/
     public void getEvents(EventsSpecification eventsSpecification, final OnEventsLoadedListener listener) {
         String eventsUrl = "";
         if (eventsSpecification.getStartDate().isEmpty() && eventsSpecification.getEndDate().isEmpty()) {

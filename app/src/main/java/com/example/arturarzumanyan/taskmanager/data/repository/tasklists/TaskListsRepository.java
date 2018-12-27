@@ -22,6 +22,7 @@ import com.example.arturarzumanyan.taskmanager.networking.util.TasksParser;
 
 import java.lang.ref.WeakReference;
 import java.net.HttpURLConnection;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -79,7 +80,7 @@ public class TaskListsRepository {
         taskListsAsyncTask.setDataInfoLoadingListener(new BaseDataLoadingAsyncTask.UserDataLoadingListener<TaskList>() {
             @Override
             public void onSuccess(List<TaskList> list) {
-                listener.onSuccess(list);
+                listener.onSuccess(list.get(list.size() - 1));
             }
         });
         taskListsAsyncTask.executeOnExecutor(AsyncTask.SERIAL_EXECUTOR, requestParameters);
@@ -91,15 +92,17 @@ public class TaskListsRepository {
         RequestParameters requestParameters = mRepositoryLoadHelper.getTaskListCreateOrUpdateParameters(taskList,
                 url, PATCH);
 
-        AllTaskListsSpecification allTaskListsSpecification = new AllTaskListsSpecification();
+        TaskListFromIdSpecification taskListFromIdSpecification = new TaskListFromIdSpecification();
+        taskListFromIdSpecification.setTaskListId(taskList.getId());
+
         TaskListsAsyncTask taskListsAsyncTask = new TaskListsAsyncTask(taskList, mContext,
                 mRepositoryLoadHelper, mFirebaseWebService, mTaskListsDbStore,
-                mTasksDbStore, allTaskListsSpecification, null);
+                mTasksDbStore, taskListFromIdSpecification, null);
 
         taskListsAsyncTask.setDataInfoLoadingListener(new BaseDataLoadingAsyncTask.UserDataLoadingListener<TaskList>() {
             @Override
             public void onSuccess(List<TaskList> list) {
-                listener.onSuccess(list);
+                listener.onSuccess(list.get(0));
             }
         });
         taskListsAsyncTask.executeOnExecutor(AsyncTask.SERIAL_EXECUTOR, requestParameters);
@@ -110,15 +113,17 @@ public class TaskListsRepository {
 
         RequestParameters requestParameters = mRepositoryLoadHelper.getDeleteParameters(url);
 
-        AllTaskListsSpecification allTaskListsSpecification = new AllTaskListsSpecification();
+        TaskListFromIdSpecification taskListFromIdSpecification = new TaskListFromIdSpecification();
+        taskListFromIdSpecification.setTaskListId(taskList.getId());
+
         TaskListsAsyncTask taskListsAsyncTask = new TaskListsAsyncTask(taskList, mContext,
                 mRepositoryLoadHelper, mFirebaseWebService, mTaskListsDbStore,
-                mTasksDbStore, allTaskListsSpecification, null);
+                mTasksDbStore, taskListFromIdSpecification, null);
 
         taskListsAsyncTask.setDataInfoLoadingListener(new BaseDataLoadingAsyncTask.UserDataLoadingListener<TaskList>() {
             @Override
             public void onSuccess(List<TaskList> list) {
-                listener.onSuccess(list);
+                listener.onSuccess(list.get(0));
             }
         });
         taskListsAsyncTask.executeOnExecutor(AsyncTask.SERIAL_EXECUTOR, requestParameters);
@@ -126,6 +131,10 @@ public class TaskListsRepository {
 
     public interface OnTaskListsLoadedListener {
         void onSuccess(List<TaskList> taskListArrayList);
+
+        void onUpdate(List<TaskList> taskLists);
+
+        void onSuccess(TaskList taskList);
 
         void onFail();
     }
@@ -172,9 +181,10 @@ public class TaskListsRepository {
                 if (responseCode == HttpURLConnection.HTTP_OK ||
                         responseCode == HttpURLConnection.HTTP_NO_CONTENT) {
                     Log.v("TaskLists loaded successfully");
-                    if (requestParameters[0].getRequestMethod() == POST ||
-                            requestParameters[0].getRequestMethod() == PATCH) {
+                    if (requestParameters[0].getRequestMethod() == POST) {
                         dbQuery(parseTaskList(responseDto.getResponseData()), requestParameters[0]);
+                    } else if (requestParameters[0].getRequestMethod() == PATCH) {
+                        dbQuery(mTaskList, requestParameters[0]);
                     } else if (requestParameters[0].getRequestMethod() == GET) {
                         List<TaskList> taskLists = parseTaskListsData(responseDto.getResponseData());
                         updateDbQuery(taskLists);
@@ -185,6 +195,7 @@ public class TaskListsRepository {
 
                     } else {
                         dbQuery(mTaskList, requestParameters[0]);
+                        return Collections.singletonList(mTaskList);
                     }
                 }
 
@@ -211,7 +222,8 @@ public class TaskListsRepository {
                         @Override
                         public void onSuccess(List<TaskList> list) {
                             Log.v("TaskLists loading retried successfully");
-                            mListener.onSuccess(list);
+                            //mListener.onSuccess(list);
+                            mListener.onUpdate(list);
                         }
 /*
                         @Override

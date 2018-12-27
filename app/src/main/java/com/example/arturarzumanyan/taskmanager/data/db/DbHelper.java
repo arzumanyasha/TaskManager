@@ -13,6 +13,7 @@ import com.example.arturarzumanyan.taskmanager.domain.Event;
 import com.example.arturarzumanyan.taskmanager.domain.Task;
 import com.example.arturarzumanyan.taskmanager.domain.TaskList;
 import com.example.arturarzumanyan.taskmanager.networking.util.DateUtils;
+import com.example.arturarzumanyan.taskmanager.ui.activity.IntentionActivity;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -83,7 +84,7 @@ public class DbHelper {
             ContentValues cv = createTaskListContentValues(taskList);
             if (isTaskListExistsInDb(taskList.getTaskListId())) {
                 mDbSqlite.update(TasksContract.TaskListTable.TABLE_NAME, cv,
-                        "id = ?", new String[]{taskList.getTitle()});
+                        "_id = ?", new String[]{Integer.toString(taskList.getId())});
             } else {
                 mDbSqlite.insert(TasksContract.TaskListTable.TABLE_NAME,
                         null, cv);

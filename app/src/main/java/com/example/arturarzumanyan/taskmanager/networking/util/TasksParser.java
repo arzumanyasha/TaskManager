@@ -25,10 +25,12 @@ public class TasksParser {
         List<Task> tasksList = new ArrayList<>();
         try {
             JSONObject jsonobject = new JSONObject(buffer);
-            JSONArray jsonArray = jsonobject.getJSONArray(ITEMS_KEY);
-            for (int i = 0; i < jsonArray.length(); i++) {
-                JSONObject explrObject = jsonArray.getJSONObject(i);
-                tasksList.add(parseTask(explrObject, taskListId));
+            if (jsonobject.optJSONArray(ITEMS_KEY) != null) {
+                JSONArray jsonArray = jsonobject.getJSONArray(ITEMS_KEY);
+                for (int i = 0; i < jsonArray.length(); i++) {
+                    JSONObject explrObject = jsonArray.getJSONObject(i);
+                    tasksList.add(parseTask(explrObject, taskListId));
+                }
             }
         } catch (JSONException e) {
             e.printStackTrace();

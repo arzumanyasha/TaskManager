@@ -100,13 +100,13 @@ public class TasksFragment extends Fragment {
         });
         getActivity().setTitle(mParam2);
 
-/*
+
         ((IntentionActivity) getActivity()).setTaskFragmentInteractionListener(new IntentionActivity.TaskFragmentInteractionListener() {
             @Override
-            public void onTasksReady(ArrayList<Task> tasks) {
+            public void onTasksReady(List<Task> tasks) {
                 mTasksAdapter.updateList(tasks);
             }
-        });*/
+        });
 
         ((IntentionActivity) getActivity()).setTaskListFragmentInteractionListener(new IntentionActivity.TaskListFragmentInteractionListener() {
             @Override
@@ -159,8 +159,6 @@ public class TasksFragment extends Fragment {
 
         TaskList taskList = new TaskList(mParam1, mParam3, mParam2);
         bundle.putParcelable(TASK_LISTS_KEY, taskList);
-        /*bundle.putInt(TASK_LIST_ID_KEY, mParam1);
-        bundle.putString(TASK_LIST_STRING_ID_KEY, mParam3);*/
         tasksDialog.setArguments(bundle);
         tasksDialog.setTasksReadyListener(new TasksDialog.TasksReadyListener() {
             @Override

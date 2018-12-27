@@ -117,31 +117,7 @@ public class EventsDialog extends AppCompatDialogFragment {
                             event.setStartTime(startDate);
                             event.setEndTime(endDate);
                             event.setIsNotify(isNotify);
-/*
-                            mEventsRepository.updateEvent(event, new EventsCloudStore.OnTaskCompletedListener() {
-                                @Override
-                                public void onSuccess(ArrayList<Event> eventsList) {
-                                    final EventsFromDateSpecification eventsFromDateSpecification = new EventsFromDateSpecification();
-                                    eventsFromDateSpecification.setDate(DateUtils.getCurrentTime());
-                                    mEventsRepository.getEvents(eventsFromDateSpecification, new EventsRepository.OnEventsLoadedListener() {
-                                        @Override
-                                        public void onSuccess(List<Event> eventsList) {
-                                            eventsReadyListener.onEventsReady(eventsList);
-                                        }
 
-                                        @Override
-                                        public void onFail() {
-
-                                        }
-                                    });
-                                    //eventsReadyListener.onEventsReady(mEventsRepository.getDailyEvents());
-                                }
-
-                                @Override
-                                public void onFail() {
-
-                                }
-                            });*/
                             mEventsRepository.updateEvent(event, new EventsRepository.OnEventsLoadedListener() {
                                 @Override
                                 public void onSuccess(List<Event> eventsList) {
@@ -175,17 +151,7 @@ public class EventsDialog extends AppCompatDialogFragment {
 
                                 }
                             });
-                            /*mEventsRepository.addEvent(event, new EventsCloudStore.OnTaskCompletedListener() {
-                                @Override
-                                public void onSuccess(List<Event> eventsList) {
-                                    //eventsReadyListener.onEventsReady(mEventsRepository.getDailyEvents());
-                                }
 
-                                @Override
-                                public void onFail() {
-
-                                }
-                            });*/
                         } else {
                             Toast.makeText(getContext(),
                                     R.string.time_error_msg,

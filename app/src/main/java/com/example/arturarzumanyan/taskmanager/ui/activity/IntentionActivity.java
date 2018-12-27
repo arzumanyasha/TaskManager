@@ -27,7 +27,6 @@ import android.widget.Toast;
 import com.example.arturarzumanyan.taskmanager.R;
 import com.example.arturarzumanyan.taskmanager.data.repository.events.EventsRepository;
 import com.example.arturarzumanyan.taskmanager.data.repository.events.specification.EventsFromDateSpecification;
-import com.example.arturarzumanyan.taskmanager.data.repository.tasklists.TaskListsCloudStore;
 import com.example.arturarzumanyan.taskmanager.data.repository.tasklists.TaskListsRepository;
 import com.example.arturarzumanyan.taskmanager.data.repository.tasklists.specification.AllTaskListsSpecification;
 import com.example.arturarzumanyan.taskmanager.domain.Event;
@@ -47,7 +46,6 @@ import java.util.List;
 import static com.example.arturarzumanyan.taskmanager.ui.fragment.TasksFragment.TASK_LIST_ID_KEY;
 import static com.example.arturarzumanyan.taskmanager.ui.fragment.TasksFragment.TASK_LIST_STRING_ID_KEY;
 import static com.example.arturarzumanyan.taskmanager.ui.fragment.TasksFragment.TASK_LIST_TITLE_KEY;
-import static com.example.arturarzumanyan.taskmanager.networking.util.Log.*;
 
 public class IntentionActivity extends AppCompatActivity {
     public static final String EVENTS_KEY = "Events";
@@ -107,6 +105,16 @@ public class IntentionActivity extends AppCompatActivity {
             }
 
             @Override
+            public void onUpdate(List<TaskList> taskLists) {
+                updateTaskListsMenu(taskLists);
+            }
+
+            @Override
+            public void onSuccess(TaskList taskList) {
+
+            }
+
+            @Override
             public void onFail() {
                 Toast.makeText(IntentionActivity.this, R.string.network_error, Toast.LENGTH_LONG).show();
             }
@@ -128,6 +136,29 @@ public class IntentionActivity extends AppCompatActivity {
                 }
             }
         });
+    }
+
+    private void updateTaskListsMenu(List<TaskList> taskLists) {
+        Log.v("TaskLists Menu updating");
+        for (int i = 0; i < mTaskLists.size(); i++) {
+            Log.v("Removing " + i + " 's menu item");
+            Log.v(mTaskListsMenu.getItem().getTitle().toString());
+            mTaskListsMenu.getItem(i).setVisible(false);
+            mTaskListsMenu.removeItem(i);
+        }
+
+        mTaskLists = taskLists;
+        for (int i = 0; i < mTaskLists.size(); i++) {
+            final int position = i;
+            mTaskListsMenu.add(mTaskLists.get(i).getTitle()).setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
+                @Override
+                public boolean onMenuItemClick(MenuItem item) {
+                    openTaskFragment(mTaskLists.get(position));
+                    mDrawer.closeDrawer(Gravity.START);
+                    return false;
+                }
+            });
+        }
     }
 
     private void displayMenu() {
@@ -222,7 +253,7 @@ public class IntentionActivity extends AppCompatActivity {
         for (int i = 0; i < mTaskLists.size(); i++) {
             if (getTitle().equals(mTaskLists.get(i).getTitle())) {
                 Bundle bundle = new Bundle();
-                bundle.putInt(TASK_LIST_ID_KEY, mTaskLists.get(i).getId());
+                bundle.putParcelable(TASK_LISTS_KEY, mTaskLists.get(i));
                 tasksDialog.setArguments(bundle);
                 tasksDialog.setTasksReadyListener(new TasksDialog.TasksReadyListener() {
                     @Override
@@ -324,7 +355,18 @@ public class IntentionActivity extends AppCompatActivity {
         } else if (id == R.id.delete_task_list) {
             if (!getTitle().equals(EVENTS_KEY)) {
                 TaskListsRepository taskListsRepository = new TaskListsRepository(IntentionActivity.this);
-                /*taskListsRepository.deleteTaskList(taskList, new TaskListsCloudStore.OnTaskCompletedListener() {
+
+                taskListsRepository.deleteTaskList(taskList, new TaskListsRepository.OnTaskListsLoadedListener() {
+                    @Override
+                    public void onSuccess(List<TaskList> taskListArrayList) {
+
+                    }
+
+                    @Override
+                    public void onUpdate(List<TaskList> taskLists) {
+
+                    }
+
                     @Override
                     public void onSuccess(TaskList taskList) {
                         int menuSize = mTaskListsMenu.size();
@@ -337,24 +379,9 @@ public class IntentionActivity extends AppCompatActivity {
                                 previousTaskList = mTaskLists.get(i - 1);
                             }
                         }
-
-                        openTaskFragment(previousTaskList.getId(), previousTaskList.getTitle());
-                    }
-
-                    @Override
-                    public void onSuccess(List<TaskList> taskListArrayList) {
-
-                    }
-
-                    @Override
-                    public void onFail() {
-
-                    }
-                });*/
-                taskListsRepository.deleteTaskList(taskList, new TaskListsRepository.OnTaskListsLoadedListener() {
-                    @Override
-                    public void onSuccess(List<TaskList> taskListArrayList) {
-
+                        if (previousTaskList != null) {
+                            openTaskFragment(previousTaskList);
+                        }
                     }
 
                     @Override
@@ -385,9 +412,7 @@ public class IntentionActivity extends AppCompatActivity {
 
                             }
                         });
-                       /*
-                        eventFragmentInteractionListener.onEventsReady(eventsRepository.getEventsFromDate(
-                                DateUtils.getDateFromString(DateUtils.getStringDateFromInt(year, monthOfYear, dayOfMonth))));*/
+
                     }
                 }, DateUtils.getYear(), DateUtils.getMonth(), DateUtils.getDay());
                 datePickerDialog.show();

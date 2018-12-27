@@ -6,6 +6,7 @@ import com.example.arturarzumanyan.taskmanager.auth.AccessTokenAsyncTask;
 import com.example.arturarzumanyan.taskmanager.auth.FirebaseWebService;
 import com.example.arturarzumanyan.taskmanager.domain.ResponseDto;
 import com.example.arturarzumanyan.taskmanager.networking.util.Converter;
+import com.example.arturarzumanyan.taskmanager.networking.util.Log;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -82,6 +83,7 @@ public class BaseHttpUrlConnection {
 
             return responseDto;
         } catch (IOException e) {
+            Log.v(e.getMessage());
             e.printStackTrace();
         } finally {
             if (connection != null) {
