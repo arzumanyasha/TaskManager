@@ -6,13 +6,20 @@ import android.os.AsyncTask;
 import com.example.arturarzumanyan.taskmanager.auth.FirebaseWebService;
 import com.example.arturarzumanyan.taskmanager.data.repository.RepositoryLoadHelper;
 import com.example.arturarzumanyan.taskmanager.data.repository.tasklists.TaskListsDbStore;
+import com.example.arturarzumanyan.taskmanager.domain.ResponseDto;
 import com.example.arturarzumanyan.taskmanager.domain.Task;
 import com.example.arturarzumanyan.taskmanager.domain.TaskList;
 import com.example.arturarzumanyan.taskmanager.data.repository.BaseDataLoadingAsyncTask;
+import com.example.arturarzumanyan.taskmanager.networking.NetworkUtil;
+import com.example.arturarzumanyan.taskmanager.networking.base.RequestParameters;
 import com.example.arturarzumanyan.taskmanager.networking.util.TasksParser;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+
+import static com.example.arturarzumanyan.taskmanager.auth.FirebaseWebService.RequestMethods.PATCH;
+import static com.example.arturarzumanyan.taskmanager.auth.FirebaseWebService.RequestMethods.POST;
 
 public class TasksCloudStore {
     public static final String BASE_TASKS_URL = "https://www.googleapis.com/tasks/v1/lists/";
@@ -20,7 +27,6 @@ public class TasksCloudStore {
     private TaskListsDbStore mTaskListsDbStore;
     private TasksDbStore mTasksDbStore;
     private RepositoryLoadHelper mRepositoryLoadHelper;
-    private ArrayList<BaseDataLoadingAsyncTask> mUserTasksAsyncTaskList = new ArrayList<>();
 
     private Context mContext;
 
@@ -31,154 +37,49 @@ public class TasksCloudStore {
         mTasksDbStore = new TasksDbStore(mContext);
     }
 
-    public void getTasksFromTaskList(TaskList taskList, final OnTaskCompletedListener listener) {
+    public ResponseDto getTasksFromServer(TaskList taskList) {
         String url = BASE_TASKS_URL + taskList.getTaskListId() + "/tasks?showHidden=true";
-        /*final int taskListId = taskList.getId();
-        mUserTasksAsyncTaskList.add(new BaseDataLoadingAsyncTask());
-        int position = mUserTasksAsyncTaskList.size() - 1;
-        mRepositoryLoadHelper.requestUserData(mUserTasksAsyncTaskList.get(position), url);
-        mUserTasksAsyncTaskList.get(position).setDataInfoLoadingListener(new BaseDataLoadingAsyncTask.UserDataLoadingListener() {
-            @Override
-            public void onDataLoaded(String response) {
-                TasksParser tasksParser = new TasksParser();
-                listener.onSuccess(tasksParser.parseTasks(response, taskListId));
-            }
 
-            @Override
-            public void onFail() {
-                listener.onSuccess(mTasksDbStore.getTasksFromTaskList(taskListId));
-            }
-        });*/
+        FirebaseWebService.RequestMethods requestMethod = FirebaseWebService.RequestMethods.GET;
+        RequestParameters requestParameters = new RequestParameters(mContext,
+                url,
+                requestMethod,
+                new HashMap<String, Object>()
+        );
+        requestParameters.setRequestHeaderParameters(new HashMap<String, String>());
 
+        return NetworkUtil.getResultFromServer(requestParameters);
     }
 
-    public void addTask(Task task, final OnTaskCompletedListener listener) {
-        /*
-        final String url = BASE_TASKS_URL +
-                mTaskListsDbStore.getTaskList(task.getListId()).getTaskListId() +
+    public ResponseDto addTaskOnServer(TaskList taskList, Task task) {
+        String url = BASE_TASKS_URL +
+                taskList.getTaskListId() +
                 "/tasks";
 
-        sendRequest(task, url, FirebaseWebService.RequestMethods.POST, listener);*/
+        RequestParameters requestParameters = mRepositoryLoadHelper.getTaskCreateOrUpdateParameters(task, url, POST);
+
+        return NetworkUtil.getResultFromServer(requestParameters);
     }
 
-    public void updateTask(Task task, final OnTaskCompletedListener listener) {
-        /*
-        final String url = BASE_TASKS_URL +
-                mTaskListsDbStore.getTaskList(task.getListId()).getTaskListId() +
+    public ResponseDto updateTaskOnServer(TaskList taskList, Task task) {
+        String url = BASE_TASKS_URL +
+                taskList.getTaskListId() +
                 "/tasks/" +
                 task.getId();
 
-        sendRequest(task, url, FirebaseWebService.RequestMethods.PATCH, listener);*/
+        RequestParameters requestParameters = mRepositoryLoadHelper.getTaskCreateOrUpdateParameters(task, url, PATCH);
+
+        return NetworkUtil.getResultFromServer(requestParameters);
     }
 
-    private void sendRequest(final Task task,
-                             final String url,
-                             final FirebaseWebService.RequestMethods requestMethod,
-                             final OnTaskCompletedListener listener) {
-/*
-        BaseDataLoadingAsyncTask baseDataLoadingAsyncTask = new BaseDataLoadingAsyncTask();
-        baseDataLoadingAsyncTask.executeOnExecutor(AsyncTask.SERIAL_EXECUTOR,
-                mRepositoryLoadHelper.getTaskCreateOrUpdateParameters(task, url, requestMethod));
-
-        baseDataLoadingAsyncTask.setDataInfoLoadingListener(new BaseDataLoadingAsyncTask.UserDataLoadingListener() {
-            @Override
-            public void onDataLoaded(String response) {
-                createOrUpdateTaskInDb(response, task, requestMethod);
-                listener.onSuccess(mTasksDbStore.getTasksFromTaskList(task.getListId()));
-            }
-
-            @Override
-            public void onFail() {
-                FirebaseWebService firebaseWebService = new FirebaseWebService();
-                firebaseWebService.refreshAccessToken(mContext, new FirebaseWebService.AccessTokenUpdatedListener() {
-                    @Override
-                    public void onAccessTokenUpdated() {
-                        BaseDataLoadingAsyncTask updatedBaseDataLoadingAsyncTask = new BaseDataLoadingAsyncTask();
-                        updatedBaseDataLoadingAsyncTask.setDataInfoLoadingListener(new BaseDataLoadingAsyncTask.UserDataLoadingListener() {
-                            @Override
-                            public void onDataLoaded(String response) {
-                                createOrUpdateTaskInDb(response, task, requestMethod);
-                                listener.onSuccess(mTasksDbStore.getTasksFromTaskList(task.getListId()));
-                            }
-
-                            @Override
-                            public void onFail() {
-                                if (requestMethod == FirebaseWebService.RequestMethods.POST) {
-                                    mTasksDbStore.addTask(task);
-                                } else if (requestMethod == FirebaseWebService.RequestMethods.PATCH) {
-                                    mTasksDbStore.updateTask(task);
-                                }
-                            }
-                        });
-                        updatedBaseDataLoadingAsyncTask.executeOnExecutor(AsyncTask.SERIAL_EXECUTOR,
-                                mRepositoryLoadHelper.getTaskCreateOrUpdateParameters(task, url, requestMethod));
-
-                    }
-                });
-            }
-        });*/
-    }
-
-    private void createOrUpdateTaskInDb(String response,
-                                        Task task,
-                                        FirebaseWebService.RequestMethods requestMethod) {
-        TasksParser tasksParser = new TasksParser();
-        if (requestMethod == FirebaseWebService.RequestMethods.POST) {
-            //mTasksDbStore.addTask(tasksParser.parseTask(response, task.getListId()));
-        } else if (requestMethod == FirebaseWebService.RequestMethods.PATCH) {
-            //mTasksDbStore.updateTask(tasksParser.parseTask(response, task.getListId()));
-        }
-    }
-
-    public void deleteTask(final Task task) {
-
-/*        final String url = BASE_TASKS_URL +
-                mTaskListsDbStore.getTaskList(task.getListId()).getTaskListId() +
+    public ResponseDto deleteTaskOnServer(TaskList taskList, Task task) {
+        String url = BASE_TASKS_URL +
+                taskList.getTaskListId() +
                 "/tasks/" +
                 task.getId();
 
-        BaseDataLoadingAsyncTask baseDataLoadingAsyncTask = new BaseDataLoadingAsyncTask();
+        RequestParameters requestParameters = mRepositoryLoadHelper.getDeleteParameters(url);
 
-        baseDataLoadingAsyncTask.executeOnExecutor(AsyncTask.SERIAL_EXECUTOR,
-                mRepositoryLoadHelper.getDeleteParameters(url));
-
-        baseDataLoadingAsyncTask.setDataInfoLoadingListener(new BaseDataLoadingAsyncTask.UserDataLoadingListener() {
-            @Override
-            public void onDataLoaded(String response) {
-                mTasksDbStore.deleteTask(task);
-            }
-
-            @Override
-            public void onFail() {
-                FirebaseWebService firebaseWebService = new FirebaseWebService();
-                firebaseWebService.refreshAccessToken(mContext, new FirebaseWebService.AccessTokenUpdatedListener() {
-                    @Override
-                    public void onAccessTokenUpdated() {
-                        BaseDataLoadingAsyncTask updatedBaseDataLoadingAsyncTask = new BaseDataLoadingAsyncTask();
-
-                        updatedBaseDataLoadingAsyncTask.setDataInfoLoadingListener(new BaseDataLoadingAsyncTask.UserDataLoadingListener() {
-                            @Override
-                            public void onDataLoaded(String response) {
-                                mTasksDbStore.deleteTask(task);
-                            }
-
-                            @Override
-                            public void onFail() {
-                                mTasksDbStore.deleteTask(task);
-                            }
-                        });
-
-                        updatedBaseDataLoadingAsyncTask.executeOnExecutor(AsyncTask.SERIAL_EXECUTOR,
-                                mRepositoryLoadHelper.getDeleteParameters(url));
-                    }
-                });
-            }
-        });*/
-    }
-
-    public interface OnTaskCompletedListener {
-        void onSuccess(List<Task> taskArrayList);
-
-        void onFail();
+        return NetworkUtil.getResultFromServer(requestParameters);
     }
 }

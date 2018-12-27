@@ -2,9 +2,9 @@ package com.example.arturarzumanyan.taskmanager.networking.util;
 
 import android.text.TextUtils;
 
-import static android.support.constraint.Constraints.TAG;
-
 public final class Log {
+
+    private static final String TAG = "TaskManager";
 
     public static void v(String msg) {
         android.util.Log.v(TAG, getLocation() + msg);

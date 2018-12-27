@@ -12,13 +12,13 @@ import java.text.ParseException;
 import java.util.HashMap;
 import java.util.List;
 
-public abstract class BaseDataLoadingAsyncTask<T> extends AsyncTask<RequestParameters, Void, List<T>> {
+public abstract class BaseDataLoadingAsyncTask<T> extends AsyncTask<FirebaseWebService.RequestMethods, Void, List<T>> {
 
     public BaseDataLoadingAsyncTask() {
     }
 
     @Override
-    protected List<T> doInBackground(RequestParameters... requestParameters) {
+    protected List<T> doInBackground(FirebaseWebService.RequestMethods... requestMethods) {
         return null;
     }
 

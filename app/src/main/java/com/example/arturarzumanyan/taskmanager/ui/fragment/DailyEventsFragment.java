@@ -75,7 +75,7 @@ public class DailyEventsFragment extends Fragment {
 
         final EventsFromDateSpecification eventsFromDateSpecification = new EventsFromDateSpecification();
         eventsFromDateSpecification.setDate(DateUtils.getCurrentTime());
-        /*ArrayList<Event> events = */eventsRepository.getEvents(eventsFromDateSpecification, new EventsRepository.OnEventsLoadedListener() {
+        eventsRepository.getEvents(eventsFromDateSpecification, new EventsRepository.OnEventsLoadedListener() {
             @Override
             public void onSuccess(List<Event> eventsList) {
                 setEventsAdapter(eventsList, eventsRepository);
@@ -86,7 +86,6 @@ public class DailyEventsFragment extends Fragment {
 
             }
         });
-        //setEventsAdapter(events, eventsRepository);
     }
 
     private void setEventsAdapter(List<Event> events, final EventsRepository eventsRepository) {

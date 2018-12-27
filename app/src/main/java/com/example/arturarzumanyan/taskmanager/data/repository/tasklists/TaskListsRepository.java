@@ -27,6 +27,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 
+import static com.example.arturarzumanyan.taskmanager.auth.FirebaseWebService.RequestMethods.DELETE;
 import static com.example.arturarzumanyan.taskmanager.auth.FirebaseWebService.RequestMethods.GET;
 import static com.example.arturarzumanyan.taskmanager.auth.FirebaseWebService.RequestMethods.PATCH;
 import static com.example.arturarzumanyan.taskmanager.auth.FirebaseWebService.RequestMethods.POST;
@@ -54,7 +55,8 @@ public class TaskListsRepository {
 
     public void loadTaskLists(TaskListsSpecification taskListsSpecification, final OnTaskListsLoadedListener listener) {
         TaskListsAsyncTask taskListsAsyncTask = new TaskListsAsyncTask(null, mContext, mRepositoryLoadHelper,
-                mFirebaseWebService, mTaskListsDbStore, mTasksDbStore, taskListsSpecification, listener);
+                mFirebaseWebService, mTaskListsDbStore, mTaskListsCloudStore,
+                mTasksDbStore, taskListsSpecification, listener);
 
         taskListsAsyncTask.setDataInfoLoadingListener(new BaseDataLoadingAsyncTask.UserDataLoadingListener<TaskList>() {
             @Override
@@ -64,17 +66,14 @@ public class TaskListsRepository {
             }
         });
 
-        mRepositoryLoadHelper.requestUserData(taskListsAsyncTask, BASE_TASK_LISTS_URL);
+        taskListsAsyncTask.executeOnExecutor(AsyncTask.SERIAL_EXECUTOR, GET);
     }
 
     public void addTaskList(TaskList taskList, final OnTaskListsLoadedListener listener) {
-        RequestParameters requestParameters = mRepositoryLoadHelper.getTaskListCreateOrUpdateParameters(taskList,
-                BASE_TASK_LISTS_URL, POST);
-
         AllTaskListsSpecification allTaskListsSpecification = new AllTaskListsSpecification();
 
         TaskListsAsyncTask taskListsAsyncTask = new TaskListsAsyncTask(taskList, mContext,
-                mRepositoryLoadHelper, mFirebaseWebService, mTaskListsDbStore,
+                mRepositoryLoadHelper, mFirebaseWebService, mTaskListsDbStore, mTaskListsCloudStore,
                 mTasksDbStore, allTaskListsSpecification, null);
 
         taskListsAsyncTask.setDataInfoLoadingListener(new BaseDataLoadingAsyncTask.UserDataLoadingListener<TaskList>() {
@@ -83,20 +82,15 @@ public class TaskListsRepository {
                 listener.onSuccess(list.get(list.size() - 1));
             }
         });
-        taskListsAsyncTask.executeOnExecutor(AsyncTask.SERIAL_EXECUTOR, requestParameters);
+        taskListsAsyncTask.executeOnExecutor(AsyncTask.SERIAL_EXECUTOR, POST);
     }
 
     public void updateTaskList(TaskList taskList, final OnTaskListsLoadedListener listener) {
-        String url = BASE_TASK_LISTS_URL + taskList.getTaskListId();
-
-        RequestParameters requestParameters = mRepositoryLoadHelper.getTaskListCreateOrUpdateParameters(taskList,
-                url, PATCH);
-
         TaskListFromIdSpecification taskListFromIdSpecification = new TaskListFromIdSpecification();
         taskListFromIdSpecification.setTaskListId(taskList.getId());
 
         TaskListsAsyncTask taskListsAsyncTask = new TaskListsAsyncTask(taskList, mContext,
-                mRepositoryLoadHelper, mFirebaseWebService, mTaskListsDbStore,
+                mRepositoryLoadHelper, mFirebaseWebService, mTaskListsDbStore, mTaskListsCloudStore,
                 mTasksDbStore, taskListFromIdSpecification, null);
 
         taskListsAsyncTask.setDataInfoLoadingListener(new BaseDataLoadingAsyncTask.UserDataLoadingListener<TaskList>() {
@@ -105,19 +99,15 @@ public class TaskListsRepository {
                 listener.onSuccess(list.get(0));
             }
         });
-        taskListsAsyncTask.executeOnExecutor(AsyncTask.SERIAL_EXECUTOR, requestParameters);
+        taskListsAsyncTask.executeOnExecutor(AsyncTask.SERIAL_EXECUTOR, PATCH);
     }
 
     public void deleteTaskList(TaskList taskList, final OnTaskListsLoadedListener listener) {
-        String url = BASE_TASK_LISTS_URL + taskList.getTaskListId();
-
-        RequestParameters requestParameters = mRepositoryLoadHelper.getDeleteParameters(url);
-
         TaskListFromIdSpecification taskListFromIdSpecification = new TaskListFromIdSpecification();
         taskListFromIdSpecification.setTaskListId(taskList.getId());
 
         TaskListsAsyncTask taskListsAsyncTask = new TaskListsAsyncTask(taskList, mContext,
-                mRepositoryLoadHelper, mFirebaseWebService, mTaskListsDbStore,
+                mRepositoryLoadHelper, mFirebaseWebService, mTaskListsDbStore, mTaskListsCloudStore,
                 mTasksDbStore, taskListFromIdSpecification, null);
 
         taskListsAsyncTask.setDataInfoLoadingListener(new BaseDataLoadingAsyncTask.UserDataLoadingListener<TaskList>() {
@@ -126,7 +116,7 @@ public class TaskListsRepository {
                 listener.onSuccess(list.get(0));
             }
         });
-        taskListsAsyncTask.executeOnExecutor(AsyncTask.SERIAL_EXECUTOR, requestParameters);
+        taskListsAsyncTask.executeOnExecutor(AsyncTask.SERIAL_EXECUTOR, DELETE);
     }
 
     public interface OnTaskListsLoadedListener {
@@ -146,6 +136,7 @@ public class TaskListsRepository {
         private RepositoryLoadHelper mRepositoryLoadHelper;
         private FirebaseWebService mFirebaseWebService;
         private TaskListsDbStore mTaskListsDbStore;
+        private TaskListsCloudStore mTaskListsCloudStore;
         private TasksDbStore mTasksDbStore;
         private TaskListsSpecification mTaskListsSpecification;
         private OnTaskListsLoadedListener mListener;
@@ -155,6 +146,7 @@ public class TaskListsRepository {
                                   RepositoryLoadHelper repositoryLoadHelper,
                                   FirebaseWebService firebaseWebService,
                                   TaskListsDbStore taskListsDbStore,
+                                  TaskListsCloudStore taskListsCloudStore,
                                   TasksDbStore tasksDbStore,
                                   TaskListsSpecification taskListsSpecification,
                                   OnTaskListsLoadedListener listener) {
@@ -163,45 +155,52 @@ public class TaskListsRepository {
             this.mRepositoryLoadHelper = repositoryLoadHelper;
             this.mFirebaseWebService = firebaseWebService;
             this.mTaskListsDbStore = taskListsDbStore;
+            this.mTaskListsCloudStore = taskListsCloudStore;
             this.mTasksDbStore = tasksDbStore;
             this.mTaskListsSpecification = taskListsSpecification;
             this.mListener = listener;
         }
 
         @Override
-        protected List<TaskList> doInBackground(final RequestParameters... requestParameters) {
+        protected List<TaskList> doInBackground(final FirebaseWebService.RequestMethods... requestMethods) {
             if (mRepositoryLoadHelper.isOnline()) {
                 Log.v("Loading tasklists...");
-                ResponseDto responseDto = NetworkUtil.getResultFromServer(requestParameters[0]);
-                int responseCode = responseDto.getResponseCode();
-                if (responseCode == HttpURLConnection.HTTP_UNAUTHORIZED) {
-                    retryGetResultFromServer(requestParameters[0]);
+
+                ResponseDto responseDto = getResponseFromServer(requestMethods[0]);
+
+                int responseCode = 0;
+                if (responseDto != null) {
+                    responseCode = responseDto.getResponseCode();
                 }
 
-                if (responseCode == HttpURLConnection.HTTP_OK ||
-                        responseCode == HttpURLConnection.HTTP_NO_CONTENT) {
-                    Log.v("TaskLists loaded successfully");
-                    if (requestParameters[0].getRequestMethod() == POST) {
-                        dbQuery(parseTaskList(responseDto.getResponseData()), requestParameters[0]);
-                    } else if (requestParameters[0].getRequestMethod() == PATCH) {
-                        dbQuery(mTaskList, requestParameters[0]);
-                    } else if (requestParameters[0].getRequestMethod() == GET) {
-                        List<TaskList> taskLists = parseTaskListsData(responseDto.getResponseData());
-                        updateDbQuery(taskLists);
+                if (responseCode == HttpURLConnection.HTTP_UNAUTHORIZED) {
+                    retryGetResultFromServer(requestMethods[0]);
+                } else {
+                    if (responseCode == HttpURLConnection.HTTP_OK ||
+                            responseCode == HttpURLConnection.HTTP_NO_CONTENT) {
+                        Log.v("TaskLists loaded successfully");
+                        if (requestMethods[0] == POST) {
+                            dbQuery(parseTaskList(responseDto.getResponseData()), requestMethods[0]);
+                        } else if (requestMethods[0] == PATCH) {
+                            dbQuery(mTaskList, requestMethods[0]);
+                        } else if (requestMethods[0] == GET) {
+                            List<TaskList> taskLists = parseTaskListsData(responseDto.getResponseData());
+                            updateDbQuery(taskLists);
 
-                        for (int i = 0; i < taskLists.size(); i++) {
-                            loadTasks(taskLists.get(i), i + 1);
+                            for (int i = 0; i < taskLists.size(); i++) {
+                                loadTasks(taskLists.get(i), i + 1);
+                            }
+
+                        } else {
+                            dbQuery(mTaskList, requestMethods[0]);
+                            return Collections.singletonList(mTaskList);
                         }
-
-                    } else {
-                        dbQuery(mTaskList, requestParameters[0]);
-                        return Collections.singletonList(mTaskList);
                     }
                 }
 
             } else {
-                if (requestParameters[0].getRequestMethod() != GET) {
-                    dbQuery(mTaskList, requestParameters[0]);
+                if (requestMethods[0] != GET) {
+                    dbQuery(mTaskList, requestMethods[0]);
                 } else {
                     return mTaskListsDbStore.getTaskLists(mTaskListsSpecification);
                 }
@@ -210,29 +209,43 @@ public class TaskListsRepository {
             return mTaskListsDbStore.getTaskLists(mTaskListsSpecification);
         }
 
-        private void retryGetResultFromServer(final RequestParameters requestParameters) {
+        private ResponseDto getResponseFromServer(FirebaseWebService.RequestMethods requestMethod) {
+            switch (requestMethod) {
+                case GET: {
+                    return mTaskListsCloudStore.getTaskListsFromServer();
+                }
+                case POST: {
+                    return mTaskListsCloudStore.addTaskListOnServer(mTaskList);
+                }
+                case PATCH: {
+                    return mTaskListsCloudStore.updateTaskListOnServer(mTaskList);
+                }
+                case DELETE: {
+                    return mTaskListsCloudStore.deleteTaskListOnServer(mTaskList);
+                }
+                default: {
+                    return null;
+                }
+            }
+        }
+
+        private void retryGetResultFromServer(final FirebaseWebService.RequestMethods requestMethod) {
             mFirebaseWebService.refreshAccessToken(new FirebaseWebService.AccessTokenUpdatedListener() {
                 @Override
                 public void onAccessTokenUpdated() {
                     Log.v("Access token refreshed successfully");
                     TaskListsAsyncTask taskListsAsyncTask = new TaskListsAsyncTask(null,
                             mContextWeakReference.get(), mRepositoryLoadHelper, mFirebaseWebService,
-                            mTaskListsDbStore, mTasksDbStore, mTaskListsSpecification, mListener);
+                            mTaskListsDbStore, mTaskListsCloudStore, mTasksDbStore, mTaskListsSpecification, mListener);
                     taskListsAsyncTask.setDataInfoLoadingListener(new UserDataLoadingListener<TaskList>() {
                         @Override
                         public void onSuccess(List<TaskList> list) {
                             Log.v("TaskLists loading retried successfully");
-                            //mListener.onSuccess(list);
                             mListener.onUpdate(list);
                         }
-/*
-                        @Override
-                        public void onFail() {
-                            mListener.onFail();
-                        }*/
                     });
 
-                    mRepositoryLoadHelper.requestUserData(taskListsAsyncTask, requestParameters.getUrl());
+                    taskListsAsyncTask.executeOnExecutor(SERIAL_EXECUTOR, requestMethod);
                 }
             });
         }
@@ -271,11 +284,10 @@ public class TaskListsRepository {
             mTasksDbStore.addOrUpdateTasks(tasks);
         }
 
-        private void dbQuery(TaskList taskList, RequestParameters requestParameters) {
-            if (requestParameters.getRequestMethod() == POST ||
-                    requestParameters.getRequestMethod() == PATCH) {
+        private void dbQuery(TaskList taskList, FirebaseWebService.RequestMethods requestMethod) {
+            if (requestMethod == POST || requestMethod == PATCH) {
                 mTaskListsDbStore.addOrUpdateTaskLists(Collections.singletonList(taskList));
-            } else if (requestParameters.getRequestMethod() == FirebaseWebService.RequestMethods.DELETE) {
+            } else if (requestMethod == FirebaseWebService.RequestMethods.DELETE) {
                 mTaskListsDbStore.deleteTaskList(taskList);
             }
         }

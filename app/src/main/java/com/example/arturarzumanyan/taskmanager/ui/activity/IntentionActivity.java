@@ -86,7 +86,7 @@ public class IntentionActivity extends AppCompatActivity {
 
         AllTaskListsSpecification allTaskListsSpecification = new AllTaskListsSpecification();
 
-        mTaskListsRepository = new TaskListsRepository(this);
+        mTaskListsRepository = new TaskListsRepository(getApplicationContext());
         mTaskListsRepository.loadTaskLists(allTaskListsSpecification, new TaskListsRepository.OnTaskListsLoadedListener() {
             @Override
             public void onSuccess(List<TaskList> taskLists) {
@@ -142,9 +142,9 @@ public class IntentionActivity extends AppCompatActivity {
         Log.v("TaskLists Menu updating");
         for (int i = 0; i < mTaskLists.size(); i++) {
             Log.v("Removing " + i + " 's menu item");
-            Log.v(mTaskListsMenu.getItem().getTitle().toString());
-            mTaskListsMenu.getItem(i).setVisible(false);
-            mTaskListsMenu.removeItem(i);
+            Log.v(mTaskListsMenu.getItem(i).getTitle().toString());
+            mTaskListsMenu.getItem(mTaskLists.size() - 1).setVisible(false);
+            mTaskListsMenu.removeItem(mTaskLists.size() - 1);
         }
 
         mTaskLists = taskLists;
@@ -227,13 +227,13 @@ public class IntentionActivity extends AppCompatActivity {
     }
 
     private void notifyDataLoaded() {
-        NotificationCompat.Builder builder = new NotificationCompat.Builder(this, CHANNEL_ID);
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(getApplicationContext(), CHANNEL_ID);
         builder.setSmallIcon(R.drawable.ic_event_black_24dp);
         builder.setContentTitle(getString(R.string.app_name));
         builder.setContentText(getString(R.string.data_loaded_message));
         builder.setPriority(NotificationCompat.PRIORITY_DEFAULT);
 
-        NotificationManagerCompat notificationManagerCompat = NotificationManagerCompat.from(this);
+        NotificationManagerCompat notificationManagerCompat = NotificationManagerCompat.from(getApplicationContext());
         notificationManagerCompat.notify(NOTIFICATION_ID, builder.build());
     }
 
@@ -354,7 +354,7 @@ public class IntentionActivity extends AppCompatActivity {
             }
         } else if (id == R.id.delete_task_list) {
             if (!getTitle().equals(EVENTS_KEY)) {
-                TaskListsRepository taskListsRepository = new TaskListsRepository(IntentionActivity.this);
+                TaskListsRepository taskListsRepository = new TaskListsRepository(getApplicationContext());
 
                 taskListsRepository.deleteTaskList(taskList, new TaskListsRepository.OnTaskListsLoadedListener() {
                     @Override
@@ -392,11 +392,11 @@ public class IntentionActivity extends AppCompatActivity {
             }
         } else if (id == R.id.pick_date) {
             if (getTitle().equals(EVENTS_KEY)) {
-                DatePickerDialog datePickerDialog = new DatePickerDialog(this, new DatePickerDialog.OnDateSetListener() {
+                DatePickerDialog datePickerDialog = new DatePickerDialog(getApplicationContext(), new DatePickerDialog.OnDateSetListener() {
 
                     @Override
                     public void onDateSet(DatePicker view, int year, int monthOfYear, int dayOfMonth) {
-                        EventsRepository eventsRepository = new EventsRepository(IntentionActivity.this);
+                        EventsRepository eventsRepository = new EventsRepository(getApplicationContext());
 
                         EventsFromDateSpecification eventsFromDateSpecification = new EventsFromDateSpecification();
                         eventsFromDateSpecification.setDate(DateUtils.getStringDateFromInt(year, monthOfYear, dayOfMonth));

@@ -30,8 +30,6 @@ public class SQLiteDbHelper extends SQLiteOpenHelper {
 
     @Override
     public void onCreate(SQLiteDatabase db) {
-        //SQLiteDatabase mDb = db;
-
         final String SQL_CREATE_EVENTS_TABLE = "CREATE TABLE " +
                 EventsContract.EventsTable.TABLE_NAME + " ( " +
                 EventsContract.EventsTable._ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +

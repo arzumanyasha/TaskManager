@@ -48,39 +48,6 @@ public class RepositoryLoadHelper {
         this.mContext = context;
     }
 
-    public void requestUserData(EventsRepository.EventsAsyncTask asyncTask, String url) {
-        FirebaseWebService.RequestMethods requestMethod = FirebaseWebService.RequestMethods.GET;
-        RequestParameters requestParameters = new RequestParameters(mContext,
-                url,
-                requestMethod,
-                new HashMap<String, Object>()
-        );
-        requestParameters.setRequestHeaderParameters(new HashMap<String, String>());
-        asyncTask.executeOnExecutor(AsyncTask.SERIAL_EXECUTOR, requestParameters);
-    }
-
-    public void requestUserData(TaskListsRepository.TaskListsAsyncTask asyncTask, String url) {
-        FirebaseWebService.RequestMethods requestMethod = FirebaseWebService.RequestMethods.GET;
-        RequestParameters requestParameters = new RequestParameters(mContext,
-                url,
-                requestMethod,
-                new HashMap<String, Object>()
-        );
-        requestParameters.setRequestHeaderParameters(new HashMap<String, String>());
-        asyncTask.executeOnExecutor(AsyncTask.SERIAL_EXECUTOR, requestParameters);
-    }
-
-    public void requestUserData(TasksRepository.TasksAsyncTask asyncTask, String url) {
-        FirebaseWebService.RequestMethods requestMethod = FirebaseWebService.RequestMethods.GET;
-        RequestParameters requestParameters = new RequestParameters(mContext,
-                url,
-                requestMethod,
-                new HashMap<String, Object>()
-        );
-        requestParameters.setRequestHeaderParameters(new HashMap<String, String>());
-        asyncTask.executeOnExecutor(AsyncTask.SERIAL_EXECUTOR, requestParameters);
-    }
-
     public RequestParameters getEventCreateOrUpdateParameters(Event event,
                                                               String url,
                                                               FirebaseWebService.RequestMethods requestMethod) {
