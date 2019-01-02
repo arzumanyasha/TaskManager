@@ -12,21 +12,16 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.example.arturarzumanyan.taskmanager.R;
-import com.example.arturarzumanyan.taskmanager.data.repository.tasklists.TaskListsRepository;
-import com.example.arturarzumanyan.taskmanager.data.repository.tasklists.specification.TaskListFromIdSpecification;
-import com.example.arturarzumanyan.taskmanager.data.repository.tasks.TasksCloudStore;
-import com.example.arturarzumanyan.taskmanager.data.repository.tasks.TasksDbStore;
 import com.example.arturarzumanyan.taskmanager.data.repository.tasks.TasksRepository;
 import com.example.arturarzumanyan.taskmanager.domain.Task;
 import com.example.arturarzumanyan.taskmanager.domain.TaskList;
-import com.example.arturarzumanyan.taskmanager.networking.util.DateUtils;
 import com.example.arturarzumanyan.taskmanager.ui.activity.IntentionActivity;
 import com.example.arturarzumanyan.taskmanager.ui.adapter.TasksAdapter;
 import com.example.arturarzumanyan.taskmanager.ui.dialog.TasksDialog;
 
-import java.util.ArrayList;
 import java.util.List;
 
+import static com.example.arturarzumanyan.taskmanager.auth.FirebaseWebService.RequestMethods.PATCH;
 import static com.example.arturarzumanyan.taskmanager.ui.activity.IntentionActivity.TASKS_KEY;
 import static com.example.arturarzumanyan.taskmanager.ui.activity.IntentionActivity.TASK_LISTS_KEY;
 
@@ -133,8 +128,8 @@ public class TasksFragment extends Fragment {
             @Override
             public void onChangeItemExecuted(final Task task) {
                 TasksRepository tasksRepository = new TasksRepository(getActivity());
-                tasksRepository.updateTask(new TaskList(mParam1, mParam3, mParam2),
-                        task, new TasksRepository.OnTasksLoadedListener() {
+                tasksRepository.addOrUpdateTask(new TaskList(mParam1, mParam3, mParam2),
+                        task, PATCH, new TasksRepository.OnTasksLoadedListener() {
                             @Override
                             public void onSuccess(List<Task> taskArrayList) {
                                 mTasksAdapter.updateList(taskArrayList);

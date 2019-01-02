@@ -12,6 +12,7 @@ import com.example.arturarzumanyan.taskmanager.domain.Event;
 import com.example.arturarzumanyan.taskmanager.domain.ResponseDto;
 import com.example.arturarzumanyan.taskmanager.networking.util.DateUtils;
 import com.example.arturarzumanyan.taskmanager.networking.util.EventsParser;
+import com.example.arturarzumanyan.taskmanager.networking.util.Log;
 
 import java.net.HttpURLConnection;
 import java.util.Collections;
@@ -50,7 +51,8 @@ public class EventsRepository {
         eventsAsyncTask.executeOnExecutor(AsyncTask.SERIAL_EXECUTOR, GET);
     }
 
-    public void addEvent(Event event, final OnEventsLoadedListener listener) {
+    public void addOrUpdateEvent(Event event, FirebaseWebService.RequestMethods requestMethod,
+                                 final OnEventsLoadedListener listener){
         EventsFromDateSpecification eventsFromDateSpecification = new EventsFromDateSpecification();
         eventsFromDateSpecification.setDate(DateUtils.getCurrentTime());
 
@@ -63,23 +65,7 @@ public class EventsRepository {
                 listener.onSuccess(list);
             }
         });
-        eventsAsyncTask.executeOnExecutor(AsyncTask.SERIAL_EXECUTOR, POST);
-    }
-
-    public void updateEvent(Event event, final OnEventsLoadedListener listener) {
-        EventsFromDateSpecification eventsFromDateSpecification = new EventsFromDateSpecification();
-        eventsFromDateSpecification.setDate(DateUtils.getCurrentTime());
-
-        EventsAsyncTask eventsAsyncTask = new EventsAsyncTask(event,
-                mRepositoryLoadHelper, mFirebaseWebService, mEventsDbStore, mEventsCloudStore,
-                eventsFromDateSpecification, null);
-        eventsAsyncTask.setDataInfoLoadingListener(new BaseDataLoadingAsyncTask.UserDataLoadingListener<Event>() {
-            @Override
-            public void onSuccess(List<Event> list) {
-                listener.onSuccess(list);
-            }
-        });
-        eventsAsyncTask.executeOnExecutor(AsyncTask.SERIAL_EXECUTOR, PATCH);
+        eventsAsyncTask.executeOnExecutor(AsyncTask.SERIAL_EXECUTOR, requestMethod);
     }
 
     public void deleteEvent(Event event) {
@@ -89,12 +75,14 @@ public class EventsRepository {
         EventsAsyncTask eventsAsyncTask = new EventsAsyncTask(event,
                 mRepositoryLoadHelper, mFirebaseWebService, mEventsDbStore, mEventsCloudStore,
                 eventsFromDateSpecification, null);
+
         eventsAsyncTask.setDataInfoLoadingListener(new BaseDataLoadingAsyncTask.UserDataLoadingListener<Event>() {
             @Override
             public void onSuccess(List<Event> list) {
-
+                Log.v("Event successfully deleted");
             }
         });
+
         eventsAsyncTask.executeOnExecutor(AsyncTask.SERIAL_EXECUTOR, DELETE);
     }
 

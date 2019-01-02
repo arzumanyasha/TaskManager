@@ -1,24 +1,13 @@
 package com.example.arturarzumanyan.taskmanager.data.db;
 
-import android.content.ContentValues;
 import android.content.Context;
-import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
 import com.example.arturarzumanyan.taskmanager.data.db.contract.EventsContract;
-import com.example.arturarzumanyan.taskmanager.domain.Event;
-import com.example.arturarzumanyan.taskmanager.domain.Task;
-import com.example.arturarzumanyan.taskmanager.domain.TaskList;
-import com.example.arturarzumanyan.taskmanager.data.db.contract.TasksContract.*;
-import com.example.arturarzumanyan.taskmanager.data.db.contract.EventsContract.*;
-import com.example.arturarzumanyan.taskmanager.networking.util.DateUtils;
-
-import java.text.DateFormat;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
+import com.example.arturarzumanyan.taskmanager.data.db.contract.EventsContract.EventsTable;
+import com.example.arturarzumanyan.taskmanager.data.db.contract.TasksContract.TaskListTable;
+import com.example.arturarzumanyan.taskmanager.data.db.contract.TasksContract.TasksTable;
 
 public class SQLiteDbHelper extends SQLiteOpenHelper {
     private static final String DATABASE_NAME = "Tasks.db";

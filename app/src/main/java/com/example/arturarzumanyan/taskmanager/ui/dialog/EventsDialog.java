@@ -20,9 +20,7 @@ import android.widget.TimePicker;
 import android.widget.Toast;
 
 import com.example.arturarzumanyan.taskmanager.R;
-import com.example.arturarzumanyan.taskmanager.data.repository.events.EventsCloudStore;
 import com.example.arturarzumanyan.taskmanager.data.repository.events.EventsRepository;
-import com.example.arturarzumanyan.taskmanager.data.repository.events.specification.EventsFromDateSpecification;
 import com.example.arturarzumanyan.taskmanager.domain.Event;
 import com.example.arturarzumanyan.taskmanager.networking.util.DateUtils;
 import com.example.arturarzumanyan.taskmanager.ui.adapter.ColorPalette;
@@ -35,6 +33,8 @@ import java.util.UUID;
 
 import petrov.kristiyan.colorpicker.ColorPicker;
 
+import static com.example.arturarzumanyan.taskmanager.auth.FirebaseWebService.RequestMethods.PATCH;
+import static com.example.arturarzumanyan.taskmanager.auth.FirebaseWebService.RequestMethods.POST;
 import static com.example.arturarzumanyan.taskmanager.ui.activity.IntentionActivity.EVENTS_KEY;
 
 public class EventsDialog extends AppCompatDialogFragment {
@@ -118,7 +118,7 @@ public class EventsDialog extends AppCompatDialogFragment {
                             event.setEndTime(endDate);
                             event.setIsNotify(isNotify);
 
-                            mEventsRepository.updateEvent(event, new EventsRepository.OnEventsLoadedListener() {
+                            mEventsRepository.addOrUpdateEvent(event, PATCH, new EventsRepository.OnEventsLoadedListener() {
                                 @Override
                                 public void onSuccess(List<Event> eventsList) {
                                     eventsReadyListener.onEventsReady(eventsList);
@@ -140,17 +140,18 @@ public class EventsDialog extends AppCompatDialogFragment {
                                     startDate,
                                     endDate,
                                     isNotify);
-                            mEventsRepository.addEvent(event, new EventsRepository.OnEventsLoadedListener() {
-                                @Override
-                                public void onSuccess(List<Event> eventsList) {
-                                    eventsReadyListener.onEventsReady(eventsList);
-                                }
+                            mEventsRepository.addOrUpdateEvent(event, POST,
+                                    new EventsRepository.OnEventsLoadedListener() {
+                                        @Override
+                                        public void onSuccess(List<Event> eventsList) {
+                                            eventsReadyListener.onEventsReady(eventsList);
+                                        }
 
-                                @Override
-                                public void onFail() {
+                                        @Override
+                                        public void onFail() {
 
-                                }
-                            });
+                                        }
+                                    });
 
                         } else {
                             Toast.makeText(getContext(),

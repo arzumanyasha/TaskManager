@@ -141,10 +141,11 @@ public class IntentionActivity extends AppCompatActivity {
     private void updateTaskListsMenu(List<TaskList> taskLists) {
         Log.v("TaskLists Menu updating");
         for (int i = 0; i < mTaskLists.size(); i++) {
-            Log.v("Removing " + i + " 's menu item");
-            Log.v(mTaskListsMenu.getItem(i).getTitle().toString());
+            Log.v("Removing " + (mTaskLists.size() - 1) + " 's menu item");
+            Log.v(mTaskListsMenu.getItem(mTaskLists.size() - 1).getTitle().toString());
             mTaskListsMenu.getItem(mTaskLists.size() - 1).setVisible(false);
             mTaskListsMenu.removeItem(mTaskLists.size() - 1);
+            mTaskLists.remove(mTaskLists.size() -1);
         }
 
         mTaskLists = taskLists;

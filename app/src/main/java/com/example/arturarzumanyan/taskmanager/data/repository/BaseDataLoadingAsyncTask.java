@@ -3,13 +3,7 @@ package com.example.arturarzumanyan.taskmanager.data.repository;
 import android.os.AsyncTask;
 
 import com.example.arturarzumanyan.taskmanager.auth.FirebaseWebService;
-import com.example.arturarzumanyan.taskmanager.networking.base.BaseHttpUrlConnection;
-import com.example.arturarzumanyan.taskmanager.networking.base.RequestParameters;
 
-import org.json.JSONException;
-
-import java.text.ParseException;
-import java.util.HashMap;
 import java.util.List;
 
 public abstract class BaseDataLoadingAsyncTask<T> extends AsyncTask<FirebaseWebService.RequestMethods, Void, List<T>> {

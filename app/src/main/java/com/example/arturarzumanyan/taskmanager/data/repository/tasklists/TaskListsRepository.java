@@ -22,7 +22,6 @@ import com.example.arturarzumanyan.taskmanager.networking.util.TasksParser;
 
 import java.lang.ref.WeakReference;
 import java.net.HttpURLConnection;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -31,7 +30,6 @@ import static com.example.arturarzumanyan.taskmanager.auth.FirebaseWebService.Re
 import static com.example.arturarzumanyan.taskmanager.auth.FirebaseWebService.RequestMethods.GET;
 import static com.example.arturarzumanyan.taskmanager.auth.FirebaseWebService.RequestMethods.PATCH;
 import static com.example.arturarzumanyan.taskmanager.auth.FirebaseWebService.RequestMethods.POST;
-import static com.example.arturarzumanyan.taskmanager.data.repository.tasklists.TaskListsCloudStore.BASE_TASK_LISTS_URL;
 import static com.example.arturarzumanyan.taskmanager.data.repository.tasks.TasksCloudStore.BASE_TASKS_URL;
 
 public class TaskListsRepository {
@@ -56,7 +54,7 @@ public class TaskListsRepository {
     public void loadTaskLists(TaskListsSpecification taskListsSpecification, final OnTaskListsLoadedListener listener) {
         TaskListsAsyncTask taskListsAsyncTask = new TaskListsAsyncTask(null, mContext, mRepositoryLoadHelper,
                 mFirebaseWebService, mTaskListsDbStore, mTaskListsCloudStore,
-                mTasksDbStore, taskListsSpecification, listener);
+                mTasksDbStore, mTasksCloudStore, taskListsSpecification, listener);
 
         taskListsAsyncTask.setDataInfoLoadingListener(new BaseDataLoadingAsyncTask.UserDataLoadingListener<TaskList>() {
             @Override
@@ -74,7 +72,7 @@ public class TaskListsRepository {
 
         TaskListsAsyncTask taskListsAsyncTask = new TaskListsAsyncTask(taskList, mContext,
                 mRepositoryLoadHelper, mFirebaseWebService, mTaskListsDbStore, mTaskListsCloudStore,
-                mTasksDbStore, allTaskListsSpecification, null);
+                mTasksDbStore, null, allTaskListsSpecification, null);
 
         taskListsAsyncTask.setDataInfoLoadingListener(new BaseDataLoadingAsyncTask.UserDataLoadingListener<TaskList>() {
             @Override
@@ -91,7 +89,7 @@ public class TaskListsRepository {
 
         TaskListsAsyncTask taskListsAsyncTask = new TaskListsAsyncTask(taskList, mContext,
                 mRepositoryLoadHelper, mFirebaseWebService, mTaskListsDbStore, mTaskListsCloudStore,
-                mTasksDbStore, taskListFromIdSpecification, null);
+                mTasksDbStore, null, taskListFromIdSpecification, null);
 
         taskListsAsyncTask.setDataInfoLoadingListener(new BaseDataLoadingAsyncTask.UserDataLoadingListener<TaskList>() {
             @Override
@@ -108,7 +106,7 @@ public class TaskListsRepository {
 
         TaskListsAsyncTask taskListsAsyncTask = new TaskListsAsyncTask(taskList, mContext,
                 mRepositoryLoadHelper, mFirebaseWebService, mTaskListsDbStore, mTaskListsCloudStore,
-                mTasksDbStore, taskListFromIdSpecification, null);
+                mTasksDbStore, null, taskListFromIdSpecification, null);
 
         taskListsAsyncTask.setDataInfoLoadingListener(new BaseDataLoadingAsyncTask.UserDataLoadingListener<TaskList>() {
             @Override
@@ -138,6 +136,7 @@ public class TaskListsRepository {
         private TaskListsDbStore mTaskListsDbStore;
         private TaskListsCloudStore mTaskListsCloudStore;
         private TasksDbStore mTasksDbStore;
+        private TasksCloudStore mTasksCloudStore;
         private TaskListsSpecification mTaskListsSpecification;
         private OnTaskListsLoadedListener mListener;
 
@@ -148,6 +147,7 @@ public class TaskListsRepository {
                                   TaskListsDbStore taskListsDbStore,
                                   TaskListsCloudStore taskListsCloudStore,
                                   TasksDbStore tasksDbStore,
+                                  TasksCloudStore tasksCloudStore,
                                   TaskListsSpecification taskListsSpecification,
                                   OnTaskListsLoadedListener listener) {
             this.mTaskList = taskList;
@@ -157,6 +157,7 @@ public class TaskListsRepository {
             this.mTaskListsDbStore = taskListsDbStore;
             this.mTaskListsCloudStore = taskListsCloudStore;
             this.mTasksDbStore = tasksDbStore;
+            this.mTasksCloudStore = tasksCloudStore;
             this.mTaskListsSpecification = taskListsSpecification;
             this.mListener = listener;
         }
@@ -236,7 +237,8 @@ public class TaskListsRepository {
                     Log.v("Access token refreshed successfully");
                     TaskListsAsyncTask taskListsAsyncTask = new TaskListsAsyncTask(null,
                             mContextWeakReference.get(), mRepositoryLoadHelper, mFirebaseWebService,
-                            mTaskListsDbStore, mTaskListsCloudStore, mTasksDbStore, mTaskListsSpecification, mListener);
+                            mTaskListsDbStore, mTaskListsCloudStore, mTasksDbStore, mTasksCloudStore,
+                            mTaskListsSpecification, mListener);
                     taskListsAsyncTask.setDataInfoLoadingListener(new UserDataLoadingListener<TaskList>() {
                         @Override
                         public void onSuccess(List<TaskList> list) {
@@ -261,16 +263,7 @@ public class TaskListsRepository {
         }
 
         private void loadTasks(TaskList taskList, int taskListNumber) {
-            String url = BASE_TASKS_URL + taskList.getTaskListId() + "/tasks?showHidden=true";
-            RequestParameters requestParameters = new RequestParameters(mContextWeakReference.get(),
-                    url,
-                    FirebaseWebService.RequestMethods.GET,
-                    new HashMap<String, Object>()
-            );
-
-            requestParameters.setRequestHeaderParameters(new HashMap<String, String>());
-
-            ResponseDto responseDto = NetworkUtil.getResultFromServer(requestParameters);
+            ResponseDto responseDto = mTasksCloudStore.getTasksFromServer(taskList);
 
             int responseCode = responseDto.getResponseCode();
             if (responseCode == HttpURLConnection.HTTP_OK ||

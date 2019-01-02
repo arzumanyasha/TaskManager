@@ -6,17 +6,10 @@ import android.os.AsyncTask;
 import com.example.arturarzumanyan.taskmanager.auth.FirebaseWebService;
 import com.example.arturarzumanyan.taskmanager.data.repository.BaseDataLoadingAsyncTask;
 import com.example.arturarzumanyan.taskmanager.data.repository.RepositoryLoadHelper;
-import com.example.arturarzumanyan.taskmanager.data.repository.events.EventsDbStore;
-import com.example.arturarzumanyan.taskmanager.data.repository.events.EventsRepository;
-import com.example.arturarzumanyan.taskmanager.data.repository.events.specification.EventsSpecification;
-import com.example.arturarzumanyan.taskmanager.data.repository.tasklists.TaskListsRepository;
-import com.example.arturarzumanyan.taskmanager.domain.Event;
 import com.example.arturarzumanyan.taskmanager.domain.ResponseDto;
 import com.example.arturarzumanyan.taskmanager.domain.Task;
 import com.example.arturarzumanyan.taskmanager.domain.TaskList;
-import com.example.arturarzumanyan.taskmanager.networking.NetworkUtil;
-import com.example.arturarzumanyan.taskmanager.networking.base.RequestParameters;
-import com.example.arturarzumanyan.taskmanager.networking.util.EventsParser;
+import com.example.arturarzumanyan.taskmanager.networking.util.Log;
 import com.example.arturarzumanyan.taskmanager.networking.util.TasksParser;
 
 import java.net.HttpURLConnection;
@@ -27,7 +20,6 @@ import static com.example.arturarzumanyan.taskmanager.auth.FirebaseWebService.Re
 import static com.example.arturarzumanyan.taskmanager.auth.FirebaseWebService.RequestMethods.GET;
 import static com.example.arturarzumanyan.taskmanager.auth.FirebaseWebService.RequestMethods.PATCH;
 import static com.example.arturarzumanyan.taskmanager.auth.FirebaseWebService.RequestMethods.POST;
-import static com.example.arturarzumanyan.taskmanager.data.repository.tasks.TasksCloudStore.BASE_TASKS_URL;
 
 public class TasksRepository {
     private TasksDbStore mTasksDbStore;
@@ -62,7 +54,8 @@ public class TasksRepository {
         void onFail();
     }
 
-    public void addTask(TaskList taskList, Task task, final OnTasksLoadedListener listener) {
+    public void addOrUpdateTask(TaskList taskList, Task task, FirebaseWebService.RequestMethods requestMethod,
+                                final OnTasksLoadedListener listener) {
         TasksAsyncTask tasksAsyncTask = new TasksAsyncTask(task, taskList, mRepositoryLoadHelper,
                 mFirebaseWebService, mTasksDbStore, mTasksCloudStore, listener);
         tasksAsyncTask.setDataInfoLoadingListener(new BaseDataLoadingAsyncTask.UserDataLoadingListener<Task>() {
@@ -72,31 +65,20 @@ public class TasksRepository {
             }
         });
 
-        tasksAsyncTask.executeOnExecutor(AsyncTask.SERIAL_EXECUTOR, POST);
-    }
-
-    public void updateTask(TaskList taskList, Task task, final OnTasksLoadedListener listener) {
-        TasksAsyncTask tasksAsyncTask = new TasksAsyncTask(task, taskList, mRepositoryLoadHelper,
-                mFirebaseWebService, mTasksDbStore, mTasksCloudStore, listener);
-        tasksAsyncTask.setDataInfoLoadingListener(new BaseDataLoadingAsyncTask.UserDataLoadingListener<Task>() {
-            @Override
-            public void onSuccess(List<Task> list) {
-                listener.onSuccess(list);
-            }
-        });
-
-        tasksAsyncTask.executeOnExecutor(AsyncTask.SERIAL_EXECUTOR, PATCH);
+        tasksAsyncTask.executeOnExecutor(AsyncTask.SERIAL_EXECUTOR, requestMethod);
     }
 
     public void deleteTask(TaskList taskList, Task task) {
         TasksAsyncTask tasksAsyncTask = new TasksAsyncTask(task, taskList, mRepositoryLoadHelper,
                 mFirebaseWebService, mTasksDbStore, mTasksCloudStore, null);
+
         tasksAsyncTask.setDataInfoLoadingListener(new BaseDataLoadingAsyncTask.UserDataLoadingListener<Task>() {
             @Override
             public void onSuccess(List<Task> list) {
-
+                Log.v("Task successfully deleted");
             }
         });
+
         tasksAsyncTask.executeOnExecutor(AsyncTask.SERIAL_EXECUTOR, DELETE);
     }
 

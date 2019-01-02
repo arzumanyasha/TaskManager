@@ -1,22 +1,16 @@
 package com.example.arturarzumanyan.taskmanager.data.repository.tasks;
 
 import android.content.Context;
-import android.os.AsyncTask;
 
 import com.example.arturarzumanyan.taskmanager.auth.FirebaseWebService;
 import com.example.arturarzumanyan.taskmanager.data.repository.RepositoryLoadHelper;
-import com.example.arturarzumanyan.taskmanager.data.repository.tasklists.TaskListsDbStore;
 import com.example.arturarzumanyan.taskmanager.domain.ResponseDto;
 import com.example.arturarzumanyan.taskmanager.domain.Task;
 import com.example.arturarzumanyan.taskmanager.domain.TaskList;
-import com.example.arturarzumanyan.taskmanager.data.repository.BaseDataLoadingAsyncTask;
 import com.example.arturarzumanyan.taskmanager.networking.NetworkUtil;
 import com.example.arturarzumanyan.taskmanager.networking.base.RequestParameters;
-import com.example.arturarzumanyan.taskmanager.networking.util.TasksParser;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 
 import static com.example.arturarzumanyan.taskmanager.auth.FirebaseWebService.RequestMethods.PATCH;
 import static com.example.arturarzumanyan.taskmanager.auth.FirebaseWebService.RequestMethods.POST;
@@ -24,8 +18,6 @@ import static com.example.arturarzumanyan.taskmanager.auth.FirebaseWebService.Re
 public class TasksCloudStore {
     public static final String BASE_TASKS_URL = "https://www.googleapis.com/tasks/v1/lists/";
 
-    private TaskListsDbStore mTaskListsDbStore;
-    private TasksDbStore mTasksDbStore;
     private RepositoryLoadHelper mRepositoryLoadHelper;
 
     private Context mContext;
@@ -33,8 +25,6 @@ public class TasksCloudStore {
     public TasksCloudStore(Context context) {
         this.mContext = context;
         mRepositoryLoadHelper = new RepositoryLoadHelper(mContext);
-        mTaskListsDbStore = new TaskListsDbStore(mContext);
-        mTasksDbStore = new TasksDbStore(mContext);
     }
 
     public ResponseDto getTasksFromServer(TaskList taskList) {
