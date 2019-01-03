@@ -41,9 +41,23 @@ public class DateUtils {
         return null;
     }
 
+    public static String trimEventDate(String date) {
+        return DateUtils.getEventDate(DateUtils.getEventDateFromString(date));
+    }
+
     public static String getEventDate(Date eventDate) {
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat(YEAR_MONTH_DAY_DATE_PATTERN);
         return simpleDateFormat.format(eventDate);
+    }
+
+    public static Date getEventDate(String date) {
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat(YEAR_MONTH_DAY_DATE_PATTERN);
+        try {
+            return simpleDateFormat.parse(date);
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 
     public static Date getTaskDateFromString(String date) {
@@ -84,6 +98,12 @@ public class DateUtils {
     public static Date getFirstDateOfMonth() {
         Calendar c = Calendar.getInstance();
         c.set(Calendar.DAY_OF_MONTH, 1);
+        return c.getTime();
+    }
+
+    public static Date getLastDateOfMonth() {
+        Calendar c = Calendar.getInstance();
+        c.set(Calendar.DAY_OF_MONTH, getDaysInCurrentMonth());
         return c.getTime();
     }
 
@@ -139,12 +159,24 @@ public class DateUtils {
         } catch (ParseException e) {
             e.printStackTrace();
         }
-        Date monday = new Date(currentDate.getTime() - currentWeekDay * MILLIS_IN_SECONDS
+        return new Date(currentDate.getTime() - currentWeekDay * MILLIS_IN_SECONDS
                 * SECONDS_IN_MINUTES * MINUTES_IN_HOUR * HOURS_IN_DAY);
-        return monday;
     }
 
-    public static Date getDateFromString(String date){
+    public static Date getSundayDate(int currentWeekDay) {
+        SimpleDateFormat df = new SimpleDateFormat(YEAR_MONTH_DAY_PATTERN);
+        Calendar c = Calendar.getInstance();
+        Date currentDate = null;
+        try {
+            currentDate = df.parse(df.format(c.getTime()));
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+        return new Date(currentDate.getTime() - (currentWeekDay - DAYS_IN_WEEK - 1) * MILLIS_IN_SECONDS
+                * SECONDS_IN_MINUTES * MINUTES_IN_HOUR * HOURS_IN_DAY);
+    }
+
+    public static Date getDateFromString(String date) {
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat(YEAR_MONTH_DAY_PATTERN);
         try {
             return simpleDateFormat.parse(date);
@@ -154,7 +186,7 @@ public class DateUtils {
         return null;
     }
 
-    public static String getStringDateFromInt(int year, int month, int day){
+    public static String getStringDateFromInt(int year, int month, int day) {
         return Integer.toString(year) + Integer.toString(month + 1) + Integer.toString(day);
     }
 
@@ -188,6 +220,10 @@ public class DateUtils {
         return c.get(Calendar.YEAR);
     }
 
+    public static boolean isMatchesEventFormat(String date) {
+        return isValidFormat(EVENT_TIME_PATTERN, date);
+    }
+
     private static boolean isValidFormat(String format, String value) {
         Date date = null;
         try {
@@ -200,5 +236,11 @@ public class DateUtils {
             ex.printStackTrace();
         }
         return date != null;
+    }
+
+    public static String decodeDate(String date) {
+        date = date.replaceAll(":", "%3A");
+        date = date.replaceAll("\\+", "%2B");
+        return date;
     }
 }

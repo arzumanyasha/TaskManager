@@ -6,9 +6,6 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.text.DateFormat;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 
@@ -72,15 +69,13 @@ public class EventsParser {
             isNotify = 0;
         }
 
-        Event event = new Event(jsonObject.getString(ID_KEY),
+        return new Event(jsonObject.getString(ID_KEY),
                 jsonObject.getString(SUMMARY_KEY),
                 description,
                 colorId,
                 startDate,
                 endDate,
                 isNotify);
-
-        return event;
     }
 
     public Event parseEvent(String buffer){

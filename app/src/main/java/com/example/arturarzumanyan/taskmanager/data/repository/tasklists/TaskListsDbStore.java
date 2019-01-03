@@ -3,9 +3,10 @@ package com.example.arturarzumanyan.taskmanager.data.repository.tasklists;
 import android.content.Context;
 
 import com.example.arturarzumanyan.taskmanager.data.db.DbHelper;
+import com.example.arturarzumanyan.taskmanager.data.repository.tasklists.specification.TaskListsSpecification;
 import com.example.arturarzumanyan.taskmanager.domain.TaskList;
 
-import java.util.ArrayList;
+import java.util.List;
 
 public class TaskListsDbStore {
     private Context mContext;
@@ -14,28 +15,12 @@ public class TaskListsDbStore {
         this.mContext = context;
     }
 
-    public ArrayList<TaskList> getTaskLists() {
-        return DbHelper.getDbHelper(mContext).getTaskLists();
+    public List<TaskList> getTaskLists(TaskListsSpecification taskListsSpecification){
+       return DbHelper.getDbHelper(mContext).getTaskLists(taskListsSpecification);
     }
 
-    public void addTaskLists(ArrayList<TaskList> taskListArrayList) {
-        DbHelper.getDbHelper(mContext).insertTaskLists(taskListArrayList);
-    }
-
-    public void addTaskList(TaskList taskList) {
-        DbHelper.getDbHelper(mContext).insertTaskList(taskList);
-    }
-
-    public TaskList getTaskList(String title){
-        return DbHelper.getDbHelper(mContext).getTaskList(title);
-    }
-
-    public TaskList getTaskList(int id) {
-        return DbHelper.getDbHelper(mContext).getTaskList(id);
-    }
-
-    public void updateTaskList(TaskList taskList) {
-        DbHelper.getDbHelper(mContext).updateTaskList(taskList);
+    public void addOrUpdateTaskLists(List<TaskList> taskLists){
+        DbHelper.getDbHelper(mContext).addOrUpdateTaskLists(taskLists);
     }
 
     public void deleteTaskList(TaskList taskList) {

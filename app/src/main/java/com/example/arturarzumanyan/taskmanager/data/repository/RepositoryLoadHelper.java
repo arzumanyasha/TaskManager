@@ -1,21 +1,13 @@
 package com.example.arturarzumanyan.taskmanager.data.repository;
 
 import android.content.Context;
-import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
-import android.os.AsyncTask;
 
 import com.example.arturarzumanyan.taskmanager.auth.FirebaseWebService;
-import com.example.arturarzumanyan.taskmanager.auth.TokenStorage;
 import com.example.arturarzumanyan.taskmanager.domain.Event;
 import com.example.arturarzumanyan.taskmanager.domain.Task;
 import com.example.arturarzumanyan.taskmanager.domain.TaskList;
-import com.example.arturarzumanyan.taskmanager.networking.UserDataAsyncTask;
 import com.example.arturarzumanyan.taskmanager.networking.base.RequestParameters;
 import com.example.arturarzumanyan.taskmanager.networking.util.DateUtils;
-
-import org.json.JSONException;
-import org.json.JSONObject;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -50,17 +42,6 @@ public class RepositoryLoadHelper {
 
     public RepositoryLoadHelper(Context context) {
         this.mContext = context;
-    }
-
-    public void requestUserData(UserDataAsyncTask asyncTask, String url) {
-        FirebaseWebService.RequestMethods requestMethod = FirebaseWebService.RequestMethods.GET;
-        RequestParameters requestParameters = new RequestParameters(mContext,
-                url,
-                requestMethod,
-                new HashMap<String, Object>()
-        );
-        requestParameters.setRequestHeaderParameters(new HashMap<String, String>());
-        asyncTask.executeOnExecutor(AsyncTask.SERIAL_EXECUTOR, requestParameters);
     }
 
     public RequestParameters getEventCreateOrUpdateParameters(Event event,

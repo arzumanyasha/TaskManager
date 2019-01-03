@@ -2,11 +2,9 @@ package com.example.arturarzumanyan.taskmanager.auth;
 
 import android.content.Context;
 import android.content.Intent;
-import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.FragmentActivity;
 
-import com.example.arturarzumanyan.taskmanager.networking.UserDataAsyncTask;
 import com.example.arturarzumanyan.taskmanager.networking.base.RequestParameters;
 import com.google.android.gms.auth.api.Auth;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
@@ -23,9 +21,6 @@ import com.google.firebase.auth.AuthCredential;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.GoogleAuthProvider;
-
-import android.support.v4.app.LoaderManager;
-import android.support.v4.content.Loader;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -53,13 +48,12 @@ public class FirebaseWebService implements GoogleApiClient.OnConnectionFailedLis
     private Context mContext;
     private TokenStorage mTokenStorage = new TokenStorage();
 
-    public FirebaseWebService() {
+    public FirebaseWebService(Context context) {
         this.userInfoLoadingListener = null;
+        this.mContext = context;
     }
 
-    public void setGoogleClient(Context context) {
-        mContext = context;
-
+    public void setGoogleClient() {
         mAuth = FirebaseAuth.getInstance();
 
         GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
@@ -152,8 +146,7 @@ public class FirebaseWebService implements GoogleApiClient.OnConnectionFailedLis
         mAccessTokenAsyncTask.execute(requestParameters);
     }
 
-    public void refreshAccessToken(Context context, final AccessTokenUpdatedListener listener) {
-        mContext = context;
+    public void refreshAccessToken(final AccessTokenUpdatedListener listener) {
         AccessTokenAsyncTask accessTokenAsyncTask = new AccessTokenAsyncTask();
         accessTokenAsyncTask.setTokensLoadingListener(new AccessTokenAsyncTask.TokensLoadingListener() {
             @Override
@@ -167,7 +160,7 @@ public class FirebaseWebService implements GoogleApiClient.OnConnectionFailedLis
 
         FirebaseWebService.RequestMethods requestMethod = FirebaseWebService.RequestMethods.POST;
         HashMap<String, Object> requestBodyParameters = new HashMap<>();
-        requestBodyParameters.put("refresh_token", mTokenStorage.getRefreshToken(context));
+        requestBodyParameters.put("refresh_token", mTokenStorage.getRefreshToken(mContext));
         requestBodyParameters.put("client_id", CLIENT_ID);
         requestBodyParameters.put("client_secret", CLIENT_SECRET);
         requestBodyParameters.put("grant_type", "refresh_token");

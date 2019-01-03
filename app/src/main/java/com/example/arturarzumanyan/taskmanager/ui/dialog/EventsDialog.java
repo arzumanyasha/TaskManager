@@ -20,7 +20,6 @@ import android.widget.TimePicker;
 import android.widget.Toast;
 
 import com.example.arturarzumanyan.taskmanager.R;
-import com.example.arturarzumanyan.taskmanager.data.repository.events.EventsCloudStore;
 import com.example.arturarzumanyan.taskmanager.data.repository.events.EventsRepository;
 import com.example.arturarzumanyan.taskmanager.domain.Event;
 import com.example.arturarzumanyan.taskmanager.networking.util.DateUtils;
@@ -29,10 +28,13 @@ import com.example.arturarzumanyan.taskmanager.ui.adapter.ColorPalette;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.UUID;
 
 import petrov.kristiyan.colorpicker.ColorPicker;
 
+import static com.example.arturarzumanyan.taskmanager.auth.FirebaseWebService.RequestMethods.PATCH;
+import static com.example.arturarzumanyan.taskmanager.auth.FirebaseWebService.RequestMethods.POST;
 import static com.example.arturarzumanyan.taskmanager.ui.activity.IntentionActivity.EVENTS_KEY;
 
 public class EventsDialog extends AppCompatDialogFragment {
@@ -105,10 +107,10 @@ public class EventsDialog extends AppCompatDialogFragment {
                             }
                         }
 
-                        if (mStartTime.getDate() < mEndTime.getDate() &&
+                        if (mEndTime.after(mStartTime) &&
                                 !mEditTextEventName.getText().toString().isEmpty() &&
                                 bundle != null) {
-                            Event event = bundle.getParcelable(EVENTS_KEY);
+                            final Event event = bundle.getParcelable(EVENTS_KEY);
                             event.setName(name);
                             event.setDescription(description);
                             event.setColorId(colorNumber);
@@ -116,10 +118,10 @@ public class EventsDialog extends AppCompatDialogFragment {
                             event.setEndTime(endDate);
                             event.setIsNotify(isNotify);
 
-                            mEventsRepository.updateEvent(event, new EventsCloudStore.OnTaskCompletedListener() {
+                            mEventsRepository.addOrUpdateEvent(event, PATCH, new EventsRepository.OnEventsLoadedListener() {
                                 @Override
-                                public void onSuccess(ArrayList<Event> eventsList) {
-                                    eventsReadyListener.onEventsReady(mEventsRepository.getDailyEvents());
+                                public void onSuccess(List<Event> eventsList) {
+                                    eventsReadyListener.onEventsReady(eventsList);
                                 }
 
                                 @Override
@@ -138,17 +140,19 @@ public class EventsDialog extends AppCompatDialogFragment {
                                     startDate,
                                     endDate,
                                     isNotify);
-                            mEventsRepository.addEvent(event, new EventsCloudStore.OnTaskCompletedListener() {
-                                @Override
-                                public void onSuccess(ArrayList<Event> eventsList) {
-                                    eventsReadyListener.onEventsReady(mEventsRepository.getDailyEvents());
-                                }
+                            mEventsRepository.addOrUpdateEvent(event, POST,
+                                    new EventsRepository.OnEventsLoadedListener() {
+                                        @Override
+                                        public void onSuccess(List<Event> eventsList) {
+                                            eventsReadyListener.onEventsReady(eventsList);
+                                        }
 
-                                @Override
-                                public void onFail() {
+                                        @Override
+                                        public void onFail() {
 
-                                }
-                            });
+                                        }
+                                    });
+
                         } else {
                             Toast.makeText(getContext(),
                                     R.string.time_error_msg,
@@ -286,7 +290,7 @@ public class EventsDialog extends AppCompatDialogFragment {
     }
 
     public interface EventsReadyListener {
-        void onEventsReady(ArrayList<Event> events);
+        void onEventsReady(List<Event> events);
     }
 
     public void setEventsReadyListener(EventsReadyListener listener) {

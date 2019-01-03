@@ -1,11 +1,5 @@
 package com.example.arturarzumanyan.taskmanager.ui.dialog;
 
-import com.example.arturarzumanyan.taskmanager.R;
-import com.example.arturarzumanyan.taskmanager.data.repository.tasks.TasksCloudStore;
-import com.example.arturarzumanyan.taskmanager.data.repository.tasks.TasksRepository;
-import com.example.arturarzumanyan.taskmanager.domain.Task;
-import com.example.arturarzumanyan.taskmanager.networking.util.DateUtils;
-
 import android.app.AlertDialog;
 import android.app.DatePickerDialog;
 import android.app.Dialog;
@@ -18,12 +12,20 @@ import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.TextView;
 
-import java.util.ArrayList;
+import com.example.arturarzumanyan.taskmanager.R;
+import com.example.arturarzumanyan.taskmanager.data.repository.tasks.TasksRepository;
+import com.example.arturarzumanyan.taskmanager.domain.Task;
+import com.example.arturarzumanyan.taskmanager.domain.TaskList;
+import com.example.arturarzumanyan.taskmanager.networking.util.DateUtils;
+
 import java.util.Date;
+import java.util.List;
 import java.util.UUID;
 
+import static com.example.arturarzumanyan.taskmanager.auth.FirebaseWebService.RequestMethods.PATCH;
+import static com.example.arturarzumanyan.taskmanager.auth.FirebaseWebService.RequestMethods.POST;
 import static com.example.arturarzumanyan.taskmanager.ui.activity.IntentionActivity.TASKS_KEY;
-import static com.example.arturarzumanyan.taskmanager.ui.fragment.TasksFragment.TASK_LIST_ID_KEY;
+import static com.example.arturarzumanyan.taskmanager.ui.activity.IntentionActivity.TASK_LISTS_KEY;
 
 public class TasksDialog extends AppCompatDialogFragment {
     private EditText mEditTextTaskName, mEditTextTaskDescription;
@@ -62,12 +64,13 @@ public class TasksDialog extends AppCompatDialogFragment {
                         String taskName = mEditTextTaskName.getText().toString();
                         if (!taskName.isEmpty() && (bundle.getParcelable(TASKS_KEY) != null)) {
                             Task task = bundle.getParcelable(TASKS_KEY);
+                            TaskList taskList = bundle.getParcelable(TASK_LISTS_KEY);
                             task.setName(taskName);
                             task.setDescription(mEditTextTaskDescription.getText().toString());
                             task.setDate(taskDate);
-                            tasksRepository.updateTask(task, new TasksCloudStore.OnTaskCompletedListener() {
+                            tasksRepository.addOrUpdateTask(taskList, task, PATCH, new TasksRepository.OnTasksLoadedListener() {
                                 @Override
-                                public void onSuccess(ArrayList<Task> taskArrayList) {
+                                public void onSuccess(List<Task> taskArrayList) {
                                     tasksReadyListener.onTasksReady(taskArrayList);
                                 }
 
@@ -80,7 +83,9 @@ public class TasksDialog extends AppCompatDialogFragment {
                             String taskId = UUID.randomUUID().toString();
                             String taskDescription = mEditTextTaskDescription.getText().toString();
                             int isExecuted = 0;
-                            int taskListId = bundle.getInt(TASK_LIST_ID_KEY);
+
+                            TaskList taskList = bundle.getParcelable(TASK_LISTS_KEY);
+                            int taskListId = taskList.getId();
                             Date date = null;
 
                             if (!mTextViewTaskDate.getText().equals(getString(R.string.set_task_date_title))) {
@@ -94,10 +99,9 @@ public class TasksDialog extends AppCompatDialogFragment {
                                     taskListId,
                                     date
                             );
-                            
-                            tasksRepository.addTask(task, new TasksCloudStore.OnTaskCompletedListener() {
+                            tasksRepository.addOrUpdateTask(taskList, task, POST, new TasksRepository.OnTasksLoadedListener() {
                                 @Override
-                                public void onSuccess(ArrayList<Task> taskArrayList) {
+                                public void onSuccess(List<Task> taskArrayList) {
                                     tasksReadyListener.onTasksReady(taskArrayList);
                                 }
 
@@ -142,7 +146,7 @@ public class TasksDialog extends AppCompatDialogFragment {
     }
 
     public interface TasksReadyListener {
-        void onTasksReady(ArrayList<Task> tasks);
+        void onTasksReady(List<Task> tasks);
     }
 
     public void setTasksReadyListener(TasksReadyListener listener) {

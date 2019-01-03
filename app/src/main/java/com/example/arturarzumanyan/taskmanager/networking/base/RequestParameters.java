@@ -59,7 +59,6 @@ public class RequestParameters {
 
     public void setRequestHeaderParameters(HashMap<String, String> requestHeaderParameters) {
         TokenStorage tokenStorage = new TokenStorage();
-        String token = tokenStorage.getAccessToken(mContext);
         requestHeaderParameters.put(AUTHORIZATION_KEY, "Bearer " + tokenStorage.getAccessToken(mContext));
 
         this.requestHeaderParameters = requestHeaderParameters;

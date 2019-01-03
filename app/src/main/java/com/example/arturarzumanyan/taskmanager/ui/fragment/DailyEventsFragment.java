@@ -13,13 +13,14 @@ import android.view.ViewGroup;
 
 import com.example.arturarzumanyan.taskmanager.R;
 import com.example.arturarzumanyan.taskmanager.data.repository.events.EventsRepository;
+import com.example.arturarzumanyan.taskmanager.data.repository.events.specification.EventsFromDateSpecification;
 import com.example.arturarzumanyan.taskmanager.domain.Event;
 import com.example.arturarzumanyan.taskmanager.networking.util.DateUtils;
 import com.example.arturarzumanyan.taskmanager.ui.activity.IntentionActivity;
 import com.example.arturarzumanyan.taskmanager.ui.adapter.EventsAdapter;
 import com.example.arturarzumanyan.taskmanager.ui.dialog.EventsDialog;
 
-import java.util.ArrayList;
+import java.util.List;
 
 import static com.example.arturarzumanyan.taskmanager.ui.activity.IntentionActivity.EVENTS_KEY;
 
@@ -71,11 +72,22 @@ public class DailyEventsFragment extends Fragment {
         super.onActivityCreated(savedInstanceState);
         final EventsRepository eventsRepository = new EventsRepository(getActivity());
 
-        ArrayList<Event> events = eventsRepository.getDailyEvents();
-        setEventsAdapter(events, eventsRepository);
+        final EventsFromDateSpecification eventsFromDateSpecification = new EventsFromDateSpecification();
+        eventsFromDateSpecification.setDate(DateUtils.getCurrentTime());
+        eventsRepository.getEvents(eventsFromDateSpecification, new EventsRepository.OnEventsLoadedListener() {
+            @Override
+            public void onSuccess(List<Event> eventsList) {
+                setEventsAdapter(eventsList, eventsRepository);
+            }
+
+            @Override
+            public void onFail() {
+
+            }
+        });
     }
 
-    private void setEventsAdapter(ArrayList<Event> events, final EventsRepository eventsRepository) {
+    private void setEventsAdapter(List<Event> events, final EventsRepository eventsRepository) {
         LinearLayoutManager layoutManager = new LinearLayoutManager(getActivity());
         mEventsRecyclerView.setLayoutManager(layoutManager);
 
@@ -93,7 +105,7 @@ public class DailyEventsFragment extends Fragment {
 
         ((IntentionActivity) getActivity()).setEventFragmentInteractionListener(new IntentionActivity.EventFragmentInteractionListener() {
             @Override
-            public void onEventsReady(ArrayList<Event> events) {
+            public void onEventsReady(List<Event> events) {
                 mEventsAdapter.updateList(events);
             }
         });
@@ -107,7 +119,7 @@ public class DailyEventsFragment extends Fragment {
         eventsDialog.setArguments(bundle);
         eventsDialog.setEventsReadyListener(new EventsDialog.EventsReadyListener() {
             @Override
-            public void onEventsReady(ArrayList<Event> events) {
+            public void onEventsReady(List<Event> events) {
                 mEventsAdapter.updateList(events);
             }
         });

@@ -10,12 +10,10 @@ import android.view.View;
 import android.widget.EditText;
 
 import com.example.arturarzumanyan.taskmanager.R;
-import com.example.arturarzumanyan.taskmanager.data.repository.tasklists.TaskListsCloudStore;
 import com.example.arturarzumanyan.taskmanager.data.repository.tasklists.TaskListsRepository;
-import com.example.arturarzumanyan.taskmanager.domain.Task;
 import com.example.arturarzumanyan.taskmanager.domain.TaskList;
 
-import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 import static com.example.arturarzumanyan.taskmanager.ui.activity.IntentionActivity.TASK_LISTS_KEY;
@@ -54,15 +52,20 @@ public class TaskListsDialog extends AppCompatDialogFragment {
                         if (!taskListName.isEmpty() && bundle != null) {
                             TaskList taskList = bundle.getParcelable(TASK_LISTS_KEY);
                             taskList.setTitle(taskListName);
-                            taskListsRepository.updateTaskList(taskList, new TaskListsCloudStore.OnTaskCompletedListener() {
+                            taskListsRepository.updateTaskList(taskList, new TaskListsRepository.OnTaskListsLoadedListener() {
                                 @Override
-                                public void onSuccess(TaskList taskList) {
-                                    taskListReadyListener.onTaskListReady(taskList);
+                                public void onSuccess(List<TaskList> taskListArrayList) {
+
                                 }
 
                                 @Override
-                                public void onSuccess(ArrayList<TaskList> taskListArrayList) {
+                                public void onUpdate(List<TaskList> taskLists) {
 
+                                }
+
+                                @Override
+                                public void onSuccess(TaskList taskList) {
+                                    taskListReadyListener.onTaskListReady(taskList);
                                 }
 
                                 @Override
@@ -73,15 +76,20 @@ public class TaskListsDialog extends AppCompatDialogFragment {
                         } else if (!taskListName.isEmpty() && bundle == null) {
                             TaskList taskList = new TaskList(UUID.randomUUID().toString(),
                                     taskListName);
-                            taskListsRepository.addTaskList(taskList, new TaskListsCloudStore.OnTaskCompletedListener() {
+                            taskListsRepository.addTaskList(taskList, new TaskListsRepository.OnTaskListsLoadedListener() {
                                 @Override
-                                public void onSuccess(TaskList taskList) {
-                                    taskListReadyListener.onTaskListReady(taskList);
+                                public void onSuccess(List<TaskList> taskListArrayList) {
+
                                 }
 
                                 @Override
-                                public void onSuccess(ArrayList<TaskList> taskListArrayList) {
+                                public void onUpdate(List<TaskList> taskLists) {
 
+                                }
+
+                                @Override
+                                public void onSuccess(TaskList taskList) {
+                                    taskListReadyListener.onTaskListReady(taskList);
                                 }
 
                                 @Override
