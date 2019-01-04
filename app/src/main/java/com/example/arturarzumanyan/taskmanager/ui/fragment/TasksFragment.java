@@ -26,31 +26,20 @@ import static com.example.arturarzumanyan.taskmanager.ui.activity.IntentionActiv
 import static com.example.arturarzumanyan.taskmanager.ui.activity.IntentionActivity.TASK_LISTS_KEY;
 
 public class TasksFragment extends Fragment {
-    private static final String ARG_PARAM1 = "param1";
-    private static final String ARG_PARAM2 = "param2";
-    private static final String ARG_PARAM3 = "param3";
-    public static final String TASK_LIST_ID_KEY = "taskListId";
-    public static final String TASK_LIST_STRING_ID_KEY = "stringTaskListId";
-    public static final String TASK_LIST_TITLE_KEY = "taskListTitle";
-
     private RecyclerView mTasksRecyclerView;
     private TasksAdapter mTasksAdapter;
 
-    private int mParam1;
-    private String mParam2;
-    private String mParam3;
+    private TaskList mTaskList;
 
     private OnFragmentInteractionListener mListener;
 
     public TasksFragment() {
     }
 
-    public static TasksFragment newInstance(String param1, String param2, String param3) {
+    public static TasksFragment newInstance(TaskList taskList) {
         TasksFragment fragment = new TasksFragment();
         Bundle args = new Bundle();
-        args.putString(ARG_PARAM1, param1);
-        args.putString(ARG_PARAM2, param2);
-        args.putString(ARG_PARAM3, param3);
+        args.putParcelable(TASK_LISTS_KEY, taskList);
         fragment.setArguments(args);
         return fragment;
     }
@@ -59,9 +48,7 @@ public class TasksFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
-            mParam1 = getArguments().getInt(TASK_LIST_ID_KEY);
-            mParam2 = getArguments().getString(TASK_LIST_TITLE_KEY);
-            mParam3 = getArguments().getString(TASK_LIST_STRING_ID_KEY);
+            mTaskList = getArguments().getParcelable(TASK_LISTS_KEY);
         }
     }
 
@@ -82,7 +69,7 @@ public class TasksFragment extends Fragment {
 
         TasksRepository tasksRepository = new TasksRepository(getActivity());
 
-        tasksRepository.loadTasks(new TaskList(mParam1, mParam3, mParam2), new TasksRepository.OnTasksLoadedListener() {
+        tasksRepository.loadTasks(mTaskList, new TasksRepository.OnTasksLoadedListener() {
             @Override
             public void onSuccess(List<Task> taskArrayList) {
                 setTasksAdapter(taskArrayList);
@@ -93,7 +80,7 @@ public class TasksFragment extends Fragment {
 
             }
         });
-        getActivity().setTitle(mParam2);
+        getActivity().setTitle(mTaskList.getTitle());
 
 
         ((IntentionActivity) getActivity()).setTaskFragmentInteractionListener(new IntentionActivity.TaskFragmentInteractionListener() {
@@ -117,7 +104,7 @@ public class TasksFragment extends Fragment {
             @Override
             public void onItemDelete(final Task task) {
                 TasksRepository tasksRepository = new TasksRepository(getActivity());
-                tasksRepository.deleteTask(new TaskList(mParam1, mParam3, mParam2), task);
+                tasksRepository.deleteTask(mTaskList, task);
             }
 
             @Override
@@ -128,7 +115,7 @@ public class TasksFragment extends Fragment {
             @Override
             public void onChangeItemExecuted(final Task task) {
                 TasksRepository tasksRepository = new TasksRepository(getActivity());
-                tasksRepository.addOrUpdateTask(new TaskList(mParam1, mParam3, mParam2),
+                tasksRepository.addOrUpdateTask(mTaskList,
                         task, PATCH, new TasksRepository.OnTasksLoadedListener() {
                             @Override
                             public void onSuccess(List<Task> taskArrayList) {
@@ -148,20 +135,16 @@ public class TasksFragment extends Fragment {
 
 
     private void openTasksDialog(Task task) {
-        TasksDialog tasksDialog = new TasksDialog();
-        Bundle bundle = new Bundle();
-        bundle.putParcelable(TASKS_KEY, task);
-
-        TaskList taskList = new TaskList(mParam1, mParam3, mParam2);
-        bundle.putParcelable(TASK_LISTS_KEY, taskList);
-        tasksDialog.setArguments(bundle);
+        TasksDialog tasksDialog = TasksDialog.newInstance(task, mTaskList);
         tasksDialog.setTasksReadyListener(new TasksDialog.TasksReadyListener() {
             @Override
             public void onTasksReady(List<Task> tasks) {
                 mTasksAdapter.updateList(tasks);
             }
         });
-        tasksDialog.show(getFragmentManager(), TASKS_KEY);
+        if (getFragmentManager() != null) {
+            tasksDialog.show(getFragmentManager(), TASKS_KEY);
+        }
     }
 
     public void onButtonPressed(Uri uri) {

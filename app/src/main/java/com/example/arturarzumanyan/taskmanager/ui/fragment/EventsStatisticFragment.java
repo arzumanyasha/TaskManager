@@ -34,15 +34,9 @@ import java.util.List;
 import static com.example.arturarzumanyan.taskmanager.networking.util.DateUtils.MINUTES_IN_HOUR;
 
 public class EventsStatisticFragment extends Fragment {
-    private static final String ARG_PARAM1 = "param1";
-    private static final String ARG_PARAM2 = "param2";
-
     private static final int MINUTES_IN_DAY = 1440;
     private static final int MINUTES_IN_WEEK = MINUTES_IN_DAY * 7;
     private static final int PERCENTAGE = 100;
-
-    private String mParam1;
-    private String mParam2;
 
     private PieChart pieChart;
     private Spinner spinnerMode;
@@ -54,22 +48,13 @@ public class EventsStatisticFragment extends Fragment {
     public EventsStatisticFragment() {
     }
 
-    public static EventsStatisticFragment newInstance(String param1, String param2) {
-        EventsStatisticFragment fragment = new EventsStatisticFragment();
-        Bundle args = new Bundle();
-        args.putString(ARG_PARAM1, param1);
-        args.putString(ARG_PARAM2, param2);
-        fragment.setArguments(args);
-        return fragment;
+    public static EventsStatisticFragment newInstance() {
+        return new EventsStatisticFragment();
     }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if (getArguments() != null) {
-            mParam1 = getArguments().getString(ARG_PARAM1);
-            mParam2 = getArguments().getString(ARG_PARAM2);
-        }
     }
 
     @Override

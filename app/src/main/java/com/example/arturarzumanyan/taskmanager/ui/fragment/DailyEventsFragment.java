@@ -25,13 +25,7 @@ import java.util.List;
 import static com.example.arturarzumanyan.taskmanager.ui.activity.IntentionActivity.EVENTS_KEY;
 
 public class DailyEventsFragment extends Fragment {
-    private static final String ARG_PARAM1 = "param1";
-    private static final String ARG_PARAM2 = "param2";
-
     private RecyclerView mEventsRecyclerView;
-
-    private String mParam1;
-    private String mParam2;
 
     private EventsAdapter mEventsAdapter;
 
@@ -41,22 +35,13 @@ public class DailyEventsFragment extends Fragment {
 
     }
 
-    public static DailyEventsFragment newInstance(String param1, String param2) {
-        DailyEventsFragment fragment = new DailyEventsFragment();
-        Bundle args = new Bundle();
-        args.putString(ARG_PARAM1, param1);
-        args.putString(ARG_PARAM2, param2);
-        fragment.setArguments(args);
-        return fragment;
+    public static DailyEventsFragment newInstance() {
+        return new DailyEventsFragment();
     }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if (getArguments() != null) {
-            mParam1 = getArguments().getString(ARG_PARAM1);
-            mParam2 = getArguments().getString(ARG_PARAM2);
-        }
     }
 
     @Override
@@ -113,10 +98,7 @@ public class DailyEventsFragment extends Fragment {
     }
 
     private void openEventsDialog(Event event) {
-        EventsDialog eventsDialog = new EventsDialog();
-        Bundle bundle = new Bundle();
-        bundle.putParcelable(EVENTS_KEY, event);
-        eventsDialog.setArguments(bundle);
+        EventsDialog eventsDialog = EventsDialog.newInstance(event);
         eventsDialog.setEventsReadyListener(new EventsDialog.EventsReadyListener() {
             @Override
             public void onEventsReady(List<Event> events) {

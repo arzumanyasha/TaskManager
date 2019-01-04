@@ -59,6 +59,16 @@ public class EventsDialog extends AppCompatDialogFragment {
         this.eventsReadyListener = null;
     }
 
+    public static EventsDialog newInstance(Event event) {
+        EventsDialog eventsDialog = new EventsDialog();
+        if (event != null) {
+            Bundle bundle = new Bundle();
+            bundle.putParcelable(EVENTS_KEY, event);
+            eventsDialog.setArguments(bundle);
+        }
+        return eventsDialog;
+    }
+
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());

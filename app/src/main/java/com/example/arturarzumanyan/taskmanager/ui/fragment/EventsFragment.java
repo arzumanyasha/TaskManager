@@ -18,13 +18,7 @@ import com.example.arturarzumanyan.taskmanager.R;
 import static com.example.arturarzumanyan.taskmanager.ui.activity.IntentionActivity.EVENTS_KEY;
 
 public class EventsFragment extends Fragment {
-    private static final String ARG_PARAM1 = "param1";
-    private static final String ARG_PARAM2 = "param2";
-
     private static final String BACK_STACK_ROOT_TAG = "root_fragment";
-
-    private String mParam1;
-    private String mParam2;
 
     private OnFragmentInteractionListener mListener;
 
@@ -32,22 +26,13 @@ public class EventsFragment extends Fragment {
 
     }
 
-    public static EventsFragment newInstance(String param1, String param2) {
-        EventsFragment fragment = new EventsFragment();
-        Bundle args = new Bundle();
-        args.putString(ARG_PARAM1, param1);
-        args.putString(ARG_PARAM2, param2);
-        fragment.setArguments(args);
-        return fragment;
+    public static EventsFragment newInstance() {
+        return new EventsFragment();
     }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if (getArguments() != null) {
-            mParam1 = getArguments().getString(ARG_PARAM1);
-            mParam2 = getArguments().getString(ARG_PARAM2);
-        }
     }
 
     @Override
@@ -73,13 +58,13 @@ public class EventsFragment extends Fragment {
 
                     switch (item.getItemId()) {
                         case R.id.nav_week:
-                            selectedFragment = new WeekDashboardFragment();
+                            selectedFragment = WeekDashboardFragment.newInstance();
                             break;
                         case R.id.nav_today:
-                            selectedFragment = new DailyEventsFragment();
+                            selectedFragment = DailyEventsFragment.newInstance();
                             break;
                         case R.id.nav_stats:
-                            selectedFragment = new EventsStatisticFragment();
+                            selectedFragment = EventsStatisticFragment.newInstance();
                             break;
                     }
 

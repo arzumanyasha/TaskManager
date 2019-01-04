@@ -36,6 +36,17 @@ public class TasksDialog extends AppCompatDialogFragment {
         this.tasksReadyListener = null;
     }
 
+    public static TasksDialog newInstance(Task task, TaskList taskList){
+        TasksDialog tasksDialog = new TasksDialog();
+        Bundle bundle = new Bundle();
+        bundle.putParcelable(TASK_LISTS_KEY, taskList);
+        if(task != null){
+            bundle.putParcelable(TASKS_KEY, task);
+        }
+        tasksDialog.setArguments(bundle);
+        return tasksDialog;
+    }
+
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
