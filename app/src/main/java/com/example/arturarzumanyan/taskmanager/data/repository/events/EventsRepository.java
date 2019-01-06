@@ -54,7 +54,7 @@ public class EventsRepository {
     public void addOrUpdateEvent(Event event, FirebaseWebService.RequestMethods requestMethod,
                                  final OnEventsLoadedListener listener){
         EventsFromDateSpecification eventsFromDateSpecification = new EventsFromDateSpecification();
-        eventsFromDateSpecification.setDate(DateUtils.getCurrentTime());
+        eventsFromDateSpecification.setDate(/*DateUtils.getCurrentTime()*/DateUtils.getEventDate(event.getStartTime()));
 
         EventsAsyncTask eventsAsyncTask = new EventsAsyncTask(event,
                 mRepositoryLoadHelper, mFirebaseWebService, mEventsDbStore, mEventsCloudStore,

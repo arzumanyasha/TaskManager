@@ -234,8 +234,9 @@ public class DateUtils {
             }
         } catch (ParseException ex) {
             ex.printStackTrace();
+        } finally {
+            return date != null;
         }
-        return date != null;
     }
 
     public static String decodeDate(String date) {

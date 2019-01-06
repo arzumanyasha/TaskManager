@@ -56,6 +56,7 @@ public class IntentionActivity extends AppCompatActivity {
     private SubMenu mTaskListsMenu;
 
     private List<TaskList> mTaskLists;
+    private TaskList mCurrentTaskList;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -90,6 +91,7 @@ public class IntentionActivity extends AppCompatActivity {
                 notifyDataLoaded();
 
                 TasksFragment tasksFragment = TasksFragment.newInstance(mTaskLists.get(0));
+                mCurrentTaskList = mTaskLists.get(0);
                 openFragment(tasksFragment);
             }
 
@@ -117,11 +119,8 @@ public class IntentionActivity extends AppCompatActivity {
             public void onClick(View view) {
                 if (getTitle() == EVENTS_KEY) {
                     openEventsDialog();
-                }
-                for (int i = 0; i < mTaskLists.size(); i++) {
-                    if (getTitle() == mTaskLists.get(i).getTitle()) {
-                        openTasksDialog();
-                    }
+                } else {
+                    openTasksDialog();
                 }
             }
         });
@@ -130,7 +129,7 @@ public class IntentionActivity extends AppCompatActivity {
     private void updateTaskListsMenu(List<TaskList> taskLists) {
         Log.v("TaskLists Menu updating");
         int listSize = mTaskLists.size();
-        for (int i = 0; i < /*mTaskLists.size()*/listSize; i++) {
+        for (int i = 0; i < listSize; i++) {
             Log.v("Removing " + (mTaskLists.size() - 1) + " 's menu item");
             Log.v(mTaskListsMenu.getItem(mTaskLists.size() - 1).getTitle().toString());
             mTaskListsMenu.getItem(mTaskLists.size() - 1).setVisible(false);
@@ -145,6 +144,7 @@ public class IntentionActivity extends AppCompatActivity {
                 @Override
                 public boolean onMenuItemClick(MenuItem item) {
                     openTaskFragment(mTaskLists.get(position));
+                    mCurrentTaskList = mTaskLists.get(position);
                     mDrawer.closeDrawer(Gravity.START);
                     return false;
                 }
@@ -193,6 +193,7 @@ public class IntentionActivity extends AppCompatActivity {
                 @Override
                 public boolean onMenuItemClick(MenuItem item) {
                     openTaskFragment(mTaskLists.get(position));
+                    mCurrentTaskList = mTaskLists.get(position);
                     mDrawer.closeDrawer(Gravity.START);
                     return false;
                 }
@@ -242,7 +243,7 @@ public class IntentionActivity extends AppCompatActivity {
     private void openTasksDialog() {
         TasksDialog tasksDialog;
         for (TaskList taskList : mTaskLists) {
-            if (getTitle().equals(taskList.getTitle())) {
+            if (mCurrentTaskList.getId() == taskList.getId()) {
                 tasksDialog = TasksDialog.newInstance(null, taskList);
                 tasksDialog.setTasksReadyListener(new TasksDialog.TasksReadyListener() {
                     @Override
@@ -267,9 +268,12 @@ public class IntentionActivity extends AppCompatActivity {
                     @Override
                     public boolean onMenuItemClick(MenuItem item) {
                         openTaskFragment(taskList);
+                        mDrawer.closeDrawer(Gravity.START);
                         return false;
                     }
                 });
+                mCurrentTaskList = taskList;
+                openTaskFragment(taskList);
             }
         });
         taskListsDialog.show(getSupportFragmentManager(), TASK_LISTS_KEY);
@@ -311,7 +315,8 @@ public class IntentionActivity extends AppCompatActivity {
         TaskList taskList = null;
 
         for (int i = 0; i < mTaskLists.size(); i++) {
-            if (getTitle() == mTaskLists.get(i).getTitle()) {
+            if (mCurrentTaskList.getId() == mTaskLists.get(i).getId()) {
+                Log.v("Selected TaskList is: " + mTaskLists.get(i).getTitle());
                 taskList = mTaskLists.get(i);
             }
         }
@@ -356,13 +361,17 @@ public class IntentionActivity extends AppCompatActivity {
                         TaskList previousTaskList = null;
                         for (int i = 0; i < menuSize; i++) {
                             if (mTaskLists.get(i).getId() == taskList.getId()) {
+                                Log.v("menu size was " + mTaskListsMenu.size());
                                 mTaskListsMenu.getItem(i).setVisible(false);
-                                mTaskListsMenu.removeItem(i);
+                                int itemId = mTaskListsMenu.getItem(i).getItemId();
+                                mTaskListsMenu.removeItem(itemId);
+                                Log.v("menu size is " + mTaskListsMenu.size());
                                 mTaskLists.remove(i);
                                 previousTaskList = mTaskLists.get(i - 1);
                             }
                         }
                         if (previousTaskList != null) {
+                            mCurrentTaskList = previousTaskList;
                             openTaskFragment(previousTaskList);
                         }
                     }
