@@ -29,12 +29,6 @@ import static com.example.arturarzumanyan.taskmanager.networking.util.DateUtils.
 import static com.example.arturarzumanyan.taskmanager.networking.util.DateUtils.MINUTES_IN_HOUR;
 
 public class WeekDashboardFragment extends Fragment {
-    private static final String ARG_PARAM1 = "param1";
-    private static final String ARG_PARAM2 = "param2";
-
-    private String mParam1;
-    private String mParam2;
-
     private LinearLayout mLinearLayoutMon;
     private LinearLayout mLinearLayoutTue;
     private LinearLayout mLinearLayoutWed;
@@ -50,22 +44,13 @@ public class WeekDashboardFragment extends Fragment {
     public WeekDashboardFragment() {
     }
 
-    public static WeekDashboardFragment newInstance(String param1, String param2) {
-        WeekDashboardFragment fragment = new WeekDashboardFragment();
-        Bundle args = new Bundle();
-        args.putString(ARG_PARAM1, param1);
-        args.putString(ARG_PARAM2, param2);
-        fragment.setArguments(args);
-        return fragment;
+    public static WeekDashboardFragment newInstance() {
+        return new WeekDashboardFragment();
     }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if (getArguments() != null) {
-            mParam1 = getArguments().getString(ARG_PARAM1);
-            mParam2 = getArguments().getString(ARG_PARAM2);
-        }
     }
 
     @Override

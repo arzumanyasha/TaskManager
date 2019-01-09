@@ -4,6 +4,7 @@ import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.DialogInterface;
 import android.os.Bundle;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatDialogFragment;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -12,6 +13,7 @@ import android.widget.EditText;
 import com.example.arturarzumanyan.taskmanager.R;
 import com.example.arturarzumanyan.taskmanager.data.repository.tasklists.TaskListsRepository;
 import com.example.arturarzumanyan.taskmanager.domain.TaskList;
+import com.example.arturarzumanyan.taskmanager.ui.fragment.TasksFragment;
 
 import java.util.List;
 import java.util.UUID;
@@ -23,6 +25,16 @@ public class TaskListsDialog extends AppCompatDialogFragment {
 
     public TaskListsDialog() {
         this.taskListReadyListener = null;
+    }
+
+    public static TaskListsDialog newInstance(TaskList taskList) {
+        TaskListsDialog taskListsDialog = new TaskListsDialog();
+        if (taskList != null) {
+            Bundle bundle = new Bundle();
+            bundle.putParcelable(TASK_LISTS_KEY, taskList);
+            taskListsDialog.setArguments(bundle);
+        }
+        return taskListsDialog;
     }
 
     @Override

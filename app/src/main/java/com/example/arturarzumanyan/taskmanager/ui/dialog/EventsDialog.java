@@ -23,6 +23,7 @@ import com.example.arturarzumanyan.taskmanager.R;
 import com.example.arturarzumanyan.taskmanager.data.repository.events.EventsRepository;
 import com.example.arturarzumanyan.taskmanager.domain.Event;
 import com.example.arturarzumanyan.taskmanager.networking.util.DateUtils;
+import com.example.arturarzumanyan.taskmanager.networking.util.Log;
 import com.example.arturarzumanyan.taskmanager.ui.adapter.ColorPalette;
 
 import java.util.ArrayList;
@@ -38,7 +39,7 @@ import static com.example.arturarzumanyan.taskmanager.auth.FirebaseWebService.Re
 import static com.example.arturarzumanyan.taskmanager.ui.activity.IntentionActivity.EVENTS_KEY;
 
 public class EventsDialog extends AppCompatDialogFragment {
-    private static final int CURRENT_COLOR = 9;
+    private static final int DEFAULT_COLOR = 9;
     private EditText mEditTextEventName, mEditTextEventDescription;
     private ImageButton mImageButtonColorPicker;
     private TextView mTextViewStartTime, mTextViewEndTime, mTextViewDate;
@@ -59,6 +60,16 @@ public class EventsDialog extends AppCompatDialogFragment {
         this.eventsReadyListener = null;
     }
 
+    public static EventsDialog newInstance(Event event) {
+        EventsDialog eventsDialog = new EventsDialog();
+        if (event != null) {
+            Bundle bundle = new Bundle();
+            bundle.putParcelable(EVENTS_KEY, event);
+            eventsDialog.setArguments(bundle);
+        }
+        return eventsDialog;
+    }
+
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
@@ -70,7 +81,7 @@ public class EventsDialog extends AppCompatDialogFragment {
 
         mColorPalette = new ColorPalette(getActivity());
         for (HashMap.Entry<Integer, Integer> map : mColorPalette.getColorPalette().entrySet()) {
-            if (map.getKey() == CURRENT_COLOR) {
+            if (map.getKey() == DEFAULT_COLOR) {
                 mCurrentColor = map.getValue();
             }
         }
@@ -99,11 +110,12 @@ public class EventsDialog extends AppCompatDialogFragment {
                             isNotify = 0;
                         }
 
-                        int colorNumber = CURRENT_COLOR;
+                        int colorNumber = mCurrentColor;
 
                         for (HashMap.Entry<Integer, Integer> map : mColorPalette.getColorPalette().entrySet()) {
                             if (map.getValue() == mCurrentColor) {
                                 colorNumber = map.getKey();
+                                Log.v("colorNumber is " + colorNumber);
                             }
                         }
 
@@ -235,6 +247,7 @@ public class EventsDialog extends AppCompatDialogFragment {
         if (bundle != null) {
             setEventInfoViews(bundle);
         }
+
         return builder.create();
     }
 
