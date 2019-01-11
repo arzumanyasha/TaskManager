@@ -23,14 +23,12 @@ import com.example.arturarzumanyan.taskmanager.networking.util.TasksParser;
 import java.lang.ref.WeakReference;
 import java.net.HttpURLConnection;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 
 import static com.example.arturarzumanyan.taskmanager.auth.FirebaseWebService.RequestMethods.DELETE;
 import static com.example.arturarzumanyan.taskmanager.auth.FirebaseWebService.RequestMethods.GET;
 import static com.example.arturarzumanyan.taskmanager.auth.FirebaseWebService.RequestMethods.PATCH;
 import static com.example.arturarzumanyan.taskmanager.auth.FirebaseWebService.RequestMethods.POST;
-import static com.example.arturarzumanyan.taskmanager.data.repository.tasks.TasksCloudStore.BASE_TASKS_URL;
 
 public class TaskListsRepository {
     private TaskListsCloudStore mTaskListsCloudStore;
@@ -62,6 +60,11 @@ public class TaskListsRepository {
                 Log.v("TaskLists loaded successfully");
                 listener.onSuccess(list);
             }
+
+            @Override
+            public void onFail() {
+                listener.onFail();
+            }
         });
 
         taskListsAsyncTask.executeOnExecutor(AsyncTask.SERIAL_EXECUTOR, GET);
@@ -78,6 +81,11 @@ public class TaskListsRepository {
             @Override
             public void onSuccess(List<TaskList> list) {
                 listener.onSuccess(list.get(list.size() - 1));
+            }
+
+            @Override
+            public void onFail() {
+                listener.onFail();
             }
         });
         taskListsAsyncTask.executeOnExecutor(AsyncTask.SERIAL_EXECUTOR, POST);
@@ -96,6 +104,11 @@ public class TaskListsRepository {
             public void onSuccess(List<TaskList> list) {
                 listener.onSuccess(list.get(0));
             }
+
+            @Override
+            public void onFail() {
+                listener.onFail();
+            }
         });
         taskListsAsyncTask.executeOnExecutor(AsyncTask.SERIAL_EXECUTOR, PATCH);
     }
@@ -112,6 +125,11 @@ public class TaskListsRepository {
             @Override
             public void onSuccess(List<TaskList> list) {
                 listener.onSuccess(list.get(0));
+            }
+
+            @Override
+            public void onFail() {
+                listener.onFail();
             }
         });
         taskListsAsyncTask.executeOnExecutor(AsyncTask.SERIAL_EXECUTOR, DELETE);
@@ -169,36 +187,36 @@ public class TaskListsRepository {
 
                 ResponseDto responseDto = getResponseFromServer(requestMethods[0]);
 
-                int responseCode = 0;
+                int responseCode;
                 if (responseDto != null) {
                     responseCode = responseDto.getResponseCode();
-                }
+                    if (responseCode == HttpURLConnection.HTTP_UNAUTHORIZED) {
+                        retryGetResultFromServer(requestMethods[0]);
+                    } else {
+                        if (responseCode == HttpURLConnection.HTTP_OK ||
+                                responseCode == HttpURLConnection.HTTP_NO_CONTENT) {
+                            Log.v("TaskLists loaded successfully");
+                            if (requestMethods[0] == POST) {
+                                dbQuery(parseTaskList(responseDto.getResponseData()), requestMethods[0]);
+                            } else if (requestMethods[0] == PATCH) {
+                                dbQuery(mTaskList, requestMethods[0]);
+                            } else if (requestMethods[0] == GET) {
+                                List<TaskList> taskLists = parseTaskListsData(responseDto.getResponseData());
+                                updateDbQuery(taskLists);
 
-                if (responseCode == HttpURLConnection.HTTP_UNAUTHORIZED) {
-                    retryGetResultFromServer(requestMethods[0]);
-                } else {
-                    if (responseCode == HttpURLConnection.HTTP_OK ||
-                            responseCode == HttpURLConnection.HTTP_NO_CONTENT) {
-                        Log.v("TaskLists loaded successfully");
-                        if (requestMethods[0] == POST) {
-                            dbQuery(parseTaskList(responseDto.getResponseData()), requestMethods[0]);
-                        } else if (requestMethods[0] == PATCH) {
-                            dbQuery(mTaskList, requestMethods[0]);
-                        } else if (requestMethods[0] == GET) {
-                            List<TaskList> taskLists = parseTaskListsData(responseDto.getResponseData());
-                            updateDbQuery(taskLists);
+                                for (int i = 0; i < taskLists.size(); i++) {
+                                    loadTasks(taskLists.get(i), i + 1);
+                                }
 
-                            for (int i = 0; i < taskLists.size(); i++) {
-                                loadTasks(taskLists.get(i), i + 1);
+                            } else {
+                                dbQuery(mTaskList, requestMethods[0]);
+                                return Collections.singletonList(mTaskList);
                             }
-
-                        } else {
-                            dbQuery(mTaskList, requestMethods[0]);
-                            return Collections.singletonList(mTaskList);
                         }
                     }
+                } else {
+                    mListener.onFail();
                 }
-
             } else {
                 if (requestMethods[0] != GET) {
                     dbQuery(mTaskList, requestMethods[0]);
@@ -244,6 +262,11 @@ public class TaskListsRepository {
                         public void onSuccess(List<TaskList> list) {
                             Log.v("TaskLists loading retried successfully");
                             mListener.onUpdate(list);
+                        }
+
+                        @Override
+                        public void onFail() {
+                            mListener.onFail();
                         }
                     });
 

@@ -16,7 +16,7 @@ import static com.example.arturarzumanyan.taskmanager.auth.FirebaseWebService.Re
 import static com.example.arturarzumanyan.taskmanager.auth.FirebaseWebService.RequestMethods.POST;
 
 public class TasksCloudStore {
-    public static final String BASE_TASKS_URL = "https://www.googleapis.com/tasks/v1/lists/";
+    private static final String BASE_TASKS_URL = "https://www.googleapis.com/tasks/v1/lists/";
 
     private RepositoryLoadHelper mRepositoryLoadHelper;
 

@@ -78,12 +78,15 @@ public class FirebaseWebService implements GoogleApiClient.OnConnectionFailedLis
         GoogleSignInResult result = Auth.GoogleSignInApi.getSignInResultFromIntent(data);
         if (result.isSuccess()) {
             GoogleSignInAccount acct = result.getSignInAccount();
-            String authCode = acct.getServerAuthCode();
-            requestToken(authCode);
+            String authCode;
+            if (acct != null) {
+                authCode = acct.getServerAuthCode();
+                requestToken(authCode);
 
-            AuthCredential credential = GoogleAuthProvider.getCredential(acct.getIdToken(), null);
-            mAuth.signInWithCredential(credential)
-                    .addOnCompleteListener(this);
+                AuthCredential credential = GoogleAuthProvider.getCredential(acct.getIdToken(), null);
+                mAuth.signInWithCredential(credential)
+                        .addOnCompleteListener(this);
+            }
 
         }
     }
@@ -92,10 +95,11 @@ public class FirebaseWebService implements GoogleApiClient.OnConnectionFailedLis
     public void onComplete(@NonNull Task task) {
         if (task.isSuccessful()) {
             FirebaseUser user = mAuth.getCurrentUser();
-            if (userInfoLoadingListener != null) {
+            if (userInfoLoadingListener != null && user != null) {
                 userInfoLoadingListener.onDataLoaded(user.getDisplayName(),
                         user.getEmail(),
-                        user.getPhotoUrl().toString());
+                        String.valueOf(user.getPhotoUrl()));
+
             }
         }
     }

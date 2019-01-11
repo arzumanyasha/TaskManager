@@ -22,8 +22,8 @@ public class Converter {
                 } else {
                     jsonObject.put(key, map.get(key) == null ? JSONObject.NULL : map.get(key));
                 }
-            } catch (JSONException jsone) {
-
+            } catch (JSONException e) {
+                Log.v(e.getMessage());
             }
         }
 

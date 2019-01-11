@@ -46,15 +46,20 @@ public class EventsRepository {
             public void onSuccess(List<Event> list) {
                 listener.onSuccess(list);
             }
+
+            @Override
+            public void onFail() {
+                listener.onFail();
+            }
         });
 
         eventsAsyncTask.executeOnExecutor(AsyncTask.SERIAL_EXECUTOR, GET);
     }
 
     public void addOrUpdateEvent(Event event, FirebaseWebService.RequestMethods requestMethod,
-                                 final OnEventsLoadedListener listener){
+                                 final OnEventsLoadedListener listener) {
         EventsFromDateSpecification eventsFromDateSpecification = new EventsFromDateSpecification();
-        eventsFromDateSpecification.setDate(/*DateUtils.getCurrentTime()*/DateUtils.getEventDate(event.getStartTime()));
+        eventsFromDateSpecification.setDate(DateUtils.getEventDate(event.getStartTime()));
 
         EventsAsyncTask eventsAsyncTask = new EventsAsyncTask(event,
                 mRepositoryLoadHelper, mFirebaseWebService, mEventsDbStore, mEventsCloudStore,
@@ -64,11 +69,16 @@ public class EventsRepository {
             public void onSuccess(List<Event> list) {
                 listener.onSuccess(list);
             }
+
+            @Override
+            public void onFail() {
+                listener.onFail();
+            }
         });
         eventsAsyncTask.executeOnExecutor(AsyncTask.SERIAL_EXECUTOR, requestMethod);
     }
 
-    public void deleteEvent(Event event) {
+    public void deleteEvent(Event event, final OnEventsLoadedListener listener) {
         EventsFromDateSpecification eventsFromDateSpecification = new EventsFromDateSpecification();
         eventsFromDateSpecification.setDate(DateUtils.getCurrentTime());
 
@@ -80,6 +90,12 @@ public class EventsRepository {
             @Override
             public void onSuccess(List<Event> list) {
                 Log.v("Event successfully deleted");
+            }
+
+            @Override
+            public void onFail() {
+                listener.onFail();
+                Log.v("Failed to delete event");
             }
         });
 
@@ -124,26 +140,27 @@ public class EventsRepository {
 
                 ResponseDto responseDto = getResponseFromServer(requestMethods[0]);
 
-                int responseCode = 0;
+                int responseCode;
                 if (responseDto != null) {
                     responseCode = responseDto.getResponseCode();
-                }
-
-                if (responseCode == HttpURLConnection.HTTP_UNAUTHORIZED) {
-                    retryGetResultFromServer(requestMethods[0]);
-                } else {
-                    if (responseCode == HttpURLConnection.HTTP_OK ||
-                            responseCode == HttpURLConnection.HTTP_NO_CONTENT) {
-                        if (requestMethods[0] == POST || requestMethods[0] == PATCH) {
-                            Event event = parseEvent(responseDto.getResponseData());
-                            dbQuery(event, requestMethods[0]);
-                        } else if (requestMethods[0] == GET) {
-                            List<Event> events = parseEventsData(responseDto.getResponseData());
-                            updateDbQuery(events);
-                        } else {
-                            dbQuery(mEvent, requestMethods[0]);
+                    if (responseCode == HttpURLConnection.HTTP_UNAUTHORIZED) {
+                        retryGetResultFromServer(requestMethods[0]);
+                    } else {
+                        if (responseCode == HttpURLConnection.HTTP_OK ||
+                                responseCode == HttpURLConnection.HTTP_NO_CONTENT) {
+                            if (requestMethods[0] == POST || requestMethods[0] == PATCH) {
+                                Event event = parseEvent(responseDto.getResponseData());
+                                dbQuery(event, requestMethods[0]);
+                            } else if (requestMethods[0] == GET) {
+                                List<Event> events = parseEventsData(responseDto.getResponseData());
+                                updateDbQuery(events);
+                            } else {
+                                dbQuery(mEvent, requestMethods[0]);
+                            }
                         }
                     }
+                } else {
+                    mListener.onFail();
                 }
 
             } else {
@@ -190,6 +207,11 @@ public class EventsRepository {
                             @Override
                             public void onSuccess(List<Event> list) {
                                 mListener.onSuccess(list);
+                            }
+
+                            @Override
+                            public void onFail() {
+                                mListener.onFail();
                             }
                         });
                     }

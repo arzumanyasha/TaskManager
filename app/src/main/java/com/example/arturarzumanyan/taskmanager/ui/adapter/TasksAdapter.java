@@ -1,5 +1,6 @@
 package com.example.arturarzumanyan.taskmanager.ui.adapter;
 
+import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -22,14 +23,15 @@ public class TasksAdapter extends RecyclerView.Adapter<TasksAdapter.ViewHolder> 
         this.mListener = onItemClickListener;
     }
 
+    @NonNull
     @Override
-    public TasksAdapter.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+    public TasksAdapter.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_task, parent, false);
-        return new ViewHolder(view, mListener);
+        return new ViewHolder(view);
     }
 
     @Override
-    public void onBindViewHolder(ViewHolder holder, int position) {
+    public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         Task task = mDataset.get(position);
 
         holder.itemView.setOnClickListener(new View.OnClickListener() {
@@ -108,13 +110,13 @@ public class TasksAdapter extends RecyclerView.Adapter<TasksAdapter.ViewHolder> 
         notifyDataSetChanged();
     }
 
-    public static class ViewHolder extends RecyclerView.ViewHolder {
+    static class ViewHolder extends RecyclerView.ViewHolder {
         View mView;
         TextView taskName, taskDescription;
         ImageView taskDelete;
         CheckBox isExecutedCheckBox;
 
-        public ViewHolder(View view, final OnItemClickListener listener) {
+        ViewHolder(View view) {
             super(view);
             mView = view;
             taskName = view.findViewById(R.id.text_task_name);

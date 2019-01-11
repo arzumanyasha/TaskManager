@@ -1,6 +1,7 @@
 package com.example.arturarzumanyan.taskmanager.ui.adapter;
 
 import android.content.Context;
+import android.support.annotation.NonNull;
 import android.support.constraint.ConstraintLayout;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -27,14 +28,15 @@ public class EventsAdapter extends RecyclerView.Adapter<EventsAdapter.ViewHolder
         this.mListener = onItemClickListener;
     }
 
+    @NonNull
     @Override
-    public EventsAdapter.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+    public EventsAdapter.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_event, parent, false);
-        return new EventsAdapter.ViewHolder(view, mListener);
+        return new EventsAdapter.ViewHolder(view);
     }
 
     @Override
-    public void onBindViewHolder(EventsAdapter.ViewHolder holder, int position) {
+    public void onBindViewHolder(@NonNull EventsAdapter.ViewHolder holder, int position) {
         Event event = mDataset.get(position);
 
         holder.itemView.setOnClickListener(new View.OnClickListener() {
@@ -104,13 +106,13 @@ public class EventsAdapter extends RecyclerView.Adapter<EventsAdapter.ViewHolder
         notifyDataSetChanged();
     }
 
-    public static class ViewHolder extends RecyclerView.ViewHolder {
+    static class ViewHolder extends RecyclerView.ViewHolder {
         View mView;
         ConstraintLayout constraintLayout;
         TextView eventName, eventDescription, eventTime;
         ImageView eventDelete;
 
-        public ViewHolder(View view, final EventsAdapter.OnItemClickListener listener) {
+        ViewHolder(View view) {
             super(view);
             mView = view;
             constraintLayout = view.findViewById(R.id.constraint_layout_events_holder);

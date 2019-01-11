@@ -7,6 +7,7 @@ import android.app.TimePickerDialog;
 import android.content.DialogInterface;
 import android.os.Build;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.annotation.RequiresApi;
 import android.support.v7.app.AppCompatDialogFragment;
 import android.view.LayoutInflater;
@@ -70,90 +71,70 @@ public class EventsDialog extends AppCompatDialogFragment {
         return eventsDialog;
     }
 
+    @NonNull
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
 
-        LayoutInflater inflater = getActivity().getLayoutInflater();
-        View view = inflater.inflate(R.layout.dialog_events, null);
+        if (getActivity() != null) {
+            LayoutInflater inflater = getActivity().getLayoutInflater();
+            View view = inflater.inflate(R.layout.dialog_events, null);
 
-        final Bundle bundle = getArguments();
+            final Bundle bundle = getArguments();
 
-        mColorPalette = new ColorPalette(getActivity());
-        for (HashMap.Entry<Integer, Integer> map : mColorPalette.getColorPalette().entrySet()) {
-            if (map.getKey() == DEFAULT_COLOR) {
-                mCurrentColor = map.getValue();
+            mColorPalette = new ColorPalette(getActivity());
+            for (HashMap.Entry<Integer, Integer> map : mColorPalette.getColorPalette().entrySet()) {
+                if (map.getKey() == DEFAULT_COLOR) {
+                    mCurrentColor = map.getValue();
+                }
             }
-        }
 
-        mEventsRepository = new EventsRepository(getActivity());
+            mEventsRepository = new EventsRepository(getActivity());
 
-        builder.setView(view)
-                .setTitle(getString(R.string.events_title))
-                .setNegativeButton(getString(R.string.cancel_button), new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
+            builder.setView(view)
+                    .setTitle(getString(R.string.events_title))
+                    .setNegativeButton(getString(R.string.cancel_button), new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
 
-                    }
-                })
-                .setPositiveButton(getString(R.string.ok_button), new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        String name = mEditTextEventName.getText().toString();
-                        String description = mEditTextEventDescription.getText().toString();
-                        Date startDate = DateUtils.getEventDate(mTextViewDate.getText().toString(), mStartTime);
-                        Date endDate = DateUtils.getEventDate(mTextViewDate.getText().toString(), mEndTime);
-                        int isNotify;
-                        if (mSwitchNotification.isChecked()) {
-                            isNotify = 1;
-                        } else {
-                            isNotify = 0;
                         }
-
-                        int colorNumber = mCurrentColor;
-
-                        for (HashMap.Entry<Integer, Integer> map : mColorPalette.getColorPalette().entrySet()) {
-                            if (map.getValue() == mCurrentColor) {
-                                colorNumber = map.getKey();
-                                Log.v("colorNumber is " + colorNumber);
+                    })
+                    .setPositiveButton(getString(R.string.ok_button), new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            String name = mEditTextEventName.getText().toString();
+                            String description = mEditTextEventDescription.getText().toString();
+                            Date startDate = DateUtils.getEventDate(mTextViewDate.getText().toString(), mStartTime);
+                            Date endDate = DateUtils.getEventDate(mTextViewDate.getText().toString(), mEndTime);
+                            int isNotify;
+                            if (mSwitchNotification.isChecked()) {
+                                isNotify = 1;
+                            } else {
+                                isNotify = 0;
                             }
-                        }
 
-                        if (mEndTime.after(mStartTime) &&
-                                !mEditTextEventName.getText().toString().isEmpty() &&
-                                bundle != null) {
-                            final Event event = bundle.getParcelable(EVENTS_KEY);
-                            event.setName(name);
-                            event.setDescription(description);
-                            event.setColorId(colorNumber);
-                            event.setStartTime(startDate);
-                            event.setEndTime(endDate);
-                            event.setIsNotify(isNotify);
+                            int colorNumber = mCurrentColor;
 
-                            mEventsRepository.addOrUpdateEvent(event, PATCH, new EventsRepository.OnEventsLoadedListener() {
-                                @Override
-                                public void onSuccess(List<Event> eventsList) {
-                                    eventsReadyListener.onEventsReady(eventsList);
+                            for (HashMap.Entry<Integer, Integer> map : mColorPalette.getColorPalette().entrySet()) {
+                                if (map.getValue() == mCurrentColor) {
+                                    colorNumber = map.getKey();
+                                    Log.v("colorNumber is " + colorNumber);
                                 }
+                            }
 
-                                @Override
-                                public void onFail() {
+                            if (mEndTime.after(mStartTime) &&
+                                    !mEditTextEventName.getText().toString().isEmpty() &&
+                                    bundle != null) {
+                                final Event event = bundle.getParcelable(EVENTS_KEY);
+                                if (event != null) {
+                                    event.setName(name);
+                                    event.setDescription(description);
+                                    event.setColorId(colorNumber);
+                                    event.setStartTime(startDate);
+                                    event.setEndTime(endDate);
+                                    event.setIsNotify(isNotify);
 
-                                }
-                            });
-                        } else if (mStartTime.getTime() < mEndTime.getTime() &&
-                                !mEditTextEventName.getText().toString().isEmpty() &&
-                                bundle == null) {
-
-                            Event event = new Event(UUID.randomUUID().toString(),
-                                    name,
-                                    description,
-                                    colorNumber,
-                                    startDate,
-                                    endDate,
-                                    isNotify);
-                            mEventsRepository.addOrUpdateEvent(event, POST,
-                                    new EventsRepository.OnEventsLoadedListener() {
+                                    mEventsRepository.addOrUpdateEvent(event, PATCH, new EventsRepository.OnEventsLoadedListener() {
                                         @Override
                                         public void onSuccess(List<Event> eventsList) {
                                             eventsReadyListener.onEventsReady(eventsList);
@@ -161,91 +142,116 @@ public class EventsDialog extends AppCompatDialogFragment {
 
                                         @Override
                                         public void onFail() {
-
+                                            Toast.makeText(getActivity(), R.string.network_error, Toast.LENGTH_LONG).show();
                                         }
                                     });
+                                }
+                            } else if (mStartTime.getTime() < mEndTime.getTime() &&
+                                    !mEditTextEventName.getText().toString().isEmpty() &&
+                                    bundle == null) {
 
-                        } else {
-                            Toast.makeText(getContext(),
-                                    R.string.time_error_msg,
-                                    Toast.LENGTH_LONG).show();
+                                Event event = new Event(UUID.randomUUID().toString(),
+                                        name,
+                                        description,
+                                        colorNumber,
+                                        startDate,
+                                        endDate,
+                                        isNotify);
+                                mEventsRepository.addOrUpdateEvent(event, POST,
+                                        new EventsRepository.OnEventsLoadedListener() {
+                                            @Override
+                                            public void onSuccess(List<Event> eventsList) {
+                                                eventsReadyListener.onEventsReady(eventsList);
+                                            }
+
+                                            @Override
+                                            public void onFail() {
+                                                Toast.makeText(getActivity(), R.string.network_error, Toast.LENGTH_LONG).show();
+                                            }
+                                        });
+
+                            } else {
+                                Toast.makeText(getContext(),
+                                        R.string.time_error_msg,
+                                        Toast.LENGTH_LONG).show();
+                            }
                         }
-                    }
-                });
+                    });
 
-        mHour = DateUtils.getHour();
-        mMinute = DateUtils.getMinute();
+            mHour = DateUtils.getHour();
+            mMinute = DateUtils.getMinute();
 
-        mDay = DateUtils.getDay();
-        mMonth = DateUtils.getMonth();
-        mYear = DateUtils.getYear();
+            mDay = DateUtils.getDay();
+            mMonth = DateUtils.getMonth();
+            mYear = DateUtils.getYear();
 
-        mStartTime = new Date(0, 0, 0, mHour, mMinute);
-        mEndTime = new Date(0, 0, 0, mHour + 1, mMinute);
+            mStartTime = new Date(0, 0, 0, mHour, mMinute);
+            mEndTime = new Date(0, 0, 0, mHour + 1, mMinute);
 
-        mEditTextEventName = view.findViewById(R.id.edit_text_event_name);
-        mEditTextEventDescription = view.findViewById(R.id.edit_text_event_description);
-        mImageButtonColorPicker = view.findViewById(R.id.image_button_color_picker);
-        mTextViewStartTime = view.findViewById(R.id.text_start_time);
-        mTextViewEndTime = view.findViewById(R.id.text_end_time);
-        mTextViewDate = view.findViewById(R.id.text_event_date);
-        mSwitchNotification = view.findViewById(R.id.switch_notification);
+            mEditTextEventName = view.findViewById(R.id.edit_text_event_name);
+            mEditTextEventDescription = view.findViewById(R.id.edit_text_event_description);
+            mImageButtonColorPicker = view.findViewById(R.id.image_button_color_picker);
+            mTextViewStartTime = view.findViewById(R.id.text_start_time);
+            mTextViewEndTime = view.findViewById(R.id.text_end_time);
+            mTextViewDate = view.findViewById(R.id.text_event_date);
+            mSwitchNotification = view.findViewById(R.id.switch_notification);
 
-        mTextViewStartTime.setText(mHour + ":" + mMinute);
-        mTextViewEndTime.setText((mHour + 1) + ":" + mMinute);
-        mTextViewDate.setText(mYear + "-" + (mMonth + 1) + "-" + mDay);
+            mTextViewStartTime.setText(mHour + ":" + mMinute);
+            mTextViewEndTime.setText((mHour + 1) + ":" + mMinute);
+            mTextViewDate.setText(mYear + "-" + (mMonth + 1) + "-" + mDay);
 
-        mImageButtonColorPicker.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                openColorPicker();
+            mImageButtonColorPicker.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    openColorPicker();
+                }
+            });
+
+            mTextViewStartTime.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    new TimePickerDialog(getActivity(), new TimePickerDialog.OnTimeSetListener() {
+                        @Override
+                        public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
+                            mTextViewStartTime.setText(hourOfDay + ":" + minute);
+                            mStartTime = new Date(0, 0, 0, hourOfDay, minute);
+                        }
+                    }, mHour, mMinute, true).show();
+                }
+            });
+
+            mTextViewEndTime.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    new TimePickerDialog(getActivity(), new TimePickerDialog.OnTimeSetListener() {
+                        @Override
+                        public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
+                            mTextViewEndTime.setText(hourOfDay + ":" + minute);
+                            mEndTime = new Date(0, 0, 0, hourOfDay, minute);
+                        }
+                    }, mHour, mMinute, true).show();
+                }
+            });
+
+            mTextViewDate.setOnClickListener(new View.OnClickListener() {
+                @RequiresApi(api = Build.VERSION_CODES.N)
+                @Override
+                public void onClick(View v) {
+                    DatePickerDialog datePickerDialog = new DatePickerDialog(getActivity(), new DatePickerDialog.OnDateSetListener() {
+
+                        @Override
+                        public void onDateSet(DatePicker view, int year, int monthOfYear, int dayOfMonth) {
+                            mTextViewDate.setText(year + "-" + (monthOfYear + 1) + "-" + dayOfMonth);
+                        }
+                    }, mYear, mMonth, mDay);
+
+                    datePickerDialog.show();
+                }
+            });
+
+            if (bundle != null) {
+                setEventInfoViews(bundle);
             }
-        });
-
-        mTextViewStartTime.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                new TimePickerDialog(getActivity(), new TimePickerDialog.OnTimeSetListener() {
-                    @Override
-                    public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
-                        mTextViewStartTime.setText(hourOfDay + ":" + minute);
-                        mStartTime = new Date(0, 0, 0, hourOfDay, minute);
-                    }
-                }, mHour, mMinute, true).show();
-            }
-        });
-
-        mTextViewEndTime.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                new TimePickerDialog(getActivity(), new TimePickerDialog.OnTimeSetListener() {
-                    @Override
-                    public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
-                        mTextViewEndTime.setText(hourOfDay + ":" + minute);
-                        mEndTime = new Date(0, 0, 0, hourOfDay, minute);
-                    }
-                }, mHour, mMinute, true).show();
-            }
-        });
-
-        mTextViewDate.setOnClickListener(new View.OnClickListener() {
-            @RequiresApi(api = Build.VERSION_CODES.N)
-            @Override
-            public void onClick(View v) {
-                DatePickerDialog datePickerDialog = new DatePickerDialog(getActivity(), new DatePickerDialog.OnDateSetListener() {
-
-                    @Override
-                    public void onDateSet(DatePicker view, int year, int monthOfYear, int dayOfMonth) {
-                        mTextViewDate.setText(year + "-" + (monthOfYear + 1) + "-" + dayOfMonth);
-                    }
-                }, mYear, mMonth, mDay);
-
-                datePickerDialog.show();
-            }
-        });
-
-        if (bundle != null) {
-            setEventInfoViews(bundle);
         }
 
         return builder.create();
@@ -253,53 +259,57 @@ public class EventsDialog extends AppCompatDialogFragment {
 
     private void setEventInfoViews(Bundle bundle) {
         Event event = bundle.getParcelable(EVENTS_KEY);
-        mEditTextEventName.setText(event.getName());
-        mEditTextEventDescription.setText(event.getDescription());
+        if (event != null) {
+            mEditTextEventName.setText(event.getName());
+            mEditTextEventDescription.setText(event.getDescription());
 
-        for (HashMap.Entry<Integer, Integer> map : mColorPalette.getColorPalette().entrySet()) {
-            if (event.getColorId() == map.getKey()) {
-                mImageButtonColorPicker.setColorFilter(map.getValue());
-                mCurrentColor = map.getKey();
+            for (HashMap.Entry<Integer, Integer> map : mColorPalette.getColorPalette().entrySet()) {
+                if (event.getColorId() == map.getKey()) {
+                    mImageButtonColorPicker.setColorFilter(map.getValue());
+                    mCurrentColor = map.getKey();
+                }
             }
+
+            mTextViewStartTime.setText(DateUtils.formatTimeWithoutA(event.getStartTime()));
+            mTextViewEndTime.setText(DateUtils.formatTimeWithoutA(event.getEndTime()));
+            mTextViewDate.setText((DateUtils.getEventDate(event.getStartTime())));
+
+            if (event.getIsNotify() == 1) {
+                mSwitchNotification.setChecked(true);
+            } else {
+                mSwitchNotification.setChecked(false);
+            }
+
+            mStartTime = DateUtils.getTimeWithoutA(DateUtils.formatTimeWithoutA(event.getStartTime()));
+            mEndTime = DateUtils.getTimeWithoutA(DateUtils.formatTimeWithoutA(event.getEndTime()));
         }
-
-        mTextViewStartTime.setText(DateUtils.formatTimeWithoutA(event.getStartTime()));
-        mTextViewEndTime.setText(DateUtils.formatTimeWithoutA(event.getEndTime()));
-        mTextViewDate.setText((DateUtils.getEventDate(event.getStartTime())));
-
-        if (event.getIsNotify() == 1) {
-            mSwitchNotification.setChecked(true);
-        } else {
-            mSwitchNotification.setChecked(false);
-        }
-
-        mStartTime = DateUtils.getTimeWithoutA(DateUtils.formatTimeWithoutA(event.getStartTime()));
-        mEndTime = DateUtils.getTimeWithoutA(DateUtils.formatTimeWithoutA(event.getEndTime()));
     }
 
     private void openColorPicker() {
-        final ColorPicker colorPicker = new ColorPicker(getActivity());
-        ArrayList<String> colors = new ArrayList<>();
-        ColorPalette colorPalette = new ColorPalette(getActivity());
-        for (HashMap.Entry<Integer, Integer> map : colorPalette.getColorPalette().entrySet()) {
-            colors.add("#" + Integer.toHexString(map.getValue()));
+        if (getActivity() != null) {
+            final ColorPicker colorPicker = new ColorPicker(getActivity());
+            ArrayList<String> colors = new ArrayList<>();
+            ColorPalette colorPalette = new ColorPalette(getActivity());
+            for (HashMap.Entry<Integer, Integer> map : colorPalette.getColorPalette().entrySet()) {
+                colors.add("#" + Integer.toHexString(map.getValue()));
+            }
+
+            colorPicker.setColors(colors)
+                    .setColumns(5)
+                    .setRoundColorButton(true)
+                    .setOnChooseColorListener(new ColorPicker.OnChooseColorListener() {
+                        @Override
+                        public void onChooseColor(int position, int color) {
+                            mImageButtonColorPicker.setColorFilter(color);
+                            mCurrentColor = color;
+                        }
+
+                        @Override
+                        public void onCancel() {
+
+                        }
+                    }).show();
         }
-
-        colorPicker.setColors(colors)
-                .setColumns(5)
-                .setRoundColorButton(true)
-                .setOnChooseColorListener(new ColorPicker.OnChooseColorListener() {
-                    @Override
-                    public void onChooseColor(int position, int color) {
-                        mImageButtonColorPicker.setColorFilter(color);
-                        mCurrentColor = color;
-                    }
-
-                    @Override
-                    public void onCancel() {
-
-                    }
-                }).show();
     }
 
     public interface EventsReadyListener {

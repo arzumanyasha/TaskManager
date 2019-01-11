@@ -3,12 +3,14 @@ package com.example.arturarzumanyan.taskmanager.ui.fragment;
 import android.content.Context;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
+import android.widget.Toast;
 
 import com.example.arturarzumanyan.taskmanager.R;
 import com.example.arturarzumanyan.taskmanager.data.repository.events.EventsRepository;
@@ -54,7 +56,7 @@ public class WeekDashboardFragment extends Fragment {
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_week_dashboard, container, false);
         mLinearLayoutMon = view.findViewById(R.id.linear_layout_mon);
@@ -109,7 +111,7 @@ public class WeekDashboardFragment extends Fragment {
 
             @Override
             public void onFail() {
-
+                Toast.makeText(getActivity(), R.string.network_error, Toast.LENGTH_LONG).show();
             }
         });
 

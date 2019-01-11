@@ -36,7 +36,7 @@ public class EventsFragment extends Fragment {
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_events, container, false);
 
@@ -53,42 +53,49 @@ public class EventsFragment extends Fragment {
                 public boolean onNavigationItemSelected(@NonNull MenuItem item) {
                     Fragment selectedFragment = null;
 
-                    getFragmentManager().popBackStack(BACK_STACK_ROOT_TAG,
-                            FragmentManager.POP_BACK_STACK_INCLUSIVE);
+                    if (getFragmentManager() != null) {
+                        getFragmentManager().popBackStack(BACK_STACK_ROOT_TAG,
+                                FragmentManager.POP_BACK_STACK_INCLUSIVE);
 
-                    switch (item.getItemId()) {
-                        case R.id.nav_week:
-                            selectedFragment = WeekDashboardFragment.newInstance();
-                            break;
-                        case R.id.nav_today:
-                            selectedFragment = DailyEventsFragment.newInstance();
-                            break;
-                        case R.id.nav_stats:
-                            selectedFragment = EventsStatisticFragment.newInstance();
-                            break;
+                        switch (item.getItemId()) {
+                            case R.id.nav_week:
+                                selectedFragment = WeekDashboardFragment.newInstance();
+                                break;
+                            case R.id.nav_today:
+                                selectedFragment = DailyEventsFragment.newInstance();
+                                break;
+                            case R.id.nav_stats:
+                                selectedFragment = EventsStatisticFragment.newInstance();
+                                break;
+                        }
+
+                        getFragmentManager()
+                                .beginTransaction()
+                                .replace(R.id.fragment_container, selectedFragment)
+                                .addToBackStack(BACK_STACK_ROOT_TAG)
+                                .commit();
+
+                        return true;
+                    } else {
+                        return false;
                     }
-
-                    getFragmentManager()
-                            .beginTransaction()
-                            .replace(R.id.fragment_container, selectedFragment)
-                            .addToBackStack(BACK_STACK_ROOT_TAG)
-                            .commit();
-
-                    return true;
                 }
             };
 
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-        if (savedInstanceState == null) {
-            getFragmentManager()
-                    .beginTransaction()
-                    .replace(R.id.fragment_container, new DailyEventsFragment())
-                    .commit();
-        }
 
-        getActivity().setTitle(EVENTS_KEY);
+        if (getActivity() != null && getFragmentManager() != null) {
+            if (savedInstanceState == null) {
+                getFragmentManager()
+                        .beginTransaction()
+                        .replace(R.id.fragment_container, new DailyEventsFragment())
+                        .commit();
+            }
+
+            getActivity().setTitle(EVENTS_KEY);
+        }
     }
 
     public void onButtonPressed(Uri uri) {

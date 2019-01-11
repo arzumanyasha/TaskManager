@@ -64,7 +64,9 @@ public class DbHelper {
         String[] selectionArgs = new String[]{eventId};
         Cursor c = mDbSqlite.rawQuery("SELECT * FROM " + EventsContract.EventsTable.TABLE_NAME +
                 " WHERE " + EventsContract.EventsTable.COLUMN_EVENT_ID + " = ?", selectionArgs);
-        return c.getCount() != 0;
+        boolean result = c.getCount() != 0;
+        c.close();
+        return result;
     }
 
     private ContentValues createEventContentValues(Event event) {
@@ -162,7 +164,9 @@ public class DbHelper {
         String[] selectionArgs = new String[]{taskListId};
         Cursor c = mDbSqlite.rawQuery("SELECT * FROM " + TasksContract.TaskListTable.TABLE_NAME +
                 " WHERE " + TasksContract.TaskListTable.COLUMN_LIST_ID + " = ?", selectionArgs);
-        return c.getCount() != 0;
+        boolean result = c.getCount() != 0;
+        c.close();
+        return result;
     }
 
     private ContentValues createTaskListContentValues(TaskList taskList) {
@@ -236,7 +240,9 @@ public class DbHelper {
         String[] selectionArgs = new String[]{taskId};
         Cursor c = mDbSqlite.rawQuery("SELECT * FROM " + TasksContract.TasksTable.TABLE_NAME +
                 " WHERE " + TasksContract.TasksTable.COLUMN_TASK_ID + " = ?", selectionArgs);
-        return c.getCount() != 0;
+        boolean result = c.getCount() != 0;
+        c.close();
+        return result;
     }
 
     private ContentValues createTaskContentValues(Task task) {

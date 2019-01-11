@@ -49,8 +49,10 @@ public class SignInActivity extends AppCompatActivity {
         if (mFirebaseWebService.getCurrentUser() != null) {
             updateUI(mFirebaseWebService.getCurrentUser().getDisplayName(),
                     mFirebaseWebService.getCurrentUser().getEmail(),
-                    mFirebaseWebService.getCurrentUser().getPhotoUrl().toString());
+                    String.valueOf(mFirebaseWebService.getCurrentUser().getPhotoUrl()));
 
+        } else {
+            Toast.makeText(getApplicationContext(), getString(R.string.failed_log_in_message), Toast.LENGTH_LONG).show();
         }
     }
 

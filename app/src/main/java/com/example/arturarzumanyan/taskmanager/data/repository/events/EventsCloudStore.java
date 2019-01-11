@@ -17,7 +17,7 @@ import static com.example.arturarzumanyan.taskmanager.auth.FirebaseWebService.Re
 import static com.example.arturarzumanyan.taskmanager.auth.FirebaseWebService.RequestMethods.POST;
 
 public class EventsCloudStore {
-    public static final String BASE_EVENTS_URL = "https://www.googleapis.com/calendar/v3/calendars/";
+    private static final String BASE_EVENTS_URL = "https://www.googleapis.com/calendar/v3/calendars/";
 
     private RepositoryLoadHelper mRepositoryLoadHelper;
     private FirebaseWebService mFirebaseWebService;

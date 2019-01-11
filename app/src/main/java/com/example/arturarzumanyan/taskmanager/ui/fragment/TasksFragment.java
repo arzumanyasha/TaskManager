@@ -3,6 +3,7 @@ package com.example.arturarzumanyan.taskmanager.ui.fragment;
 import android.content.Context;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
@@ -10,6 +11,7 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 
 import com.example.arturarzumanyan.taskmanager.R;
 import com.example.arturarzumanyan.taskmanager.data.repository.tasks.TasksRepository;
@@ -53,7 +55,7 @@ public class TasksFragment extends Fragment {
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_tasks, container, false);
         mTasksRecyclerView = view.findViewById(R.id.recycler_tasks);
@@ -64,39 +66,40 @@ public class TasksFragment extends Fragment {
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
 
-        LinearLayoutManager layoutManager = new LinearLayoutManager(getActivity());
-        mTasksRecyclerView.setLayoutManager(layoutManager);
+        if (getActivity() != null) {
+            LinearLayoutManager layoutManager = new LinearLayoutManager(getActivity());
+            mTasksRecyclerView.setLayoutManager(layoutManager);
 
-        TasksRepository tasksRepository = new TasksRepository(getActivity());
+            TasksRepository tasksRepository = new TasksRepository(getActivity());
 
-        tasksRepository.loadTasks(mTaskList, new TasksRepository.OnTasksLoadedListener() {
-            @Override
-            public void onSuccess(List<Task> taskArrayList) {
-                setTasksAdapter(taskArrayList);
-            }
+            tasksRepository.loadTasks(mTaskList, new TasksRepository.OnTasksLoadedListener() {
+                @Override
+                public void onSuccess(List<Task> taskArrayList) {
+                    setTasksAdapter(taskArrayList);
+                }
 
-            @Override
-            public void onFail() {
+                @Override
+                public void onFail() {
+                    Toast.makeText(getActivity(), R.string.network_error, Toast.LENGTH_LONG).show();
+                }
+            });
+            getActivity().setTitle(mTaskList.getTitle());
 
-            }
-        });
-        getActivity().setTitle(mTaskList.getTitle());
 
+            ((IntentionActivity) getActivity()).setTaskFragmentInteractionListener(new IntentionActivity.TaskFragmentInteractionListener() {
+                @Override
+                public void onTasksReady(List<Task> tasks) {
+                    mTasksAdapter.updateList(tasks);
+                }
+            });
 
-        ((IntentionActivity) getActivity()).setTaskFragmentInteractionListener(new IntentionActivity.TaskFragmentInteractionListener() {
-            @Override
-            public void onTasksReady(List<Task> tasks) {
-                mTasksAdapter.updateList(tasks);
-            }
-        });
-
-        ((IntentionActivity) getActivity()).setTaskListFragmentInteractionListener(new IntentionActivity.TaskListFragmentInteractionListener() {
-            @Override
-            public void onTaskListReady(TaskList taskList) {
-                getActivity().setTitle(taskList.getTitle());
-            }
-        });
-
+            ((IntentionActivity) getActivity()).setTaskListFragmentInteractionListener(new IntentionActivity.TaskListFragmentInteractionListener() {
+                @Override
+                public void onTaskListReady(TaskList taskList) {
+                    getActivity().setTitle(taskList.getTitle());
+                }
+            });
+        }
     }
 
     private void setTasksAdapter(List<Task> taskArrayList) {
@@ -104,7 +107,17 @@ public class TasksFragment extends Fragment {
             @Override
             public void onItemDelete(final Task task) {
                 TasksRepository tasksRepository = new TasksRepository(getActivity());
-                tasksRepository.deleteTask(mTaskList, task);
+                tasksRepository.deleteTask(mTaskList, task, new TasksRepository.OnTasksLoadedListener() {
+                    @Override
+                    public void onSuccess(List<Task> taskArrayList) {
+
+                    }
+
+                    @Override
+                    public void onFail() {
+                        Toast.makeText(getActivity(), R.string.network_error, Toast.LENGTH_LONG).show();
+                    }
+                });
             }
 
             @Override
@@ -124,7 +137,7 @@ public class TasksFragment extends Fragment {
 
                             @Override
                             public void onFail() {
-
+                                Toast.makeText(getActivity(), R.string.network_error, Toast.LENGTH_LONG).show();
                             }
                         });
             }

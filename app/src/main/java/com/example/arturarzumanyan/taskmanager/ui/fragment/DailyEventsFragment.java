@@ -3,6 +3,7 @@ package com.example.arturarzumanyan.taskmanager.ui.fragment;
 import android.content.Context;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
@@ -10,6 +11,7 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 
 import com.example.arturarzumanyan.taskmanager.R;
 import com.example.arturarzumanyan.taskmanager.data.repository.events.EventsRepository;
@@ -45,7 +47,7 @@ public class DailyEventsFragment extends Fragment {
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_daily_events, container, false);
         mEventsRecyclerView = view.findViewById(R.id.recycler_events);
@@ -67,7 +69,7 @@ public class DailyEventsFragment extends Fragment {
 
             @Override
             public void onFail() {
-
+                Toast.makeText(getActivity(), R.string.network_error, Toast.LENGTH_LONG).show();
             }
         });
     }
@@ -79,7 +81,17 @@ public class DailyEventsFragment extends Fragment {
         mEventsAdapter = new EventsAdapter(getActivity(), events, new EventsAdapter.OnItemClickListener() {
             @Override
             public void onItemDelete(Event event) {
-                eventsRepository.deleteEvent(event);
+                eventsRepository.deleteEvent(event, new EventsRepository.OnEventsLoadedListener() {
+                    @Override
+                    public void onSuccess(List<Event> eventsList) {
+
+                    }
+
+                    @Override
+                    public void onFail() {
+                        Toast.makeText(getActivity(), R.string.network_error, Toast.LENGTH_LONG).show();
+                    }
+                });
             }
 
             @Override
@@ -88,12 +100,14 @@ public class DailyEventsFragment extends Fragment {
             }
         });
 
-        ((IntentionActivity) getActivity()).setEventFragmentInteractionListener(new IntentionActivity.EventFragmentInteractionListener() {
-            @Override
-            public void onEventsReady(List<Event> events) {
-                mEventsAdapter.updateList(events);
-            }
-        });
+        if (getActivity() != null) {
+            ((IntentionActivity) getActivity()).setEventFragmentInteractionListener(new IntentionActivity.EventFragmentInteractionListener() {
+                @Override
+                public void onEventsReady(List<Event> events) {
+                    mEventsAdapter.updateList(events);
+                }
+            });
+        }
         mEventsRecyclerView.setAdapter(mEventsAdapter);
     }
 
@@ -105,7 +119,9 @@ public class DailyEventsFragment extends Fragment {
                 mEventsAdapter.updateList(events);
             }
         });
-        eventsDialog.show(getFragmentManager(), EVENTS_KEY);
+        if (getFragmentManager() != null) {
+            eventsDialog.show(getFragmentManager(), EVENTS_KEY);
+        }
     }
 
     public void onButtonPressed(Uri uri) {
