@@ -48,15 +48,15 @@ public class EventsRepository {
             }
 
             @Override
-            public void onFail() {
-                listener.onFail();
+            public void onFail(String message) {
+                listener.onFail(message + '\n' + "Failed to load events");
             }
         });
 
         eventsAsyncTask.executeOnExecutor(AsyncTask.SERIAL_EXECUTOR, GET);
     }
 
-    public void addOrUpdateEvent(Event event, FirebaseWebService.RequestMethods requestMethod,
+    public void addOrUpdateEvent(Event event, final FirebaseWebService.RequestMethods requestMethod,
                                  final OnEventsLoadedListener listener) {
         EventsFromDateSpecification eventsFromDateSpecification = new EventsFromDateSpecification();
         eventsFromDateSpecification.setDate(DateUtils.getEventDate(event.getStartTime()));
@@ -71,8 +71,12 @@ public class EventsRepository {
             }
 
             @Override
-            public void onFail() {
-                listener.onFail();
+            public void onFail(String message) {
+                if (requestMethod == POST) {
+                    listener.onFail(message + '\n' + "Failed to create event");
+                } else {
+                    listener.onFail(message + '\n' + "Failed to update event");
+                }
             }
         });
         eventsAsyncTask.executeOnExecutor(AsyncTask.SERIAL_EXECUTOR, requestMethod);
@@ -93,8 +97,8 @@ public class EventsRepository {
             }
 
             @Override
-            public void onFail() {
-                listener.onFail();
+            public void onFail(String message) {
+                listener.onFail(message + '\n' + "Failed to delete event");
                 Log.v("Failed to delete event");
             }
         });
@@ -105,7 +109,7 @@ public class EventsRepository {
     public interface OnEventsLoadedListener {
         void onSuccess(List<Event> eventsList);
 
-        void onFail();
+        void onFail(String message);
     }
 
     public static class EventsAsyncTask extends BaseDataLoadingAsyncTask<Event> {
@@ -160,7 +164,7 @@ public class EventsRepository {
                         }
                     }
                 } else {
-                    mListener.onFail();
+                    mListener.onFail("Server error");
                 }
 
             } else {
@@ -210,8 +214,8 @@ public class EventsRepository {
                             }
 
                             @Override
-                            public void onFail() {
-                                mListener.onFail();
+                            public void onFail(String message) {
+                                mListener.onFail(message);
                             }
                         });
                     }

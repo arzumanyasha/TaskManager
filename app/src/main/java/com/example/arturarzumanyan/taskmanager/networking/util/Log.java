@@ -5,9 +5,14 @@ import android.text.TextUtils;
 public final class Log {
 
     private static final String TAG = "TaskManager";
+    private static final String ERROR_TAG = "Error";
 
     public static void v(String msg) {
         android.util.Log.v(TAG, getLocation() + msg);
+    }
+
+    public static void e(String msg) {
+        android.util.Log.v(ERROR_TAG, getLocation() + msg);
     }
 
     private static String getLocation() {
@@ -26,7 +31,8 @@ public final class Log {
                     found = true;
                 }
             } catch (ClassNotFoundException e) {
-                Log.v(e.getMessage());
+                Log.e(e.getMessage());
+                e.printStackTrace();
             }
         }
 

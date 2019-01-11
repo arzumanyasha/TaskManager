@@ -31,6 +31,11 @@ public class SignInActivity extends AppCompatActivity {
             public void onDataLoaded(String userName, String userEmail, String userPhotoUrl) {
                 updateUI(userName, userEmail, userPhotoUrl);
             }
+
+            @Override
+            public void onFail() {
+                Toast.makeText(getApplicationContext(), getString(R.string.failed_log_in_message), Toast.LENGTH_LONG).show();
+            }
         });
 
         SignInButton signInButton = findViewById(R.id.btn_sign_in);

@@ -45,8 +45,8 @@ public class TasksRepository {
             }
 
             @Override
-            public void onFail() {
-                listener.onFail();
+            public void onFail(String message) {
+                listener.onFail(message + '\n' + "Failed to load tasks");
             }
         });
 
@@ -56,10 +56,10 @@ public class TasksRepository {
     public interface OnTasksLoadedListener {
         void onSuccess(List<Task> taskArrayList);
 
-        void onFail();
+        void onFail(String message);
     }
 
-    public void addOrUpdateTask(TaskList taskList, Task task, FirebaseWebService.RequestMethods requestMethod,
+    public void addOrUpdateTask(TaskList taskList, Task task, final FirebaseWebService.RequestMethods requestMethod,
                                 final OnTasksLoadedListener listener) {
         TasksAsyncTask tasksAsyncTask = new TasksAsyncTask(task, taskList, mRepositoryLoadHelper,
                 mFirebaseWebService, mTasksDbStore, mTasksCloudStore, listener);
@@ -70,8 +70,12 @@ public class TasksRepository {
             }
 
             @Override
-            public void onFail() {
-                listener.onFail();
+            public void onFail(String message) {
+                if (requestMethod == POST) {
+                    listener.onFail(message + '\n' + "Failed to create task");
+                } else {
+                    listener.onFail(message + '\n' + "Failed to update task");
+                }
             }
         });
 
@@ -89,8 +93,8 @@ public class TasksRepository {
             }
 
             @Override
-            public void onFail() {
-                listener.onFail();
+            public void onFail(String message) {
+                listener.onFail(message + '\n' + "Failed to delete task");
                 Log.v("Failed to delete task");
             }
         });
@@ -149,7 +153,7 @@ public class TasksRepository {
                         }
                     }
                 } else {
-                    mListener.onFail();
+                    mListener.onFail("Server error");
                 }
             } else {
                 if (requestMethods[0] != GET) {
@@ -197,8 +201,8 @@ public class TasksRepository {
                             }
 
                             @Override
-                            public void onFail() {
-                                mListener.onFail();
+                            public void onFail(String message) {
+                                mListener.onFail(message);
                             }
                         });
                     }

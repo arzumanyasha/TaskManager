@@ -62,8 +62,8 @@ public class TaskListsRepository {
             }
 
             @Override
-            public void onFail() {
-                listener.onFail();
+            public void onFail(String message) {
+                listener.onFail(message + '\n' + "Failed to get events");
             }
         });
 
@@ -84,8 +84,8 @@ public class TaskListsRepository {
             }
 
             @Override
-            public void onFail() {
-                listener.onFail();
+            public void onFail(String message) {
+                listener.onFail(message + '\n' + "Failed to create task list");
             }
         });
         taskListsAsyncTask.executeOnExecutor(AsyncTask.SERIAL_EXECUTOR, POST);
@@ -106,8 +106,8 @@ public class TaskListsRepository {
             }
 
             @Override
-            public void onFail() {
-                listener.onFail();
+            public void onFail(String message) {
+                listener.onFail(message + '\n' + "Failed to update task list");
             }
         });
         taskListsAsyncTask.executeOnExecutor(AsyncTask.SERIAL_EXECUTOR, PATCH);
@@ -128,8 +128,8 @@ public class TaskListsRepository {
             }
 
             @Override
-            public void onFail() {
-                listener.onFail();
+            public void onFail(String message) {
+                listener.onFail(message + '\n' + "Failed to delete task list");
             }
         });
         taskListsAsyncTask.executeOnExecutor(AsyncTask.SERIAL_EXECUTOR, DELETE);
@@ -142,7 +142,7 @@ public class TaskListsRepository {
 
         void onSuccess(TaskList taskList);
 
-        void onFail();
+        void onFail(String message);
     }
 
     public static class TaskListsAsyncTask extends BaseDataLoadingAsyncTask<TaskList> {
@@ -215,7 +215,7 @@ public class TaskListsRepository {
                         }
                     }
                 } else {
-                    mListener.onFail();
+                    mListener.onFail("Server error");
                 }
             } else {
                 if (requestMethods[0] != GET) {
@@ -265,8 +265,8 @@ public class TaskListsRepository {
                         }
 
                         @Override
-                        public void onFail() {
-                            mListener.onFail();
+                        public void onFail(String message) {
+                            mListener.onFail(message);
                         }
                     });
 

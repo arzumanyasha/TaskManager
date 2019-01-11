@@ -108,8 +108,8 @@ public class IntentionActivity extends AppCompatActivity {
             }
 
             @Override
-            public void onFail() {
-                Toast.makeText(IntentionActivity.this, R.string.network_error, Toast.LENGTH_LONG).show();
+            public void onFail(String message) {
+                Toast.makeText(IntentionActivity.this, message, Toast.LENGTH_LONG).show();
             }
         };
 
@@ -412,8 +412,8 @@ public class IntentionActivity extends AppCompatActivity {
                         }
 
                         @Override
-                        public void onFail() {
-                            Toast.makeText(IntentionActivity.this, R.string.network_error, Toast.LENGTH_LONG).show();
+                        public void onFail(String message) {
+                            Toast.makeText(IntentionActivity.this, message, Toast.LENGTH_LONG).show();
                         }
                     });
                 }
@@ -437,8 +437,8 @@ public class IntentionActivity extends AppCompatActivity {
                                 }
 
                                 @Override
-                                public void onFail() {
-                                    Toast.makeText(IntentionActivity.this, R.string.network_error, Toast.LENGTH_LONG).show();
+                                public void onFail(String message) {
+                                    Toast.makeText(IntentionActivity.this, message, Toast.LENGTH_LONG).show();
                                 }
                             });
 

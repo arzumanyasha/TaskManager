@@ -24,7 +24,7 @@ public abstract class BaseDataLoadingAsyncTask<T> extends AsyncTask<FirebaseWebS
 
     public interface UserDataLoadingListener<T> {
         void onSuccess(List<T> list);
-        void onFail();
+        void onFail(String message);
     }
 
     public void setDataInfoLoadingListener(UserDataLoadingListener<T> listener) {

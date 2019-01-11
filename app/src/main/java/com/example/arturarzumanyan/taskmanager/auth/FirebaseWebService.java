@@ -95,11 +95,14 @@ public class FirebaseWebService implements GoogleApiClient.OnConnectionFailedLis
     public void onComplete(@NonNull Task task) {
         if (task.isSuccessful()) {
             FirebaseUser user = mAuth.getCurrentUser();
-            if (userInfoLoadingListener != null && user != null) {
-                userInfoLoadingListener.onDataLoaded(user.getDisplayName(),
-                        user.getEmail(),
-                        String.valueOf(user.getPhotoUrl()));
-
+            if (userInfoLoadingListener != null) {
+                if (user != null) {
+                    userInfoLoadingListener.onDataLoaded(user.getDisplayName(),
+                            user.getEmail(),
+                            String.valueOf(user.getPhotoUrl()));
+                } else {
+                    userInfoLoadingListener.onFail();
+                }
             }
         }
     }
@@ -197,6 +200,8 @@ public class FirebaseWebService implements GoogleApiClient.OnConnectionFailedLis
 
     public interface UserInfoLoadingListener {
         void onDataLoaded(String userName, String userEmail, String userPhotoUrl);
+
+        void onFail();
     }
 
     public void setUserInfoLoadingListener(UserInfoLoadingListener listener) {

@@ -93,8 +93,8 @@ public class EventsStatisticFragment extends Fragment {
                         }
 
                         @Override
-                        public void onFail() {
-                            Toast.makeText(getActivity(), R.string.network_error, Toast.LENGTH_LONG).show();
+                        public void onFail(String message) {
+                            Toast.makeText(getActivity(), message, Toast.LENGTH_LONG).show();
                         }
                     });
                 } else if (position == 1) {
@@ -106,8 +106,8 @@ public class EventsStatisticFragment extends Fragment {
                         }
 
                         @Override
-                        public void onFail() {
-                            Toast.makeText(getActivity(), R.string.network_error, Toast.LENGTH_LONG).show();
+                        public void onFail(String message) {
+                            Toast.makeText(getActivity(), message, Toast.LENGTH_LONG).show();
                         }
                     });
                 } else {
@@ -119,8 +119,8 @@ public class EventsStatisticFragment extends Fragment {
                         }
 
                         @Override
-                        public void onFail() {
-                            Toast.makeText(getActivity(), R.string.network_error, Toast.LENGTH_LONG).show();
+                        public void onFail(String message) {
+                            Toast.makeText(getActivity(), message, Toast.LENGTH_LONG).show();
                         }
                     });
                 }

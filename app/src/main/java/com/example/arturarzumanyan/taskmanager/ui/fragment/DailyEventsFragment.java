@@ -68,8 +68,8 @@ public class DailyEventsFragment extends Fragment {
             }
 
             @Override
-            public void onFail() {
-                Toast.makeText(getActivity(), R.string.network_error, Toast.LENGTH_LONG).show();
+            public void onFail(String message) {
+                Toast.makeText(getActivity(), message, Toast.LENGTH_LONG).show();
             }
         });
     }
@@ -88,8 +88,8 @@ public class DailyEventsFragment extends Fragment {
                     }
 
                     @Override
-                    public void onFail() {
-                        Toast.makeText(getActivity(), R.string.network_error, Toast.LENGTH_LONG).show();
+                    public void onFail(String message) {
+                        Toast.makeText(getActivity(), message, Toast.LENGTH_LONG).show();
                     }
                 });
             }

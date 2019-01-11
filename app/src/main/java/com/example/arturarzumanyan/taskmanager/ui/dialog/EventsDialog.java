@@ -141,8 +141,8 @@ public class EventsDialog extends AppCompatDialogFragment {
                                         }
 
                                         @Override
-                                        public void onFail() {
-                                            Toast.makeText(getActivity(), R.string.network_error, Toast.LENGTH_LONG).show();
+                                        public void onFail(String message) {
+                                            Toast.makeText(getActivity(), message, Toast.LENGTH_LONG).show();
                                         }
                                     });
                                 }
@@ -165,8 +165,8 @@ public class EventsDialog extends AppCompatDialogFragment {
                                             }
 
                                             @Override
-                                            public void onFail() {
-                                                Toast.makeText(getActivity(), R.string.network_error, Toast.LENGTH_LONG).show();
+                                            public void onFail(String message) {
+                                                Toast.makeText(getActivity(), message, Toast.LENGTH_LONG).show();
                                             }
                                         });
 
