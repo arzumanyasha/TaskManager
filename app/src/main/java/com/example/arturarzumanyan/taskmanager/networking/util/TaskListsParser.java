@@ -9,8 +9,8 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 
 public class TaskListsParser {
-    public static final String ITEMS_KEY = "items";
-    public static final String ID_KEY = "id";
+    static final String ITEMS_KEY = "items";
+    static final String ID_KEY = "id";
     public static final String TITLE_KEY = "title";
 
     public ArrayList<TaskList> parseTaskLists(String buffer) {
@@ -31,11 +31,8 @@ public class TaskListsParser {
     }
 
     private TaskList parseTaskList(JSONObject jsonObject) throws JSONException {
-
-        TaskList taskList = new TaskList(jsonObject.getString(ID_KEY),
+        return new TaskList(jsonObject.getString(ID_KEY),
                 jsonObject.getString(TITLE_KEY));
-
-        return taskList;
     }
 
     public TaskList parseTaskList(String buffer) {

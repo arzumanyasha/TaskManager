@@ -21,7 +21,7 @@ import java.util.HashMap;
 
 public class BaseHttpUrlConnection {
     public static final String JSON_CONTENT_TYPE_VALUE = "application/json";
-    public static final String NO_CONTENT_KEY = "no content";
+    private static final String NO_CONTENT_KEY = "no content";
     private Boolean isJson;
 
     public ResponseDto getResult(String url,
@@ -35,7 +35,7 @@ public class BaseHttpUrlConnection {
 
         String query = "";
         try {
-            connection = getConnectionSettings(connection, url, requestMethod, requestHeaderParameters);
+            connection = getConnectionSettings(url, requestMethod, requestHeaderParameters);
             uriBuilder = new Uri.Builder();
             if ((requestMethod == FirebaseWebService.RequestMethods.POST) && !isJson) {
                 for (HashMap.Entry<String, Object> map : requestBodyParameters.entrySet()) {
@@ -56,28 +56,34 @@ public class BaseHttpUrlConnection {
             int responseCode = connection.getResponseCode();
 
             ResponseDto responseDto = null;
-            if (responseCode == HttpURLConnection.HTTP_OK) {
-                reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
-                String buffer;
-                buffer = getInputStream(reader);
-                //return buffer;
-                responseDto = new ResponseDto(HttpURLConnection.HTTP_OK, buffer);
-                //return responseDto;
-            } else if (responseCode == HttpURLConnection.HTTP_UNAUTHORIZED) {
-                responseDto = new ResponseDto(HttpURLConnection.HTTP_UNAUTHORIZED, "");
-                //return responseDto;
-            } else if (responseCode == HttpURLConnection.HTTP_BAD_REQUEST) {
-                responseDto = new ResponseDto(HttpURLConnection.HTTP_BAD_REQUEST, "");
-                //return responseDto;
-            } else if (responseCode == HttpURLConnection.HTTP_NO_CONTENT) {
-                responseDto = new ResponseDto(HttpURLConnection.HTTP_NO_CONTENT, NO_CONTENT_KEY);
-                //return responseDto;
+            switch (responseCode) {
+                case HttpURLConnection.HTTP_OK: {
+                    reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+                    String buffer;
+                    buffer = getInputStream(reader);
+
+                    responseDto = new ResponseDto(HttpURLConnection.HTTP_OK, buffer);
+                    break;
+                }
+                case HttpURLConnection.HTTP_UNAUTHORIZED: {
+                    responseDto = new ResponseDto(HttpURLConnection.HTTP_UNAUTHORIZED, "");
+                    break;
+                }
+                case HttpURLConnection.HTTP_BAD_REQUEST: {
+                    responseDto = new ResponseDto(HttpURLConnection.HTTP_BAD_REQUEST, "");
+                    break;
+                }
+                case HttpURLConnection.HTTP_NO_CONTENT: {
+                    responseDto = new ResponseDto(HttpURLConnection.HTTP_NO_CONTENT, NO_CONTENT_KEY);
+                    break;
+                }
             }
 
             return responseDto;
         } catch (IOException e) {
             Log.v(e.getMessage());
             e.printStackTrace();
+            return null;
         } finally {
             if (connection != null) {
                 connection.disconnect();
@@ -91,15 +97,13 @@ public class BaseHttpUrlConnection {
 
             }
         }
-        return null;
     }
 
-    private HttpURLConnection getConnectionSettings(HttpURLConnection connection,
-                                                    String url,
+    private HttpURLConnection getConnectionSettings(String url,
                                                     FirebaseWebService.RequestMethods requestMethod,
                                                     HashMap<String, String> requestHeaderParameters) throws IOException {
         URL requestUrl = new URL(url);
-        connection = (HttpURLConnection) requestUrl.openConnection();
+        HttpURLConnection connection = (HttpURLConnection) requestUrl.openConnection();
         connection.setReadTimeout(15000);
         connection.setConnectTimeout(15000);
         connection.setInstanceFollowRedirects(true);
@@ -137,9 +141,9 @@ public class BaseHttpUrlConnection {
 
     private String getInputStream(BufferedReader reader) throws IOException {
         StringBuilder buf = new StringBuilder();
-        String line = null;
+        String line;
         while ((line = reader.readLine()) != null) {
-            buf.append(line + "\n");
+            buf.append(line).append("\n");
         }
         return buf.toString();
     }

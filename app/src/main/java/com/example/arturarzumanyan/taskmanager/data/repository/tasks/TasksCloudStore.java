@@ -14,9 +14,10 @@ import java.util.HashMap;
 
 import static com.example.arturarzumanyan.taskmanager.auth.FirebaseWebService.RequestMethods.PATCH;
 import static com.example.arturarzumanyan.taskmanager.auth.FirebaseWebService.RequestMethods.POST;
+import static com.example.arturarzumanyan.taskmanager.data.repository.RepositoryLoadHelper.BASE_GOOGLE_APIS_URL;
 
 public class TasksCloudStore {
-    public static final String BASE_TASKS_URL = "https://www.googleapis.com/tasks/v1/lists/";
+    private static final String BASE_TASKS_URL = "tasks/v1/lists/";
 
     private RepositoryLoadHelper mRepositoryLoadHelper;
 
@@ -28,7 +29,7 @@ public class TasksCloudStore {
     }
 
     public ResponseDto getTasksFromServer(TaskList taskList) {
-        String url = BASE_TASKS_URL + taskList.getTaskListId() + "/tasks?showHidden=true";
+        String url = BASE_GOOGLE_APIS_URL + BASE_TASKS_URL + taskList.getTaskListId() + "/tasks?showHidden=true";
 
         FirebaseWebService.RequestMethods requestMethod = FirebaseWebService.RequestMethods.GET;
         RequestParameters requestParameters = new RequestParameters(mContext,
@@ -42,7 +43,8 @@ public class TasksCloudStore {
     }
 
     public ResponseDto addTaskOnServer(TaskList taskList, Task task) {
-        String url = BASE_TASKS_URL +
+        String url = BASE_GOOGLE_APIS_URL +
+                BASE_TASKS_URL +
                 taskList.getTaskListId() +
                 "/tasks";
 
@@ -52,7 +54,8 @@ public class TasksCloudStore {
     }
 
     public ResponseDto updateTaskOnServer(TaskList taskList, Task task) {
-        String url = BASE_TASKS_URL +
+        String url = BASE_GOOGLE_APIS_URL +
+                BASE_TASKS_URL +
                 taskList.getTaskListId() +
                 "/tasks/" +
                 task.getId();
@@ -63,7 +66,8 @@ public class TasksCloudStore {
     }
 
     public ResponseDto deleteTaskOnServer(TaskList taskList, Task task) {
-        String url = BASE_TASKS_URL +
+        String url = BASE_GOOGLE_APIS_URL +
+                BASE_TASKS_URL +
                 taskList.getTaskListId() +
                 "/tasks/" +
                 task.getId();

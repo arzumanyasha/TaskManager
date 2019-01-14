@@ -43,6 +43,11 @@ public class TasksRepository {
             public void onSuccess(List<Task> list) {
                 listener.onSuccess(list);
             }
+
+            @Override
+            public void onFail(String message) {
+                listener.onFail(message + '\n' + "Failed to load tasks");
+            }
         });
 
         tasksAsyncTask.executeOnExecutor(AsyncTask.SERIAL_EXECUTOR, GET);
@@ -51,10 +56,10 @@ public class TasksRepository {
     public interface OnTasksLoadedListener {
         void onSuccess(List<Task> taskArrayList);
 
-        void onFail();
+        void onFail(String message);
     }
 
-    public void addOrUpdateTask(TaskList taskList, Task task, FirebaseWebService.RequestMethods requestMethod,
+    public void addOrUpdateTask(TaskList taskList, Task task, final FirebaseWebService.RequestMethods requestMethod,
                                 final OnTasksLoadedListener listener) {
         TasksAsyncTask tasksAsyncTask = new TasksAsyncTask(task, taskList, mRepositoryLoadHelper,
                 mFirebaseWebService, mTasksDbStore, mTasksCloudStore, listener);
@@ -63,12 +68,21 @@ public class TasksRepository {
             public void onSuccess(List<Task> list) {
                 listener.onSuccess(list);
             }
+
+            @Override
+            public void onFail(String message) {
+                if (requestMethod == POST) {
+                    listener.onFail(message + '\n' + "Failed to create task");
+                } else {
+                    listener.onFail(message + '\n' + "Failed to update task");
+                }
+            }
         });
 
         tasksAsyncTask.executeOnExecutor(AsyncTask.SERIAL_EXECUTOR, requestMethod);
     }
 
-    public void deleteTask(TaskList taskList, Task task) {
+    public void deleteTask(TaskList taskList, Task task, final OnTasksLoadedListener listener) {
         TasksAsyncTask tasksAsyncTask = new TasksAsyncTask(task, taskList, mRepositoryLoadHelper,
                 mFirebaseWebService, mTasksDbStore, mTasksCloudStore, null);
 
@@ -76,6 +90,12 @@ public class TasksRepository {
             @Override
             public void onSuccess(List<Task> list) {
                 Log.v("Task successfully deleted");
+            }
+
+            @Override
+            public void onFail(String message) {
+                listener.onFail(message + '\n' + "Failed to delete task");
+                Log.v("Failed to delete task");
             }
         });
 
@@ -113,26 +133,27 @@ public class TasksRepository {
             if (mRepositoryLoadHelper.isOnline()) {
                 ResponseDto responseDto = getResponseFromServer(requestMethods[0]);
 
-                int responseCode = 0;
+                int responseCode;
                 if (responseDto != null) {
                     responseCode = responseDto.getResponseCode();
-                }
-
-                if (responseCode == HttpURLConnection.HTTP_UNAUTHORIZED) {
-                    retryGetResultFromServer(requestMethods[0]);
-                } else {
-                    if (responseCode == HttpURLConnection.HTTP_OK ||
-                            responseCode == HttpURLConnection.HTTP_NO_CONTENT) {
-                        if (requestMethods[0] == POST || requestMethods[0] == PATCH) {
-                            Task task = parseTask(responseDto.getResponseData());
-                            dbQuery(task, requestMethods[0]);
-                        } else if (requestMethods[0] == GET) {
-                            List<Task> tasks = parseTasksData(responseDto.getResponseData());
-                            updateDbQuery(tasks);
-                        } else {
-                            dbQuery(mTask, requestMethods[0]);
+                    if (responseCode == HttpURLConnection.HTTP_UNAUTHORIZED) {
+                        retryGetResultFromServer(requestMethods[0]);
+                    } else {
+                        if (responseCode == HttpURLConnection.HTTP_OK ||
+                                responseCode == HttpURLConnection.HTTP_NO_CONTENT) {
+                            if (requestMethods[0] == POST || requestMethods[0] == PATCH) {
+                                Task task = parseTask(responseDto.getResponseData());
+                                dbQuery(task, requestMethods[0]);
+                            } else if (requestMethods[0] == GET) {
+                                List<Task> tasks = parseTasksData(responseDto.getResponseData());
+                                updateDbQuery(tasks);
+                            } else {
+                                dbQuery(mTask, requestMethods[0]);
+                            }
                         }
                     }
+                } else {
+                    mListener.onFail("Server error");
                 }
             } else {
                 if (requestMethods[0] != GET) {
@@ -177,6 +198,11 @@ public class TasksRepository {
                             @Override
                             public void onSuccess(List<Task> list) {
                                 mListener.onSuccess(list);
+                            }
+
+                            @Override
+                            public void onFail(String message) {
+                                mListener.onFail(message);
                             }
                         });
                     }

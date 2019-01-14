@@ -3,6 +3,7 @@ package com.example.arturarzumanyan.taskmanager.ui.fragment;
 import android.content.Context;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
@@ -10,6 +11,7 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 
 import com.example.arturarzumanyan.taskmanager.R;
 import com.example.arturarzumanyan.taskmanager.data.repository.tasks.TasksRepository;
@@ -53,7 +55,7 @@ public class TasksFragment extends Fragment {
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_tasks, container, false);
         mTasksRecyclerView = view.findViewById(R.id.recycler_tasks);
@@ -76,24 +78,24 @@ public class TasksFragment extends Fragment {
             }
 
             @Override
-            public void onFail() {
-
+            public void onFail(String message) {
+                Toast.makeText(getActivity(), message, Toast.LENGTH_LONG).show();
             }
         });
-        getActivity().setTitle(mTaskList.getTitle());
+        requireActivity().setTitle(mTaskList.getTitle());
 
 
-        ((IntentionActivity) getActivity()).setTaskFragmentInteractionListener(new IntentionActivity.TaskFragmentInteractionListener() {
+        ((IntentionActivity) requireActivity()).setTaskFragmentInteractionListener(new IntentionActivity.TaskFragmentInteractionListener() {
             @Override
             public void onTasksReady(List<Task> tasks) {
                 mTasksAdapter.updateList(tasks);
             }
         });
 
-        ((IntentionActivity) getActivity()).setTaskListFragmentInteractionListener(new IntentionActivity.TaskListFragmentInteractionListener() {
+        ((IntentionActivity) requireActivity()).setTaskListFragmentInteractionListener(new IntentionActivity.TaskListFragmentInteractionListener() {
             @Override
             public void onTaskListReady(TaskList taskList) {
-                getActivity().setTitle(taskList.getTitle());
+                requireActivity().setTitle(taskList.getTitle());
             }
         });
 
@@ -104,7 +106,17 @@ public class TasksFragment extends Fragment {
             @Override
             public void onItemDelete(final Task task) {
                 TasksRepository tasksRepository = new TasksRepository(getActivity());
-                tasksRepository.deleteTask(mTaskList, task);
+                tasksRepository.deleteTask(mTaskList, task, new TasksRepository.OnTasksLoadedListener() {
+                    @Override
+                    public void onSuccess(List<Task> taskArrayList) {
+
+                    }
+
+                    @Override
+                    public void onFail(String message) {
+                        Toast.makeText(getActivity(), message, Toast.LENGTH_LONG).show();
+                    }
+                });
             }
 
             @Override
@@ -123,8 +135,8 @@ public class TasksFragment extends Fragment {
                             }
 
                             @Override
-                            public void onFail() {
-
+                            public void onFail(String message) {
+                                Toast.makeText(getActivity(), message, Toast.LENGTH_LONG).show();
                             }
                         });
             }
@@ -142,9 +154,8 @@ public class TasksFragment extends Fragment {
                 mTasksAdapter.updateList(tasks);
             }
         });
-        if (getFragmentManager() != null) {
-            tasksDialog.show(getFragmentManager(), TASKS_KEY);
-        }
+
+        tasksDialog.show(requireFragmentManager(), TASKS_KEY);
     }
 
     public void onButtonPressed(Uri uri) {

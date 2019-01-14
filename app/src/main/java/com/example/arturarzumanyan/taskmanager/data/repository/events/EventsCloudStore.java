@@ -15,9 +15,10 @@ import java.util.HashMap;
 
 import static com.example.arturarzumanyan.taskmanager.auth.FirebaseWebService.RequestMethods.PATCH;
 import static com.example.arturarzumanyan.taskmanager.auth.FirebaseWebService.RequestMethods.POST;
+import static com.example.arturarzumanyan.taskmanager.data.repository.RepositoryLoadHelper.BASE_GOOGLE_APIS_URL;
 
 public class EventsCloudStore {
-    public static final String BASE_EVENTS_URL = "https://www.googleapis.com/calendar/v3/calendars/";
+    private static final String BASE_EVENTS_URL = "calendar/v3/calendars/";
 
     private RepositoryLoadHelper mRepositoryLoadHelper;
     private FirebaseWebService mFirebaseWebService;
@@ -32,7 +33,7 @@ public class EventsCloudStore {
     public ResponseDto getEventsFromServer(EventsSpecification eventsSpecification) {
         String eventsUrl;
         if (eventsSpecification.getStartDate().isEmpty() && eventsSpecification.getEndDate().isEmpty()) {
-            eventsUrl = BASE_EVENTS_URL + mFirebaseWebService.getCurrentUser().getEmail() + "/events";
+            eventsUrl = BASE_GOOGLE_APIS_URL + BASE_EVENTS_URL + mFirebaseWebService.getCurrentUser().getEmail() + "/events";
         } else {
             eventsUrl = BASE_EVENTS_URL + mFirebaseWebService.getCurrentUser().getEmail() + "/events?" +
                     "timeMax=" + DateUtils.decodeDate(eventsSpecification.getEndDate()) +
@@ -51,7 +52,7 @@ public class EventsCloudStore {
     }
 
     public ResponseDto addEventOnServer(Event event) {
-        final String url = BASE_EVENTS_URL +
+        final String url = BASE_GOOGLE_APIS_URL + BASE_EVENTS_URL +
                 mFirebaseWebService.getCurrentUser().getEmail() +
                 "/events";
         RequestParameters requestParameters = mRepositoryLoadHelper.getEventCreateOrUpdateParameters(event, url, POST);
@@ -60,7 +61,7 @@ public class EventsCloudStore {
     }
 
     public ResponseDto updateEventOnServer(Event event) {
-        final String url = BASE_EVENTS_URL +
+        final String url = BASE_GOOGLE_APIS_URL + BASE_EVENTS_URL +
                 mFirebaseWebService.getCurrentUser().getEmail() +
                 "/events/" +
                 event.getId();
@@ -72,7 +73,7 @@ public class EventsCloudStore {
     }
 
     public ResponseDto deleteEventOnServer(Event event) {
-        final String url = BASE_EVENTS_URL +
+        final String url = BASE_GOOGLE_APIS_URL + BASE_EVENTS_URL +
                 mFirebaseWebService.getCurrentUser().getEmail() +
                 "/events/" +
                 event.getId();

@@ -25,11 +25,16 @@ public class SignInActivity extends AppCompatActivity {
         setContentView(R.layout.activity_sign_in);
 
         mFirebaseWebService = new FirebaseWebService(this);
-        mFirebaseWebService.setGoogleClient();
+        mFirebaseWebService.setGoogleClientOptions();
         mFirebaseWebService.setUserInfoLoadingListener(new FirebaseWebService.UserInfoLoadingListener() {
             @Override
             public void onDataLoaded(String userName, String userEmail, String userPhotoUrl) {
                 updateUI(userName, userEmail, userPhotoUrl);
+            }
+
+            @Override
+            public void onFail() {
+                Toast.makeText(getApplicationContext(), getString(R.string.failed_log_in_message), Toast.LENGTH_LONG).show();
             }
         });
 
@@ -49,8 +54,10 @@ public class SignInActivity extends AppCompatActivity {
         if (mFirebaseWebService.getCurrentUser() != null) {
             updateUI(mFirebaseWebService.getCurrentUser().getDisplayName(),
                     mFirebaseWebService.getCurrentUser().getEmail(),
-                    mFirebaseWebService.getCurrentUser().getPhotoUrl().toString());
+                    String.valueOf(mFirebaseWebService.getCurrentUser().getPhotoUrl()));
 
+        } else {
+            Toast.makeText(getApplicationContext(), getString(R.string.failed_log_in_message), Toast.LENGTH_LONG).show();
         }
     }
 

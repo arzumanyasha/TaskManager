@@ -30,6 +30,7 @@ import static com.example.arturarzumanyan.taskmanager.networking.util.TasksParse
 import static com.example.arturarzumanyan.taskmanager.networking.util.TasksParser.STATUS_KEY;
 
 public class RepositoryLoadHelper {
+    public static final String BASE_GOOGLE_APIS_URL = "https://www.googleapis.com/";
     public static final String AUTHORIZATION_KEY = "Authorization";
     private static final String CONTENT_TYPE_KEY = "Content-Type";
     private static final String NEEDS_ACTION_KEY = "needsAction";

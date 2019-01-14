@@ -4,11 +4,13 @@ import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.DialogInterface;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatDialogFragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.EditText;
+import android.widget.Toast;
 
 import com.example.arturarzumanyan.taskmanager.R;
 import com.example.arturarzumanyan.taskmanager.data.repository.tasklists.TaskListsRepository;
@@ -37,11 +39,12 @@ public class TaskListsDialog extends AppCompatDialogFragment {
         return taskListsDialog;
     }
 
+    @NonNull
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
 
-        LayoutInflater inflater = getActivity().getLayoutInflater();
+        LayoutInflater inflater = requireActivity().getLayoutInflater();
         View view = inflater.inflate(R.layout.dialog_tasklists, null);
 
         final Bundle bundle = getArguments();
@@ -63,29 +66,31 @@ public class TaskListsDialog extends AppCompatDialogFragment {
                         TaskListsRepository taskListsRepository = new TaskListsRepository(getActivity());
                         if (!taskListName.isEmpty() && bundle != null) {
                             TaskList taskList = bundle.getParcelable(TASK_LISTS_KEY);
-                            taskList.setTitle(taskListName);
-                            taskListsRepository.updateTaskList(taskList, new TaskListsRepository.OnTaskListsLoadedListener() {
-                                @Override
-                                public void onSuccess(List<TaskList> taskListArrayList) {
+                            if (taskList != null) {
+                                taskList.setTitle(taskListName);
+                                taskListsRepository.updateTaskList(taskList, new TaskListsRepository.OnTaskListsLoadedListener() {
+                                    @Override
+                                    public void onSuccess(List<TaskList> taskListArrayList) {
 
-                                }
+                                    }
 
-                                @Override
-                                public void onUpdate(List<TaskList> taskLists) {
+                                    @Override
+                                    public void onUpdate(List<TaskList> taskLists) {
 
-                                }
+                                    }
 
-                                @Override
-                                public void onSuccess(TaskList taskList) {
-                                    taskListReadyListener.onTaskListReady(taskList);
-                                }
+                                    @Override
+                                    public void onSuccess(TaskList taskList) {
+                                        taskListReadyListener.onTaskListReady(taskList);
+                                    }
 
-                                @Override
-                                public void onFail() {
-
-                                }
-                            });
-                        } else if (!taskListName.isEmpty() && bundle == null) {
+                                    @Override
+                                    public void onFail(String message) {
+                                        Toast.makeText(getActivity(), message, Toast.LENGTH_LONG).show();
+                                    }
+                                });
+                            }
+                        } else if (!taskListName.isEmpty()) {
                             TaskList taskList = new TaskList(UUID.randomUUID().toString(),
                                     taskListName);
                             taskListsRepository.addTaskList(taskList, new TaskListsRepository.OnTaskListsLoadedListener() {
@@ -105,8 +110,8 @@ public class TaskListsDialog extends AppCompatDialogFragment {
                                 }
 
                                 @Override
-                                public void onFail() {
-
+                                public void onFail(String message) {
+                                    Toast.makeText(getActivity(), message, Toast.LENGTH_LONG).show();
                                 }
                             });
                         }
@@ -115,8 +120,11 @@ public class TaskListsDialog extends AppCompatDialogFragment {
 
         if (bundle != null) {
             TaskList taskList = bundle.getParcelable(TASK_LISTS_KEY);
-            mEditTextTaskListTitle.setText(taskList.getTitle());
+            if (taskList != null) {
+                mEditTextTaskListTitle.setText(taskList.getTitle());
+            }
         }
+
         return builder.create();
     }
 

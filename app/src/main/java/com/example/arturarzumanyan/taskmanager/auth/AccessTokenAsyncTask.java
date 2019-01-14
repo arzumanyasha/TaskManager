@@ -3,12 +3,10 @@ package com.example.arturarzumanyan.taskmanager.auth;
 import android.os.AsyncTask;
 
 import com.example.arturarzumanyan.taskmanager.domain.ResponseDto;
+import com.example.arturarzumanyan.taskmanager.networking.NetworkUtil;
 import com.example.arturarzumanyan.taskmanager.networking.base.RequestParameters;
-import com.example.arturarzumanyan.taskmanager.networking.base.BaseHttpUrlConnection;
 
 import org.json.JSONException;
-
-import java.util.HashMap;
 
 public class AccessTokenAsyncTask extends AsyncTask<RequestParameters, Void, ResponseDto> {
 
@@ -18,16 +16,7 @@ public class AccessTokenAsyncTask extends AsyncTask<RequestParameters, Void, Res
 
     @Override
     protected ResponseDto doInBackground(RequestParameters... requestParameters) {
-        String url = requestParameters[0].getUrl();
-        FirebaseWebService.RequestMethods requestMethod = requestParameters[0].getRequestMethod();
-        HashMap<String, Object> requestBodyParameters = requestParameters[0].getRequestBodyParameters();
-        HashMap<String, String> requestHeaderParameters = requestParameters[0].getRequestHeaderParameters();
-
-        BaseHttpUrlConnection baseHttpUrlConnection = new BaseHttpUrlConnection();
-        return baseHttpUrlConnection.getResult(url,
-                requestMethod,
-                requestBodyParameters,
-                requestHeaderParameters);
+        return NetworkUtil.getResultFromServer(requestParameters[0]);
     }
 
     @Override

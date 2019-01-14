@@ -43,8 +43,6 @@ import com.squareup.picasso.Picasso;
 
 import java.util.List;
 
-//import static com.example.arturarzumanyan.taskmanager.ui.activity.IntentionActivity.Screen.TASK;
-
 public class IntentionActivity extends AppCompatActivity {
     public static final String EVENTS_KEY = "Events";
     public static final String TASKS_KEY = "Tasks";
@@ -110,8 +108,8 @@ public class IntentionActivity extends AppCompatActivity {
             }
 
             @Override
-            public void onFail() {
-                Toast.makeText(IntentionActivity.this, R.string.network_error, Toast.LENGTH_LONG).show();
+            public void onFail(String message) {
+                Toast.makeText(IntentionActivity.this, message, Toast.LENGTH_LONG).show();
             }
         };
 
@@ -414,8 +412,8 @@ public class IntentionActivity extends AppCompatActivity {
                         }
 
                         @Override
-                        public void onFail() {
-
+                        public void onFail(String message) {
+                            Toast.makeText(IntentionActivity.this, message, Toast.LENGTH_LONG).show();
                         }
                     });
                 }
@@ -439,8 +437,8 @@ public class IntentionActivity extends AppCompatActivity {
                                 }
 
                                 @Override
-                                public void onFail() {
-
+                                public void onFail(String message) {
+                                    Toast.makeText(IntentionActivity.this, message, Toast.LENGTH_LONG).show();
                                 }
                             });
 

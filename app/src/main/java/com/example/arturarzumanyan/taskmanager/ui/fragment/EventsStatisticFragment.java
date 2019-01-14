@@ -4,6 +4,7 @@ import android.content.Context;
 import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
@@ -12,6 +13,7 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Spinner;
+import android.widget.Toast;
 
 import com.example.arturarzumanyan.taskmanager.R;
 import com.example.arturarzumanyan.taskmanager.data.repository.events.EventsRepository;
@@ -58,15 +60,16 @@ public class EventsStatisticFragment extends Fragment {
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_events_statistic, container, false);
         pieChart = view.findViewById(R.id.pie_chart);
         spinnerMode = view.findViewById(R.id.spinner_mode);
-        ArrayAdapter<CharSequence> arrayAdapter = ArrayAdapter.createFromResource(getActivity(),
+        ArrayAdapter<CharSequence> arrayAdapter = ArrayAdapter.createFromResource(requireActivity(),
                 R.array.modes, android.R.layout.simple_spinner_item);
         arrayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinnerMode.setAdapter(arrayAdapter);
+
         return view;
     }
 
@@ -89,8 +92,8 @@ public class EventsStatisticFragment extends Fragment {
                         }
 
                         @Override
-                        public void onFail() {
-
+                        public void onFail(String message) {
+                            Toast.makeText(getActivity(), message, Toast.LENGTH_LONG).show();
                         }
                     });
                 } else if (position == 1) {
@@ -102,8 +105,8 @@ public class EventsStatisticFragment extends Fragment {
                         }
 
                         @Override
-                        public void onFail() {
-
+                        public void onFail(String message) {
+                            Toast.makeText(getActivity(), message, Toast.LENGTH_LONG).show();
                         }
                     });
                 } else {
@@ -115,8 +118,8 @@ public class EventsStatisticFragment extends Fragment {
                         }
 
                         @Override
-                        public void onFail() {
-
+                        public void onFail(String message) {
+                            Toast.makeText(getActivity(), message, Toast.LENGTH_LONG).show();
                         }
                     });
                 }
@@ -131,7 +134,7 @@ public class EventsStatisticFragment extends Fragment {
     }
 
     private void makePieChart(List<Event> events, int minutes) {
-        ArrayList<Integer> mColors = new ArrayList<>();
+        List<Integer> mColors = new ArrayList<>();
         HashMap<Integer, Integer> mMinutesOnEvents = new HashMap<>();
 
         ColorPalette colorPalette = new ColorPalette(getActivity());
@@ -145,7 +148,7 @@ public class EventsStatisticFragment extends Fragment {
             }
         }
 
-        ArrayList<PieEntry> dailyEventsValues = new ArrayList<>();
+        List<PieEntry> dailyEventsValues = new ArrayList<>();
 
         for (HashMap.Entry<Integer, Integer> map : mMinutesOnEvents.entrySet()) {
             dailyEventsValues.add(new PieEntry(map.getValue() % minutes * PERCENTAGE,

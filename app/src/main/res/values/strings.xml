@@ -5,6 +5,7 @@
     <!--Activity-->
         <!--SignIn Activity-->
             <string name="logged_in_message">Logged in</string>
+            <string name="failed_log_in_message">Failed to log in</string>
 
         <!--Intention Activity-->
             <string name="title_activity_intention">IntentionActivity</string>
@@ -12,7 +13,7 @@
             <string name="navigation_drawer_close">Close navigation drawer</string>
             <string name="action_settings">action</string>
             <string name="data_loaded_message">Data loaded</string>
-            <string name="network_error">Check network connection</string>
+            <string name="network_error">Unexpected network error</string>
 
     <!--Dialog-->
         <string name="ok_button">OK</string>
