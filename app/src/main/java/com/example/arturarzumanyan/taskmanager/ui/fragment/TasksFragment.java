@@ -66,40 +66,39 @@ public class TasksFragment extends Fragment {
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
 
-        if (getActivity() != null) {
-            LinearLayoutManager layoutManager = new LinearLayoutManager(getActivity());
-            mTasksRecyclerView.setLayoutManager(layoutManager);
+        LinearLayoutManager layoutManager = new LinearLayoutManager(getActivity());
+        mTasksRecyclerView.setLayoutManager(layoutManager);
 
-            TasksRepository tasksRepository = new TasksRepository(getActivity());
+        TasksRepository tasksRepository = new TasksRepository(getActivity());
 
-            tasksRepository.loadTasks(mTaskList, new TasksRepository.OnTasksLoadedListener() {
-                @Override
-                public void onSuccess(List<Task> taskArrayList) {
-                    setTasksAdapter(taskArrayList);
-                }
+        tasksRepository.loadTasks(mTaskList, new TasksRepository.OnTasksLoadedListener() {
+            @Override
+            public void onSuccess(List<Task> taskArrayList) {
+                setTasksAdapter(taskArrayList);
+            }
 
-                @Override
-                public void onFail(String message) {
-                    Toast.makeText(getActivity(), message, Toast.LENGTH_LONG).show();
-                }
-            });
-            getActivity().setTitle(mTaskList.getTitle());
+            @Override
+            public void onFail(String message) {
+                Toast.makeText(getActivity(), message, Toast.LENGTH_LONG).show();
+            }
+        });
+        requireActivity().setTitle(mTaskList.getTitle());
 
 
-            ((IntentionActivity) getActivity()).setTaskFragmentInteractionListener(new IntentionActivity.TaskFragmentInteractionListener() {
-                @Override
-                public void onTasksReady(List<Task> tasks) {
-                    mTasksAdapter.updateList(tasks);
-                }
-            });
+        ((IntentionActivity) requireActivity()).setTaskFragmentInteractionListener(new IntentionActivity.TaskFragmentInteractionListener() {
+            @Override
+            public void onTasksReady(List<Task> tasks) {
+                mTasksAdapter.updateList(tasks);
+            }
+        });
 
-            ((IntentionActivity) getActivity()).setTaskListFragmentInteractionListener(new IntentionActivity.TaskListFragmentInteractionListener() {
-                @Override
-                public void onTaskListReady(TaskList taskList) {
-                    getActivity().setTitle(taskList.getTitle());
-                }
-            });
-        }
+        ((IntentionActivity) requireActivity()).setTaskListFragmentInteractionListener(new IntentionActivity.TaskListFragmentInteractionListener() {
+            @Override
+            public void onTaskListReady(TaskList taskList) {
+                requireActivity().setTitle(taskList.getTitle());
+            }
+        });
+
     }
 
     private void setTasksAdapter(List<Task> taskArrayList) {
@@ -155,9 +154,8 @@ public class TasksFragment extends Fragment {
                 mTasksAdapter.updateList(tasks);
             }
         });
-        if (getFragmentManager() != null) {
-            tasksDialog.show(getFragmentManager(), TASKS_KEY);
-        }
+
+        tasksDialog.show(requireFragmentManager(), TASKS_KEY);
     }
 
     public void onButtonPressed(Uri uri) {

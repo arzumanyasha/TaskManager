@@ -25,7 +25,7 @@ public class SignInActivity extends AppCompatActivity {
         setContentView(R.layout.activity_sign_in);
 
         mFirebaseWebService = new FirebaseWebService(this);
-        mFirebaseWebService.setGoogleClient();
+        mFirebaseWebService.setGoogleClientOptions();
         mFirebaseWebService.setUserInfoLoadingListener(new FirebaseWebService.UserInfoLoadingListener() {
             @Override
             public void onDataLoaded(String userName, String userEmail, String userPhotoUrl) {

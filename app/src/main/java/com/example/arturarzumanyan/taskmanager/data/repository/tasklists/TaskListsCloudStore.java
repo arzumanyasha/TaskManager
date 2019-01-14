@@ -13,9 +13,10 @@ import java.util.HashMap;
 
 import static com.example.arturarzumanyan.taskmanager.auth.FirebaseWebService.RequestMethods.PATCH;
 import static com.example.arturarzumanyan.taskmanager.auth.FirebaseWebService.RequestMethods.POST;
+import static com.example.arturarzumanyan.taskmanager.data.repository.RepositoryLoadHelper.BASE_GOOGLE_APIS_URL;
 
 public class TaskListsCloudStore {
-    private static final String BASE_TASK_LISTS_URL = "https://www.googleapis.com/tasks/v1/users/@me/lists/";
+    private static final String BASE_TASK_LISTS_URL = "tasks/v1/users/@me/lists/";
 
     private RepositoryLoadHelper mRepositoryLoadHelper;
     private Context mContext;
@@ -28,7 +29,7 @@ public class TaskListsCloudStore {
     public ResponseDto getTaskListsFromServer() {
         FirebaseWebService.RequestMethods requestMethod = FirebaseWebService.RequestMethods.GET;
         RequestParameters requestParameters = new RequestParameters(mContext,
-                BASE_TASK_LISTS_URL,
+                BASE_GOOGLE_APIS_URL + BASE_TASK_LISTS_URL,
                 requestMethod,
                 new HashMap<String, Object>()
         );
@@ -39,13 +40,13 @@ public class TaskListsCloudStore {
 
     public ResponseDto addTaskListOnServer(TaskList taskList) {
         RequestParameters requestParameters = mRepositoryLoadHelper.getTaskListCreateOrUpdateParameters(taskList,
-                BASE_TASK_LISTS_URL, POST);
+                BASE_GOOGLE_APIS_URL + BASE_TASK_LISTS_URL, POST);
 
         return NetworkUtil.getResultFromServer(requestParameters);
     }
 
     public ResponseDto updateTaskListOnServer(TaskList taskList) {
-        String url = BASE_TASK_LISTS_URL + taskList.getTaskListId();
+        String url = BASE_GOOGLE_APIS_URL + BASE_TASK_LISTS_URL + taskList.getTaskListId();
 
         RequestParameters requestParameters = mRepositoryLoadHelper.getTaskListCreateOrUpdateParameters(taskList,
                 url, PATCH);
@@ -54,7 +55,7 @@ public class TaskListsCloudStore {
     }
 
     public ResponseDto deleteTaskListOnServer(final TaskList taskList) {
-        String url = BASE_TASK_LISTS_URL + taskList.getTaskListId();
+        String url = BASE_GOOGLE_APIS_URL + BASE_TASK_LISTS_URL + taskList.getTaskListId();
 
         RequestParameters requestParameters = mRepositoryLoadHelper.getDeleteParameters(url);
 

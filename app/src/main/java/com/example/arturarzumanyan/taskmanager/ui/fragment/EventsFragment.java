@@ -53,32 +53,29 @@ public class EventsFragment extends Fragment {
                 public boolean onNavigationItemSelected(@NonNull MenuItem item) {
                     Fragment selectedFragment = null;
 
-                    if (getFragmentManager() != null) {
-                        getFragmentManager().popBackStack(BACK_STACK_ROOT_TAG,
-                                FragmentManager.POP_BACK_STACK_INCLUSIVE);
+                    requireFragmentManager().popBackStack(BACK_STACK_ROOT_TAG,
+                            FragmentManager.POP_BACK_STACK_INCLUSIVE);
 
-                        switch (item.getItemId()) {
-                            case R.id.nav_week:
-                                selectedFragment = WeekDashboardFragment.newInstance();
-                                break;
-                            case R.id.nav_today:
-                                selectedFragment = DailyEventsFragment.newInstance();
-                                break;
-                            case R.id.nav_stats:
-                                selectedFragment = EventsStatisticFragment.newInstance();
-                                break;
-                        }
-
-                        getFragmentManager()
-                                .beginTransaction()
-                                .replace(R.id.fragment_container, selectedFragment)
-                                .addToBackStack(BACK_STACK_ROOT_TAG)
-                                .commit();
-
-                        return true;
-                    } else {
-                        return false;
+                    switch (item.getItemId()) {
+                        case R.id.nav_week:
+                            selectedFragment = WeekDashboardFragment.newInstance();
+                            break;
+                        case R.id.nav_today:
+                            selectedFragment = DailyEventsFragment.newInstance();
+                            break;
+                        case R.id.nav_stats:
+                            selectedFragment = EventsStatisticFragment.newInstance();
+                            break;
                     }
+
+                    requireFragmentManager()
+                            .beginTransaction()
+                            .replace(R.id.fragment_container, selectedFragment)
+                            .addToBackStack(BACK_STACK_ROOT_TAG)
+                            .commit();
+
+                    return true;
+
                 }
             };
 
@@ -86,16 +83,14 @@ public class EventsFragment extends Fragment {
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
 
-        if (getActivity() != null && getFragmentManager() != null) {
-            if (savedInstanceState == null) {
-                getFragmentManager()
-                        .beginTransaction()
-                        .replace(R.id.fragment_container, new DailyEventsFragment())
-                        .commit();
-            }
-
-            getActivity().setTitle(EVENTS_KEY);
+        if (savedInstanceState == null) {
+            requireFragmentManager()
+                    .beginTransaction()
+                    .replace(R.id.fragment_container, new DailyEventsFragment())
+                    .commit();
         }
+
+        requireActivity().setTitle(EVENTS_KEY);
     }
 
     public void onButtonPressed(Uri uri) {

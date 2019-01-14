@@ -100,14 +100,13 @@ public class DailyEventsFragment extends Fragment {
             }
         });
 
-        if (getActivity() != null) {
-            ((IntentionActivity) getActivity()).setEventFragmentInteractionListener(new IntentionActivity.EventFragmentInteractionListener() {
-                @Override
-                public void onEventsReady(List<Event> events) {
-                    mEventsAdapter.updateList(events);
-                }
-            });
-        }
+        ((IntentionActivity) requireActivity()).setEventFragmentInteractionListener(new IntentionActivity.EventFragmentInteractionListener() {
+            @Override
+            public void onEventsReady(List<Event> events) {
+                mEventsAdapter.updateList(events);
+            }
+        });
+
         mEventsRecyclerView.setAdapter(mEventsAdapter);
     }
 

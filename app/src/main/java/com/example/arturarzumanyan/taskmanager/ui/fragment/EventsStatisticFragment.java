@@ -65,12 +65,11 @@ public class EventsStatisticFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_events_statistic, container, false);
         pieChart = view.findViewById(R.id.pie_chart);
         spinnerMode = view.findViewById(R.id.spinner_mode);
-        if (getActivity() != null) {
-            ArrayAdapter<CharSequence> arrayAdapter = ArrayAdapter.createFromResource(getActivity(),
-                    R.array.modes, android.R.layout.simple_spinner_item);
-            arrayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-            spinnerMode.setAdapter(arrayAdapter);
-        }
+        ArrayAdapter<CharSequence> arrayAdapter = ArrayAdapter.createFromResource(requireActivity(),
+                R.array.modes, android.R.layout.simple_spinner_item);
+        arrayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        spinnerMode.setAdapter(arrayAdapter);
+
         return view;
     }
 
