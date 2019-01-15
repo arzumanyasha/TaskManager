@@ -14,13 +14,11 @@ import com.example.arturarzumanyan.taskmanager.networking.util.DateUtils;
 import com.example.arturarzumanyan.taskmanager.networking.util.EventsParser;
 import com.example.arturarzumanyan.taskmanager.networking.util.Log;
 
-import java.net.HttpURLConnection;
 import java.util.Collections;
 import java.util.List;
 
 import static com.example.arturarzumanyan.taskmanager.auth.FirebaseWebService.RequestMethods.DELETE;
 import static com.example.arturarzumanyan.taskmanager.auth.FirebaseWebService.RequestMethods.GET;
-import static com.example.arturarzumanyan.taskmanager.auth.FirebaseWebService.RequestMethods.PATCH;
 import static com.example.arturarzumanyan.taskmanager.auth.FirebaseWebService.RequestMethods.POST;
 
 public class EventsRepository {
@@ -140,65 +138,68 @@ public class EventsRepository {
 
         @Override
         protected List<Event> doInBackground(FirebaseWebService.RequestMethods... requestMethods) {
-            if (mRepositoryLoadHelper.isOnline()) {
+            return super.doInBackground(requestMethods[0]);
+        }
 
-                ResponseDto responseDto = getResponseFromServer(requestMethods[0]);
+        @Override
+        protected ResponseDto doGetRequest() {
+            return mEventsCloudStore.getEventsFromServer(mEventsSpecification);
+        }
 
-                int responseCode;
-                if (responseDto != null) {
-                    responseCode = responseDto.getResponseCode();
-                    if (responseCode == HttpURLConnection.HTTP_UNAUTHORIZED) {
-                        retryGetResultFromServer(requestMethods[0]);
-                    } else {
-                        if (responseCode == HttpURLConnection.HTTP_OK ||
-                                responseCode == HttpURLConnection.HTTP_NO_CONTENT) {
-                            if (requestMethods[0] == POST || requestMethods[0] == PATCH) {
-                                Event event = parseEvent(responseDto.getResponseData());
-                                dbQuery(event, requestMethods[0]);
-                            } else if (requestMethods[0] == GET) {
-                                List<Event> events = parseEventsData(responseDto.getResponseData());
-                                updateDbQuery(events);
-                            } else {
-                                dbQuery(mEvent, requestMethods[0]);
-                            }
-                        }
-                    }
-                } else {
-                    mListener.onFail("Server error");
-                }
+        @Override
+        protected ResponseDto doPostRequest() {
+            return mEventsCloudStore.addEventOnServer(mEvent);
+        }
 
-            } else {
-                if (requestMethods[0] != GET) {
-                    dbQuery(mEvent, requestMethods[0]);
-                } else {
-                    return mEventsDbStore.getEvents(mEventsSpecification);
-                }
-            }
+        @Override
+        protected ResponseDto doPatchRequest() {
+            return mEventsCloudStore.updateEventOnServer(mEvent);
+        }
 
+        @Override
+        protected ResponseDto doDeleteRequest() {
+            return mEventsCloudStore.deleteEventOnServer(mEvent);
+        }
+
+        @Override
+        protected List<Event> doSelectQuery() {
             return mEventsDbStore.getEvents(mEventsSpecification);
         }
 
-        private ResponseDto getResponseFromServer(FirebaseWebService.RequestMethods requestMethod) {
-            switch (requestMethod) {
-                case GET: {
-                    return mEventsCloudStore.getEventsFromServer(mEventsSpecification);
-                }
-                case POST: {
-                    return mEventsCloudStore.addEventOnServer(mEvent);
-                }
-                case PATCH: {
-                    return mEventsCloudStore.updateEventOnServer(mEvent);
-                }
-                case DELETE: {
-                    return mEventsCloudStore.deleteEventOnServer(mEvent);
-                }
-                default: {
-                    return null;
-                }
-            }
+        @Override
+        protected void refreshDbQuery(ResponseDto responseDto) {
+            List<Event> events = parseEventsData(responseDto.getResponseData());
+            updateDbQuery(events);
         }
 
-        private void retryGetResultFromServer(final FirebaseWebService.RequestMethods requestMethod) {
+        @Override
+        protected void doInsertQuery(ResponseDto responseDto) {
+            Event event;
+            if (responseDto != null) {
+                event = parseEvent(responseDto.getResponseData());
+            } else {
+                event = mEvent;
+            }
+            mEventsDbStore.addOrUpdateEvents(Collections.singletonList(event));
+        }
+
+        @Override
+        protected void doUpdateQuery() {
+            mEventsDbStore.addOrUpdateEvents(Collections.singletonList(mEvent));
+        }
+
+        @Override
+        protected void doDeleteQuery() {
+            mEventsDbStore.deleteEvent(mEvent);
+        }
+
+        @Override
+        protected void onServerError() {
+            mListener.onFail("Calendar API server error");
+        }
+
+        @Override
+        protected void retryGetResultFromServer(final FirebaseWebService.RequestMethods requestMethod) {
             mFirebaseWebService.refreshAccessToken(new FirebaseWebService.AccessTokenUpdatedListener() {
                 @Override
                 public void onAccessTokenUpdated() {
@@ -233,14 +234,6 @@ public class EventsRepository {
         private List<Event> parseEventsData(String data) {
             EventsParser eventsParser = new EventsParser();
             return eventsParser.parseEvents(data);
-        }
-
-        private void dbQuery(Event event, FirebaseWebService.RequestMethods requestMethod) {
-            if (requestMethod == POST || requestMethod == PATCH) {
-                mEventsDbStore.addOrUpdateEvents(Collections.singletonList(event));
-            } else if (requestMethod == DELETE) {
-                mEventsDbStore.deleteEvent(event);
-            }
         }
 
         private void updateDbQuery(List<Event> events) {

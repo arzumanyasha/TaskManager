@@ -51,28 +51,10 @@ public class EventsFragment extends Fragment {
             new BottomNavigationView.OnNavigationItemSelectedListener() {
                 @Override
                 public boolean onNavigationItemSelected(@NonNull MenuItem item) {
-                    Fragment selectedFragment = null;
-
                     requireFragmentManager().popBackStack(BACK_STACK_ROOT_TAG,
                             FragmentManager.POP_BACK_STACK_INCLUSIVE);
 
-                    switch (item.getItemId()) {
-                        case R.id.nav_week:
-                            selectedFragment = WeekDashboardFragment.newInstance();
-                            break;
-                        case R.id.nav_today:
-                            selectedFragment = DailyEventsFragment.newInstance();
-                            break;
-                        case R.id.nav_stats:
-                            selectedFragment = EventsStatisticFragment.newInstance();
-                            break;
-                    }
-
-                    requireFragmentManager()
-                            .beginTransaction()
-                            .replace(R.id.fragment_container, selectedFragment)
-                            .addToBackStack(BACK_STACK_ROOT_TAG)
-                            .commit();
+                    setSelectedFragment(item);
 
                     return true;
 
@@ -83,6 +65,33 @@ public class EventsFragment extends Fragment {
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
 
+        setDailyEventsFragment(savedInstanceState);
+    }
+
+    private void setSelectedFragment(MenuItem item) {
+        Fragment selectedFragment = null;
+
+        switch (item.getItemId()) {
+            case R.id.nav_week:
+                selectedFragment = WeekDashboardFragment.newInstance();
+                break;
+            case R.id.nav_today:
+                selectedFragment = DailyEventsFragment.newInstance();
+                break;
+            case R.id.nav_stats:
+                selectedFragment = EventsStatisticFragment.newInstance();
+                break;
+        }
+
+        requireFragmentManager()
+                .beginTransaction()
+                .replace(R.id.fragment_container, selectedFragment)
+                .addToBackStack(BACK_STACK_ROOT_TAG)
+                .commit();
+
+    }
+
+    private void setDailyEventsFragment(Bundle savedInstanceState) {
         if (savedInstanceState == null) {
             requireFragmentManager()
                     .beginTransaction()

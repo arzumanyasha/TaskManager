@@ -4,6 +4,7 @@ import android.content.Context;
 import android.support.annotation.NonNull;
 import android.support.constraint.ConstraintLayout;
 import android.support.v7.widget.RecyclerView;
+import android.util.SparseIntArray;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,10 +15,9 @@ import com.example.arturarzumanyan.taskmanager.R;
 import com.example.arturarzumanyan.taskmanager.domain.Event;
 import com.example.arturarzumanyan.taskmanager.networking.util.DateUtils;
 
-import java.util.HashMap;
 import java.util.List;
 
-public class EventsAdapter extends RecyclerView.Adapter<EventsAdapter.ViewHolder> implements View.OnClickListener {
+public class EventsAdapter extends RecyclerView.Adapter<EventsAdapter.ViewHolder> {
     private List<Event> mDataset;
     private EventsAdapter.OnItemClickListener mListener;
     private Context mContext;
@@ -47,8 +47,6 @@ public class EventsAdapter extends RecyclerView.Adapter<EventsAdapter.ViewHolder
                     if (position != RecyclerView.NO_POSITION) {
                         Event event = mDataset.get(position);
                         mListener.onItemClick(event);
-                        notifyItemChanged(position);
-                        notifyItemRangeChanged(position, mDataset.size());
                     }
                 }
             }
@@ -75,25 +73,11 @@ public class EventsAdapter extends RecyclerView.Adapter<EventsAdapter.ViewHolder
         holder.itemView.setTag(position);
 
         ColorPalette colorPalette = new ColorPalette(mContext);
-        HashMap<Integer, Integer> map = colorPalette.getColorPalette();
+        SparseIntArray map = colorPalette.getColorPalette();
         holder.constraintLayout.setBackgroundColor(map.get(event.getColorId()));
 
         holder.eventTime.setText(DateUtils.formatTime(event.getStartTime())
                 + " - " + DateUtils.formatTime(event.getEndTime()));
-    }
-
-    @Override
-    public void onClick(View v) {
-        if (mListener != null) {
-            int position = (int) v.getTag();
-            if (position != RecyclerView.NO_POSITION) {
-                Event event = mDataset.get(position);
-                mListener.onItemDelete(event);
-                mDataset.remove(event);
-                notifyItemRemoved(position);
-                notifyItemRangeChanged(position, mDataset.size());
-            }
-        }
     }
 
     @Override

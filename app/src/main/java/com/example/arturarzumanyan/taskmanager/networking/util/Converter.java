@@ -4,19 +4,18 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 public class Converter {
-    public static JSONObject fromMapToJson(HashMap<String, Object> map) {
+    public static JSONObject fromMapToJson(Map<String, Object> map) {
         JSONObject jsonObject = new JSONObject();
 
         for (String key : map.keySet()) {
             try {
                 Object obj = map.get(key);
                 if (obj instanceof Map) {
-                    jsonObject.put(key, fromMapToJson((HashMap) obj));
+                    jsonObject.put(key, fromMapToJson((Map) obj));
                 } else if (obj instanceof List) {
                     jsonObject.put(key, fromListToJson((List) obj));
                 } else {
@@ -34,8 +33,8 @@ public class Converter {
         JSONArray jsonArray = new JSONArray();
 
         for (Object obj : list) {
-            if (obj instanceof HashMap) {
-                jsonArray.put(fromMapToJson((HashMap) obj));
+            if (obj instanceof Map) {
+                jsonArray.put(fromMapToJson((Map) obj));
             } else if (obj instanceof List) {
                 jsonArray.put(fromListToJson((List) obj));
             } else {

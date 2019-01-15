@@ -12,7 +12,7 @@ import com.google.android.gms.common.SignInButton;
 
 public class SignInActivity extends AppCompatActivity {
 
-    private static final int REQUEST_CODE = 101;
+    private static final int ACITVITY_REQUEST_CODE = 101;
     public static final String EXTRA_USER_NAME = "userName";
     public static final String EXTRA_USER_EMAIL = "userEmail";
     public static final String EXTRA_USER_PHOTO_URL = "userPhotoUrl";
@@ -24,6 +24,21 @@ public class SignInActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_sign_in);
 
+        setViews();
+        setAuthenticationOptions();
+    }
+
+    private void setViews() {
+        SignInButton signInButton = findViewById(R.id.btn_sign_in);
+        signInButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                signIn();
+            }
+        });
+    }
+
+    private void setAuthenticationOptions() {
         mFirebaseWebService = new FirebaseWebService(this);
         mFirebaseWebService.setGoogleClientOptions();
         mFirebaseWebService.setUserInfoLoadingListener(new FirebaseWebService.UserInfoLoadingListener() {
@@ -35,14 +50,6 @@ public class SignInActivity extends AppCompatActivity {
             @Override
             public void onFail() {
                 Toast.makeText(getApplicationContext(), getString(R.string.failed_log_in_message), Toast.LENGTH_LONG).show();
-            }
-        });
-
-        SignInButton signInButton = findViewById(R.id.btn_sign_in);
-        signInButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                signIn();
             }
         });
     }
@@ -75,12 +82,12 @@ public class SignInActivity extends AppCompatActivity {
     private void signIn() {
         Intent signInIntent = mFirebaseWebService.getGoogleSignInClientIntent();
 
-        startActivityForResult(signInIntent, REQUEST_CODE);
+        startActivityForResult(signInIntent, ACITVITY_REQUEST_CODE);
     }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (requestCode == REQUEST_CODE) {
+        if (requestCode == ACITVITY_REQUEST_CODE) {
 
             mFirebaseWebService.authWithGoogle(data);
         }

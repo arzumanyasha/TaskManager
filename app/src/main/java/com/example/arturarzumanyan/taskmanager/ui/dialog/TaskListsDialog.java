@@ -67,53 +67,10 @@ public class TaskListsDialog extends AppCompatDialogFragment {
                         if (!taskListName.isEmpty() && bundle != null) {
                             TaskList taskList = bundle.getParcelable(TASK_LISTS_KEY);
                             if (taskList != null) {
-                                taskList.setTitle(taskListName);
-                                taskListsRepository.updateTaskList(taskList, new TaskListsRepository.OnTaskListsLoadedListener() {
-                                    @Override
-                                    public void onSuccess(List<TaskList> taskListArrayList) {
-
-                                    }
-
-                                    @Override
-                                    public void onUpdate(List<TaskList> taskLists) {
-
-                                    }
-
-                                    @Override
-                                    public void onSuccess(TaskList taskList) {
-                                        taskListReadyListener.onTaskListReady(taskList);
-                                    }
-
-                                    @Override
-                                    public void onFail(String message) {
-                                        Toast.makeText(getActivity(), message, Toast.LENGTH_LONG).show();
-                                    }
-                                });
+                                updateTaskList(taskListsRepository, taskList, taskListName);
                             }
                         } else if (!taskListName.isEmpty()) {
-                            TaskList taskList = new TaskList(UUID.randomUUID().toString(),
-                                    taskListName);
-                            taskListsRepository.addTaskList(taskList, new TaskListsRepository.OnTaskListsLoadedListener() {
-                                @Override
-                                public void onSuccess(List<TaskList> taskListArrayList) {
-
-                                }
-
-                                @Override
-                                public void onUpdate(List<TaskList> taskLists) {
-
-                                }
-
-                                @Override
-                                public void onSuccess(TaskList taskList) {
-                                    taskListReadyListener.onTaskListReady(taskList);
-                                }
-
-                                @Override
-                                public void onFail(String message) {
-                                    Toast.makeText(getActivity(), message, Toast.LENGTH_LONG).show();
-                                }
-                            });
+                            addTaskList(taskListsRepository, taskListName);
                         }
                     }
                 });
@@ -126,6 +83,57 @@ public class TaskListsDialog extends AppCompatDialogFragment {
         }
 
         return builder.create();
+    }
+
+    private void updateTaskList(TaskListsRepository taskListsRepository, TaskList taskList, String taskListName){
+        taskList.setTitle(taskListName);
+        taskListsRepository.updateTaskList(taskList, new TaskListsRepository.OnTaskListsLoadedListener() {
+            @Override
+            public void onSuccess(List<TaskList> taskListArrayList) {
+
+            }
+
+            @Override
+            public void onUpdate(List<TaskList> taskLists) {
+
+            }
+
+            @Override
+            public void onSuccess(TaskList taskList) {
+                taskListReadyListener.onTaskListReady(taskList);
+            }
+
+            @Override
+            public void onFail(String message) {
+                Toast.makeText(getActivity(), message, Toast.LENGTH_LONG).show();
+            }
+        });
+    }
+
+    private void addTaskList(TaskListsRepository taskListsRepository, String taskListName) {
+        TaskList taskList = new TaskList(UUID.randomUUID().toString(),
+                taskListName);
+        taskListsRepository.addTaskList(taskList, new TaskListsRepository.OnTaskListsLoadedListener() {
+            @Override
+            public void onSuccess(List<TaskList> taskListArrayList) {
+
+            }
+
+            @Override
+            public void onUpdate(List<TaskList> taskLists) {
+
+            }
+
+            @Override
+            public void onSuccess(TaskList taskList) {
+                taskListReadyListener.onTaskListReady(taskList);
+            }
+
+            @Override
+            public void onFail(String message) {
+                Toast.makeText(getActivity(), message, Toast.LENGTH_LONG).show();
+            }
+        });
     }
 
     public interface TaskListReadyListener {

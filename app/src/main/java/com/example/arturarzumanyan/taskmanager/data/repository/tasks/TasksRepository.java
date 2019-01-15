@@ -12,13 +12,11 @@ import com.example.arturarzumanyan.taskmanager.domain.TaskList;
 import com.example.arturarzumanyan.taskmanager.networking.util.Log;
 import com.example.arturarzumanyan.taskmanager.networking.util.TasksParser;
 
-import java.net.HttpURLConnection;
 import java.util.Collections;
 import java.util.List;
 
 import static com.example.arturarzumanyan.taskmanager.auth.FirebaseWebService.RequestMethods.DELETE;
 import static com.example.arturarzumanyan.taskmanager.auth.FirebaseWebService.RequestMethods.GET;
-import static com.example.arturarzumanyan.taskmanager.auth.FirebaseWebService.RequestMethods.PATCH;
 import static com.example.arturarzumanyan.taskmanager.auth.FirebaseWebService.RequestMethods.POST;
 
 public class TasksRepository {
@@ -130,63 +128,68 @@ public class TasksRepository {
 
         @Override
         protected List<Task> doInBackground(FirebaseWebService.RequestMethods... requestMethods) {
-            if (mRepositoryLoadHelper.isOnline()) {
-                ResponseDto responseDto = getResponseFromServer(requestMethods[0]);
+            return super.doInBackground(requestMethods[0]);
+        }
 
-                int responseCode;
-                if (responseDto != null) {
-                    responseCode = responseDto.getResponseCode();
-                    if (responseCode == HttpURLConnection.HTTP_UNAUTHORIZED) {
-                        retryGetResultFromServer(requestMethods[0]);
-                    } else {
-                        if (responseCode == HttpURLConnection.HTTP_OK ||
-                                responseCode == HttpURLConnection.HTTP_NO_CONTENT) {
-                            if (requestMethods[0] == POST || requestMethods[0] == PATCH) {
-                                Task task = parseTask(responseDto.getResponseData());
-                                dbQuery(task, requestMethods[0]);
-                            } else if (requestMethods[0] == GET) {
-                                List<Task> tasks = parseTasksData(responseDto.getResponseData());
-                                updateDbQuery(tasks);
-                            } else {
-                                dbQuery(mTask, requestMethods[0]);
-                            }
-                        }
-                    }
-                } else {
-                    mListener.onFail("Server error");
-                }
+        @Override
+        protected ResponseDto doGetRequest() {
+            return mTasksCloudStore.getTasksFromServer(mTaskList);
+        }
+
+        @Override
+        protected ResponseDto doPostRequest() {
+            return mTasksCloudStore.addTaskOnServer(mTaskList, mTask);
+        }
+
+        @Override
+        protected ResponseDto doPatchRequest() {
+            return mTasksCloudStore.updateTaskOnServer(mTaskList, mTask);
+        }
+
+        @Override
+        protected ResponseDto doDeleteRequest() {
+            return mTasksCloudStore.deleteTaskOnServer(mTaskList, mTask);
+        }
+
+        @Override
+        protected void refreshDbQuery(ResponseDto responseDto) {
+            List<Task> tasks = parseTasksData(responseDto.getResponseData());
+            updateDbQuery(tasks);
+        }
+
+        @Override
+        protected void doInsertQuery(ResponseDto responseDto) {
+            Task task;
+            if (responseDto != null) {
+                task = parseTask(responseDto.getResponseData());
             } else {
-                if (requestMethods[0] != GET) {
-                    dbQuery(mTask, requestMethods[0]);
-                } else {
-                    return mTasksDbStore.getTasksFromTaskList(mTaskList.getId());
-                }
+                task = mTask;
             }
+            mTasksDbStore.addOrUpdateTasks(Collections.singletonList(task));
+        }
 
+        @Override
+        protected void doUpdateQuery() {
+            mTasksDbStore.addOrUpdateTasks(Collections.singletonList(mTask));
+        }
+
+        @Override
+        protected void doDeleteQuery() {
+            mTasksDbStore.deleteTask(mTask);
+        }
+
+        @Override
+        protected List<Task> doSelectQuery() {
             return mTasksDbStore.getTasksFromTaskList(mTaskList.getId());
         }
 
-        private ResponseDto getResponseFromServer(FirebaseWebService.RequestMethods requestMethod) {
-            switch (requestMethod) {
-                case GET: {
-                    return mTasksCloudStore.getTasksFromServer(mTaskList);
-                }
-                case POST: {
-                    return mTasksCloudStore.addTaskOnServer(mTaskList, mTask);
-                }
-                case PATCH: {
-                    return mTasksCloudStore.updateTaskOnServer(mTaskList, mTask);
-                }
-                case DELETE: {
-                    return mTasksCloudStore.deleteTaskOnServer(mTaskList, mTask);
-                }
-                default: {
-                    return null;
-                }
-            }
+        @Override
+        protected void onServerError() {
+            mListener.onFail("Tasks API server error");
         }
 
-        private void retryGetResultFromServer(final FirebaseWebService.RequestMethods requestMethod) {
+        @Override
+        protected void retryGetResultFromServer(final FirebaseWebService.RequestMethods requestMethod) {
             mFirebaseWebService.refreshAccessToken(new FirebaseWebService.AccessTokenUpdatedListener() {
                 @Override
                 public void onAccessTokenUpdated() {
@@ -220,14 +223,6 @@ public class TasksRepository {
         private List<Task> parseTasksData(String data) {
             TasksParser tasksParser = new TasksParser();
             return tasksParser.parseTasks(data, mTaskList.getId());
-        }
-
-        private void dbQuery(Task task, FirebaseWebService.RequestMethods requestMethod) {
-            if (requestMethod == POST || requestMethod == PATCH) {
-                mTasksDbStore.addOrUpdateTasks(Collections.singletonList(task));
-            } else if (requestMethod == FirebaseWebService.RequestMethods.DELETE) {
-                mTasksDbStore.deleteTask(task);
-            }
         }
 
         private void updateDbQuery(List<Task> tasks) {

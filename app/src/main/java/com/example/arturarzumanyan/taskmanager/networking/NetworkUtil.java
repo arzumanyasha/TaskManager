@@ -6,13 +6,14 @@ import com.example.arturarzumanyan.taskmanager.networking.base.BaseHttpUrlConnec
 import com.example.arturarzumanyan.taskmanager.networking.base.RequestParameters;
 
 import java.util.HashMap;
+import java.util.Map;
 
 public class NetworkUtil {
     public static ResponseDto getResultFromServer(RequestParameters requestParameters) {
         String url = requestParameters.getUrl();
         FirebaseWebService.RequestMethods requestMethod = requestParameters.getRequestMethod();
-        HashMap<String, Object> requestBodyParameters = requestParameters.getRequestBodyParameters();
-        HashMap<String, String> requestHeaderParameters = requestParameters.getRequestHeaderParameters();
+        Map<String, Object> requestBodyParameters = requestParameters.getRequestBodyParameters();
+        Map<String, String> requestHeaderParameters = requestParameters.getRequestHeaderParameters();
 
         BaseHttpUrlConnection baseHttpUrlConnection = new BaseHttpUrlConnection();
         return baseHttpUrlConnection.getResult(url,

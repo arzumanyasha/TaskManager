@@ -59,6 +59,16 @@ public class TasksDialog extends AppCompatDialogFragment {
 
         final Bundle bundle = getArguments();
 
+        setViews(builder, view, bundle);
+
+        setTaskDateListener();
+
+        setTaskInfoViews(bundle);
+
+        return builder.create();
+    }
+
+    private void setViews(AlertDialog.Builder builder, View view, final Bundle bundle) {
         mEditTextTaskName = view.findViewById(R.id.edit_text_task_name);
         mEditTextTaskDescription = view.findViewById(R.id.edit_text_task_description);
         mTextViewTaskDate = view.findViewById(R.id.text_task_date);
@@ -78,69 +88,24 @@ public class TasksDialog extends AppCompatDialogFragment {
                         String taskName = mEditTextTaskName.getText().toString();
                         if (bundle != null) {
                             if (!taskName.isEmpty() && (bundle.getParcelable(TASKS_KEY) != null)) {
-                                Task task = bundle.getParcelable(TASKS_KEY);
-                                TaskList taskList = bundle.getParcelable(TASK_LISTS_KEY);
-                                if (task != null) {
-                                    task.setName(taskName);
-                                    task.setDescription(mEditTextTaskDescription.getText().toString());
-                                    task.setDate(taskDate);
-                                    tasksRepository.addOrUpdateTask(taskList, task, PATCH, new TasksRepository.OnTasksLoadedListener() {
-                                        @Override
-                                        public void onSuccess(List<Task> taskArrayList) {
-                                            tasksReadyListener.onTasksReady(taskArrayList);
-                                        }
-
-                                        @Override
-                                        public void onFail(String message) {
-                                            Toast.makeText(getActivity(), R.string.network_error, Toast.LENGTH_LONG).show();
-                                        }
-                                    });
-                                }
+                                updateTask(tasksRepository, bundle, taskName);
                             } else if (!taskName.isEmpty() && (bundle.getParcelable(TASKS_KEY) == null)) {
-                                String taskId = UUID.randomUUID().toString();
-                                String taskDescription = mEditTextTaskDescription.getText().toString();
-                                int isExecuted = 0;
-
-                                TaskList taskList = bundle.getParcelable(TASK_LISTS_KEY);
-                                if (taskList != null) {
-                                    int taskListId = taskList.getId();
-                                    Date date = null;
-
-                                    if (!mTextViewTaskDate.getText().equals(getString(R.string.set_task_date_title))) {
-                                        date = DateUtils.getTaskDateFromString(mTextViewTaskDate.getText().toString());
-                                    }
-
-                                    Task task = new Task(taskId,
-                                            taskName,
-                                            taskDescription,
-                                            isExecuted,
-                                            taskListId,
-                                            date
-                                    );
-                                    tasksRepository.addOrUpdateTask(taskList, task, POST, new TasksRepository.OnTasksLoadedListener() {
-                                        @Override
-                                        public void onSuccess(List<Task> taskArrayList) {
-                                            tasksReadyListener.onTasksReady(taskArrayList);
-                                        }
-
-                                        @Override
-                                        public void onFail(String message) {
-                                            Toast.makeText(getActivity(), message, Toast.LENGTH_LONG).show();
-                                        }
-                                    });
-                                }
+                                addTask(tasksRepository, bundle, taskName);
                             }
                         }
                     }
                 });
 
+    }
+
+    private void setTaskDateListener() {
         final int year = DateUtils.getYear();
         final int month = DateUtils.getMonth();
         final int day = DateUtils.getDay();
         mTextViewTaskDate.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                DatePickerDialog datePickerDialog = new DatePickerDialog(getActivity(), new DatePickerDialog.OnDateSetListener() {
+                DatePickerDialog datePickerDialog = new DatePickerDialog(requireActivity(), new DatePickerDialog.OnDateSetListener() {
 
                     @Override
                     public void onDateSet(DatePicker view, int year, int monthOfYear, int dayOfMonth) {
@@ -152,7 +117,9 @@ public class TasksDialog extends AppCompatDialogFragment {
                 datePickerDialog.show();
             }
         });
+    }
 
+    private void setTaskInfoViews(Bundle bundle) {
         if (bundle != null) {
             if (bundle.getParcelable(TASKS_KEY) != null) {
                 Task task = bundle.getParcelable(TASKS_KEY);
@@ -165,8 +132,57 @@ public class TasksDialog extends AppCompatDialogFragment {
                 }
             }
         }
+    }
 
-        return builder.create();
+    private void addTask(TasksRepository tasksRepository, Bundle bundle, String taskName) {
+        String taskId = UUID.randomUUID().toString();
+        String taskDescription = mEditTextTaskDescription.getText().toString();
+        int isExecuted = 0;
+
+        TaskList taskList = bundle.getParcelable(TASK_LISTS_KEY);
+        if (taskList != null) {
+            int taskListId = taskList.getId();
+            Date date = null;
+
+            if (!mTextViewTaskDate.getText().equals(getString(R.string.set_task_date_title))) {
+                date = DateUtils.getTaskDateFromString(mTextViewTaskDate.getText().toString());
+            }
+
+            Task task = new Task(taskId, taskName, taskDescription, isExecuted, taskListId, date);
+
+            tasksRepository.addOrUpdateTask(taskList, task, POST, new TasksRepository.OnTasksLoadedListener() {
+                @Override
+                public void onSuccess(List<Task> taskArrayList) {
+                    tasksReadyListener.onTasksReady(taskArrayList);
+                }
+
+                @Override
+                public void onFail(String message) {
+                    Toast.makeText(getActivity(), message, Toast.LENGTH_LONG).show();
+                }
+            });
+        }
+    }
+
+    private void updateTask(TasksRepository tasksRepository, Bundle bundle, String taskName) {
+        Task task = bundle.getParcelable(TASKS_KEY);
+        TaskList taskList = bundle.getParcelable(TASK_LISTS_KEY);
+        if (task != null) {
+            task.setName(taskName);
+            task.setDescription(mEditTextTaskDescription.getText().toString());
+            task.setDate(taskDate);
+            tasksRepository.addOrUpdateTask(taskList, task, PATCH, new TasksRepository.OnTasksLoadedListener() {
+                @Override
+                public void onSuccess(List<Task> taskArrayList) {
+                    tasksReadyListener.onTasksReady(taskArrayList);
+                }
+
+                @Override
+                public void onFail(String message) {
+                    Toast.makeText(getActivity(), R.string.network_error, Toast.LENGTH_LONG).show();
+                }
+            });
+        }
     }
 
     public interface TasksReadyListener {

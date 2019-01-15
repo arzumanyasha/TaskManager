@@ -33,9 +33,9 @@ public class EventsCloudStore {
     public ResponseDto getEventsFromServer(EventsSpecification eventsSpecification) {
         String eventsUrl;
         if (eventsSpecification.getStartDate().isEmpty() && eventsSpecification.getEndDate().isEmpty()) {
-            eventsUrl = BASE_GOOGLE_APIS_URL + BASE_EVENTS_URL + mFirebaseWebService.getCurrentUser().getEmail() + "/events";
+            eventsUrl = BASE_GOOGLE_APIS_URL + BASE_EVENTS_URL + mFirebaseWebService.getUserEmail() + "/events";
         } else {
-            eventsUrl = BASE_EVENTS_URL + mFirebaseWebService.getCurrentUser().getEmail() + "/events?" +
+            eventsUrl = BASE_GOOGLE_APIS_URL + BASE_EVENTS_URL + mFirebaseWebService.getUserEmail() + "/events?" +
                     "timeMax=" + DateUtils.decodeDate(eventsSpecification.getEndDate()) +
                     "&timeMin=" + DateUtils.decodeDate(eventsSpecification.getStartDate());
         }
@@ -53,7 +53,7 @@ public class EventsCloudStore {
 
     public ResponseDto addEventOnServer(Event event) {
         final String url = BASE_GOOGLE_APIS_URL + BASE_EVENTS_URL +
-                mFirebaseWebService.getCurrentUser().getEmail() +
+                mFirebaseWebService.getUserEmail() +
                 "/events";
         RequestParameters requestParameters = mRepositoryLoadHelper.getEventCreateOrUpdateParameters(event, url, POST);
 
@@ -62,7 +62,7 @@ public class EventsCloudStore {
 
     public ResponseDto updateEventOnServer(Event event) {
         final String url = BASE_GOOGLE_APIS_URL + BASE_EVENTS_URL +
-                mFirebaseWebService.getCurrentUser().getEmail() +
+                mFirebaseWebService.getUserEmail() +
                 "/events/" +
                 event.getId();
 
@@ -74,7 +74,7 @@ public class EventsCloudStore {
 
     public ResponseDto deleteEventOnServer(Event event) {
         final String url = BASE_GOOGLE_APIS_URL + BASE_EVENTS_URL +
-                mFirebaseWebService.getCurrentUser().getEmail() +
+                mFirebaseWebService.getUserEmail() +
                 "/events/" +
                 event.getId();
 

@@ -57,6 +57,10 @@ public class DailyEventsFragment extends Fragment {
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
+        loadDailyEvents();
+    }
+
+    private void loadDailyEvents() {
         final EventsRepository eventsRepository = new EventsRepository(getActivity());
 
         final EventsFromDateSpecification eventsFromDateSpecification = new EventsFromDateSpecification();
@@ -81,17 +85,7 @@ public class DailyEventsFragment extends Fragment {
         mEventsAdapter = new EventsAdapter(getActivity(), events, new EventsAdapter.OnItemClickListener() {
             @Override
             public void onItemDelete(Event event) {
-                eventsRepository.deleteEvent(event, new EventsRepository.OnEventsLoadedListener() {
-                    @Override
-                    public void onSuccess(List<Event> eventsList) {
-
-                    }
-
-                    @Override
-                    public void onFail(String message) {
-                        Toast.makeText(getActivity(), message, Toast.LENGTH_LONG).show();
-                    }
-                });
+                deleteEvent(eventsRepository, event);
             }
 
             @Override
@@ -108,6 +102,20 @@ public class DailyEventsFragment extends Fragment {
         });
 
         mEventsRecyclerView.setAdapter(mEventsAdapter);
+    }
+
+    private void deleteEvent(EventsRepository eventsRepository, Event event){
+        eventsRepository.deleteEvent(event, new EventsRepository.OnEventsLoadedListener() {
+            @Override
+            public void onSuccess(List<Event> eventsList) {
+
+            }
+
+            @Override
+            public void onFail(String message) {
+                Toast.makeText(getActivity(), message, Toast.LENGTH_LONG).show();
+            }
+        });
     }
 
     private void openEventsDialog(Event event) {

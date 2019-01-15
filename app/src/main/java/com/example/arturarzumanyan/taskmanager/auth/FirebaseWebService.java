@@ -26,6 +26,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.HashMap;
+import java.util.Map;
 
 public class FirebaseWebService implements GoogleApiClient.OnConnectionFailedListener, OnCompleteListener {
 
@@ -142,12 +143,12 @@ public class FirebaseWebService implements GoogleApiClient.OnConnectionFailedLis
 
     private RequestParameters getAccessTokenParameters(String authCode) {
         RequestMethods requestMethod = RequestMethods.POST;
-        HashMap<String, Object> requestBodyParameters = new HashMap<>();
+        Map<String, Object> requestBodyParameters = new HashMap<>();
         requestBodyParameters.put("code", authCode);
         requestBodyParameters.put(CLIENT_ID_KEY, CLIENT_ID);
         requestBodyParameters.put(CLIENT_SECRET_KEY, CLIENT_SECRET);
         requestBodyParameters.put(GRANT_TYPE_KEY, "authorization_code");
-        HashMap<String, String> requestHeaderParameters = new HashMap<>();
+        Map<String, String> requestHeaderParameters = new HashMap<>();
         requestHeaderParameters.put(CONTENT_TYPE_KEY, CONTENT_TYPE);
 
         return new RequestParameters(BASE_URL,
@@ -175,12 +176,12 @@ public class FirebaseWebService implements GoogleApiClient.OnConnectionFailedLis
 
     private RequestParameters getRefreshTokenParameters() {
         FirebaseWebService.RequestMethods requestMethod = FirebaseWebService.RequestMethods.POST;
-        HashMap<String, Object> requestBodyParameters = new HashMap<>();
+        Map<String, Object> requestBodyParameters = new HashMap<>();
         requestBodyParameters.put(REFRESH_TOKEN_KEY, mTokenStorage.getRefreshToken(mContext));
         requestBodyParameters.put(CLIENT_ID_KEY, CLIENT_ID);
         requestBodyParameters.put(CLIENT_SECRET_KEY, CLIENT_SECRET);
         requestBodyParameters.put(GRANT_TYPE_KEY, REFRESH_TOKEN_KEY);
-        HashMap<String, String> requestHeaderParameters = new HashMap<>();
+        Map<String, String> requestHeaderParameters = new HashMap<>();
         requestHeaderParameters.put(CONTENT_TYPE_KEY, CONTENT_TYPE);
 
         return new RequestParameters(BASE_URL,
@@ -192,6 +193,16 @@ public class FirebaseWebService implements GoogleApiClient.OnConnectionFailedLis
     public FirebaseUser getCurrentUser() {
         mAuth = FirebaseAuth.getInstance();
         return mAuth.getCurrentUser();
+    }
+
+    public String getUserEmail() {
+        mAuth = FirebaseAuth.getInstance();
+        FirebaseUser firebaseUser = mAuth.getCurrentUser();
+        if (firebaseUser != null) {
+            return firebaseUser.getEmail();
+        } else {
+            return null;
+        }
     }
 
     public Intent getGoogleSignInClientIntent() {

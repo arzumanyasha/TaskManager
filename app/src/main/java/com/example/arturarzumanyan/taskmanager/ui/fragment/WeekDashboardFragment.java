@@ -88,24 +88,23 @@ public class WeekDashboardFragment extends Fragment {
         Date nextDate = mondayDate;
         final List<Date> weekDateList = new ArrayList<>();
 
+        loadWeeklyEvents(linearLayouts, weekDateList);
+
+        for (int i = 0; i < DAYS_IN_WEEK; i++) {
+            weekDateList.add(nextDate);
+            nextDate = DateUtils.getNextDate(nextDate);
+        }
+    }
+
+    private void loadWeeklyEvents(final List<LinearLayout> linearLayouts, final List<Date> weekDateList) {
         WeeklyEventsSpecification weeklyEventsSpecification = new WeeklyEventsSpecification();
         EventsRepository eventsRepository = new EventsRepository(getActivity());
         eventsRepository.getEvents(weeklyEventsSpecification, new EventsRepository.OnEventsLoadedListener() {
             @Override
             public void onSuccess(List<Event> eventsList) {
                 Log.v("Weekly events loaded");
-                ArrayList<Event> dailyEventsList;
-                for (Event event : eventsList) {
-                    Date eventDate = DateUtils.getEventDate(DateUtils.getEventDate(event.getStartTime()));
 
-                    if (mWeeklyEvents.containsKey(eventDate)) {
-                        dailyEventsList = new ArrayList<>(mWeeklyEvents.get(eventDate));
-                        dailyEventsList.add(event);
-                        mWeeklyEvents.put(eventDate, dailyEventsList);
-                    } else {
-                        mWeeklyEvents.put(eventDate, Collections.singletonList(event));
-                    }
-                }
+                fetchWeeklyEventsWithDate(eventsList);
                 displayDashboard(linearLayouts, mWeeklyEvents, weekDateList);
             }
 
@@ -114,10 +113,20 @@ public class WeekDashboardFragment extends Fragment {
                 Toast.makeText(getActivity(), message, Toast.LENGTH_LONG).show();
             }
         });
+    }
 
-        for (int i = 0; i < DAYS_IN_WEEK; i++) {
-            weekDateList.add(nextDate);
-            nextDate = DateUtils.getNextDate(nextDate);
+    private void fetchWeeklyEventsWithDate(List<Event> eventsList) {
+        List<Event> dailyEventsList;
+        for (Event event : eventsList) {
+            Date eventDate = DateUtils.getEventDate(DateUtils.getEventDate(event.getStartTime()));
+
+            if (mWeeklyEvents.containsKey(eventDate)) {
+                dailyEventsList = new ArrayList<>(mWeeklyEvents.get(eventDate));
+                dailyEventsList.add(event);
+                mWeeklyEvents.put(eventDate, dailyEventsList);
+            } else {
+                mWeeklyEvents.put(eventDate, Collections.singletonList(event));
+            }
         }
     }
 

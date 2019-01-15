@@ -69,21 +69,7 @@ public class TasksFragment extends Fragment {
         LinearLayoutManager layoutManager = new LinearLayoutManager(getActivity());
         mTasksRecyclerView.setLayoutManager(layoutManager);
 
-        TasksRepository tasksRepository = new TasksRepository(getActivity());
-
-        tasksRepository.loadTasks(mTaskList, new TasksRepository.OnTasksLoadedListener() {
-            @Override
-            public void onSuccess(List<Task> taskArrayList) {
-                setTasksAdapter(taskArrayList);
-            }
-
-            @Override
-            public void onFail(String message) {
-                Toast.makeText(getActivity(), message, Toast.LENGTH_LONG).show();
-            }
-        });
-        requireActivity().setTitle(mTaskList.getTitle());
-
+        loadTasks();
 
         ((IntentionActivity) requireActivity()).setTaskFragmentInteractionListener(new IntentionActivity.TaskFragmentInteractionListener() {
             @Override
@@ -101,22 +87,28 @@ public class TasksFragment extends Fragment {
 
     }
 
+    private void loadTasks() {
+        TasksRepository tasksRepository = new TasksRepository(getActivity());
+
+        tasksRepository.loadTasks(mTaskList, new TasksRepository.OnTasksLoadedListener() {
+            @Override
+            public void onSuccess(List<Task> taskArrayList) {
+                setTasksAdapter(taskArrayList);
+            }
+
+            @Override
+            public void onFail(String message) {
+                Toast.makeText(getActivity(), message, Toast.LENGTH_LONG).show();
+            }
+        });
+        requireActivity().setTitle(mTaskList.getTitle());
+    }
+
     private void setTasksAdapter(List<Task> taskArrayList) {
         mTasksAdapter = new TasksAdapter(taskArrayList, new TasksAdapter.OnItemClickListener() {
             @Override
             public void onItemDelete(final Task task) {
-                TasksRepository tasksRepository = new TasksRepository(getActivity());
-                tasksRepository.deleteTask(mTaskList, task, new TasksRepository.OnTasksLoadedListener() {
-                    @Override
-                    public void onSuccess(List<Task> taskArrayList) {
-
-                    }
-
-                    @Override
-                    public void onFail(String message) {
-                        Toast.makeText(getActivity(), message, Toast.LENGTH_LONG).show();
-                    }
-                });
+                deleteTask(task);
             }
 
             @Override
@@ -126,25 +118,12 @@ public class TasksFragment extends Fragment {
 
             @Override
             public void onChangeItemExecuted(final Task task) {
-                TasksRepository tasksRepository = new TasksRepository(getActivity());
-                tasksRepository.addOrUpdateTask(mTaskList,
-                        task, PATCH, new TasksRepository.OnTasksLoadedListener() {
-                            @Override
-                            public void onSuccess(List<Task> taskArrayList) {
-                                mTasksAdapter.updateList(taskArrayList);
-                            }
-
-                            @Override
-                            public void onFail(String message) {
-                                Toast.makeText(getActivity(), message, Toast.LENGTH_LONG).show();
-                            }
-                        });
+                updateTask(task);
             }
         });
 
         mTasksRecyclerView.setAdapter(mTasksAdapter);
     }
-
 
     private void openTasksDialog(Task task) {
         TasksDialog tasksDialog = TasksDialog.newInstance(task, mTaskList);
@@ -156,6 +135,37 @@ public class TasksFragment extends Fragment {
         });
 
         tasksDialog.show(requireFragmentManager(), TASKS_KEY);
+    }
+
+    private void updateTask(Task task) {
+        TasksRepository tasksRepository = new TasksRepository(getActivity());
+        tasksRepository.addOrUpdateTask(mTaskList,
+                task, PATCH, new TasksRepository.OnTasksLoadedListener() {
+                    @Override
+                    public void onSuccess(List<Task> taskArrayList) {
+                        mTasksAdapter.updateList(taskArrayList);
+                    }
+
+                    @Override
+                    public void onFail(String message) {
+                        Toast.makeText(getActivity(), message, Toast.LENGTH_LONG).show();
+                    }
+                });
+    }
+
+    private void deleteTask(Task task) {
+        TasksRepository tasksRepository = new TasksRepository(getActivity());
+        tasksRepository.deleteTask(mTaskList, task, new TasksRepository.OnTasksLoadedListener() {
+            @Override
+            public void onSuccess(List<Task> taskArrayList) {
+
+            }
+
+            @Override
+            public void onFail(String message) {
+                Toast.makeText(getActivity(), message, Toast.LENGTH_LONG).show();
+            }
+        });
     }
 
     public void onButtonPressed(Uri uri) {

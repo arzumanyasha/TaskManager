@@ -7,6 +7,7 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.util.SparseIntArray;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -30,7 +31,6 @@ import com.github.mikephil.charting.data.PieDataSet;
 import com.github.mikephil.charting.data.PieEntry;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 
 import static com.example.arturarzumanyan.taskmanager.networking.util.DateUtils.MINUTES_IN_HOUR;
@@ -39,6 +39,7 @@ public class EventsStatisticFragment extends Fragment {
     private static final int MINUTES_IN_DAY = 1440;
     private static final int MINUTES_IN_WEEK = MINUTES_IN_DAY * 7;
     private static final int PERCENTAGE = 100;
+    private static final int VALUE_IF_KEY_NOT_FOUND = -1;
 
     private PieChart pieChart;
     private Spinner spinnerMode;
@@ -82,46 +83,19 @@ public class EventsStatisticFragment extends Fragment {
         spinnerMode.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                if (position == 0) {
-                    EventsFromDateSpecification eventsFromDateSpecification = new EventsFromDateSpecification();
-                    eventsFromDateSpecification.setDate(DateUtils.getCurrentTime());
-                    mEventsRepository.getEvents(eventsFromDateSpecification, new EventsRepository.OnEventsLoadedListener() {
-                        @Override
-                        public void onSuccess(List<Event> eventsList) {
-                            makePieChart(eventsList, MINUTES_IN_DAY);
-                        }
-
-                        @Override
-                        public void onFail(String message) {
-                            Toast.makeText(getActivity(), message, Toast.LENGTH_LONG).show();
-                        }
-                    });
-                } else if (position == 1) {
-                    WeeklyEventsSpecification weeklyEventsSpecification = new WeeklyEventsSpecification();
-                    mEventsRepository.getEvents(weeklyEventsSpecification, new EventsRepository.OnEventsLoadedListener() {
-                        @Override
-                        public void onSuccess(List<Event> eventsList) {
-                            makePieChart(eventsList, MINUTES_IN_WEEK);
-                        }
-
-                        @Override
-                        public void onFail(String message) {
-                            Toast.makeText(getActivity(), message, Toast.LENGTH_LONG).show();
-                        }
-                    });
-                } else {
-                    MonthlyEventsSpecification monthlyEventsSpecification = new MonthlyEventsSpecification();
-                    mEventsRepository.getEvents(monthlyEventsSpecification, new EventsRepository.OnEventsLoadedListener() {
-                        @Override
-                        public void onSuccess(List<Event> eventsList) {
-                            makePieChart(eventsList, DateUtils.getDaysInCurrentMonth() * MINUTES_IN_DAY);
-                        }
-
-                        @Override
-                        public void onFail(String message) {
-                            Toast.makeText(getActivity(), message, Toast.LENGTH_LONG).show();
-                        }
-                    });
+                switch (position) {
+                    case 0: {
+                        getDailyEvents();
+                        break;
+                    }
+                    case 1: {
+                        getWeeklyEvents();
+                        break;
+                    }
+                    case 2: {
+                        getMonthlyEvents();
+                        break;
+                    }
                 }
             }
 
@@ -133,29 +107,80 @@ public class EventsStatisticFragment extends Fragment {
 
     }
 
-    private void makePieChart(List<Event> events, int minutes) {
-        List<Integer> mColors = new ArrayList<>();
-        HashMap<Integer, Integer> mMinutesOnEvents = new HashMap<>();
+    private void getDailyEvents() {
+        EventsFromDateSpecification eventsFromDateSpecification = new EventsFromDateSpecification();
+        eventsFromDateSpecification.setDate(DateUtils.getCurrentTime());
+        mEventsRepository.getEvents(eventsFromDateSpecification, new EventsRepository.OnEventsLoadedListener() {
+            @Override
+            public void onSuccess(List<Event> eventsList) {
+                createPieChart(eventsList, MINUTES_IN_DAY);
+            }
+
+            @Override
+            public void onFail(String message) {
+                Toast.makeText(getActivity(), message, Toast.LENGTH_LONG).show();
+            }
+        });
+    }
+
+    private void getWeeklyEvents() {
+        WeeklyEventsSpecification weeklyEventsSpecification = new WeeklyEventsSpecification();
+        mEventsRepository.getEvents(weeklyEventsSpecification, new EventsRepository.OnEventsLoadedListener() {
+            @Override
+            public void onSuccess(List<Event> eventsList) {
+                createPieChart(eventsList, MINUTES_IN_WEEK);
+            }
+
+            @Override
+            public void onFail(String message) {
+                Toast.makeText(getActivity(), message, Toast.LENGTH_LONG).show();
+            }
+        });
+    }
+
+    private void getMonthlyEvents() {
+        MonthlyEventsSpecification monthlyEventsSpecification = new MonthlyEventsSpecification();
+        mEventsRepository.getEvents(monthlyEventsSpecification, new EventsRepository.OnEventsLoadedListener() {
+            @Override
+            public void onSuccess(List<Event> eventsList) {
+                createPieChart(eventsList, DateUtils.getDaysInCurrentMonth() * MINUTES_IN_DAY);
+            }
+
+            @Override
+            public void onFail(String message) {
+                Toast.makeText(getActivity(), message, Toast.LENGTH_LONG).show();
+            }
+        });
+    }
+
+    private void createPieChart(List<Event> events, int minutes) {
+        List<Integer> colors = new ArrayList<>();
+        SparseIntArray minutesOnEvents = new SparseIntArray();
 
         ColorPalette colorPalette = new ColorPalette(getActivity());
         for (Event event : events) {
             int eventTimeSpent = event.getEndTime().getHours() * MINUTES_IN_HOUR + event.getEndTime().getMinutes()
                     - event.getStartTime().getHours() * MINUTES_IN_HOUR - event.getStartTime().getMinutes();
-            if (mMinutesOnEvents.containsKey(event.getColorId())) {
-                mMinutesOnEvents.put(event.getColorId(), mMinutesOnEvents.get(event.getColorId()) + eventTimeSpent);
+            if (minutesOnEvents.get(event.getColorId(), VALUE_IF_KEY_NOT_FOUND) != VALUE_IF_KEY_NOT_FOUND) {
+                minutesOnEvents.put(event.getColorId(), minutesOnEvents.get(event.getColorId()) + eventTimeSpent);
             } else {
-                mMinutesOnEvents.put(event.getColorId(), eventTimeSpent);
+                minutesOnEvents.put(event.getColorId(), eventTimeSpent);
             }
         }
 
         List<PieEntry> dailyEventsValues = new ArrayList<>();
 
-        for (HashMap.Entry<Integer, Integer> map : mMinutesOnEvents.entrySet()) {
-            dailyEventsValues.add(new PieEntry(map.getValue() % minutes * PERCENTAGE,
-                    map.getValue() / MINUTES_IN_HOUR + "h " + map.getValue() % MINUTES_IN_HOUR + "m"));
-            mColors.add(colorPalette.getColorPalette().get(map.getKey()));
+        for (int i = 0; i < minutesOnEvents.size(); i++) {
+            dailyEventsValues.add(new PieEntry(minutesOnEvents.valueAt(i) % minutes * PERCENTAGE,
+                    minutesOnEvents.valueAt(i) / MINUTES_IN_HOUR + "h " +
+                            minutesOnEvents.valueAt(i) % MINUTES_IN_HOUR + "m"));
+            colors.add(colorPalette.getColorPalette().get(minutesOnEvents.keyAt(i)));
         }
 
+        setPieChartData(dailyEventsValues, colors);
+    }
+
+    private void setPieChartData(List<PieEntry> dailyEventsValues, List<Integer> colors) {
         pieChart.setUsePercentValues(true);
         pieChart.getDescription().setEnabled(false);
         pieChart.setExtraOffsets(5, 10, 5, 5);
@@ -170,7 +195,7 @@ public class EventsStatisticFragment extends Fragment {
 
         pieDataSet.setSliceSpace(3f);
         pieDataSet.setSelectionShift(5f);
-        pieDataSet.setColors(mColors);
+        pieDataSet.setColors(colors);
 
         PieData pieData = new PieData(pieDataSet);
         pieData.setValueTextSize(10f);
