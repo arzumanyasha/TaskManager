@@ -13,16 +13,6 @@ public class RequestParameters {
     private Map<String, Object> requestBodyParameters;
     private Map<String, String> requestHeaderParameters;
 
-    public RequestParameters(String url,
-                             FirebaseWebService.RequestMethods requestMethod,
-                             Map<String, Object> requestBodyParameters,
-                             Map<String, String> requestHeaderParameters) {
-        this.url = url;
-        this.requestMethod = requestMethod;
-        this.requestBodyParameters = requestBodyParameters;
-        this.requestHeaderParameters = requestHeaderParameters;
-    }
-
     public RequestParameters(
             String url,
             FirebaseWebService.RequestMethods requestMethod,
@@ -46,11 +36,6 @@ public class RequestParameters {
 
     public Map<String, String> getRequestHeaderParameters() {
         return requestHeaderParameters;
-    }
-
-    public void setRequestBodyParameters(Map<String, Object> requestBodyParameters) {
-
-        this.requestBodyParameters = requestBodyParameters;
     }
 
     public void setRequestHeaderParameters(Map<String, String> requestHeaderParameters) {

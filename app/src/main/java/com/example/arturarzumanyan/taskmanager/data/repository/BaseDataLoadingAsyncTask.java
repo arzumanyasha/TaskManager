@@ -15,7 +15,7 @@ import static com.example.arturarzumanyan.taskmanager.auth.FirebaseWebService.Re
 public abstract class BaseDataLoadingAsyncTask<T> extends AsyncTask<FirebaseWebService.RequestMethods, Void, List<T>> {
     private UserDataLoadingListener<T> userDataLoadingListener;
 
-    public BaseDataLoadingAsyncTask() {
+    protected BaseDataLoadingAsyncTask() {
 
     }
 

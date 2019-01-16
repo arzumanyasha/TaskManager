@@ -92,7 +92,7 @@ public class EventsDialog extends AppCompatDialogFragment {
             }
         }
 
-        mEventsRepository = new EventsRepository(getActivity());
+        mEventsRepository = new EventsRepository();
 
         builder.setView(view)
                 .setTitle(getString(R.string.events_title))

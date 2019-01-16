@@ -31,11 +31,13 @@ public class TasksFragment extends Fragment {
     private RecyclerView mTasksRecyclerView;
     private TasksAdapter mTasksAdapter;
 
+    private TasksRepository mTasksRepository;
     private TaskList mTaskList;
 
     private OnFragmentInteractionListener mListener;
 
     public TasksFragment() {
+        mTasksRepository = new TasksRepository();
     }
 
     public static TasksFragment newInstance(TaskList taskList) {
@@ -88,9 +90,7 @@ public class TasksFragment extends Fragment {
     }
 
     private void loadTasks() {
-        TasksRepository tasksRepository = new TasksRepository(getActivity());
-
-        tasksRepository.loadTasks(mTaskList, new TasksRepository.OnTasksLoadedListener() {
+        mTasksRepository.loadTasks(mTaskList, new TasksRepository.OnTasksLoadedListener() {
             @Override
             public void onSuccess(List<Task> taskArrayList) {
                 setTasksAdapter(taskArrayList);
@@ -138,8 +138,7 @@ public class TasksFragment extends Fragment {
     }
 
     private void updateTask(Task task) {
-        TasksRepository tasksRepository = new TasksRepository(getActivity());
-        tasksRepository.addOrUpdateTask(mTaskList,
+        mTasksRepository.addOrUpdateTask(mTaskList,
                 task, PATCH, new TasksRepository.OnTasksLoadedListener() {
                     @Override
                     public void onSuccess(List<Task> taskArrayList) {
@@ -154,8 +153,7 @@ public class TasksFragment extends Fragment {
     }
 
     private void deleteTask(Task task) {
-        TasksRepository tasksRepository = new TasksRepository(getActivity());
-        tasksRepository.deleteTask(mTaskList, task, new TasksRepository.OnTasksLoadedListener() {
+        mTasksRepository.deleteTask(mTaskList, task, new TasksRepository.OnTasksLoadedListener() {
             @Override
             public void onSuccess(List<Task> taskArrayList) {
 

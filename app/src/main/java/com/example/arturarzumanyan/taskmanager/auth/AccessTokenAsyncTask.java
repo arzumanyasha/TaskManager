@@ -11,7 +11,7 @@ import org.json.JSONException;
 public class AccessTokenAsyncTask extends AsyncTask<RequestParameters, Void, ResponseDto> {
     private TokensLoadingListener tokensLoadingListener;
 
-    public AccessTokenAsyncTask() {
+    AccessTokenAsyncTask() {
     }
 
     @Override
@@ -32,11 +32,11 @@ public class AccessTokenAsyncTask extends AsyncTask<RequestParameters, Void, Res
         }
     }
 
-    public interface TokensLoadingListener {
-        void onDataLoaded(String buffer) throws JSONException;
-    }
-
     public void setTokensLoadingListener(TokensLoadingListener listener) {
         this.tokensLoadingListener = listener;
+    }
+
+    public interface TokensLoadingListener {
+        void onDataLoaded(String buffer) throws JSONException;
     }
 }

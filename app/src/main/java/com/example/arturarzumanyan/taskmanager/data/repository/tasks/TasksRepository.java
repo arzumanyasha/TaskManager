@@ -24,9 +24,9 @@ public class TasksRepository {
     private TasksCloudStore mTasksCloudStore;
     private RepositoryLoadHelper mRepositoryLoadHelper;
 
-    public TasksRepository(Context context) {
+    public TasksRepository() {
         mTasksCloudStore = new TasksCloudStore();
-        mTasksDbStore = new TasksDbStore(context);
+        mTasksDbStore = new TasksDbStore();
         mRepositoryLoadHelper = new RepositoryLoadHelper();
     }
 
@@ -107,12 +107,12 @@ public class TasksRepository {
         private TasksCloudStore mTasksCloudStore;
         private TasksRepository.OnTasksLoadedListener mListener;
 
-        public TasksAsyncTask(Task task,
-                              TaskList taskList,
-                              RepositoryLoadHelper repositoryLoadHelper,
-                              TasksDbStore tasksDbStore,
-                              TasksCloudStore tasksCloudStore,
-                              TasksRepository.OnTasksLoadedListener listener) {
+        TasksAsyncTask(Task task,
+                       TaskList taskList,
+                       RepositoryLoadHelper repositoryLoadHelper,
+                       TasksDbStore tasksDbStore,
+                       TasksCloudStore tasksCloudStore,
+                       TasksRepository.OnTasksLoadedListener listener) {
             this.mTask = task;
             this.mTaskList = taskList;
             this.mRepositoryLoadHelper = repositoryLoadHelper;

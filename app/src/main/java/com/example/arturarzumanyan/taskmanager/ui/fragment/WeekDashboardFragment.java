@@ -98,7 +98,7 @@ public class WeekDashboardFragment extends Fragment {
 
     private void loadWeeklyEvents(final List<LinearLayout> linearLayouts, final List<Date> weekDateList) {
         WeeklyEventsSpecification weeklyEventsSpecification = new WeeklyEventsSpecification();
-        EventsRepository eventsRepository = new EventsRepository(getActivity());
+        EventsRepository eventsRepository = new EventsRepository();
         eventsRepository.getEvents(weeklyEventsSpecification, new EventsRepository.OnEventsLoadedListener() {
             @Override
             public void onSuccess(List<Event> eventsList) {

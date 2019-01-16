@@ -141,7 +141,7 @@ public class IntentionActivity extends AppCompatActivity {
             }
         };
 
-        mTaskListsRepository = new TaskListsRepository(getApplicationContext());
+        mTaskListsRepository = new TaskListsRepository();
         mTaskListsRepository.loadTaskLists(allTaskListsSpecification, onTaskListsLoadedListener);
 
     }
@@ -479,7 +479,7 @@ public class IntentionActivity extends AppCompatActivity {
 
             @Override
             public void onDateSet(DatePicker view, int year, int monthOfYear, int dayOfMonth) {
-                EventsRepository eventsRepository = new EventsRepository(getApplicationContext());
+                EventsRepository eventsRepository = new EventsRepository();
 
                 EventsFromDateSpecification eventsFromDateSpecification = new EventsFromDateSpecification();
                 eventsFromDateSpecification.setDate(DateUtils.getStringDateFromInt(year, monthOfYear, dayOfMonth));
@@ -510,28 +510,28 @@ public class IntentionActivity extends AppCompatActivity {
         taskListFragmentInteractionListener = null;
     }
 
-    public interface TaskFragmentInteractionListener {
-        void onTasksReady(List<Task> tasks);
-    }
-
     public void setTaskFragmentInteractionListener(TaskFragmentInteractionListener listener) {
         this.taskFragmentInteractionListener = listener;
-    }
-
-    public interface EventFragmentInteractionListener {
-        void onEventsReady(List<Event> events);
     }
 
     public void setEventFragmentInteractionListener(EventFragmentInteractionListener listener) {
         this.eventFragmentInteractionListener = listener;
     }
 
-    public interface TaskListFragmentInteractionListener {
-        void onTaskListReady(TaskList taskList);
-    }
-
     public void setTaskListFragmentInteractionListener(TaskListFragmentInteractionListener listener) {
         this.taskListFragmentInteractionListener = listener;
+    }
+
+    public interface TaskFragmentInteractionListener {
+        void onTasksReady(List<Task> tasks);
+    }
+
+    public interface EventFragmentInteractionListener {
+        void onEventsReady(List<Event> events);
+    }
+
+    public interface TaskListFragmentInteractionListener {
+        void onTaskListReady(TaskList taskList);
     }
 }
 

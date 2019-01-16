@@ -1,6 +1,5 @@
 package com.example.arturarzumanyan.taskmanager.data.repository.tasklists;
 
-import android.content.Context;
 import android.os.AsyncTask;
 
 import com.example.arturarzumanyan.taskmanager.auth.FirebaseWebService;
@@ -16,7 +15,6 @@ import com.example.arturarzumanyan.taskmanager.domain.TaskList;
 import com.example.arturarzumanyan.taskmanager.networking.util.Log;
 import com.example.arturarzumanyan.taskmanager.networking.util.TaskListsParser;
 
-import java.lang.ref.WeakReference;
 import java.util.Collections;
 import java.util.List;
 
@@ -31,19 +29,17 @@ public class TaskListsRepository {
     private TasksDbStore mTasksDbStore;
     private TasksCloudStore mTasksCloudStore;
     private RepositoryLoadHelper mRepositoryLoadHelper;
-    private Context mContext;
 
-    public TaskListsRepository(Context context) {
-        this.mContext = context;
+    public TaskListsRepository() {
         mTaskListsCloudStore = new TaskListsCloudStore();
-        mTaskListsDbStore = new TaskListsDbStore(mContext);
+        mTaskListsDbStore = new TaskListsDbStore();
         mTasksCloudStore = new TasksCloudStore();
-        mTasksDbStore = new TasksDbStore(mContext);
+        mTasksDbStore = new TasksDbStore();
         mRepositoryLoadHelper = new RepositoryLoadHelper();
     }
 
     public void loadTaskLists(TaskListsSpecification taskListsSpecification, final OnTaskListsLoadedListener listener) {
-        TaskListsAsyncTask taskListsAsyncTask = new TaskListsAsyncTask(null, mContext, mRepositoryLoadHelper,
+        TaskListsAsyncTask taskListsAsyncTask = new TaskListsAsyncTask(null, mRepositoryLoadHelper,
                 mTaskListsDbStore, mTaskListsCloudStore, mTasksDbStore, mTasksCloudStore, taskListsSpecification, listener);
 
         taskListsAsyncTask.setDataInfoLoadingListener(new BaseDataLoadingAsyncTask.UserDataLoadingListener<TaskList>() {
@@ -65,7 +61,7 @@ public class TaskListsRepository {
     public void addTaskList(TaskList taskList, final OnTaskListsLoadedListener listener) {
         AllTaskListsSpecification allTaskListsSpecification = new AllTaskListsSpecification();
 
-        TaskListsAsyncTask taskListsAsyncTask = new TaskListsAsyncTask(taskList, mContext,
+        TaskListsAsyncTask taskListsAsyncTask = new TaskListsAsyncTask(taskList,
                 mRepositoryLoadHelper, mTaskListsDbStore, mTaskListsCloudStore,
                 mTasksDbStore, null, allTaskListsSpecification, null);
 
@@ -87,7 +83,7 @@ public class TaskListsRepository {
         TaskListFromIdSpecification taskListFromIdSpecification = new TaskListFromIdSpecification();
         taskListFromIdSpecification.setTaskListId(taskList.getId());
 
-        TaskListsAsyncTask taskListsAsyncTask = new TaskListsAsyncTask(taskList, mContext,
+        TaskListsAsyncTask taskListsAsyncTask = new TaskListsAsyncTask(taskList,
                 mRepositoryLoadHelper, mTaskListsDbStore, mTaskListsCloudStore,
                 mTasksDbStore, null, taskListFromIdSpecification, null);
 
@@ -109,7 +105,7 @@ public class TaskListsRepository {
         TaskListFromIdSpecification taskListFromIdSpecification = new TaskListFromIdSpecification();
         taskListFromIdSpecification.setTaskListId(taskList.getId());
 
-        TaskListsAsyncTask taskListsAsyncTask = new TaskListsAsyncTask(taskList, mContext,
+        TaskListsAsyncTask taskListsAsyncTask = new TaskListsAsyncTask(taskList,
                 mRepositoryLoadHelper, mTaskListsDbStore, mTaskListsCloudStore,
                 mTasksDbStore, null, taskListFromIdSpecification, null);
 
@@ -140,7 +136,6 @@ public class TaskListsRepository {
     public static class TaskListsAsyncTask extends BaseDataLoadingAsyncTask<TaskList> {
 
         private TaskList mTaskList;
-        private WeakReference<Context> mContextWeakReference;
         private RepositoryLoadHelper mRepositoryLoadHelper;
         private TaskListsDbStore mTaskListsDbStore;
         private TaskListsCloudStore mTaskListsCloudStore;
@@ -149,17 +144,15 @@ public class TaskListsRepository {
         private TaskListsSpecification mTaskListsSpecification;
         private OnTaskListsLoadedListener mListener;
 
-        public TaskListsAsyncTask(TaskList taskList,
-                                  Context context,
-                                  RepositoryLoadHelper repositoryLoadHelper,
-                                  TaskListsDbStore taskListsDbStore,
-                                  TaskListsCloudStore taskListsCloudStore,
-                                  TasksDbStore tasksDbStore,
-                                  TasksCloudStore tasksCloudStore,
-                                  TaskListsSpecification taskListsSpecification,
-                                  OnTaskListsLoadedListener listener) {
+        TaskListsAsyncTask(TaskList taskList,
+                           RepositoryLoadHelper repositoryLoadHelper,
+                           TaskListsDbStore taskListsDbStore,
+                           TaskListsCloudStore taskListsCloudStore,
+                           TasksDbStore tasksDbStore,
+                           TasksCloudStore tasksCloudStore,
+                           TaskListsSpecification taskListsSpecification,
+                           OnTaskListsLoadedListener listener) {
             this.mTaskList = taskList;
-            this.mContextWeakReference = new WeakReference<>(context);
             this.mRepositoryLoadHelper = repositoryLoadHelper;
             this.mTaskListsDbStore = taskListsDbStore;
             this.mTaskListsCloudStore = taskListsCloudStore;
@@ -238,9 +231,8 @@ public class TaskListsRepository {
                 public void onAccessTokenUpdated() {
                     Log.v("Access token refreshed successfully");
                     TaskListsAsyncTask taskListsAsyncTask = new TaskListsAsyncTask(null,
-                            mContextWeakReference.get(), mRepositoryLoadHelper,
-                            mTaskListsDbStore, mTaskListsCloudStore, mTasksDbStore, mTasksCloudStore,
-                            mTaskListsSpecification, mListener);
+                            mRepositoryLoadHelper, mTaskListsDbStore, mTaskListsCloudStore,
+                            mTasksDbStore, mTasksCloudStore, mTaskListsSpecification, mListener);
                     taskListsAsyncTask.setDataInfoLoadingListener(new UserDataLoadingListener<TaskList>() {
                         @Override
                         public void onSuccess(List<TaskList> list) {
@@ -269,20 +261,23 @@ public class TaskListsRepository {
             return taskListsParser.parseTaskLists(data);
         }
 
-        /*private void loadTasks(TaskList taskList, int taskListNumber) {
-            ResponseDto responseDto = mTasksCloudStore.getTasksFromServer(taskList);
-
-            int responseCode = responseDto.getResponseCode();
-            if (responseCode == HttpURLConnection.HTTP_OK ||
-                    responseCode == HttpURLConnection.HTTP_NO_CONTENT) {
-                TasksParser tasksParser = new TasksParser();
-                updateTasksInDbQuery(tasksParser.parseTasks(responseDto.getResponseData(), taskListNumber));
-            }
-        }
-
-        private void updateTasksInDbQuery(List<Task> tasks) {
-            mTasksDbStore.addOrUpdateTasks(tasks);
-        }*/
+        /**
+         * IF TASK LOADING NEEDED FROM THIS ASYNCTASK
+         * private void loadTasks(TaskList taskList, int taskListNumber) {
+         * ResponseDto responseDto = mTasksCloudStore.getTasksFromServer(taskList);
+         * <p>
+         * int responseCode = responseDto.getResponseCode();
+         * if (responseCode == HttpURLConnection.HTTP_OK ||
+         * responseCode == HttpURLConnection.HTTP_NO_CONTENT) {
+         * TasksParser tasksParser = new TasksParser();
+         * updateTasksInDbQuery(tasksParser.parseTasks(responseDto.getResponseData(), taskListNumber));
+         * }
+         * }
+         * <p>
+         * private void updateTasksInDbQuery(List<Task> tasks) {
+         * mTasksDbStore.addOrUpdateTasks(tasks);
+         * }
+         */
 
         private void updateDbQuery(List<TaskList> events) {
             mTaskListsDbStore.addOrUpdateTaskLists(events);

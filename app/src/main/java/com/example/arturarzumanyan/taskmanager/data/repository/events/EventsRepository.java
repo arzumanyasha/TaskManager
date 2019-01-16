@@ -1,6 +1,5 @@
 package com.example.arturarzumanyan.taskmanager.data.repository.events;
 
-import android.content.Context;
 import android.os.AsyncTask;
 
 import com.example.arturarzumanyan.taskmanager.auth.FirebaseWebService;
@@ -26,9 +25,9 @@ public class EventsRepository {
     private EventsCloudStore mEventsCloudStore;
     private RepositoryLoadHelper mRepositoryLoadHelper;
 
-    public EventsRepository(Context context) {
+    public EventsRepository() {
         mEventsCloudStore = new EventsCloudStore();
-        mEventsDbStore = new EventsDbStore(context);
+        mEventsDbStore = new EventsDbStore();
         mRepositoryLoadHelper = new RepositoryLoadHelper();
     }
 
@@ -117,12 +116,12 @@ public class EventsRepository {
         private EventsSpecification mEventsSpecification;
         private OnEventsLoadedListener mListener;
 
-        public EventsAsyncTask(Event event,
-                               RepositoryLoadHelper repositoryLoadHelper,
-                               EventsDbStore eventsDbStore,
-                               EventsCloudStore eventsCloudStore,
-                               EventsSpecification eventsSpecification,
-                               OnEventsLoadedListener listener) {
+        EventsAsyncTask(Event event,
+                        RepositoryLoadHelper repositoryLoadHelper,
+                        EventsDbStore eventsDbStore,
+                        EventsCloudStore eventsCloudStore,
+                        EventsSpecification eventsSpecification,
+                        OnEventsLoadedListener listener) {
             this.mEvent = event;
             this.mRepositoryLoadHelper = repositoryLoadHelper;
             this.mEventsDbStore = eventsDbStore;

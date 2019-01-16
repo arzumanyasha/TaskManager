@@ -18,7 +18,7 @@ public class TaskListsCloudStore {
 
     private RepositoryLoadHelper mRepositoryLoadHelper;
 
-    public TaskListsCloudStore() {
+    TaskListsCloudStore() {
         mRepositoryLoadHelper = new RepositoryLoadHelper();
     }
 

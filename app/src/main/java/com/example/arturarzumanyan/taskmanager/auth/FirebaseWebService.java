@@ -56,7 +56,7 @@ public class FirebaseWebService implements GoogleApiClient.OnConnectionFailedLis
 
     private UserInfoLoadingListener userInfoLoadingListener;
 
-    public static void initFirebaseWebWerviceInstance(Context context) {
+    public static void initFirebaseWebServiceInstance(Context context) {
         if (mFirebaseWebServiceInstance == null) {
             mFirebaseWebServiceInstance = new FirebaseWebService(context);
         }
@@ -159,11 +159,9 @@ public class FirebaseWebService implements GoogleApiClient.OnConnectionFailedLis
         Map<String, String> requestHeaderParameters = new HashMap<>();
         requestHeaderParameters.put(CONTENT_TYPE_KEY, CONTENT_TYPE);
 
-        return new RequestParameters(BASE_URL,
-                requestMethod,
-                requestBodyParameters,
-                requestHeaderParameters);
-
+        RequestParameters requestParameters = new RequestParameters(BASE_URL, requestMethod, requestBodyParameters);
+        requestParameters.setRequestHeaderParameters(requestHeaderParameters);
+        return requestParameters;
     }
 
     public void refreshAccessToken(final AccessTokenUpdatedListener listener) {
@@ -191,11 +189,10 @@ public class FirebaseWebService implements GoogleApiClient.OnConnectionFailedLis
         requestBodyParameters.put(GRANT_TYPE_KEY, REFRESH_TOKEN_KEY);
         Map<String, String> requestHeaderParameters = new HashMap<>();
         requestHeaderParameters.put(CONTENT_TYPE_KEY, CONTENT_TYPE);
-        return new RequestParameters(BASE_URL,
 
-                requestMethod,
-                requestBodyParameters,
-                requestHeaderParameters);
+        RequestParameters requestParameters = new RequestParameters(BASE_URL, requestMethod, requestBodyParameters);
+        requestParameters.setRequestHeaderParameters(requestHeaderParameters);
+        return requestParameters;
     }
 
     public FirebaseUser getCurrentUser() {
@@ -224,14 +221,14 @@ public class FirebaseWebService implements GoogleApiClient.OnConnectionFailedLis
         }
     }
 
+    public void setUserInfoLoadingListener(UserInfoLoadingListener listener) {
+        this.userInfoLoadingListener = listener;
+    }
+
     public interface UserInfoLoadingListener {
         void onDataLoaded(String userName, String userEmail, String userPhotoUrl);
 
         void onFail(String message);
-    }
-
-    public void setUserInfoLoadingListener(UserInfoLoadingListener listener) {
-        this.userInfoLoadingListener = listener;
     }
 
     public interface AccessTokenUpdatedListener {

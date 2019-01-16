@@ -62,7 +62,7 @@ public class TaskListsDialog extends AppCompatDialogFragment {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         String taskListName = mEditTextTaskListTitle.getText().toString();
-                        TaskListsRepository taskListsRepository = new TaskListsRepository(getActivity());
+                        TaskListsRepository taskListsRepository = new TaskListsRepository();
                         if (!taskListName.isEmpty() && bundle != null) {
                             TaskList taskList = bundle.getParcelable(TASK_LISTS_KEY);
                             if (taskList != null) {

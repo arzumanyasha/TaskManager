@@ -19,17 +19,17 @@ import java.util.Date;
 import java.util.List;
 
 public class DbHelper {
-    private static final String ID_WHERE_CLAUSE_KEY = "id = ?";
-    private static final String _ID_WHERE_CLAUSE_KEY = "_id = ?";
-
     private static DbHelper mDbInstance;
     private SQLiteDatabase mDbSqlite;
     private static SQLiteDbHelper mSqLiteDbHelper;
 
-    public synchronized static DbHelper getDbHelper(Context context) {
+    public static void initDbHelperInstance(Context context)
+    {
         if (mDbInstance == null) {
             mDbInstance = new DbHelper(context);
         }
+    }
+    public synchronized static DbHelper getDbHelperInstance() {
         return mDbInstance;
     }
 
@@ -52,7 +52,7 @@ public class DbHelper {
             ContentValues cv = createEventContentValues(event);
             if (isEventExistsInDb(event.getId())) {
                 mDbSqlite.update(EventsContract.EventsTable.TABLE_NAME, cv,
-                        ID_WHERE_CLAUSE_KEY, new String[]{event.getId()});
+                        EventsContract.EventsTable.COLUMN_EVENT_ID + " = ?", new String[]{event.getId()});
             } else {
                 mDbSqlite.insert(EventsContract.EventsTable.TABLE_NAME,
                         null, cv);
@@ -96,7 +96,7 @@ public class DbHelper {
         mDbSqlite.beginTransaction();
         try {
             mDbSqlite.delete(EventsContract.EventsTable.TABLE_NAME,
-                    ID_WHERE_CLAUSE_KEY,
+                    EventsContract.EventsTable.COLUMN_EVENT_ID + " = ?",
                     new String[]{event.getId()});
 
             mDbSqlite.setTransactionSuccessful();
@@ -152,7 +152,8 @@ public class DbHelper {
             ContentValues cv = createTaskListContentValues(taskList);
             if (isTaskListExistsInDb(taskList.getTaskListId())) {
                 mDbSqlite.update(TasksContract.TaskListTable.TABLE_NAME, cv,
-                        _ID_WHERE_CLAUSE_KEY, new String[]{Integer.toString(taskList.getId())});
+                        TasksContract.TaskListTable._ID + " = ?",
+                        new String[]{Integer.toString(taskList.getId())});
             } else {
                 mDbSqlite.insert(TasksContract.TaskListTable.TABLE_NAME,
                         null, cv);
@@ -209,7 +210,8 @@ public class DbHelper {
 
     public void deleteTaskList(TaskList taskList) {
         mDbSqlite = mSqLiteDbHelper.getWritableDatabase();
-        mDbSqlite.delete(TasksContract.TaskListTable.TABLE_NAME, _ID_WHERE_CLAUSE_KEY,
+        mDbSqlite.delete(TasksContract.TaskListTable.TABLE_NAME,
+                TasksContract.TaskListTable._ID + " = ?",
                 new String[]{Integer.toString(taskList.getId())});
     }
 
@@ -228,7 +230,7 @@ public class DbHelper {
             ContentValues cv = createTaskContentValues(task);
             if (isTaskExistsInDb(task.getId())) {
                 mDbSqlite.update(TasksContract.TasksTable.TABLE_NAME, cv,
-                        ID_WHERE_CLAUSE_KEY, new String[]{task.getId()});
+                        TasksContract.TasksTable.COLUMN_TASK_ID + " = ?", new String[]{task.getId()});
             } else {
                 mDbSqlite.insert(TasksContract.TasksTable.TABLE_NAME,
                         null, cv);
@@ -269,7 +271,7 @@ public class DbHelper {
     public void deleteTask(Task task) {
         mDbSqlite = mSqLiteDbHelper.getWritableDatabase();
         mDbSqlite.delete(TasksContract.TasksTable.TABLE_NAME,
-                ID_WHERE_CLAUSE_KEY, new String[]{task.getId()});
+                TasksContract.TasksTable.COLUMN_TASK_ID + " = ?", new String[]{task.getId()});
     }
 
     public List<Task> getTasksFromList(int tasksListId) {

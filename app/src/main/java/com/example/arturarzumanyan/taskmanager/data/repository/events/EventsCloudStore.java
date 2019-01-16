@@ -20,7 +20,7 @@ public class EventsCloudStore {
 
     private RepositoryLoadHelper mRepositoryLoadHelper;
 
-    public EventsCloudStore() {
+    EventsCloudStore() {
         mRepositoryLoadHelper = new RepositoryLoadHelper();
     }
 

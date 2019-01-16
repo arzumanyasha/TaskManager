@@ -61,7 +61,7 @@ public class DailyEventsFragment extends Fragment {
     }
 
     private void loadDailyEvents() {
-        final EventsRepository eventsRepository = new EventsRepository(getActivity());
+        final EventsRepository eventsRepository = new EventsRepository();
 
         final EventsFromDateSpecification eventsFromDateSpecification = new EventsFromDateSpecification();
         eventsFromDateSpecification.setDate(DateUtils.getCurrentTime());

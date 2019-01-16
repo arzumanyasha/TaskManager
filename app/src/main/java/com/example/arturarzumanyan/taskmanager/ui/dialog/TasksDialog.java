@@ -86,7 +86,7 @@ public class TasksDialog extends AppCompatDialogFragment {
                 .setPositiveButton(getString(R.string.ok_button), new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        TasksRepository tasksRepository = new TasksRepository(getActivity());
+                        TasksRepository tasksRepository = new TasksRepository();
                         String taskName = mEditTextTaskName.getText().toString();
                         if (bundle != null) {
                             if (!taskName.isEmpty() && (bundle.getParcelable(TASKS_KEY) != null)) {

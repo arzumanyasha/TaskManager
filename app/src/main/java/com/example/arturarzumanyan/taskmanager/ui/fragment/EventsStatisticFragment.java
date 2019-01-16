@@ -78,7 +78,7 @@ public class EventsStatisticFragment extends Fragment {
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
 
-        mEventsRepository = new EventsRepository(getActivity());
+        mEventsRepository = new EventsRepository();
 
         spinnerMode.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
