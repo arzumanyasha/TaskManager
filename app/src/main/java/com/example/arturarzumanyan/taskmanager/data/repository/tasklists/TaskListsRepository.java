@@ -31,23 +31,20 @@ public class TaskListsRepository {
     private TasksDbStore mTasksDbStore;
     private TasksCloudStore mTasksCloudStore;
     private RepositoryLoadHelper mRepositoryLoadHelper;
-    private FirebaseWebService mFirebaseWebService;
     private Context mContext;
 
     public TaskListsRepository(Context context) {
         this.mContext = context;
-        mTaskListsCloudStore = new TaskListsCloudStore(mContext);
+        mTaskListsCloudStore = new TaskListsCloudStore();
         mTaskListsDbStore = new TaskListsDbStore(mContext);
-        mTasksCloudStore = new TasksCloudStore(mContext);
+        mTasksCloudStore = new TasksCloudStore();
         mTasksDbStore = new TasksDbStore(mContext);
-        mRepositoryLoadHelper = new RepositoryLoadHelper(mContext);
-        mFirebaseWebService = new FirebaseWebService(mContext);
+        mRepositoryLoadHelper = new RepositoryLoadHelper();
     }
 
     public void loadTaskLists(TaskListsSpecification taskListsSpecification, final OnTaskListsLoadedListener listener) {
         TaskListsAsyncTask taskListsAsyncTask = new TaskListsAsyncTask(null, mContext, mRepositoryLoadHelper,
-                mFirebaseWebService, mTaskListsDbStore, mTaskListsCloudStore,
-                mTasksDbStore, mTasksCloudStore, taskListsSpecification, listener);
+                mTaskListsDbStore, mTaskListsCloudStore, mTasksDbStore, mTasksCloudStore, taskListsSpecification, listener);
 
         taskListsAsyncTask.setDataInfoLoadingListener(new BaseDataLoadingAsyncTask.UserDataLoadingListener<TaskList>() {
             @Override
@@ -69,7 +66,7 @@ public class TaskListsRepository {
         AllTaskListsSpecification allTaskListsSpecification = new AllTaskListsSpecification();
 
         TaskListsAsyncTask taskListsAsyncTask = new TaskListsAsyncTask(taskList, mContext,
-                mRepositoryLoadHelper, mFirebaseWebService, mTaskListsDbStore, mTaskListsCloudStore,
+                mRepositoryLoadHelper, mTaskListsDbStore, mTaskListsCloudStore,
                 mTasksDbStore, null, allTaskListsSpecification, null);
 
         taskListsAsyncTask.setDataInfoLoadingListener(new BaseDataLoadingAsyncTask.UserDataLoadingListener<TaskList>() {
@@ -91,7 +88,7 @@ public class TaskListsRepository {
         taskListFromIdSpecification.setTaskListId(taskList.getId());
 
         TaskListsAsyncTask taskListsAsyncTask = new TaskListsAsyncTask(taskList, mContext,
-                mRepositoryLoadHelper, mFirebaseWebService, mTaskListsDbStore, mTaskListsCloudStore,
+                mRepositoryLoadHelper, mTaskListsDbStore, mTaskListsCloudStore,
                 mTasksDbStore, null, taskListFromIdSpecification, null);
 
         taskListsAsyncTask.setDataInfoLoadingListener(new BaseDataLoadingAsyncTask.UserDataLoadingListener<TaskList>() {
@@ -113,7 +110,7 @@ public class TaskListsRepository {
         taskListFromIdSpecification.setTaskListId(taskList.getId());
 
         TaskListsAsyncTask taskListsAsyncTask = new TaskListsAsyncTask(taskList, mContext,
-                mRepositoryLoadHelper, mFirebaseWebService, mTaskListsDbStore, mTaskListsCloudStore,
+                mRepositoryLoadHelper, mTaskListsDbStore, mTaskListsCloudStore,
                 mTasksDbStore, null, taskListFromIdSpecification, null);
 
         taskListsAsyncTask.setDataInfoLoadingListener(new BaseDataLoadingAsyncTask.UserDataLoadingListener<TaskList>() {
@@ -145,7 +142,6 @@ public class TaskListsRepository {
         private TaskList mTaskList;
         private WeakReference<Context> mContextWeakReference;
         private RepositoryLoadHelper mRepositoryLoadHelper;
-        private FirebaseWebService mFirebaseWebService;
         private TaskListsDbStore mTaskListsDbStore;
         private TaskListsCloudStore mTaskListsCloudStore;
         private TasksDbStore mTasksDbStore;
@@ -156,7 +152,6 @@ public class TaskListsRepository {
         public TaskListsAsyncTask(TaskList taskList,
                                   Context context,
                                   RepositoryLoadHelper repositoryLoadHelper,
-                                  FirebaseWebService firebaseWebService,
                                   TaskListsDbStore taskListsDbStore,
                                   TaskListsCloudStore taskListsCloudStore,
                                   TasksDbStore tasksDbStore,
@@ -166,7 +161,6 @@ public class TaskListsRepository {
             this.mTaskList = taskList;
             this.mContextWeakReference = new WeakReference<>(context);
             this.mRepositoryLoadHelper = repositoryLoadHelper;
-            this.mFirebaseWebService = firebaseWebService;
             this.mTaskListsDbStore = taskListsDbStore;
             this.mTaskListsCloudStore = taskListsCloudStore;
             this.mTasksDbStore = tasksDbStore;
@@ -239,12 +233,12 @@ public class TaskListsRepository {
 
         @Override
         protected void retryGetResultFromServer(final FirebaseWebService.RequestMethods requestMethod) {
-            mFirebaseWebService.refreshAccessToken(new FirebaseWebService.AccessTokenUpdatedListener() {
+            FirebaseWebService.getFirebaseWebServiceInstance().refreshAccessToken(new FirebaseWebService.AccessTokenUpdatedListener() {
                 @Override
                 public void onAccessTokenUpdated() {
                     Log.v("Access token refreshed successfully");
                     TaskListsAsyncTask taskListsAsyncTask = new TaskListsAsyncTask(null,
-                            mContextWeakReference.get(), mRepositoryLoadHelper, mFirebaseWebService,
+                            mContextWeakReference.get(), mRepositoryLoadHelper,
                             mTaskListsDbStore, mTaskListsCloudStore, mTasksDbStore, mTasksCloudStore,
                             mTaskListsSpecification, mListener);
                     taskListsAsyncTask.setDataInfoLoadingListener(new UserDataLoadingListener<TaskList>() {

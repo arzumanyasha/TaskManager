@@ -34,6 +34,8 @@ public class TasksDialog extends AppCompatDialogFragment {
     private TextView mTextViewTaskDate;
     private Date taskDate;
 
+    private TasksReadyListener tasksReadyListener;
+
     public TasksDialog() {
         this.tasksReadyListener = null;
     }
@@ -192,6 +194,4 @@ public class TasksDialog extends AppCompatDialogFragment {
     public void setTasksReadyListener(TasksReadyListener listener) {
         this.tasksReadyListener = listener;
     }
-
-    private TasksReadyListener tasksReadyListener;
 }

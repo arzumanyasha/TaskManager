@@ -13,6 +13,8 @@ import static com.example.arturarzumanyan.taskmanager.auth.FirebaseWebService.Re
 import static com.example.arturarzumanyan.taskmanager.auth.FirebaseWebService.RequestMethods.POST;
 
 public abstract class BaseDataLoadingAsyncTask<T> extends AsyncTask<FirebaseWebService.RequestMethods, Void, List<T>> {
+    private UserDataLoadingListener<T> userDataLoadingListener;
+
     public BaseDataLoadingAsyncTask() {
 
     }
@@ -116,6 +118,4 @@ public abstract class BaseDataLoadingAsyncTask<T> extends AsyncTask<FirebaseWebS
     public void setDataInfoLoadingListener(UserDataLoadingListener<T> listener) {
         this.userDataLoadingListener = listener;
     }
-
-    private UserDataLoadingListener<T> userDataLoadingListener;
 }

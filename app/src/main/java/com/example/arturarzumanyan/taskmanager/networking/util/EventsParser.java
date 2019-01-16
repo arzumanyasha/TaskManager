@@ -8,6 +8,7 @@ import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 public class EventsParser {
     private static final String ITEMS_KEY = "items";
@@ -21,9 +22,9 @@ public class EventsParser {
     private static final String ID_KEY = "id";
     public static final String SUMMARY_KEY = "summary";
 
-    public ArrayList<Event> parseEvents(String buffer) {
+    public List<Event> parseEvents(String buffer) {
 
-        ArrayList<Event> eventsList = new ArrayList<>();
+        List<Event> eventsList = new ArrayList<>();
         try {
             JSONObject jsonobject = new JSONObject(buffer);
             JSONArray jsonArray = jsonobject.getJSONArray(ITEMS_KEY);
@@ -78,7 +79,7 @@ public class EventsParser {
                 isNotify);
     }
 
-    public Event parseEvent(String buffer){
+    public Event parseEvent(String buffer) {
         try {
             JSONObject jsonobject = new JSONObject(buffer);
             return parseEvent(jsonobject);

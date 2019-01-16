@@ -5,7 +5,6 @@ import android.app.Dialog;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
-import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatDialogFragment;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -15,7 +14,6 @@ import android.widget.Toast;
 import com.example.arturarzumanyan.taskmanager.R;
 import com.example.arturarzumanyan.taskmanager.data.repository.tasklists.TaskListsRepository;
 import com.example.arturarzumanyan.taskmanager.domain.TaskList;
-import com.example.arturarzumanyan.taskmanager.ui.fragment.TasksFragment;
 
 import java.util.List;
 import java.util.UUID;
@@ -24,6 +22,7 @@ import static com.example.arturarzumanyan.taskmanager.ui.activity.IntentionActiv
 
 public class TaskListsDialog extends AppCompatDialogFragment {
     private EditText mEditTextTaskListTitle;
+    private TaskListReadyListener taskListReadyListener;
 
     public TaskListsDialog() {
         this.taskListReadyListener = null;
@@ -143,6 +142,4 @@ public class TaskListsDialog extends AppCompatDialogFragment {
     public void setTaskListReadyListener(TaskListReadyListener listener) {
         this.taskListReadyListener = listener;
     }
-
-    private TaskListReadyListener taskListReadyListener;
 }

@@ -14,11 +14,6 @@ public class MonthlyEventsSpecification implements EventsSpecification {
     }
 
     @Override
-    public int getCountOfDays() {
-        return DateUtils.getDaysInCurrentMonth();
-    }
-
-    @Override
     public String getStartDate() {
         Date date = DateUtils.getFirstDateOfMonth();
         return DateUtils.formatEventTime(date);

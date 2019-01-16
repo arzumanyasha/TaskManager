@@ -40,10 +40,7 @@ public class RepositoryLoadHelper {
     private static final String USE_DEFAULT_KEY = "useDefault";
     private static final String MINUTES_KEY = "minutes";
 
-    private Context mContext;
-
-    public RepositoryLoadHelper(Context context) {
-        this.mContext = context;
+    public RepositoryLoadHelper() {
     }
 
     public RequestParameters getEventCreateOrUpdateParameters(Event event,
@@ -89,7 +86,7 @@ public class RepositoryLoadHelper {
 
         requestHeaderParameters.put(CONTENT_TYPE_KEY, JSON_CONTENT_TYPE_VALUE);
 
-        RequestParameters requestParameters = new RequestParameters(mContext,
+        RequestParameters requestParameters = new RequestParameters(
                 url,
                 requestMethod,
                 requestBody);
@@ -118,7 +115,7 @@ public class RepositoryLoadHelper {
             requestBody.put(STATUS_KEY, COMPLETED_KEY);
         } else {
             requestBody.put(STATUS_KEY, NEEDS_ACTION_KEY);
-            if(requestMethod.equals(FirebaseWebService.RequestMethods.PATCH)){
+            if (requestMethod.equals(FirebaseWebService.RequestMethods.PATCH)) {
                 requestBody.put(COMPLETED_KEY, null);
             }
         }
@@ -127,7 +124,7 @@ public class RepositoryLoadHelper {
 
         requestHeaderParameters.put(CONTENT_TYPE_KEY, JSON_CONTENT_TYPE_VALUE);
 
-        RequestParameters requestParameters = new RequestParameters(mContext,
+        RequestParameters requestParameters = new RequestParameters(
                 url,
                 requestMethod,
                 requestBody);
@@ -146,7 +143,7 @@ public class RepositoryLoadHelper {
 
         requestHeaderParameters.put(CONTENT_TYPE_KEY, JSON_CONTENT_TYPE_VALUE);
 
-        RequestParameters requestParameters = new RequestParameters(mContext,
+        RequestParameters requestParameters = new RequestParameters(
                 url,
                 requestMethod,
                 requestBody);
@@ -157,7 +154,6 @@ public class RepositoryLoadHelper {
 
     public RequestParameters getDeleteParameters(String url) {
         RequestParameters requestParameters = new RequestParameters(
-                mContext,
                 url,
                 FirebaseWebService.RequestMethods.DELETE,
                 new HashMap<String, Object>()

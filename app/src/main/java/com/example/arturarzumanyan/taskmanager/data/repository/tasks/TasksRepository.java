@@ -23,18 +23,16 @@ public class TasksRepository {
     private TasksDbStore mTasksDbStore;
     private TasksCloudStore mTasksCloudStore;
     private RepositoryLoadHelper mRepositoryLoadHelper;
-    private FirebaseWebService mFirebaseWebService;
 
     public TasksRepository(Context context) {
-        mTasksCloudStore = new TasksCloudStore(context);
+        mTasksCloudStore = new TasksCloudStore();
         mTasksDbStore = new TasksDbStore(context);
-        mRepositoryLoadHelper = new RepositoryLoadHelper(context);
-        mFirebaseWebService = new FirebaseWebService(context);
+        mRepositoryLoadHelper = new RepositoryLoadHelper();
     }
 
     public void loadTasks(TaskList taskList, final OnTasksLoadedListener listener) {
         TasksAsyncTask tasksAsyncTask = new TasksAsyncTask(null, taskList, mRepositoryLoadHelper,
-                mFirebaseWebService, mTasksDbStore, mTasksCloudStore, listener);
+                mTasksDbStore, mTasksCloudStore, listener);
 
         tasksAsyncTask.setDataInfoLoadingListener(new BaseDataLoadingAsyncTask.UserDataLoadingListener<Task>() {
             @Override
@@ -60,7 +58,7 @@ public class TasksRepository {
     public void addOrUpdateTask(TaskList taskList, Task task, final FirebaseWebService.RequestMethods requestMethod,
                                 final OnTasksLoadedListener listener) {
         TasksAsyncTask tasksAsyncTask = new TasksAsyncTask(task, taskList, mRepositoryLoadHelper,
-                mFirebaseWebService, mTasksDbStore, mTasksCloudStore, listener);
+                mTasksDbStore, mTasksCloudStore, listener);
         tasksAsyncTask.setDataInfoLoadingListener(new BaseDataLoadingAsyncTask.UserDataLoadingListener<Task>() {
             @Override
             public void onSuccess(List<Task> list) {
@@ -82,7 +80,7 @@ public class TasksRepository {
 
     public void deleteTask(TaskList taskList, Task task, final OnTasksLoadedListener listener) {
         TasksAsyncTask tasksAsyncTask = new TasksAsyncTask(task, taskList, mRepositoryLoadHelper,
-                mFirebaseWebService, mTasksDbStore, mTasksCloudStore, null);
+                mTasksDbStore, mTasksCloudStore, null);
 
         tasksAsyncTask.setDataInfoLoadingListener(new BaseDataLoadingAsyncTask.UserDataLoadingListener<Task>() {
             @Override
@@ -105,7 +103,6 @@ public class TasksRepository {
         private TaskList mTaskList;
         private Task mTask;
         private RepositoryLoadHelper mRepositoryLoadHelper;
-        private FirebaseWebService mFirebaseWebService;
         private TasksDbStore mTasksDbStore;
         private TasksCloudStore mTasksCloudStore;
         private TasksRepository.OnTasksLoadedListener mListener;
@@ -113,14 +110,12 @@ public class TasksRepository {
         public TasksAsyncTask(Task task,
                               TaskList taskList,
                               RepositoryLoadHelper repositoryLoadHelper,
-                              FirebaseWebService firebaseWebService,
                               TasksDbStore tasksDbStore,
                               TasksCloudStore tasksCloudStore,
                               TasksRepository.OnTasksLoadedListener listener) {
             this.mTask = task;
             this.mTaskList = taskList;
             this.mRepositoryLoadHelper = repositoryLoadHelper;
-            this.mFirebaseWebService = firebaseWebService;
             this.mTasksDbStore = tasksDbStore;
             this.mTasksCloudStore = tasksCloudStore;
             this.mListener = listener;
@@ -190,11 +185,11 @@ public class TasksRepository {
 
         @Override
         protected void retryGetResultFromServer(final FirebaseWebService.RequestMethods requestMethod) {
-            mFirebaseWebService.refreshAccessToken(new FirebaseWebService.AccessTokenUpdatedListener() {
+            FirebaseWebService.getFirebaseWebServiceInstance().refreshAccessToken(new FirebaseWebService.AccessTokenUpdatedListener() {
                 @Override
                 public void onAccessTokenUpdated() {
                     TasksAsyncTask tasksAsyncTask = new TasksRepository.TasksAsyncTask(mTask, mTaskList,
-                            mRepositoryLoadHelper, mFirebaseWebService, mTasksDbStore, mTasksCloudStore, mListener);
+                            mRepositoryLoadHelper, mTasksDbStore, mTasksCloudStore, mListener);
 
                     if (requestMethod != DELETE) {
                         tasksAsyncTask.setDataInfoLoadingListener(new UserDataLoadingListener<Task>() {

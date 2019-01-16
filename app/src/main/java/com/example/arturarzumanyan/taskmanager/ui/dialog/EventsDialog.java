@@ -45,6 +45,7 @@ public class EventsDialog extends AppCompatDialogFragment {
     private TextView mTextViewStartTime, mTextViewEndTime, mTextViewDate;
     private Switch mSwitchNotification;
 
+    private EventsReadyListener eventsReadyListener;
     private EventsRepository mEventsRepository;
 
     private SparseIntArray mColorMap;
@@ -346,6 +347,4 @@ public class EventsDialog extends AppCompatDialogFragment {
     public void setEventsReadyListener(EventsReadyListener listener) {
         this.eventsReadyListener = listener;
     }
-
-    private EventsReadyListener eventsReadyListener;
 }

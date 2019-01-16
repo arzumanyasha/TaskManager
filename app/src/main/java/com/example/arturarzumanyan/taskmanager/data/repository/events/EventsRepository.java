@@ -25,18 +25,16 @@ public class EventsRepository {
     private EventsDbStore mEventsDbStore;
     private EventsCloudStore mEventsCloudStore;
     private RepositoryLoadHelper mRepositoryLoadHelper;
-    private FirebaseWebService mFirebaseWebService;
 
     public EventsRepository(Context context) {
-        mEventsCloudStore = new EventsCloudStore(context);
+        mEventsCloudStore = new EventsCloudStore();
         mEventsDbStore = new EventsDbStore(context);
-        mRepositoryLoadHelper = new RepositoryLoadHelper(context);
-        mFirebaseWebService = new FirebaseWebService(context);
+        mRepositoryLoadHelper = new RepositoryLoadHelper();
     }
 
     public void getEvents(EventsSpecification eventsSpecification, final OnEventsLoadedListener listener) {
         EventsAsyncTask eventsAsyncTask = new EventsAsyncTask(null,
-                mRepositoryLoadHelper, mFirebaseWebService, mEventsDbStore, mEventsCloudStore,
+                mRepositoryLoadHelper, mEventsDbStore, mEventsCloudStore,
                 eventsSpecification, listener);
 
         eventsAsyncTask.setDataInfoLoadingListener(new BaseDataLoadingAsyncTask.UserDataLoadingListener<Event>() {
@@ -60,7 +58,7 @@ public class EventsRepository {
         eventsFromDateSpecification.setDate(DateUtils.getEventDate(event.getStartTime()));
 
         EventsAsyncTask eventsAsyncTask = new EventsAsyncTask(event,
-                mRepositoryLoadHelper, mFirebaseWebService, mEventsDbStore, mEventsCloudStore,
+                mRepositoryLoadHelper, mEventsDbStore, mEventsCloudStore,
                 eventsFromDateSpecification, null);
         eventsAsyncTask.setDataInfoLoadingListener(new BaseDataLoadingAsyncTask.UserDataLoadingListener<Event>() {
             @Override
@@ -85,7 +83,7 @@ public class EventsRepository {
         eventsFromDateSpecification.setDate(DateUtils.getCurrentTime());
 
         EventsAsyncTask eventsAsyncTask = new EventsAsyncTask(event,
-                mRepositoryLoadHelper, mFirebaseWebService, mEventsDbStore, mEventsCloudStore,
+                mRepositoryLoadHelper, mEventsDbStore, mEventsCloudStore,
                 eventsFromDateSpecification, null);
 
         eventsAsyncTask.setDataInfoLoadingListener(new BaseDataLoadingAsyncTask.UserDataLoadingListener<Event>() {
@@ -114,7 +112,6 @@ public class EventsRepository {
 
         private Event mEvent;
         private RepositoryLoadHelper mRepositoryLoadHelper;
-        private FirebaseWebService mFirebaseWebService;
         private EventsDbStore mEventsDbStore;
         private EventsCloudStore mEventsCloudStore;
         private EventsSpecification mEventsSpecification;
@@ -122,14 +119,12 @@ public class EventsRepository {
 
         public EventsAsyncTask(Event event,
                                RepositoryLoadHelper repositoryLoadHelper,
-                               FirebaseWebService firebaseWebService,
                                EventsDbStore eventsDbStore,
                                EventsCloudStore eventsCloudStore,
                                EventsSpecification eventsSpecification,
                                OnEventsLoadedListener listener) {
             this.mEvent = event;
             this.mRepositoryLoadHelper = repositoryLoadHelper;
-            this.mFirebaseWebService = firebaseWebService;
             this.mEventsDbStore = eventsDbStore;
             this.mEventsCloudStore = eventsCloudStore;
             this.mEventsSpecification = eventsSpecification;
@@ -200,11 +195,11 @@ public class EventsRepository {
 
         @Override
         protected void retryGetResultFromServer(final FirebaseWebService.RequestMethods requestMethod) {
-            mFirebaseWebService.refreshAccessToken(new FirebaseWebService.AccessTokenUpdatedListener() {
+            FirebaseWebService.getFirebaseWebServiceInstance().refreshAccessToken(new FirebaseWebService.AccessTokenUpdatedListener() {
                 @Override
                 public void onAccessTokenUpdated() {
                     EventsAsyncTask eventsAsyncTask = new EventsAsyncTask(null,
-                            mRepositoryLoadHelper, mFirebaseWebService, mEventsDbStore, mEventsCloudStore,
+                            mRepositoryLoadHelper, mEventsDbStore, mEventsCloudStore,
                             mEventsSpecification, mListener);
 
                     if (requestMethod != DELETE) {

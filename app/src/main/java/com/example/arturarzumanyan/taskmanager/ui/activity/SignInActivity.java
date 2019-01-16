@@ -12,12 +12,10 @@ import com.google.android.gms.common.SignInButton;
 
 public class SignInActivity extends AppCompatActivity {
 
-    private static final int ACITVITY_REQUEST_CODE = 101;
+    private static final int AUTHENTICATION_REQUEST_CODE = 101;
     public static final String EXTRA_USER_NAME = "userName";
     public static final String EXTRA_USER_EMAIL = "userEmail";
     public static final String EXTRA_USER_PHOTO_URL = "userPhotoUrl";
-
-    private FirebaseWebService mFirebaseWebService;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -39,17 +37,16 @@ public class SignInActivity extends AppCompatActivity {
     }
 
     private void setAuthenticationOptions() {
-        mFirebaseWebService = new FirebaseWebService(this);
-        mFirebaseWebService.setGoogleClientOptions();
-        mFirebaseWebService.setUserInfoLoadingListener(new FirebaseWebService.UserInfoLoadingListener() {
+        FirebaseWebService.getFirebaseWebServiceInstance().setGoogleClientOptions();
+        FirebaseWebService.getFirebaseWebServiceInstance().setUserInfoLoadingListener(new FirebaseWebService.UserInfoLoadingListener() {
             @Override
             public void onDataLoaded(String userName, String userEmail, String userPhotoUrl) {
                 updateUI(userName, userEmail, userPhotoUrl);
             }
 
             @Override
-            public void onFail() {
-                Toast.makeText(getApplicationContext(), getString(R.string.failed_log_in_message), Toast.LENGTH_LONG).show();
+            public void onFail(String message) {
+                Toast.makeText(getApplicationContext(), message, Toast.LENGTH_LONG).show();
             }
         });
     }
@@ -58,10 +55,10 @@ public class SignInActivity extends AppCompatActivity {
     public void onStart() {
         super.onStart();
 
-        if (mFirebaseWebService.getCurrentUser() != null) {
-            updateUI(mFirebaseWebService.getCurrentUser().getDisplayName(),
-                    mFirebaseWebService.getCurrentUser().getEmail(),
-                    String.valueOf(mFirebaseWebService.getCurrentUser().getPhotoUrl()));
+        if (FirebaseWebService.getFirebaseWebServiceInstance().getCurrentUser() != null) {
+            updateUI(FirebaseWebService.getFirebaseWebServiceInstance().getCurrentUser().getDisplayName(),
+                    FirebaseWebService.getFirebaseWebServiceInstance().getCurrentUser().getEmail(),
+                    String.valueOf(FirebaseWebService.getFirebaseWebServiceInstance().getCurrentUser().getPhotoUrl()));
 
         } else {
             Toast.makeText(getApplicationContext(), getString(R.string.failed_log_in_message), Toast.LENGTH_LONG).show();
@@ -80,22 +77,21 @@ public class SignInActivity extends AppCompatActivity {
     }
 
     private void signIn() {
-        Intent signInIntent = mFirebaseWebService.getGoogleSignInClientIntent();
+        Intent signInIntent = FirebaseWebService.getFirebaseWebServiceInstance().getGoogleSignInClientIntent();
 
-        startActivityForResult(signInIntent, ACITVITY_REQUEST_CODE);
+        startActivityForResult(signInIntent, AUTHENTICATION_REQUEST_CODE);
     }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (requestCode == ACITVITY_REQUEST_CODE) {
-
-            mFirebaseWebService.authWithGoogle(data);
+        if (requestCode == AUTHENTICATION_REQUEST_CODE) {
+            FirebaseWebService.getFirebaseWebServiceInstance().authWithGoogle(data);
         }
     }
 
     @Override
     protected void onDestroy() {
-        mFirebaseWebService.closeAuthConnection();
+        FirebaseWebService.getFirebaseWebServiceInstance().closeAuthConnection();
         super.onDestroy();
     }
 }

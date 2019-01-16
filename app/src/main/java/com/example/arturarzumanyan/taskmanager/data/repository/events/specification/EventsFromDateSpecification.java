@@ -14,13 +14,8 @@ public class EventsFromDateSpecification implements EventsSpecification {
                 " WHERE " + EventsContract.EventsTable.COLUMN_START_TIME + " LIKE '" + mDate + "%'";
     }
 
-    @Override
-    public int getCountOfDays() {
-        return 1;
-    }
-
     public void setDate(String date) {
-        if(DateUtils.isMatchesEventFormat(date)){
+        if (DateUtils.isMatchesEventFormat(date)) {
             date = DateUtils.trimEventDate(date);
         }
         this.mDate = date;
@@ -37,6 +32,7 @@ public class EventsFromDateSpecification implements EventsSpecification {
         Date time = new Date();
         time.setHours(23);
         time.setMinutes(59);
+        time.setSeconds(59);
         Date eventsEndTime = DateUtils.getEventDate(mDate, time);
         return DateUtils.formatEventTime(eventsEndTime);
     }

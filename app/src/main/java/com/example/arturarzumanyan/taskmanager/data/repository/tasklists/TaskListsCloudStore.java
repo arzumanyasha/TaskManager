@@ -1,7 +1,5 @@
 package com.example.arturarzumanyan.taskmanager.data.repository.tasklists;
 
-import android.content.Context;
-
 import com.example.arturarzumanyan.taskmanager.auth.FirebaseWebService;
 import com.example.arturarzumanyan.taskmanager.data.repository.RepositoryLoadHelper;
 import com.example.arturarzumanyan.taskmanager.domain.ResponseDto;
@@ -19,19 +17,17 @@ public class TaskListsCloudStore {
     private static final String BASE_TASK_LISTS_URL = "tasks/v1/users/@me/lists/";
 
     private RepositoryLoadHelper mRepositoryLoadHelper;
-    private Context mContext;
 
-    public TaskListsCloudStore(Context context) {
-        this.mContext = context;
-        mRepositoryLoadHelper = new RepositoryLoadHelper(mContext);
+    public TaskListsCloudStore() {
+        mRepositoryLoadHelper = new RepositoryLoadHelper();
     }
 
     public ResponseDto getTaskListsFromServer() {
         FirebaseWebService.RequestMethods requestMethod = FirebaseWebService.RequestMethods.GET;
-        RequestParameters requestParameters = new RequestParameters(mContext,
+        RequestParameters requestParameters = new RequestParameters(
                 BASE_GOOGLE_APIS_URL + BASE_TASK_LISTS_URL,
                 requestMethod,
-                new HashMap<String, Object>()
+                null
         );
         requestParameters.setRequestHeaderParameters(new HashMap<String, String>());
 

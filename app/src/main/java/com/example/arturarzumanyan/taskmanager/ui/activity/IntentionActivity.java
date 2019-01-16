@@ -60,6 +60,9 @@ public class IntentionActivity extends AppCompatActivity {
     private TaskList mCurrentTaskList;
 
     private TaskListsRepository.OnTaskListsLoadedListener onTaskListsLoadedListener;
+    private TaskFragmentInteractionListener taskFragmentInteractionListener;
+    private EventFragmentInteractionListener eventFragmentInteractionListener;
+    private TaskListFragmentInteractionListener taskListFragmentInteractionListener;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -515,8 +518,6 @@ public class IntentionActivity extends AppCompatActivity {
         this.taskFragmentInteractionListener = listener;
     }
 
-    private TaskFragmentInteractionListener taskFragmentInteractionListener;
-
     public interface EventFragmentInteractionListener {
         void onEventsReady(List<Event> events);
     }
@@ -525,8 +526,6 @@ public class IntentionActivity extends AppCompatActivity {
         this.eventFragmentInteractionListener = listener;
     }
 
-    private EventFragmentInteractionListener eventFragmentInteractionListener;
-
     public interface TaskListFragmentInteractionListener {
         void onTaskListReady(TaskList taskList);
     }
@@ -534,7 +533,5 @@ public class IntentionActivity extends AppCompatActivity {
     public void setTaskListFragmentInteractionListener(TaskListFragmentInteractionListener listener) {
         this.taskListFragmentInteractionListener = listener;
     }
-
-    private TaskListFragmentInteractionListener taskListFragmentInteractionListener;
 }
 
