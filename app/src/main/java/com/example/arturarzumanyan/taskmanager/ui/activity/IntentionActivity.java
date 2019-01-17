@@ -115,14 +115,7 @@ public class IntentionActivity extends AppCompatActivity {
         onTaskListsLoadedListener = new TaskListsRepository.OnTaskListsLoadedListener() {
             @Override
             public void onSuccess(List<TaskList> taskLists) {
-                Log.v("Loaded tasklists");
-                mTaskLists = taskLists;
-                displayMenu();
-                notifyDataLoaded();
-
-                TasksFragment tasksFragment = TasksFragment.newInstance(mTaskLists.get(0));
-                mCurrentTaskList = mTaskLists.get(0);
-                openFragment(tasksFragment);
+                displayDefaultTasksUi(taskLists);
             }
 
             @Override
@@ -146,6 +139,17 @@ public class IntentionActivity extends AppCompatActivity {
 
     }
 
+    private void displayDefaultTasksUi(List<TaskList> taskLists) {
+        Log.v("Loaded tasklists");
+        mTaskLists = taskLists;
+        displayMenu();
+        notifyDataLoaded();
+
+        TasksFragment tasksFragment = TasksFragment.newInstance(mTaskLists.get(0));
+        mCurrentTaskList = mTaskLists.get(0);
+        openFragment(tasksFragment);
+    }
+
     private void updateTaskListsMenu(List<TaskList> taskLists) {
         Log.v("TaskLists Menu updating");
 
@@ -157,9 +161,7 @@ public class IntentionActivity extends AppCompatActivity {
             mTaskListsMenu.add(mTaskLists.get(i).getTitle()).setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
                 @Override
                 public boolean onMenuItemClick(MenuItem item) {
-                    openTaskFragment(mTaskLists.get(position));
-                    mCurrentTaskList = mTaskLists.get(position);
-                    mDrawer.closeDrawer(Gravity.START);
+                    updateTaskUi(mTaskLists.get(position));
                     return false;
                 }
             });
@@ -211,9 +213,7 @@ public class IntentionActivity extends AppCompatActivity {
             mTaskListsMenu.add(mTaskLists.get(i).getTitle()).setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
                 @Override
                 public boolean onMenuItemClick(MenuItem item) {
-                    openTaskFragment(mTaskLists.get(position));
-                    mCurrentTaskList = mTaskLists.get(position);
-                    mDrawer.closeDrawer(Gravity.START);
+                    updateTaskUi(mTaskLists.get(position));
                     invalidateOptionsMenu();
                     return false;
                 }
@@ -298,8 +298,7 @@ public class IntentionActivity extends AppCompatActivity {
                 mTaskListsMenu.add(taskList.getTitle()).setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
                     @Override
                     public boolean onMenuItemClick(MenuItem item) {
-                        openTaskFragment(taskList);
-                        mDrawer.closeDrawer(Gravity.START);
+                        updateTaskUi(taskList);
                         return false;
                     }
                 });
@@ -308,6 +307,12 @@ public class IntentionActivity extends AppCompatActivity {
             }
         });
         taskListsDialog.show(getSupportFragmentManager(), TASK_LISTS_KEY);
+    }
+
+    private void updateTaskUi(TaskList taskList) {
+        openTaskFragment(taskList);
+        mCurrentTaskList = taskList;
+        mDrawer.closeDrawer(Gravity.START);
     }
 
     private void openTaskFragment(TaskList taskList) {
@@ -373,26 +378,16 @@ public class IntentionActivity extends AppCompatActivity {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
 
-        TaskList taskList = null;
-
-        for (int i = 0; i < mTaskLists.size(); i++) {
-            if (mCurrentTaskList.getId() == mTaskLists.get(i).getId()) {
-                Log.v("Selected TaskList is: " + mTaskLists.get(i).getTitle());
-                taskList = mTaskLists.get(i);
-                break;
-            }
-        }
-
         switch (item.getItemId()) {
             case R.id.update_task_list: {
                 if (!getTitle().equals(EVENTS_KEY)) {
-                    displayTaskListUpdatingDialog(taskList);
+                    displayTaskListUpdatingDialog(mCurrentTaskList);
                 }
                 break;
             }
             case R.id.delete_task_list: {
                 if (!getTitle().equals(EVENTS_KEY)) {
-                    deleteTaskList(taskList);
+                    deleteTaskList(mCurrentTaskList);
                 }
                 break;
             }

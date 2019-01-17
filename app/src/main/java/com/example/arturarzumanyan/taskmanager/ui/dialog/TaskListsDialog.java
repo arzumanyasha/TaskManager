@@ -61,16 +61,7 @@ public class TaskListsDialog extends AppCompatDialogFragment {
                 .setPositiveButton(getString(R.string.ok_button), new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        String taskListName = mEditTextTaskListTitle.getText().toString();
-                        TaskListsRepository taskListsRepository = new TaskListsRepository();
-                        if (!taskListName.isEmpty() && bundle != null) {
-                            TaskList taskList = bundle.getParcelable(TASK_LISTS_KEY);
-                            if (taskList != null) {
-                                updateTaskList(taskListsRepository, taskList, taskListName);
-                            }
-                        } else if (!taskListName.isEmpty()) {
-                            addTaskList(taskListsRepository, taskListName);
-                        }
+                        addOrUpdateTaskList(bundle);
                     }
                 });
 
@@ -82,6 +73,19 @@ public class TaskListsDialog extends AppCompatDialogFragment {
         }
 
         return builder.create();
+    }
+
+    private void addOrUpdateTaskList(Bundle bundle) {
+        String taskListName = mEditTextTaskListTitle.getText().toString();
+        TaskListsRepository taskListsRepository = new TaskListsRepository();
+        if (!taskListName.isEmpty() && bundle != null) {
+            TaskList taskList = bundle.getParcelable(TASK_LISTS_KEY);
+            if (taskList != null) {
+                updateTaskList(taskListsRepository, taskList, taskListName);
+            }
+        } else if (!taskListName.isEmpty()) {
+            addTaskList(taskListsRepository, taskListName);
+        }
     }
 
     private void updateTaskList(TaskListsRepository taskListsRepository, TaskList taskList, String taskListName){

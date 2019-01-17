@@ -42,13 +42,7 @@ public class EventsAdapter extends RecyclerView.Adapter<EventsAdapter.ViewHolder
         holder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (mListener != null) {
-                    int position = (int) v.getTag();
-                    if (position != RecyclerView.NO_POSITION) {
-                        Event event = mDataset.get(position);
-                        mListener.onItemClick(event);
-                    }
-                }
+                triggerItemClick(v);
             }
         });
         holder.eventName.setText(event.getName());
@@ -57,16 +51,7 @@ public class EventsAdapter extends RecyclerView.Adapter<EventsAdapter.ViewHolder
         holder.eventDelete.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (mListener != null) {
-                    int position = (int) v.getTag();
-                    if (position != RecyclerView.NO_POSITION) {
-                        Event event = mDataset.get(position);
-                        mListener.onItemDelete(event);
-                        mDataset.remove(event);
-                        notifyItemRemoved(position);
-                        notifyItemRangeChanged(position, mDataset.size());
-                    }
-                }
+                deleteItem(v);
             }
         });
         holder.eventDelete.setTag(position);
@@ -78,6 +63,29 @@ public class EventsAdapter extends RecyclerView.Adapter<EventsAdapter.ViewHolder
 
         holder.eventTime.setText(DateUtils.formatTime(event.getStartTime())
                 + " - " + DateUtils.formatTime(event.getEndTime()));
+    }
+
+    private void triggerItemClick(View v) {
+        if (mListener != null) {
+            int position = (int) v.getTag();
+            if (position != RecyclerView.NO_POSITION) {
+                Event event = mDataset.get(position);
+                mListener.onItemClick(event);
+            }
+        }
+    }
+
+    private void deleteItem(View v) {
+        if (mListener != null) {
+            int position = (int) v.getTag();
+            if (position != RecyclerView.NO_POSITION) {
+                Event event = mDataset.get(position);
+                mListener.onItemDelete(event);
+                mDataset.remove(event);
+                notifyItemRemoved(position);
+                notifyItemRangeChanged(position, mDataset.size());
+            }
+        }
     }
 
     @Override

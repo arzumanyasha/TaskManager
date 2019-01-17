@@ -63,7 +63,7 @@ public class TasksDialog extends AppCompatDialogFragment {
 
         setViews(builder, view, bundle);
 
-        setTaskDateListener();
+        setTaskDatePickerListener();
 
         setTaskInfoViews(bundle);
 
@@ -86,21 +86,13 @@ public class TasksDialog extends AppCompatDialogFragment {
                 .setPositiveButton(getString(R.string.ok_button), new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        TasksRepository tasksRepository = new TasksRepository();
-                        String taskName = mEditTextTaskName.getText().toString();
-                        if (bundle != null) {
-                            if (!taskName.isEmpty() && (bundle.getParcelable(TASKS_KEY) != null)) {
-                                updateTask(tasksRepository, bundle, taskName);
-                            } else if (!taskName.isEmpty() && (bundle.getParcelable(TASKS_KEY) == null)) {
-                                addTask(tasksRepository, bundle, taskName);
-                            }
-                        }
+                        addOrUpdateTask(bundle);
                     }
                 });
 
     }
 
-    private void setTaskDateListener() {
+    private void setTaskDatePickerListener() {
         final int year = DateUtils.getYear();
         final int month = DateUtils.getMonth();
         final int day = DateUtils.getDay();
@@ -132,6 +124,18 @@ public class TasksDialog extends AppCompatDialogFragment {
                         mTextViewTaskDate.setText(DateUtils.getTaskDate(DateUtils.formatTaskDate(task.getDate())));
                     }
                 }
+            }
+        }
+    }
+
+    private void addOrUpdateTask(Bundle bundle) {
+        TasksRepository tasksRepository = new TasksRepository();
+        String taskName = mEditTextTaskName.getText().toString();
+        if (bundle != null) {
+            if (!taskName.isEmpty() && (bundle.getParcelable(TASKS_KEY) != null)) {
+                updateTask(tasksRepository, bundle, taskName);
+            } else if (!taskName.isEmpty() && (bundle.getParcelable(TASKS_KEY) == null)) {
+                addTask(tasksRepository, bundle, taskName);
             }
         }
     }

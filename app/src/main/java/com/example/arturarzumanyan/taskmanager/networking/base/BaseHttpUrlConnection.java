@@ -40,9 +40,7 @@ public class BaseHttpUrlConnection {
 
             setConnection(connection, query, requestMethod);
 
-            int responseCode = connection.getResponseCode();
-
-            return getResponseDto(responseCode, connection);
+            return getResponseDto(connection);
         } catch (IOException e) {
             Log.v(e.getMessage());
             e.printStackTrace();
@@ -74,9 +72,10 @@ public class BaseHttpUrlConnection {
         return null;
     }
 
-    private ResponseDto getResponseDto(int responseCode, HttpURLConnection connection)
+    private ResponseDto getResponseDto(HttpURLConnection connection)
             throws IOException {
 
+        int responseCode = connection.getResponseCode();
         switch (responseCode) {
             case HttpURLConnection.HTTP_OK: {
                 String buffer = "";

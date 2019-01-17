@@ -92,7 +92,9 @@ public class WeekDashboardFragment extends Fragment {
 
         for (int i = 0; i < DAYS_IN_WEEK; i++) {
             weekDateList.add(nextDate);
-            nextDate = DateUtils.getNextDate(nextDate);
+            if (nextDate != null) {
+                nextDate = DateUtils.getNextDate(nextDate);
+            }
         }
     }
 

@@ -11,7 +11,7 @@ import com.example.arturarzumanyan.taskmanager.data.db.contract.TasksContract.Ta
 
 public class SQLiteDbHelper extends SQLiteOpenHelper {
     private static final String DATABASE_NAME = "Tasks.db";
-    private static final int DATABASE_VERSION = 30;
+    private static final int DATABASE_VERSION = 2;
 
     public SQLiteDbHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
