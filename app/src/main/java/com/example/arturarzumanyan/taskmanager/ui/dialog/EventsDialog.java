@@ -85,12 +85,7 @@ public class EventsDialog extends AppCompatDialogFragment {
         ColorPalette mColorPalette = new ColorPalette(getActivity());
         mColorMap = mColorPalette.getColorPalette();
 
-        for (int i = 0; i < mColorMap.size(); i++) {
-            if (mColorMap.keyAt(i) == DEFAULT_COLOR) {
-                mCurrentColor = mColorMap.valueAt(i);
-                break;
-            }
-        }
+        mCurrentColor = mColorMap.valueAt(mColorMap.indexOfKey(DEFAULT_COLOR));
 
         mEventsRepository = new EventsRepository();
 
@@ -164,14 +159,7 @@ public class EventsDialog extends AppCompatDialogFragment {
             isNotify = 0;
         }
 
-        int colorNumber = mCurrentColor;
-
-        for (int i = 0; i < mColorMap.size(); i++) {
-            if (mColorMap.valueAt(i) == mCurrentColor) {
-                colorNumber = mColorMap.keyAt(i);
-                break;
-            }
-        }
+        int colorNumber = mColorMap.keyAt(mColorMap.indexOfValue(mCurrentColor));
 
         if (mEndTime.after(mStartTime) &&
                 !mEditTextEventName.getText().toString().isEmpty() &&
@@ -194,13 +182,8 @@ public class EventsDialog extends AppCompatDialogFragment {
 
     private void addEvent(String name, String description, int colorNumber, Date startDate,
                           Date endDate, int isNotify) {
-        Event event = new Event(UUID.randomUUID().toString(),
-                name,
-                description,
-                colorNumber,
-                startDate,
-                endDate,
-                isNotify);
+        Event event = createEventObject(UUID.randomUUID().toString(), name, description,
+                colorNumber, startDate, endDate, isNotify);
         mEventsRepository.addOrUpdateEvent(event, POST,
                 new EventsRepository.OnEventsLoadedListener() {
                     @Override
@@ -220,14 +203,9 @@ public class EventsDialog extends AppCompatDialogFragment {
                              Date startDate, Date endDate, int isNotify) {
         final Event event = bundle.getParcelable(EVENTS_KEY);
         if (event != null) {
-            event.setName(name);
-            event.setDescription(description);
-            event.setColorId(colorNumber);
-            event.setStartTime(startDate);
-            event.setEndTime(endDate);
-            event.setIsNotify(isNotify);
+            Event updatedEvent = createEventObject(event.getId(), name, description, colorNumber, startDate, endDate, isNotify);
 
-            mEventsRepository.addOrUpdateEvent(event, PATCH, new EventsRepository.OnEventsLoadedListener() {
+            mEventsRepository.addOrUpdateEvent(updatedEvent, PATCH, new EventsRepository.OnEventsLoadedListener() {
                 @Override
                 public void onSuccess(List<Event> eventsList) {
                     eventsReadyListener.onEventsReady(eventsList);
@@ -239,6 +217,11 @@ public class EventsDialog extends AppCompatDialogFragment {
                 }
             });
         }
+    }
+
+    private Event createEventObject(String id, String name, String description, int colorNumber,
+                                    Date startDate, Date endDate, int isNotify) {
+        return new Event(id, name, description, colorNumber, startDate, endDate, isNotify);
     }
 
     private void setTimeAndDatePickersListeners() {
@@ -291,23 +274,14 @@ public class EventsDialog extends AppCompatDialogFragment {
             mEditTextEventName.setText(event.getName());
             mEditTextEventDescription.setText(event.getDescription());
 
-            for (int i = 0; i < mColorMap.size(); i++) {
-                if (event.getColorId() == mColorMap.keyAt(i)) {
-                    mImageButtonColorPicker.setColorFilter(mColorMap.valueAt(i));
-                    mCurrentColor = mColorMap.valueAt(i);
-                    break;
-                }
-            }
+            mImageButtonColorPicker.setColorFilter(mColorMap.valueAt(mColorMap.indexOfKey(event.getColorId())));
+            mCurrentColor = mColorMap.valueAt(mColorMap.indexOfKey(event.getColorId()));
 
             mTextViewStartTime.setText(DateUtils.formatTimeWithoutA(event.getStartTime()));
             mTextViewEndTime.setText(DateUtils.formatTimeWithoutA(event.getEndTime()));
             mTextViewDate.setText((DateUtils.getEventDate(event.getStartTime())));
 
-            if (event.getIsNotify() == 1) {
-                mSwitchNotification.setChecked(true);
-            } else {
-                mSwitchNotification.setChecked(false);
-            }
+            mSwitchNotification.setChecked(event.getIsNotify() == 1);
 
             mStartTime = DateUtils.getTimeWithoutA(DateUtils.formatTimeWithoutA(event.getStartTime()));
             mEndTime = DateUtils.getTimeWithoutA(DateUtils.formatTimeWithoutA(event.getEndTime()));

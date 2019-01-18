@@ -156,12 +156,11 @@ public class IntentionActivity extends AppCompatActivity {
         mTaskListsMenu.clear();
 
         mTaskLists = taskLists;
-        for (int i = 0; i < mTaskLists.size(); i++) {
-            final int position = i;
-            mTaskListsMenu.add(mTaskLists.get(i).getTitle()).setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
+        for(final TaskList taskList : mTaskLists) {
+            mTaskListsMenu.add(taskList.getTitle()).setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
                 @Override
                 public boolean onMenuItemClick(MenuItem item) {
-                    updateTaskUi(mTaskLists.get(position));
+                    updateTaskUi(taskList);
                     return false;
                 }
             });
@@ -208,12 +207,12 @@ public class IntentionActivity extends AppCompatActivity {
 
     private void populateTasksMenu(Menu menu) {
         mTaskListsMenu = menu.addSubMenu("TaskLists");
-        for (int i = 0; i < mTaskLists.size(); i++) {
-            final int position = i;
-            mTaskListsMenu.add(mTaskLists.get(i).getTitle()).setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
+        for(final TaskList taskList : mTaskLists) {
+            mTaskListsMenu.add(taskList.getTitle()).setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
                 @Override
                 public boolean onMenuItemClick(MenuItem item) {
-                    updateTaskUi(mTaskLists.get(position));
+                    Log.v("Populating tasks menu " + taskList.getTitle());
+                    updateTaskUi(taskList);
                     invalidateOptionsMenu();
                     return false;
                 }

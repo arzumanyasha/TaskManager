@@ -99,14 +99,12 @@ public class EventsAdapter extends RecyclerView.Adapter<EventsAdapter.ViewHolder
     }
 
     static class ViewHolder extends RecyclerView.ViewHolder {
-        View mView;
         ConstraintLayout constraintLayout;
         TextView eventName, eventDescription, eventTime;
         ImageView eventDelete;
 
         ViewHolder(View view) {
             super(view);
-            mView = view;
             constraintLayout = view.findViewById(R.id.constraint_layout_events_holder);
             eventName = view.findViewById(R.id.text_event_name);
             eventDescription = view.findViewById(R.id.text_event_description);

@@ -62,7 +62,7 @@ public class DateUtils {
     }
 
     public static Date getTaskDateFromString(String date) {
-        DateFormat dateFormat = new SimpleDateFormat(TASK_DATE_PATTERN, Locale.getDefault());
+        DateFormat dateFormat = new SimpleDateFormat(TASK_DATE_PATTERN, Locale.ENGLISH);
         if (isValidFormat(TASK_DATE_PATTERN, date)) {
             try {
                 return dateFormat.parse(date);
@@ -81,7 +81,7 @@ public class DateUtils {
     }
 
     public static Date getEventDate(String date, Date time) {
-        DateFormat dateFormat = new SimpleDateFormat(EVENT_TIME_PATTERN, Locale.getDefault());
+        DateFormat dateFormat = new SimpleDateFormat(EVENT_TIME_PATTERN, Locale.ENGLISH);
         String fullDate = date + "T" + time.getHours() + ":" + time.getMinutes() + ":00+0300";
         try {
             return dateFormat.parse(fullDate);
@@ -236,7 +236,7 @@ public class DateUtils {
     private static boolean isValidFormat(String format, String value) {
         Date date = null;
         try {
-            SimpleDateFormat sdf = new SimpleDateFormat(format,Locale.getDefault());
+            SimpleDateFormat sdf = new SimpleDateFormat(format, Locale.getDefault());
             date = sdf.parse(value);
             if (!value.equals(sdf.format(date))) {
                 date = null;
