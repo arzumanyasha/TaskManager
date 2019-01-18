@@ -50,11 +50,7 @@ public class TasksAdapter extends RecyclerView.Adapter<TasksAdapter.ViewHolder> 
             }
         });
 
-        if (task.getIsExecuted() == 1) {
-            holder.isExecutedCheckBox.setChecked(true);
-        } else {
-            holder.isExecutedCheckBox.setChecked(false);
-        }
+        holder.isExecutedCheckBox.setChecked(task.getIsExecuted() == 1);
 
         holder.isExecutedCheckBox.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -123,14 +119,13 @@ public class TasksAdapter extends RecyclerView.Adapter<TasksAdapter.ViewHolder> 
     }
 
     static class ViewHolder extends RecyclerView.ViewHolder {
-        View mView;
-        TextView taskName, taskDescription;
+        TextView taskName;
+        TextView taskDescription;
         ImageView taskDelete;
         CheckBox isExecutedCheckBox;
 
         ViewHolder(View view) {
             super(view);
-            mView = view;
             taskName = view.findViewById(R.id.text_task_name);
             taskDescription = view.findViewById(R.id.text_task_description);
             taskDelete = view.findViewById(R.id.image_delete);

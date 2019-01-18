@@ -2,7 +2,6 @@ package com.example.arturarzumanyan.taskmanager.ui.fragment;
 
 import android.content.Context;
 import android.graphics.Color;
-import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -44,9 +43,9 @@ public class EventsStatisticFragment extends Fragment {
     private PieChart pieChart;
     private Spinner spinnerMode;
 
+    private ColorPalette mColorPalette = new ColorPalette(getActivity());
+    private SparseIntArray mColorPaletteArray = mColorPalette.getColorPalette();
     private EventsRepository mEventsRepository;
-
-    private OnFragmentInteractionListener mListener;
 
     public EventsStatisticFragment() {
     }
@@ -157,24 +156,25 @@ public class EventsStatisticFragment extends Fragment {
         List<Integer> colors = new ArrayList<>();
         SparseIntArray minutesOnEvents = new SparseIntArray();
 
-        ColorPalette colorPalette = new ColorPalette(getActivity());
         for (Event event : events) {
             int eventTimeSpent = event.getEndTime().getHours() * MINUTES_IN_HOUR + event.getEndTime().getMinutes()
                     - event.getStartTime().getHours() * MINUTES_IN_HOUR - event.getStartTime().getMinutes();
-            if (minutesOnEvents.get(event.getColorId(), VALUE_IF_KEY_NOT_FOUND) != VALUE_IF_KEY_NOT_FOUND) {
-                minutesOnEvents.put(event.getColorId(), minutesOnEvents.get(event.getColorId()) + eventTimeSpent);
+            int colorNumber = event.getColorId();
+            if (minutesOnEvents.get(colorNumber, VALUE_IF_KEY_NOT_FOUND) != VALUE_IF_KEY_NOT_FOUND) {
+                minutesOnEvents.put(colorNumber, minutesOnEvents.get(colorNumber) + eventTimeSpent);
             } else {
-                minutesOnEvents.put(event.getColorId(), eventTimeSpent);
+                minutesOnEvents.put(colorNumber, eventTimeSpent);
             }
         }
 
         List<PieEntry> dailyEventsValues = new ArrayList<>();
 
         for (int i = 0; i < minutesOnEvents.size(); i++) {
-            dailyEventsValues.add(new PieEntry(minutesOnEvents.valueAt(i) % minutes * PERCENTAGE,
-                    minutesOnEvents.valueAt(i) / MINUTES_IN_HOUR + "h " +
-                            minutesOnEvents.valueAt(i) % MINUTES_IN_HOUR + "m"));
-            colors.add(colorPalette.getColorPalette().get(minutesOnEvents.keyAt(i)));
+            int countOfMinutes = minutesOnEvents.valueAt(i);
+            dailyEventsValues.add(new PieEntry(countOfMinutes % minutes * PERCENTAGE,
+                    countOfMinutes / MINUTES_IN_HOUR + "h " +
+                            countOfMinutes % MINUTES_IN_HOUR + "m"));
+            colors.add(mColorPaletteArray.get(minutesOnEvents.keyAt(i)));
         }
 
         setPieChartData(dailyEventsValues, colors);
@@ -204,27 +204,13 @@ public class EventsStatisticFragment extends Fragment {
         pieChart.setData(pieData);
     }
 
-    public void onButtonPressed(Uri uri) {
-        if (mListener != null) {
-            mListener.onFragmentInteraction(uri);
-        }
-    }
-
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
-        if (context instanceof OnFragmentInteractionListener) {
-            mListener = (OnFragmentInteractionListener) context;
-        }
     }
 
     @Override
     public void onDetach() {
         super.onDetach();
-        mListener = null;
-    }
-
-    public interface OnFragmentInteractionListener {
-        void onFragmentInteraction(Uri uri);
     }
 }

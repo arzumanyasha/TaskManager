@@ -82,12 +82,8 @@ public class IntentionActivity extends AppCompatActivity {
 
         setSupportActionBar(toolbar);
 
-        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
-                this,
-                mDrawer,
-                toolbar,
-                R.string.navigation_drawer_open,
-                R.string.navigation_drawer_close);
+        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(this, mDrawer, toolbar,
+                R.string.navigation_drawer_open, R.string.navigation_drawer_close);
         mDrawer.addDrawerListener(toggle);
         toggle.syncState();
 
@@ -175,16 +171,6 @@ public class IntentionActivity extends AppCompatActivity {
         Menu mainMenu = mNavigationView.getMenu();
         mainMenu = populateCalendarMenu(mainMenu);
         populateTasksMenu(mainMenu);
-
-        /*
-        taskListsMenu.add("Add")
-                .setIcon(R.drawable.ic_add_black_24dp)
-                .setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
-                    @Override
-                    public boolean onMenuItemClick(MenuItem item) {
-                        return false;
-                    }
-                });*/
     }
 
     private Menu populateCalendarMenu(Menu menu) {
@@ -271,10 +257,9 @@ public class IntentionActivity extends AppCompatActivity {
     }
 
     private void openTasksDialog() {
-        TasksDialog tasksDialog;
         for (TaskList taskList : mTaskLists) {
             if (mCurrentTaskList.getId() == taskList.getId()) {
-                tasksDialog = TasksDialog.newInstance(null, taskList);
+                TasksDialog tasksDialog = TasksDialog.newInstance(null, taskList);
                 tasksDialog.setTasksReadyListener(new TasksDialog.TasksReadyListener() {
                     @Override
                     public void onTasksReady(List<Task> tasks) {
@@ -422,7 +407,7 @@ public class IntentionActivity extends AppCompatActivity {
     }
 
     private void updateTaskList(TaskList taskList) {
-        for (int i = 0; i < mTaskListsMenu.size(); i++) {
+        for (int i = 0; i < mTaskLists.size(); i++) {
             if (mTaskLists.get(i).getId() == taskList.getId()) {
                 mTaskLists.get(i).setTitle(taskList.getTitle());
                 mTaskListsMenu.getItem(i).setTitle(taskList.getTitle());

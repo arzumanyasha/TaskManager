@@ -1,7 +1,6 @@
 package com.example.arturarzumanyan.taskmanager.ui.fragment;
 
 import android.content.Context;
-import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -33,8 +32,6 @@ public class TasksFragment extends Fragment {
 
     private TasksRepository mTasksRepository;
     private TaskList mTaskList;
-
-    private OnFragmentInteractionListener mListener;
 
     public TasksFragment() {
         mTasksRepository = new TasksRepository();
@@ -166,27 +163,13 @@ public class TasksFragment extends Fragment {
         });
     }
 
-    public void onButtonPressed(Uri uri) {
-        if (mListener != null) {
-            mListener.onFragmentInteraction(uri);
-        }
-    }
-
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
-        if (context instanceof OnFragmentInteractionListener) {
-            mListener = (OnFragmentInteractionListener) context;
-        }
     }
 
     @Override
     public void onDetach() {
         super.onDetach();
-        mListener = null;
-    }
-
-    public interface OnFragmentInteractionListener {
-        void onFragmentInteraction(Uri uri);
     }
 }

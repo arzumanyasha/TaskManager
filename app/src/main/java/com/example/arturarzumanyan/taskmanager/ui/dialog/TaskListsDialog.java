@@ -25,7 +25,6 @@ public class TaskListsDialog extends AppCompatDialogFragment {
     private TaskListReadyListener taskListReadyListener;
 
     public TaskListsDialog() {
-        this.taskListReadyListener = null;
     }
 
     public static TaskListsDialog newInstance(TaskList taskList) {
@@ -78,17 +77,20 @@ public class TaskListsDialog extends AppCompatDialogFragment {
     private void addOrUpdateTaskList(Bundle bundle) {
         String taskListName = mEditTextTaskListTitle.getText().toString();
         TaskListsRepository taskListsRepository = new TaskListsRepository();
-        if (!taskListName.isEmpty() && bundle != null) {
-            TaskList taskList = bundle.getParcelable(TASK_LISTS_KEY);
-            if (taskList != null) {
-                updateTaskList(taskListsRepository, taskList, taskListName);
+        if (!taskListName.isEmpty()) {
+            if (bundle != null) {
+                TaskList taskList = bundle.getParcelable(TASK_LISTS_KEY);
+                if (taskList != null) {
+                    updateTaskList(taskListsRepository, taskList, taskListName);
+                }
+            } else {
+                addTaskList(taskListsRepository, taskListName);
+
             }
-        } else if (!taskListName.isEmpty()) {
-            addTaskList(taskListsRepository, taskListName);
         }
     }
 
-    private void updateTaskList(TaskListsRepository taskListsRepository, TaskList taskList, String taskListName){
+    private void updateTaskList(TaskListsRepository taskListsRepository, TaskList taskList, String taskListName) {
         taskList.setTitle(taskListName);
         taskListsRepository.updateTaskList(taskList, new TaskListsRepository.OnTaskListsLoadedListener() {
             @Override
@@ -139,11 +141,11 @@ public class TaskListsDialog extends AppCompatDialogFragment {
         });
     }
 
-    public interface TaskListReadyListener {
-        void onTaskListReady(TaskList taskList);
-    }
-
     public void setTaskListReadyListener(TaskListReadyListener listener) {
         this.taskListReadyListener = listener;
+    }
+
+    public interface TaskListReadyListener {
+        void onTaskListReady(TaskList taskList);
     }
 }

@@ -1,7 +1,6 @@
 package com.example.arturarzumanyan.taskmanager.ui.fragment;
 
 import android.content.Context;
-import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -30,8 +29,6 @@ public class DailyEventsFragment extends Fragment {
     private RecyclerView mEventsRecyclerView;
 
     private EventsAdapter mEventsAdapter;
-
-    private OnFragmentInteractionListener mListener;
 
     public DailyEventsFragment() {
 
@@ -104,7 +101,7 @@ public class DailyEventsFragment extends Fragment {
         mEventsRecyclerView.setAdapter(mEventsAdapter);
     }
 
-    private void deleteEvent(EventsRepository eventsRepository, Event event){
+    private void deleteEvent(EventsRepository eventsRepository, Event event) {
         eventsRepository.deleteEvent(event, new EventsRepository.OnEventsLoadedListener() {
             @Override
             public void onSuccess(List<Event> eventsList) {
@@ -131,27 +128,13 @@ public class DailyEventsFragment extends Fragment {
         }
     }
 
-    public void onButtonPressed(Uri uri) {
-        if (mListener != null) {
-            mListener.onFragmentInteraction(uri);
-        }
-    }
-
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
-        if (context instanceof OnFragmentInteractionListener) {
-            mListener = (OnFragmentInteractionListener) context;
-        }
     }
 
     @Override
     public void onDetach() {
         super.onDetach();
-        mListener = null;
-    }
-
-    public interface OnFragmentInteractionListener {
-        void onFragmentInteraction(Uri uri);
     }
 }

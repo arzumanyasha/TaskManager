@@ -1,7 +1,6 @@
 package com.example.arturarzumanyan.taskmanager.ui.fragment;
 
 import android.content.Context;
-import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -19,8 +18,6 @@ import static com.example.arturarzumanyan.taskmanager.ui.activity.IntentionActiv
 
 public class EventsFragment extends Fragment {
     private static final String BACK_STACK_ROOT_TAG = "root_fragment";
-
-    private OnFragmentInteractionListener mListener;
 
     public EventsFragment() {
 
@@ -102,27 +99,13 @@ public class EventsFragment extends Fragment {
         requireActivity().setTitle(EVENTS_KEY);
     }
 
-    public void onButtonPressed(Uri uri) {
-        if (mListener != null) {
-            mListener.onFragmentInteraction(uri);
-        }
-    }
-
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
-        if (context instanceof OnFragmentInteractionListener) {
-            mListener = (OnFragmentInteractionListener) context;
-        }
     }
 
     @Override
     public void onDetach() {
         super.onDetach();
-        mListener = null;
-    }
-
-    public interface OnFragmentInteractionListener {
-        void onFragmentInteraction(Uri uri);
     }
 }

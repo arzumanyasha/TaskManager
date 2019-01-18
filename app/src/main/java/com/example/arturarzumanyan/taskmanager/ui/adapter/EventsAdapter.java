@@ -20,12 +20,14 @@ import java.util.List;
 public class EventsAdapter extends RecyclerView.Adapter<EventsAdapter.ViewHolder> {
     private List<Event> mDataset;
     private EventsAdapter.OnItemClickListener mListener;
-    private Context mContext;
+
+    private SparseIntArray mColorPaletteArray;
 
     public EventsAdapter(Context context, List<Event> dataset, EventsAdapter.OnItemClickListener onItemClickListener) {
-        this.mContext = context;
         this.mDataset = dataset;
         this.mListener = onItemClickListener;
+        ColorPalette mColorPalette = new ColorPalette(context);
+        this.mColorPaletteArray = mColorPalette.getColorPalette();
     }
 
     @NonNull
@@ -57,9 +59,7 @@ public class EventsAdapter extends RecyclerView.Adapter<EventsAdapter.ViewHolder
         holder.eventDelete.setTag(position);
         holder.itemView.setTag(position);
 
-        ColorPalette colorPalette = new ColorPalette(mContext);
-        SparseIntArray map = colorPalette.getColorPalette();
-        holder.constraintLayout.setBackgroundColor(map.get(event.getColorId()));
+        holder.constraintLayout.setBackgroundColor(mColorPaletteArray.get(event.getColorId()));
 
         holder.eventTime.setText(DateUtils.formatTime(event.getStartTime())
                 + " - " + DateUtils.formatTime(event.getEndTime()));
@@ -100,7 +100,9 @@ public class EventsAdapter extends RecyclerView.Adapter<EventsAdapter.ViewHolder
 
     static class ViewHolder extends RecyclerView.ViewHolder {
         ConstraintLayout constraintLayout;
-        TextView eventName, eventDescription, eventTime;
+        TextView eventName;
+        TextView eventDescription;
+        TextView eventTime;
         ImageView eventDelete;
 
         ViewHolder(View view) {

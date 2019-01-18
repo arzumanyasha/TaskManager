@@ -1,11 +1,11 @@
 package com.example.arturarzumanyan.taskmanager.ui.fragment;
 
 import android.content.Context;
-import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.util.SparseIntArray;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -39,9 +39,9 @@ public class WeekDashboardFragment extends Fragment {
     private LinearLayout mLinearLayoutSat;
     private LinearLayout mLinearLayoutSun;
 
+    private ColorPalette mColorPalette = new ColorPalette(getActivity());
+    private SparseIntArray mColorPaletteArray = mColorPalette.getColorPalette();
     private Map<Date, List<Event>> mWeeklyEvents = new HashMap<>();
-
-    private OnFragmentInteractionListener mListener;
 
     public WeekDashboardFragment() {
     }
@@ -162,34 +162,19 @@ public class WeekDashboardFragment extends Fragment {
     private void makeEventPart(Event event, LinearLayout linearLayout) {
         LinearLayout.LayoutParams lParams = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 0);
         View view = new View(getActivity());
-        ColorPalette colorPalette = new ColorPalette(getActivity());
-        view.setBackgroundColor(colorPalette.getColorPalette().get(event.getColorId()));
+        view.setBackgroundColor(mColorPaletteArray.get(event.getColorId()));
         lParams.weight = event.getEndTime().getHours() * MINUTES_IN_HOUR + event.getEndTime().getMinutes()
                 - event.getStartTime().getHours() * MINUTES_IN_HOUR - event.getStartTime().getMinutes();
         linearLayout.addView(view, lParams);
     }
 
-    public void onButtonPressed(Uri uri) {
-        if (mListener != null) {
-            mListener.onFragmentInteraction(uri);
-        }
-    }
-
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
-        if (context instanceof OnFragmentInteractionListener) {
-            mListener = (OnFragmentInteractionListener) context;
-        }
     }
 
     @Override
     public void onDetach() {
         super.onDetach();
-        mListener = null;
-    }
-
-    public interface OnFragmentInteractionListener {
-        void onFragmentInteraction(Uri uri);
     }
 }

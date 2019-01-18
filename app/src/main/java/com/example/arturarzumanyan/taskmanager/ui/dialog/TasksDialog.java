@@ -37,7 +37,6 @@ public class TasksDialog extends AppCompatDialogFragment {
     private TasksReadyListener tasksReadyListener;
 
     public TasksDialog() {
-        this.tasksReadyListener = null;
     }
 
     public static TasksDialog newInstance(Task task, TaskList taskList) {
@@ -114,15 +113,13 @@ public class TasksDialog extends AppCompatDialogFragment {
     }
 
     private void setTaskInfoViews(Bundle bundle) {
-        if (bundle != null) {
-            if (bundle.getParcelable(TASKS_KEY) != null) {
-                Task task = bundle.getParcelable(TASKS_KEY);
-                if (task != null) {
-                    mEditTextTaskName.setText(task.getName());
-                    mEditTextTaskDescription.setText(task.getDescription());
-                    if (task.getDate() != null) {
-                        mTextViewTaskDate.setText(DateUtils.getTaskDate(DateUtils.formatTaskDate(task.getDate())));
-                    }
+        if (bundle != null && bundle.getParcelable(TASKS_KEY) != null) {
+            Task task = bundle.getParcelable(TASKS_KEY);
+            if (task != null) {
+                mEditTextTaskName.setText(task.getName());
+                mEditTextTaskDescription.setText(task.getDescription());
+                if (task.getDate() != null) {
+                    mTextViewTaskDate.setText(DateUtils.getTaskDate(DateUtils.formatTaskDate(task.getDate())));
                 }
             }
         }
@@ -131,10 +128,10 @@ public class TasksDialog extends AppCompatDialogFragment {
     private void addOrUpdateTask(Bundle bundle) {
         TasksRepository tasksRepository = new TasksRepository();
         String taskName = mEditTextTaskName.getText().toString();
-        if (bundle != null) {
-            if (!taskName.isEmpty() && (bundle.getParcelable(TASKS_KEY) != null)) {
+        if (bundle != null && !taskName.isEmpty()) {
+            if (bundle.getParcelable(TASKS_KEY) != null) {
                 updateTask(tasksRepository, bundle, taskName);
-            } else if (!taskName.isEmpty() && (bundle.getParcelable(TASKS_KEY) == null)) {
+            } else {
                 addTask(tasksRepository, bundle, taskName);
             }
         }
@@ -191,11 +188,11 @@ public class TasksDialog extends AppCompatDialogFragment {
         }
     }
 
-    public interface TasksReadyListener {
-        void onTasksReady(List<Task> tasks);
-    }
-
     public void setTasksReadyListener(TasksReadyListener listener) {
         this.tasksReadyListener = listener;
+    }
+
+    public interface TasksReadyListener {
+        void onTasksReady(List<Task> tasks);
     }
 }
