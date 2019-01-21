@@ -114,7 +114,7 @@ public class TasksDialog extends AppCompatDialogFragment {
     }
 
     private void setTaskInfoViews(Bundle bundle) {
-        if (bundle != null && bundle.getParcelable(TASKS_KEY) != null) {
+        if (bundle != null) {
             Task task = bundle.getParcelable(TASKS_KEY);
             if (task != null) {
                 mEditTextTaskName.setText(task.getName());
