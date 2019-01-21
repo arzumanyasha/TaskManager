@@ -21,6 +21,8 @@ import com.example.arturarzumanyan.taskmanager.ui.activity.BaseActivity;
 import com.example.arturarzumanyan.taskmanager.ui.adapter.ColorPalette;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
@@ -120,16 +122,13 @@ public class WeekDashboardFragment extends Fragment {
     }
 
     private void fetchWeeklyEventsWithDate(List<Event> eventsList) {
-        List<Event> dailyEventsList;
         for (Event event : eventsList) {
-            Date eventDate = DateUtils.getEventDate(event.getStartTime());
+            Date eventDate = DateUtils.getEventDateWithoutTime(event.getStartTime());
 
             if (mWeeklyEvents.containsKey(eventDate)) {
-                dailyEventsList = new ArrayList<>(mWeeklyEvents.get(eventDate));
-                dailyEventsList.add(event);
-                mWeeklyEvents.put(eventDate, dailyEventsList);
+                mWeeklyEvents.get(eventDate).add(event);
             } else {
-                mWeeklyEvents.put(eventDate, Collections.singletonList(event));
+                mWeeklyEvents.put(eventDate, new ArrayList<>(Collections.singletonList(event)));
             }
         }
     }

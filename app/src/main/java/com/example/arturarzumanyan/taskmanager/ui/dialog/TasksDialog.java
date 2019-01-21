@@ -119,9 +119,7 @@ public class TasksDialog extends AppCompatDialogFragment {
             if (task != null) {
                 mEditTextTaskName.setText(task.getName());
                 mEditTextTaskDescription.setText(task.getDescription());
-                if (task.getDate() != null) {
-                    mTextViewTaskDate.setText(DateUtils.getTaskDate(task.getDate()));
-                }
+                mTextViewTaskDate.setText(DateUtils.getTaskDate(task.getDate()));
             }
         }
     }

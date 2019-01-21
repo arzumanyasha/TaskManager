@@ -51,7 +51,7 @@ public class DateUtils {
         return simpleDateFormat.format(eventDate);
     }
 
-    public static Date getEventDate(Date date) {
+    public static Date getEventDateWithoutTime(Date date) {
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat(YEAR_MONTH_DAY_DATE_PATTERN, Locale.getDefault());
         try {
             return simpleDateFormat.parse(simpleDateFormat.format(date));
