@@ -19,6 +19,7 @@ import com.example.arturarzumanyan.taskmanager.data.repository.tasks.TasksReposi
 import com.example.arturarzumanyan.taskmanager.domain.Task;
 import com.example.arturarzumanyan.taskmanager.domain.TaskList;
 import com.example.arturarzumanyan.taskmanager.networking.util.DateUtils;
+import com.example.arturarzumanyan.taskmanager.ui.activity.BaseActivity;
 
 import java.util.Date;
 import java.util.List;
@@ -119,7 +120,7 @@ public class TasksDialog extends AppCompatDialogFragment {
                 mEditTextTaskName.setText(task.getName());
                 mEditTextTaskDescription.setText(task.getDescription());
                 if (task.getDate() != null) {
-                    mTextViewTaskDate.setText(DateUtils.getTaskDate(DateUtils.formatTaskDate(task.getDate())));
+                    mTextViewTaskDate.setText(DateUtils.getTaskDate(task.getDate()));
                 }
             }
         }
@@ -161,7 +162,7 @@ public class TasksDialog extends AppCompatDialogFragment {
 
                 @Override
                 public void onFail(String message) {
-                    Toast.makeText(getActivity(), message, Toast.LENGTH_LONG).show();
+                    ((BaseActivity) requireActivity()).onError(message);
                 }
             });
         }
@@ -182,7 +183,7 @@ public class TasksDialog extends AppCompatDialogFragment {
 
                 @Override
                 public void onFail(String message) {
-                    Toast.makeText(getActivity(), R.string.network_error, Toast.LENGTH_LONG).show();
+                    ((BaseActivity) requireActivity()).onError(message);
                 }
             });
         }

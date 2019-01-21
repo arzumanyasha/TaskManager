@@ -9,11 +9,11 @@ import android.support.v7.app.AppCompatDialogFragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.EditText;
-import android.widget.Toast;
 
 import com.example.arturarzumanyan.taskmanager.R;
 import com.example.arturarzumanyan.taskmanager.data.repository.tasklists.TaskListsRepository;
 import com.example.arturarzumanyan.taskmanager.domain.TaskList;
+import com.example.arturarzumanyan.taskmanager.ui.activity.BaseActivity;
 
 import java.util.List;
 import java.util.UUID;
@@ -77,22 +77,22 @@ public class TaskListsDialog extends AppCompatDialogFragment {
     private void addOrUpdateTaskList(Bundle bundle) {
         String taskListName = mEditTextTaskListTitle.getText().toString();
         TaskListsRepository taskListsRepository = new TaskListsRepository();
+        TaskListsRepository.OnTaskListsLoadedListener onTaskListsLoadedListener = getTaskListLoadedListener();
         if (!taskListName.isEmpty()) {
             if (bundle != null) {
                 TaskList taskList = bundle.getParcelable(TASK_LISTS_KEY);
                 if (taskList != null) {
-                    updateTaskList(taskListsRepository, taskList, taskListName);
+                    updateTaskList(taskListsRepository, taskList, taskListName, onTaskListsLoadedListener);
                 }
             } else {
-                addTaskList(taskListsRepository, taskListName);
+                addTaskList(taskListsRepository, taskListName, onTaskListsLoadedListener);
 
             }
         }
     }
 
-    private void updateTaskList(TaskListsRepository taskListsRepository, TaskList taskList, String taskListName) {
-        taskList.setTitle(taskListName);
-        taskListsRepository.updateTaskList(taskList, new TaskListsRepository.OnTaskListsLoadedListener() {
+    private TaskListsRepository.OnTaskListsLoadedListener getTaskListLoadedListener() {
+        return new TaskListsRepository.OnTaskListsLoadedListener() {
             @Override
             public void onSuccess(List<TaskList> taskListArrayList) {
 
@@ -110,35 +110,22 @@ public class TaskListsDialog extends AppCompatDialogFragment {
 
             @Override
             public void onFail(String message) {
-                Toast.makeText(getActivity(), message, Toast.LENGTH_LONG).show();
+                ((BaseActivity) requireActivity()).onError(message);
             }
-        });
+        };
     }
 
-    private void addTaskList(TaskListsRepository taskListsRepository, String taskListName) {
+    private void updateTaskList(TaskListsRepository taskListsRepository, TaskList taskList, String taskListName,
+                                TaskListsRepository.OnTaskListsLoadedListener onTaskListsLoadedListener) {
+        taskList.setTitle(taskListName);
+        taskListsRepository.updateTaskList(taskList, onTaskListsLoadedListener);
+    }
+
+    private void addTaskList(TaskListsRepository taskListsRepository, String taskListName,
+                             TaskListsRepository.OnTaskListsLoadedListener onTaskListsLoadedListener) {
         TaskList taskList = new TaskList(UUID.randomUUID().toString(),
                 taskListName);
-        taskListsRepository.addTaskList(taskList, new TaskListsRepository.OnTaskListsLoadedListener() {
-            @Override
-            public void onSuccess(List<TaskList> taskListArrayList) {
-
-            }
-
-            @Override
-            public void onUpdate(List<TaskList> taskLists) {
-
-            }
-
-            @Override
-            public void onSuccess(TaskList taskList) {
-                taskListReadyListener.onTaskListReady(taskList);
-            }
-
-            @Override
-            public void onFail(String message) {
-                Toast.makeText(getActivity(), message, Toast.LENGTH_LONG).show();
-            }
-        });
+        taskListsRepository.addTaskList(taskList, onTaskListsLoadedListener);
     }
 
     public void setTaskListReadyListener(TaskListReadyListener listener) {

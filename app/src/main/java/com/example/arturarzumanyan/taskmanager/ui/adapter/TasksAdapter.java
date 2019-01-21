@@ -79,11 +79,12 @@ public class TasksAdapter extends RecyclerView.Adapter<TasksAdapter.ViewHolder> 
             int position = (int) v.getTag();
             if (position != RecyclerView.NO_POSITION) {
                 Task task = mDataset.get(position);
-                if (task.getIsExecuted() == 1) {
+                /*if (task.getIsExecuted() == 1) {
                     setItemChecked(task, position, 0);
                 } else {
                     setItemChecked(task, position, 1);
-                }
+                }*/
+                setItemChecked(task, position, task.getIsExecuted() == 1 ? 0 : 1);
                 notifyItemChanged(position);
             }
         }

@@ -13,7 +13,6 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Spinner;
-import android.widget.Toast;
 
 import com.example.arturarzumanyan.taskmanager.R;
 import com.example.arturarzumanyan.taskmanager.data.repository.events.EventsRepository;
@@ -22,6 +21,7 @@ import com.example.arturarzumanyan.taskmanager.data.repository.events.specificat
 import com.example.arturarzumanyan.taskmanager.data.repository.events.specification.WeeklyEventsSpecification;
 import com.example.arturarzumanyan.taskmanager.domain.Event;
 import com.example.arturarzumanyan.taskmanager.networking.util.DateUtils;
+import com.example.arturarzumanyan.taskmanager.ui.activity.BaseActivity;
 import com.example.arturarzumanyan.taskmanager.ui.adapter.ColorPalette;
 import com.github.mikephil.charting.animation.Easing;
 import com.github.mikephil.charting.charts.PieChart;
@@ -43,8 +43,7 @@ public class EventsStatisticFragment extends Fragment {
     private PieChart pieChart;
     private Spinner spinnerMode;
 
-    private ColorPalette mColorPalette = new ColorPalette(getActivity());
-    private SparseIntArray mColorPaletteArray = mColorPalette.getColorPalette();
+    private SparseIntArray mColorPaletteArray;
     private EventsRepository mEventsRepository;
 
     public EventsStatisticFragment() {
@@ -77,6 +76,9 @@ public class EventsStatisticFragment extends Fragment {
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
 
+        ColorPalette colorPalette = new ColorPalette(getActivity());
+        mColorPaletteArray = colorPalette.getColorPalette();
+        
         mEventsRepository = new EventsRepository();
 
         spinnerMode.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
@@ -117,7 +119,7 @@ public class EventsStatisticFragment extends Fragment {
 
             @Override
             public void onFail(String message) {
-                Toast.makeText(getActivity(), message, Toast.LENGTH_LONG).show();
+                ((BaseActivity) requireActivity()).onError(message);
             }
         });
     }
@@ -132,7 +134,7 @@ public class EventsStatisticFragment extends Fragment {
 
             @Override
             public void onFail(String message) {
-                Toast.makeText(getActivity(), message, Toast.LENGTH_LONG).show();
+                ((BaseActivity) requireActivity()).onError(message);
             }
         });
     }
@@ -147,7 +149,7 @@ public class EventsStatisticFragment extends Fragment {
 
             @Override
             public void onFail(String message) {
-                Toast.makeText(getActivity(), message, Toast.LENGTH_LONG).show();
+                ((BaseActivity) requireActivity()).onError(message);
             }
         });
     }

@@ -25,6 +25,7 @@ import com.example.arturarzumanyan.taskmanager.R;
 import com.example.arturarzumanyan.taskmanager.data.repository.events.EventsRepository;
 import com.example.arturarzumanyan.taskmanager.domain.Event;
 import com.example.arturarzumanyan.taskmanager.networking.util.DateUtils;
+import com.example.arturarzumanyan.taskmanager.ui.activity.BaseActivity;
 import com.example.arturarzumanyan.taskmanager.ui.adapter.ColorPalette;
 
 import java.util.ArrayList;
@@ -155,8 +156,8 @@ public class EventsDialog extends AppCompatDialogFragment {
 
         int colorNumber = mColorMap.keyAt(mColorMap.indexOfValue(mCurrentColor));
 
-        if(mEndTime.after(mStartTime) && !mEditTextEventName.getText().toString().isEmpty()){
-            if(bundle != null) {
+        if (mEndTime.after(mStartTime) && !mEditTextEventName.getText().toString().isEmpty()) {
+            if (bundle != null) {
                 updateEvent(bundle, name, description, colorNumber, startDate, endDate, isNotify);
             } else {
                 addEvent(name, description, colorNumber, startDate, endDate, isNotify);
@@ -179,7 +180,7 @@ public class EventsDialog extends AppCompatDialogFragment {
 
                     @Override
                     public void onFail(String message) {
-                        Toast.makeText(getActivity(), message, Toast.LENGTH_LONG).show();
+                        ((BaseActivity) requireActivity()).onError(message);
                     }
                 });
 
@@ -199,7 +200,7 @@ public class EventsDialog extends AppCompatDialogFragment {
 
                 @Override
                 public void onFail(String message) {
-                    Toast.makeText(getActivity(), message, Toast.LENGTH_LONG).show();
+                    ((BaseActivity) requireActivity()).onError(message);
                 }
             });
         }
@@ -265,7 +266,7 @@ public class EventsDialog extends AppCompatDialogFragment {
 
             mTextViewStartTime.setText(DateUtils.formatTimeWithoutA(event.getStartTime()));
             mTextViewEndTime.setText(DateUtils.formatTimeWithoutA(event.getEndTime()));
-            mTextViewDate.setText((DateUtils.getEventDate(event.getStartTime())));
+            mTextViewDate.setText((DateUtils.formatEventDate(event.getStartTime())));
 
             mSwitchNotification.setChecked(event.getIsNotify() == 1);
 

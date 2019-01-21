@@ -2,7 +2,6 @@ package com.example.arturarzumanyan.taskmanager.ui.activity;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.Toast;
 
@@ -10,7 +9,7 @@ import com.example.arturarzumanyan.taskmanager.R;
 import com.example.arturarzumanyan.taskmanager.auth.FirebaseWebService;
 import com.google.android.gms.common.SignInButton;
 
-public class SignInActivity extends AppCompatActivity {
+public class SignInActivity extends BaseActivity {
 
     private static final int AUTHENTICATION_REQUEST_CODE = 101;
     public static final String EXTRA_USER_NAME = "userName";
@@ -46,7 +45,7 @@ public class SignInActivity extends AppCompatActivity {
 
             @Override
             public void onFail(String message) {
-                Toast.makeText(getApplicationContext(), message, Toast.LENGTH_LONG).show();
+                onError(message);
             }
         });
     }
@@ -84,8 +83,10 @@ public class SignInActivity extends AppCompatActivity {
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (requestCode == AUTHENTICATION_REQUEST_CODE) {
-            FirebaseWebService.getFirebaseWebServiceInstance().authWithGoogle(data);
+        if (resultCode == RESULT_OK) {
+            if (requestCode == AUTHENTICATION_REQUEST_CODE) {
+                FirebaseWebService.getFirebaseWebServiceInstance().authWithGoogle(data);
+            }
         }
     }
 

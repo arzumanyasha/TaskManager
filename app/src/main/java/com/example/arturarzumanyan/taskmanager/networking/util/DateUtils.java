@@ -27,9 +27,9 @@ public class DateUtils {
         return simpleDateFormat.format(currentDate);
     }
 
-    public static String getTaskDate(String date) {
+    public static String getTaskDate(Date date) {
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat(YEAR_MONTH_DAY_DATE_PATTERN, Locale.getDefault());
-        return simpleDateFormat.format(getTaskDateFromString(date));
+        return simpleDateFormat.format(date);
     }
 
     public static Date getEventDateFromString(String date) {
@@ -43,18 +43,18 @@ public class DateUtils {
     }
 
     public static String trimEventDate(String date) {
-        return DateUtils.getEventDate(DateUtils.getEventDateFromString(date));
+        return DateUtils.formatEventDate(DateUtils.getEventDateFromString(date));
     }
 
-    public static String getEventDate(Date eventDate) {
+    public static String formatEventDate(Date eventDate) {
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat(YEAR_MONTH_DAY_DATE_PATTERN, Locale.getDefault());
         return simpleDateFormat.format(eventDate);
     }
 
-    public static Date getEventDate(String date) {
+    public static Date getEventDate(Date date) {
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat(YEAR_MONTH_DAY_DATE_PATTERN, Locale.getDefault());
         try {
-            return simpleDateFormat.parse(date);
+            return simpleDateFormat.parse(simpleDateFormat.format(date));
         } catch (ParseException e) {
             e.printStackTrace();
         }
@@ -183,16 +183,6 @@ public class DateUtils {
         } else {
             return null;
         }
-    }
-
-    public static Date getDateFromString(String date) {
-        SimpleDateFormat simpleDateFormat = new SimpleDateFormat(YEAR_MONTH_DAY_PATTERN, Locale.getDefault());
-        try {
-            return simpleDateFormat.parse(date);
-        } catch (ParseException e) {
-            e.printStackTrace();
-        }
-        return null;
     }
 
     public static String getStringDateFromInt(int year, int month, int day) {

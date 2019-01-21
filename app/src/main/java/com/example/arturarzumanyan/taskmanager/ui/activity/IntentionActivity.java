@@ -12,7 +12,6 @@ import android.support.v4.app.NotificationManagerCompat;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
-import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Gravity;
 import android.view.Menu;
@@ -43,7 +42,7 @@ import com.squareup.picasso.Picasso;
 
 import java.util.List;
 
-public class IntentionActivity extends AppCompatActivity {
+public class IntentionActivity extends BaseActivity {
     public static final String EVENTS_KEY = "Events";
     public static final String TASKS_KEY = "Tasks";
     public static final String TASK_LISTS_KEY = "TaskLists";
@@ -126,7 +125,7 @@ public class IntentionActivity extends AppCompatActivity {
 
             @Override
             public void onFail(String message) {
-                Toast.makeText(IntentionActivity.this, message, Toast.LENGTH_LONG).show();
+                onError(message);
             }
         };
 
@@ -152,7 +151,7 @@ public class IntentionActivity extends AppCompatActivity {
         mTaskListsMenu.clear();
 
         mTaskLists = taskLists;
-        for(final TaskList taskList : mTaskLists) {
+        for (final TaskList taskList : mTaskLists) {
             mTaskListsMenu.add(taskList.getTitle()).setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
                 @Override
                 public boolean onMenuItemClick(MenuItem item) {
@@ -193,7 +192,7 @@ public class IntentionActivity extends AppCompatActivity {
 
     private void populateTasksMenu(Menu menu) {
         mTaskListsMenu = menu.addSubMenu("TaskLists");
-        for(final TaskList taskList : mTaskLists) {
+        for (final TaskList taskList : mTaskLists) {
             mTaskListsMenu.add(taskList.getTitle()).setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
                 @Override
                 public boolean onMenuItemClick(MenuItem item) {
@@ -436,7 +435,7 @@ public class IntentionActivity extends AppCompatActivity {
 
             @Override
             public void onFail(String message) {
-                Toast.makeText(IntentionActivity.this, message, Toast.LENGTH_LONG).show();
+                onError(message);
             }
         });
     }
@@ -471,7 +470,7 @@ public class IntentionActivity extends AppCompatActivity {
 
                     @Override
                     public void onFail(String message) {
-                        Toast.makeText(IntentionActivity.this, message, Toast.LENGTH_LONG).show();
+                        onError(message);
                     }
                 });
 

@@ -10,7 +10,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
-import android.widget.Toast;
 
 import com.example.arturarzumanyan.taskmanager.R;
 import com.example.arturarzumanyan.taskmanager.data.repository.events.EventsRepository;
@@ -18,6 +17,7 @@ import com.example.arturarzumanyan.taskmanager.data.repository.events.specificat
 import com.example.arturarzumanyan.taskmanager.domain.Event;
 import com.example.arturarzumanyan.taskmanager.networking.util.DateUtils;
 import com.example.arturarzumanyan.taskmanager.networking.util.Log;
+import com.example.arturarzumanyan.taskmanager.ui.activity.BaseActivity;
 import com.example.arturarzumanyan.taskmanager.ui.adapter.ColorPalette;
 
 import java.util.ArrayList;
@@ -39,8 +39,7 @@ public class WeekDashboardFragment extends Fragment {
     private LinearLayout mLinearLayoutSat;
     private LinearLayout mLinearLayoutSun;
 
-    private ColorPalette mColorPalette = new ColorPalette(getActivity());
-    private SparseIntArray mColorPaletteArray = mColorPalette.getColorPalette();
+    private SparseIntArray mColorPaletteArray;
     private Map<Date, List<Event>> mWeeklyEvents = new HashMap<>();
 
     public WeekDashboardFragment() {
@@ -72,6 +71,9 @@ public class WeekDashboardFragment extends Fragment {
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
+
+        ColorPalette colorPalette = new ColorPalette(getActivity());
+        mColorPaletteArray = colorPalette.getColorPalette();
 
         int date = DateUtils.getEventWeek(DateUtils.getCurrentTime()) - 1;
         Date mondayDate = DateUtils.getMondayDate(date - 1);
@@ -112,7 +114,7 @@ public class WeekDashboardFragment extends Fragment {
 
             @Override
             public void onFail(String message) {
-                Toast.makeText(getActivity(), message, Toast.LENGTH_LONG).show();
+                ((BaseActivity) requireActivity()).onError(message);
             }
         });
     }
@@ -120,7 +122,7 @@ public class WeekDashboardFragment extends Fragment {
     private void fetchWeeklyEventsWithDate(List<Event> eventsList) {
         List<Event> dailyEventsList;
         for (Event event : eventsList) {
-            Date eventDate = DateUtils.getEventDate(DateUtils.getEventDate(event.getStartTime()));
+            Date eventDate = DateUtils.getEventDate(event.getStartTime());
 
             if (mWeeklyEvents.containsKey(eventDate)) {
                 dailyEventsList = new ArrayList<>(mWeeklyEvents.get(eventDate));

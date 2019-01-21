@@ -10,12 +10,12 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Toast;
 
 import com.example.arturarzumanyan.taskmanager.R;
 import com.example.arturarzumanyan.taskmanager.data.repository.tasks.TasksRepository;
 import com.example.arturarzumanyan.taskmanager.domain.Task;
 import com.example.arturarzumanyan.taskmanager.domain.TaskList;
+import com.example.arturarzumanyan.taskmanager.ui.activity.BaseActivity;
 import com.example.arturarzumanyan.taskmanager.ui.activity.IntentionActivity;
 import com.example.arturarzumanyan.taskmanager.ui.adapter.TasksAdapter;
 import com.example.arturarzumanyan.taskmanager.ui.dialog.TasksDialog;
@@ -95,7 +95,7 @@ public class TasksFragment extends Fragment {
 
             @Override
             public void onFail(String message) {
-                Toast.makeText(getActivity(), message, Toast.LENGTH_LONG).show();
+                ((BaseActivity) requireActivity()).onError(message);
             }
         });
         requireActivity().setTitle(mTaskList.getTitle());
@@ -144,7 +144,7 @@ public class TasksFragment extends Fragment {
 
                     @Override
                     public void onFail(String message) {
-                        Toast.makeText(getActivity(), message, Toast.LENGTH_LONG).show();
+                        ((BaseActivity) requireActivity()).onError(message);
                     }
                 });
     }
@@ -158,7 +158,7 @@ public class TasksFragment extends Fragment {
 
             @Override
             public void onFail(String message) {
-                Toast.makeText(getActivity(), message, Toast.LENGTH_LONG).show();
+                ((BaseActivity) requireActivity()).onError(message);
             }
         });
     }
