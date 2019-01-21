@@ -37,15 +37,7 @@ public class TasksAdapter extends RecyclerView.Adapter<TasksAdapter.ViewHolder> 
         holder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (mListener != null) {
-                    int position = (int) v.getTag();
-                    if (position != RecyclerView.NO_POSITION) {
-                        Task task = mDataset.get(position);
-                        mListener.onItemClick(task);
-                        notifyItemChanged(position);
-                        notifyItemRangeChanged(position, mDataset.size());
-                    }
-                }
+                triggerItemClick(v);
             }
         });
         holder.taskName.setText(task.getName());
@@ -54,50 +46,62 @@ public class TasksAdapter extends RecyclerView.Adapter<TasksAdapter.ViewHolder> 
         holder.taskDelete.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (mListener != null) {
-                    int position = (int) v.getTag();
-                    if (position != RecyclerView.NO_POSITION) {
-                        Task task = mDataset.get(position);
-                        mListener.onItemDelete(task);
-                        mDataset.remove(task);
-                        notifyItemRemoved(position);
-                        notifyItemRangeChanged(position, mDataset.size());
-                    }
-                }
+                deleteItem(v);
             }
         });
 
-        if (task.getIsExecuted() == 1) {
-            holder.isExecutedCheckBox.setChecked(true);
-        } else {
-            holder.isExecutedCheckBox.setChecked(false);
-        }
+        holder.isExecutedCheckBox.setChecked(task.getIsExecuted() == 1);
 
         holder.isExecutedCheckBox.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (mListener != null) {
-                    int position = (int) v.getTag();
-                    if (position != RecyclerView.NO_POSITION) {
-                        Task task = mDataset.get(position);
-                        if (task.getIsExecuted() == 1) {
-                            mDataset.get(position).setIsExecuted(0);
-                            task.setIsExecuted(0);
-                            mListener.onChangeItemExecuted(task);
-                        } else {
-                            mDataset.get(position).setIsExecuted(1);
-                            task.setIsExecuted(1);
-                            mListener.onChangeItemExecuted(task);
-                        }
-                        notifyItemChanged(position);
-                    }
-                }
+                changeTaskStatus(v);
             }
         });
 
         holder.taskDelete.setTag(position);
         holder.itemView.setTag(position);
         holder.isExecutedCheckBox.setTag(position);
+    }
+
+    private void triggerItemClick(View v) {
+        if (mListener != null) {
+            int position = (int) v.getTag();
+            if (position != RecyclerView.NO_POSITION) {
+                Task task = mDataset.get(position);
+                mListener.onItemClick(task);
+            }
+        }
+    }
+
+    private void changeTaskStatus(View v) {
+        if (mListener != null) {
+            int position = (int) v.getTag();
+            if (position != RecyclerView.NO_POSITION) {
+                Task task = mDataset.get(position);
+                setItemChecked(task, position, task.getIsExecuted() ^ 1);
+                notifyItemChanged(position);
+            }
+        }
+    }
+
+    private void deleteItem(View v) {
+        if (mListener != null) {
+            int position = (int) v.getTag();
+            if (position != RecyclerView.NO_POSITION) {
+                Task task = mDataset.get(position);
+                mListener.onItemDelete(task);
+                mDataset.remove(task);
+                notifyItemRemoved(position);
+                notifyItemRangeChanged(position, mDataset.size());
+            }
+        }
+    }
+
+    private void setItemChecked(Task task, int position, int checked) {
+        mDataset.get(position).setIsExecuted(checked);
+        task.setIsExecuted(checked);
+        mListener.onChangeItemExecuted(task);
     }
 
     @Override
@@ -111,14 +115,13 @@ public class TasksAdapter extends RecyclerView.Adapter<TasksAdapter.ViewHolder> 
     }
 
     static class ViewHolder extends RecyclerView.ViewHolder {
-        View mView;
-        TextView taskName, taskDescription;
+        TextView taskName;
+        TextView taskDescription;
         ImageView taskDelete;
         CheckBox isExecutedCheckBox;
 
         ViewHolder(View view) {
             super(view);
-            mView = view;
             taskName = view.findViewById(R.id.text_task_name);
             taskDescription = view.findViewById(R.id.text_task_description);
             taskDelete = view.findViewById(R.id.image_delete);

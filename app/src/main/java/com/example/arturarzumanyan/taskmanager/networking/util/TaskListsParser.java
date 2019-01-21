@@ -7,15 +7,16 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class TaskListsParser {
     static final String ITEMS_KEY = "items";
     static final String ID_KEY = "id";
     public static final String TITLE_KEY = "title";
 
-    public ArrayList<TaskList> parseTaskLists(String buffer) {
+    public List<TaskList> parseTaskLists(String buffer) {
 
-        ArrayList<TaskList> taskListArrayList = new ArrayList<>();
+        List<TaskList> taskListArrayList = new ArrayList<>();
         try {
             JSONObject jsonobject = new JSONObject(buffer);
             JSONArray jsonArray = jsonobject.getJSONArray(ITEMS_KEY);

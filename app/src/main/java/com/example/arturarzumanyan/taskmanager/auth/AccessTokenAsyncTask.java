@@ -9,9 +9,9 @@ import com.example.arturarzumanyan.taskmanager.networking.base.RequestParameters
 import org.json.JSONException;
 
 public class AccessTokenAsyncTask extends AsyncTask<RequestParameters, Void, ResponseDto> {
+    private TokensLoadingListener tokensLoadingListener;
 
-    public AccessTokenAsyncTask() {
-        tokensLoadingListener = null;
+    AccessTokenAsyncTask() {
     }
 
     @Override
@@ -32,13 +32,11 @@ public class AccessTokenAsyncTask extends AsyncTask<RequestParameters, Void, Res
         }
     }
 
-    public interface TokensLoadingListener {
-        void onDataLoaded(String buffer) throws JSONException;
-    }
-
     public void setTokensLoadingListener(TokensLoadingListener listener) {
         this.tokensLoadingListener = listener;
     }
 
-    private TokensLoadingListener tokensLoadingListener;
+    public interface TokensLoadingListener {
+        void onDataLoaded(String buffer) throws JSONException;
+    }
 }

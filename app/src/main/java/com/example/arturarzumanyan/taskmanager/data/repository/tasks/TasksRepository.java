@@ -12,31 +12,27 @@ import com.example.arturarzumanyan.taskmanager.domain.TaskList;
 import com.example.arturarzumanyan.taskmanager.networking.util.Log;
 import com.example.arturarzumanyan.taskmanager.networking.util.TasksParser;
 
-import java.net.HttpURLConnection;
 import java.util.Collections;
 import java.util.List;
 
 import static com.example.arturarzumanyan.taskmanager.auth.FirebaseWebService.RequestMethods.DELETE;
 import static com.example.arturarzumanyan.taskmanager.auth.FirebaseWebService.RequestMethods.GET;
-import static com.example.arturarzumanyan.taskmanager.auth.FirebaseWebService.RequestMethods.PATCH;
 import static com.example.arturarzumanyan.taskmanager.auth.FirebaseWebService.RequestMethods.POST;
 
 public class TasksRepository {
     private TasksDbStore mTasksDbStore;
     private TasksCloudStore mTasksCloudStore;
     private RepositoryLoadHelper mRepositoryLoadHelper;
-    private FirebaseWebService mFirebaseWebService;
 
-    public TasksRepository(Context context) {
-        mTasksCloudStore = new TasksCloudStore(context);
-        mTasksDbStore = new TasksDbStore(context);
-        mRepositoryLoadHelper = new RepositoryLoadHelper(context);
-        mFirebaseWebService = new FirebaseWebService(context);
+    public TasksRepository() {
+        mTasksCloudStore = new TasksCloudStore();
+        mTasksDbStore = new TasksDbStore();
+        mRepositoryLoadHelper = new RepositoryLoadHelper();
     }
 
     public void loadTasks(TaskList taskList, final OnTasksLoadedListener listener) {
         TasksAsyncTask tasksAsyncTask = new TasksAsyncTask(null, taskList, mRepositoryLoadHelper,
-                mFirebaseWebService, mTasksDbStore, mTasksCloudStore, listener);
+                mTasksDbStore, mTasksCloudStore, listener);
 
         tasksAsyncTask.setDataInfoLoadingListener(new BaseDataLoadingAsyncTask.UserDataLoadingListener<Task>() {
             @Override
@@ -62,7 +58,7 @@ public class TasksRepository {
     public void addOrUpdateTask(TaskList taskList, Task task, final FirebaseWebService.RequestMethods requestMethod,
                                 final OnTasksLoadedListener listener) {
         TasksAsyncTask tasksAsyncTask = new TasksAsyncTask(task, taskList, mRepositoryLoadHelper,
-                mFirebaseWebService, mTasksDbStore, mTasksCloudStore, listener);
+                mTasksDbStore, mTasksCloudStore, listener);
         tasksAsyncTask.setDataInfoLoadingListener(new BaseDataLoadingAsyncTask.UserDataLoadingListener<Task>() {
             @Override
             public void onSuccess(List<Task> list) {
@@ -84,7 +80,7 @@ public class TasksRepository {
 
     public void deleteTask(TaskList taskList, Task task, final OnTasksLoadedListener listener) {
         TasksAsyncTask tasksAsyncTask = new TasksAsyncTask(task, taskList, mRepositoryLoadHelper,
-                mFirebaseWebService, mTasksDbStore, mTasksCloudStore, null);
+                mTasksDbStore, mTasksCloudStore, null);
 
         tasksAsyncTask.setDataInfoLoadingListener(new BaseDataLoadingAsyncTask.UserDataLoadingListener<Task>() {
             @Override
@@ -107,22 +103,19 @@ public class TasksRepository {
         private TaskList mTaskList;
         private Task mTask;
         private RepositoryLoadHelper mRepositoryLoadHelper;
-        private FirebaseWebService mFirebaseWebService;
         private TasksDbStore mTasksDbStore;
         private TasksCloudStore mTasksCloudStore;
         private TasksRepository.OnTasksLoadedListener mListener;
 
-        public TasksAsyncTask(Task task,
-                              TaskList taskList,
-                              RepositoryLoadHelper repositoryLoadHelper,
-                              FirebaseWebService firebaseWebService,
-                              TasksDbStore tasksDbStore,
-                              TasksCloudStore tasksCloudStore,
-                              TasksRepository.OnTasksLoadedListener listener) {
+        TasksAsyncTask(Task task,
+                       TaskList taskList,
+                       RepositoryLoadHelper repositoryLoadHelper,
+                       TasksDbStore tasksDbStore,
+                       TasksCloudStore tasksCloudStore,
+                       TasksRepository.OnTasksLoadedListener listener) {
             this.mTask = task;
             this.mTaskList = taskList;
             this.mRepositoryLoadHelper = repositoryLoadHelper;
-            this.mFirebaseWebService = firebaseWebService;
             this.mTasksDbStore = tasksDbStore;
             this.mTasksCloudStore = tasksCloudStore;
             this.mListener = listener;
@@ -130,68 +123,73 @@ public class TasksRepository {
 
         @Override
         protected List<Task> doInBackground(FirebaseWebService.RequestMethods... requestMethods) {
-            if (mRepositoryLoadHelper.isOnline()) {
-                ResponseDto responseDto = getResponseFromServer(requestMethods[0]);
+            return super.doInBackground(requestMethods[0]);
+        }
 
-                int responseCode;
-                if (responseDto != null) {
-                    responseCode = responseDto.getResponseCode();
-                    if (responseCode == HttpURLConnection.HTTP_UNAUTHORIZED) {
-                        retryGetResultFromServer(requestMethods[0]);
-                    } else {
-                        if (responseCode == HttpURLConnection.HTTP_OK ||
-                                responseCode == HttpURLConnection.HTTP_NO_CONTENT) {
-                            if (requestMethods[0] == POST || requestMethods[0] == PATCH) {
-                                Task task = parseTask(responseDto.getResponseData());
-                                dbQuery(task, requestMethods[0]);
-                            } else if (requestMethods[0] == GET) {
-                                List<Task> tasks = parseTasksData(responseDto.getResponseData());
-                                updateDbQuery(tasks);
-                            } else {
-                                dbQuery(mTask, requestMethods[0]);
-                            }
-                        }
-                    }
-                } else {
-                    mListener.onFail("Server error");
-                }
+        @Override
+        protected ResponseDto doGetRequest() {
+            return mTasksCloudStore.getTasksFromServer(mTaskList);
+        }
+
+        @Override
+        protected ResponseDto doPostRequest() {
+            return mTasksCloudStore.addTaskOnServer(mTaskList, mTask);
+        }
+
+        @Override
+        protected ResponseDto doPatchRequest() {
+            return mTasksCloudStore.updateTaskOnServer(mTaskList, mTask);
+        }
+
+        @Override
+        protected ResponseDto doDeleteRequest() {
+            return mTasksCloudStore.deleteTaskOnServer(mTaskList, mTask);
+        }
+
+        @Override
+        protected void refreshDbQuery(ResponseDto responseDto) {
+            List<Task> tasks = parseTasksData(responseDto.getResponseData());
+            updateDbQuery(tasks);
+        }
+
+        @Override
+        protected void doInsertQuery(ResponseDto responseDto) {
+            Task task;
+            if (responseDto != null) {
+                task = parseTask(responseDto.getResponseData());
             } else {
-                if (requestMethods[0] != GET) {
-                    dbQuery(mTask, requestMethods[0]);
-                } else {
-                    return mTasksDbStore.getTasksFromTaskList(mTaskList.getId());
-                }
+                task = mTask;
             }
+            mTasksDbStore.addOrUpdateTasks(Collections.singletonList(task));
+        }
 
+        @Override
+        protected void doUpdateQuery() {
+            mTasksDbStore.addOrUpdateTasks(Collections.singletonList(mTask));
+        }
+
+        @Override
+        protected void doDeleteQuery() {
+            mTasksDbStore.deleteTask(mTask);
+        }
+
+        @Override
+        protected List<Task> doSelectQuery() {
             return mTasksDbStore.getTasksFromTaskList(mTaskList.getId());
         }
 
-        private ResponseDto getResponseFromServer(FirebaseWebService.RequestMethods requestMethod) {
-            switch (requestMethod) {
-                case GET: {
-                    return mTasksCloudStore.getTasksFromServer(mTaskList);
-                }
-                case POST: {
-                    return mTasksCloudStore.addTaskOnServer(mTaskList, mTask);
-                }
-                case PATCH: {
-                    return mTasksCloudStore.updateTaskOnServer(mTaskList, mTask);
-                }
-                case DELETE: {
-                    return mTasksCloudStore.deleteTaskOnServer(mTaskList, mTask);
-                }
-                default: {
-                    return null;
-                }
-            }
+        @Override
+        protected void onServerError() {
+            mListener.onFail("Tasks API server error");
         }
 
-        private void retryGetResultFromServer(final FirebaseWebService.RequestMethods requestMethod) {
-            mFirebaseWebService.refreshAccessToken(new FirebaseWebService.AccessTokenUpdatedListener() {
+        @Override
+        protected void retryGetResultFromServer(final FirebaseWebService.RequestMethods requestMethod) {
+            FirebaseWebService.getFirebaseWebServiceInstance().refreshAccessToken(new FirebaseWebService.AccessTokenUpdatedListener() {
                 @Override
                 public void onAccessTokenUpdated() {
                     TasksAsyncTask tasksAsyncTask = new TasksRepository.TasksAsyncTask(mTask, mTaskList,
-                            mRepositoryLoadHelper, mFirebaseWebService, mTasksDbStore, mTasksCloudStore, mListener);
+                            mRepositoryLoadHelper, mTasksDbStore, mTasksCloudStore, mListener);
 
                     if (requestMethod != DELETE) {
                         tasksAsyncTask.setDataInfoLoadingListener(new UserDataLoadingListener<Task>() {
@@ -220,14 +218,6 @@ public class TasksRepository {
         private List<Task> parseTasksData(String data) {
             TasksParser tasksParser = new TasksParser();
             return tasksParser.parseTasks(data, mTaskList.getId());
-        }
-
-        private void dbQuery(Task task, FirebaseWebService.RequestMethods requestMethod) {
-            if (requestMethod == POST || requestMethod == PATCH) {
-                mTasksDbStore.addOrUpdateTasks(Collections.singletonList(task));
-            } else if (requestMethod == FirebaseWebService.RequestMethods.DELETE) {
-                mTasksDbStore.deleteTask(task);
-            }
         }
 
         private void updateDbQuery(List<Task> tasks) {

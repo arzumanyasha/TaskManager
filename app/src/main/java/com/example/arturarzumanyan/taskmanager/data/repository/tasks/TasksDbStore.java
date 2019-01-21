@@ -1,28 +1,24 @@
 package com.example.arturarzumanyan.taskmanager.data.repository.tasks;
 
-import android.content.Context;
-
 import com.example.arturarzumanyan.taskmanager.data.db.DbHelper;
 import com.example.arturarzumanyan.taskmanager.domain.Task;
 
 import java.util.List;
 
 public class TasksDbStore {
-    private Context mContext;
 
-    public TasksDbStore(Context context) {
-        this.mContext = context;
+    public TasksDbStore() {
     }
 
     public List<Task> getTasksFromTaskList(int taskListId) {
-        return DbHelper.getDbHelper(mContext).getTasksFromList(taskListId);
+        return DbHelper.getDbHelperInstance().getTasksFromList(taskListId);
     }
 
     public void addOrUpdateTasks(List<Task> tasks) {
-        DbHelper.getDbHelper(mContext).addOrUpdateTasks(tasks);
+        DbHelper.getDbHelperInstance().addOrUpdateTasks(tasks);
     }
 
     public void deleteTask(Task task) {
-        DbHelper.getDbHelper(mContext).deleteTask(task);
+        DbHelper.getDbHelperInstance().deleteTask(task);
     }
 }

@@ -1,7 +1,5 @@
 package com.example.arturarzumanyan.taskmanager.data.repository.tasks;
 
-import android.content.Context;
-
 import com.example.arturarzumanyan.taskmanager.auth.FirebaseWebService;
 import com.example.arturarzumanyan.taskmanager.data.repository.RepositoryLoadHelper;
 import com.example.arturarzumanyan.taskmanager.domain.ResponseDto;
@@ -21,21 +19,18 @@ public class TasksCloudStore {
 
     private RepositoryLoadHelper mRepositoryLoadHelper;
 
-    private Context mContext;
-
-    public TasksCloudStore(Context context) {
-        this.mContext = context;
-        mRepositoryLoadHelper = new RepositoryLoadHelper(mContext);
+    public TasksCloudStore() {
+        mRepositoryLoadHelper = new RepositoryLoadHelper();
     }
 
     public ResponseDto getTasksFromServer(TaskList taskList) {
         String url = BASE_GOOGLE_APIS_URL + BASE_TASKS_URL + taskList.getTaskListId() + "/tasks?showHidden=true";
 
         FirebaseWebService.RequestMethods requestMethod = FirebaseWebService.RequestMethods.GET;
-        RequestParameters requestParameters = new RequestParameters(mContext,
+        RequestParameters requestParameters = new RequestParameters(
                 url,
                 requestMethod,
-                new HashMap<String, Object>()
+                null
         );
         requestParameters.setRequestHeaderParameters(new HashMap<String, String>());
 

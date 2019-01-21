@@ -13,6 +13,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import static com.example.arturarzumanyan.taskmanager.networking.base.BaseHttpUrlConnection.JSON_CONTENT_TYPE_VALUE;
 import static com.example.arturarzumanyan.taskmanager.networking.util.EventsParser.COLOR_ID_KEY;
@@ -39,19 +40,16 @@ public class RepositoryLoadHelper {
     private static final String USE_DEFAULT_KEY = "useDefault";
     private static final String MINUTES_KEY = "minutes";
 
-    private Context mContext;
-
-    public RepositoryLoadHelper(Context context) {
-        this.mContext = context;
+    public RepositoryLoadHelper() {
     }
 
     public RequestParameters getEventCreateOrUpdateParameters(Event event,
                                                               String url,
                                                               FirebaseWebService.RequestMethods requestMethod) {
-        HashMap<String, Object> requestBody = new HashMap<>();
+        Map<String, Object> requestBody = new HashMap<>();
 
-        HashMap<String, String> startTimeMap = new HashMap<>();
-        HashMap<String, String> endTimeMap = new HashMap<>();
+        Map<String, String> startTimeMap = new HashMap<>();
+        Map<String, String> endTimeMap = new HashMap<>();
         startTimeMap.put(DATETIME_KEY, DateUtils.formatEventTime(event.getStartTime()));
         endTimeMap.put(DATETIME_KEY, DateUtils.formatEventTime(event.getEndTime()));
 
@@ -67,10 +65,10 @@ public class RepositoryLoadHelper {
         requestBody.put(END_KEY, endTimeMap);
 
         if (event.getIsNotify() == 1) {
-            HashMap<String, Object> remindersMap = new HashMap<>();
+            Map<String, Object> remindersMap = new HashMap<>();
             List<Object> overrides = new ArrayList<>();
 
-            HashMap<String, Object> overridesMap = new HashMap<>();
+            Map<String, Object> overridesMap = new HashMap<>();
             overridesMap.put(METHOD_KEY, POPUP_KEY);
             overridesMap.put(MINUTES_KEY, 10);
             overrides.add(overridesMap);
@@ -79,16 +77,16 @@ public class RepositoryLoadHelper {
 
             requestBody.put(REMINDERS_KEY, remindersMap);
         } else {
-            HashMap<String, Object> remindersMap = new HashMap<>();
+            Map<String, Object> remindersMap = new HashMap<>();
             remindersMap.put(USE_DEFAULT_KEY, false);
             requestBody.put(REMINDERS_KEY, remindersMap);
         }
 
-        HashMap<String, String> requestHeaderParameters = new HashMap<>();
+        Map<String, String> requestHeaderParameters = new HashMap<>();
 
         requestHeaderParameters.put(CONTENT_TYPE_KEY, JSON_CONTENT_TYPE_VALUE);
 
-        RequestParameters requestParameters = new RequestParameters(mContext,
+        RequestParameters requestParameters = new RequestParameters(
                 url,
                 requestMethod,
                 requestBody);
@@ -101,7 +99,7 @@ public class RepositoryLoadHelper {
                                                              String url,
                                                              FirebaseWebService.RequestMethods requestMethod) {
 
-        HashMap<String, Object> requestBody = new HashMap<>();
+        Map<String, Object> requestBody = new HashMap<>();
 
         requestBody.put(TITLE_KEY, task.getName());
 
@@ -117,16 +115,16 @@ public class RepositoryLoadHelper {
             requestBody.put(STATUS_KEY, COMPLETED_KEY);
         } else {
             requestBody.put(STATUS_KEY, NEEDS_ACTION_KEY);
-            if(requestMethod.equals(FirebaseWebService.RequestMethods.PATCH)){
+            if (requestMethod.equals(FirebaseWebService.RequestMethods.PATCH)) {
                 requestBody.put(COMPLETED_KEY, null);
             }
         }
 
-        HashMap<String, String> requestHeaderParameters = new HashMap<>();
+        Map<String, String> requestHeaderParameters = new HashMap<>();
 
         requestHeaderParameters.put(CONTENT_TYPE_KEY, JSON_CONTENT_TYPE_VALUE);
 
-        RequestParameters requestParameters = new RequestParameters(mContext,
+        RequestParameters requestParameters = new RequestParameters(
                 url,
                 requestMethod,
                 requestBody);
@@ -138,14 +136,14 @@ public class RepositoryLoadHelper {
     public RequestParameters getTaskListCreateOrUpdateParameters(TaskList taskList,
                                                                  String url,
                                                                  FirebaseWebService.RequestMethods requestMethod) {
-        HashMap<String, Object> requestBody = new HashMap<>();
+        Map<String, Object> requestBody = new HashMap<>();
         requestBody.put(TITLE_KEY, taskList.getTitle());
 
-        HashMap<String, String> requestHeaderParameters = new HashMap<>();
+        Map<String, String> requestHeaderParameters = new HashMap<>();
 
         requestHeaderParameters.put(CONTENT_TYPE_KEY, JSON_CONTENT_TYPE_VALUE);
 
-        RequestParameters requestParameters = new RequestParameters(mContext,
+        RequestParameters requestParameters = new RequestParameters(
                 url,
                 requestMethod,
                 requestBody);
@@ -156,7 +154,6 @@ public class RepositoryLoadHelper {
 
     public RequestParameters getDeleteParameters(String url) {
         RequestParameters requestParameters = new RequestParameters(
-                mContext,
                 url,
                 FirebaseWebService.RequestMethods.DELETE,
                 new HashMap<String, Object>()
@@ -166,7 +163,7 @@ public class RepositoryLoadHelper {
         return requestParameters;
     }
 
-    public boolean isOnline() {
+    public static boolean isOnline() {
         Runtime runtime = Runtime.getRuntime();
         try {
             Process ipProcess = runtime.exec("/system/bin/ping -c 1 8.8.8.8");

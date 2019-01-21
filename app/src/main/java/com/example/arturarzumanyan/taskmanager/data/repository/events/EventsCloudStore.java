@@ -1,7 +1,5 @@
 package com.example.arturarzumanyan.taskmanager.data.repository.events;
 
-import android.content.Context;
-
 import com.example.arturarzumanyan.taskmanager.auth.FirebaseWebService;
 import com.example.arturarzumanyan.taskmanager.data.repository.RepositoryLoadHelper;
 import com.example.arturarzumanyan.taskmanager.data.repository.events.specification.EventsSpecification;
@@ -21,30 +19,28 @@ public class EventsCloudStore {
     private static final String BASE_EVENTS_URL = "calendar/v3/calendars/";
 
     private RepositoryLoadHelper mRepositoryLoadHelper;
-    private FirebaseWebService mFirebaseWebService;
-    private Context mContext;
 
-    public EventsCloudStore(Context context) {
-        mContext = context;
-        mFirebaseWebService = new FirebaseWebService(context);
-        mRepositoryLoadHelper = new RepositoryLoadHelper(context);
+    EventsCloudStore() {
+        mRepositoryLoadHelper = new RepositoryLoadHelper();
     }
 
     public ResponseDto getEventsFromServer(EventsSpecification eventsSpecification) {
         String eventsUrl;
         if (eventsSpecification.getStartDate().isEmpty() && eventsSpecification.getEndDate().isEmpty()) {
-            eventsUrl = BASE_GOOGLE_APIS_URL + BASE_EVENTS_URL + mFirebaseWebService.getCurrentUser().getEmail() + "/events";
+            eventsUrl = BASE_GOOGLE_APIS_URL + BASE_EVENTS_URL +
+                    FirebaseWebService.getFirebaseWebServiceInstance().getUserEmail() + "/events";
         } else {
-            eventsUrl = BASE_EVENTS_URL + mFirebaseWebService.getCurrentUser().getEmail() + "/events?" +
+            eventsUrl = BASE_GOOGLE_APIS_URL + BASE_EVENTS_URL +
+                    FirebaseWebService.getFirebaseWebServiceInstance().getUserEmail() + "/events?" +
                     "timeMax=" + DateUtils.decodeDate(eventsSpecification.getEndDate()) +
                     "&timeMin=" + DateUtils.decodeDate(eventsSpecification.getStartDate());
         }
 
         FirebaseWebService.RequestMethods requestMethod = FirebaseWebService.RequestMethods.GET;
-        RequestParameters requestParameters = new RequestParameters(mContext,
+        RequestParameters requestParameters = new RequestParameters(
                 eventsUrl,
                 requestMethod,
-                new HashMap<String, Object>()
+                null
         );
         requestParameters.setRequestHeaderParameters(new HashMap<String, String>());
 
@@ -53,7 +49,7 @@ public class EventsCloudStore {
 
     public ResponseDto addEventOnServer(Event event) {
         final String url = BASE_GOOGLE_APIS_URL + BASE_EVENTS_URL +
-                mFirebaseWebService.getCurrentUser().getEmail() +
+                FirebaseWebService.getFirebaseWebServiceInstance().getUserEmail() +
                 "/events";
         RequestParameters requestParameters = mRepositoryLoadHelper.getEventCreateOrUpdateParameters(event, url, POST);
 
@@ -62,7 +58,7 @@ public class EventsCloudStore {
 
     public ResponseDto updateEventOnServer(Event event) {
         final String url = BASE_GOOGLE_APIS_URL + BASE_EVENTS_URL +
-                mFirebaseWebService.getCurrentUser().getEmail() +
+                FirebaseWebService.getFirebaseWebServiceInstance().getUserEmail() +
                 "/events/" +
                 event.getId();
 
@@ -74,7 +70,7 @@ public class EventsCloudStore {
 
     public ResponseDto deleteEventOnServer(Event event) {
         final String url = BASE_GOOGLE_APIS_URL + BASE_EVENTS_URL +
-                mFirebaseWebService.getCurrentUser().getEmail() +
+                FirebaseWebService.getFirebaseWebServiceInstance().getUserEmail() +
                 "/events/" +
                 event.getId();
 

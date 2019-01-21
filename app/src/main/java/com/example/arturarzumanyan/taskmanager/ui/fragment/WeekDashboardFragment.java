@@ -1,16 +1,15 @@
 package com.example.arturarzumanyan.taskmanager.ui.fragment;
 
 import android.content.Context;
-import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.util.SparseIntArray;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
-import android.widget.Toast;
 
 import com.example.arturarzumanyan.taskmanager.R;
 import com.example.arturarzumanyan.taskmanager.data.repository.events.EventsRepository;
@@ -18,9 +17,12 @@ import com.example.arturarzumanyan.taskmanager.data.repository.events.specificat
 import com.example.arturarzumanyan.taskmanager.domain.Event;
 import com.example.arturarzumanyan.taskmanager.networking.util.DateUtils;
 import com.example.arturarzumanyan.taskmanager.networking.util.Log;
+import com.example.arturarzumanyan.taskmanager.ui.activity.BaseActivity;
 import com.example.arturarzumanyan.taskmanager.ui.adapter.ColorPalette;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
@@ -39,9 +41,8 @@ public class WeekDashboardFragment extends Fragment {
     private LinearLayout mLinearLayoutSat;
     private LinearLayout mLinearLayoutSun;
 
+    private SparseIntArray mColorPaletteArray;
     private Map<Date, List<Event>> mWeeklyEvents = new HashMap<>();
-
-    private OnFragmentInteractionListener mListener;
 
     public WeekDashboardFragment() {
     }
@@ -73,6 +74,9 @@ public class WeekDashboardFragment extends Fragment {
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
 
+        ColorPalette colorPalette = new ColorPalette(getActivity());
+        mColorPaletteArray = colorPalette.getColorPalette();
+
         int date = DateUtils.getEventWeek(DateUtils.getCurrentTime()) - 1;
         Date mondayDate = DateUtils.getMondayDate(date - 1);
 
@@ -88,36 +92,44 @@ public class WeekDashboardFragment extends Fragment {
         Date nextDate = mondayDate;
         final List<Date> weekDateList = new ArrayList<>();
 
+        loadWeeklyEvents(linearLayouts, weekDateList);
+
+        for (int i = 0; i < DAYS_IN_WEEK; i++) {
+            weekDateList.add(nextDate);
+            if (nextDate != null) {
+                nextDate = DateUtils.getNextDate(nextDate);
+            }
+        }
+    }
+
+    private void loadWeeklyEvents(final List<LinearLayout> linearLayouts, final List<Date> weekDateList) {
         WeeklyEventsSpecification weeklyEventsSpecification = new WeeklyEventsSpecification();
-        EventsRepository eventsRepository = new EventsRepository(getActivity());
+        EventsRepository eventsRepository = new EventsRepository();
         eventsRepository.getEvents(weeklyEventsSpecification, new EventsRepository.OnEventsLoadedListener() {
             @Override
             public void onSuccess(List<Event> eventsList) {
                 Log.v("Weekly events loaded");
-                ArrayList<Event> dailyEventsList;
-                for (Event event : eventsList) {
-                    Date eventDate = DateUtils.getEventDate(DateUtils.getEventDate(event.getStartTime()));
 
-                    if (mWeeklyEvents.containsKey(eventDate)) {
-                        dailyEventsList = new ArrayList<>(mWeeklyEvents.get(eventDate));
-                        dailyEventsList.add(event);
-                        mWeeklyEvents.put(eventDate, dailyEventsList);
-                    } else {
-                        mWeeklyEvents.put(eventDate, Collections.singletonList(event));
-                    }
-                }
+                fetchWeeklyEventsWithDate(eventsList);
                 displayDashboard(linearLayouts, mWeeklyEvents, weekDateList);
             }
 
             @Override
             public void onFail(String message) {
-                Toast.makeText(getActivity(), message, Toast.LENGTH_LONG).show();
+                ((BaseActivity) requireActivity()).onError(message);
             }
         });
+    }
 
-        for (int i = 0; i < DAYS_IN_WEEK; i++) {
-            weekDateList.add(nextDate);
-            nextDate = DateUtils.getNextDate(nextDate);
+    private void fetchWeeklyEventsWithDate(List<Event> eventsList) {
+        for (Event event : eventsList) {
+            Date eventDate = DateUtils.getEventDateWithoutTime(event.getStartTime());
+
+            if (mWeeklyEvents.containsKey(eventDate)) {
+                mWeeklyEvents.get(eventDate).add(event);
+            } else {
+                mWeeklyEvents.put(eventDate, new ArrayList<>(Collections.singletonList(event)));
+            }
         }
     }
 
@@ -151,34 +163,19 @@ public class WeekDashboardFragment extends Fragment {
     private void makeEventPart(Event event, LinearLayout linearLayout) {
         LinearLayout.LayoutParams lParams = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 0);
         View view = new View(getActivity());
-        ColorPalette colorPalette = new ColorPalette(getActivity());
-        view.setBackgroundColor(colorPalette.getColorPalette().get(event.getColorId()));
+        view.setBackgroundColor(mColorPaletteArray.get(event.getColorId()));
         lParams.weight = event.getEndTime().getHours() * MINUTES_IN_HOUR + event.getEndTime().getMinutes()
                 - event.getStartTime().getHours() * MINUTES_IN_HOUR - event.getStartTime().getMinutes();
         linearLayout.addView(view, lParams);
     }
 
-    public void onButtonPressed(Uri uri) {
-        if (mListener != null) {
-            mListener.onFragmentInteraction(uri);
-        }
-    }
-
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
-        if (context instanceof OnFragmentInteractionListener) {
-            mListener = (OnFragmentInteractionListener) context;
-        }
     }
 
     @Override
     public void onDetach() {
         super.onDetach();
-        mListener = null;
-    }
-
-    public interface OnFragmentInteractionListener {
-        void onFragmentInteraction(Uri uri);
     }
 }

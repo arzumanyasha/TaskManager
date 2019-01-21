@@ -2,10 +2,9 @@ package com.example.arturarzumanyan.taskmanager.ui.adapter;
 
 import android.content.Context;
 import android.support.v4.content.res.ResourcesCompat;
+import android.util.SparseIntArray;
 
 import com.example.arturarzumanyan.taskmanager.R;
-
-import java.util.HashMap;
 
 public class ColorPalette {
     private Context mContext;
@@ -14,8 +13,8 @@ public class ColorPalette {
         this.mContext = mContext;
     }
 
-    public HashMap<Integer, Integer> getColorPalette() {
-        HashMap<Integer, Integer> colorPalette = new HashMap<>();
+    public SparseIntArray getColorPalette() {
+        SparseIntArray colorPalette = new SparseIntArray();
         colorPalette.put(1, ResourcesCompat.getColor(mContext.getResources(), R.color._1, null));
         colorPalette.put(2, ResourcesCompat.getColor(mContext.getResources(), R.color._2, null));
         colorPalette.put(3, ResourcesCompat.getColor(mContext.getResources(), R.color._3, null));

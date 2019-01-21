@@ -10,6 +10,7 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.RequiresApi;
 import android.support.v7.app.AppCompatDialogFragment;
+import android.util.SparseIntArray;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.DatePicker;
@@ -24,12 +25,11 @@ import com.example.arturarzumanyan.taskmanager.R;
 import com.example.arturarzumanyan.taskmanager.data.repository.events.EventsRepository;
 import com.example.arturarzumanyan.taskmanager.domain.Event;
 import com.example.arturarzumanyan.taskmanager.networking.util.DateUtils;
-import com.example.arturarzumanyan.taskmanager.networking.util.Log;
+import com.example.arturarzumanyan.taskmanager.ui.activity.BaseActivity;
 import com.example.arturarzumanyan.taskmanager.ui.adapter.ColorPalette;
 
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
 
@@ -46,9 +46,10 @@ public class EventsDialog extends AppCompatDialogFragment {
     private TextView mTextViewStartTime, mTextViewEndTime, mTextViewDate;
     private Switch mSwitchNotification;
 
+    private EventsReadyListener eventsReadyListener;
     private EventsRepository mEventsRepository;
 
-    private ColorPalette mColorPalette;
+    private SparseIntArray mColorMap;
 
     private Date mStartTime;
     private Date mEndTime;
@@ -58,7 +59,6 @@ public class EventsDialog extends AppCompatDialogFragment {
     private int mDay, mMonth, mYear;
 
     public EventsDialog() {
-        this.eventsReadyListener = null;
     }
 
     public static EventsDialog newInstance(Event event) {
@@ -82,14 +82,12 @@ public class EventsDialog extends AppCompatDialogFragment {
 
         final Bundle bundle = getArguments();
 
-        mColorPalette = new ColorPalette(getActivity());
-        for (HashMap.Entry<Integer, Integer> map : mColorPalette.getColorPalette().entrySet()) {
-            if (map.getKey() == DEFAULT_COLOR) {
-                mCurrentColor = map.getValue();
-            }
-        }
+        ColorPalette colorPalette = new ColorPalette(getActivity());
+        mColorMap = colorPalette.getColorPalette();
 
-        mEventsRepository = new EventsRepository(getActivity());
+        mCurrentColor = mColorMap.get(DEFAULT_COLOR);
+
+        mEventsRepository = new EventsRepository();
 
         builder.setView(view)
                 .setTitle(getString(R.string.events_title))
@@ -102,83 +100,22 @@ public class EventsDialog extends AppCompatDialogFragment {
                 .setPositiveButton(getString(R.string.ok_button), new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        String name = mEditTextEventName.getText().toString();
-                        String description = mEditTextEventDescription.getText().toString();
-                        Date startDate = DateUtils.getEventDate(mTextViewDate.getText().toString(), mStartTime);
-                        Date endDate = DateUtils.getEventDate(mTextViewDate.getText().toString(), mEndTime);
-                        int isNotify;
-                        if (mSwitchNotification.isChecked()) {
-                            isNotify = 1;
-                        } else {
-                            isNotify = 0;
-                        }
-
-                        int colorNumber = mCurrentColor;
-
-                        for (HashMap.Entry<Integer, Integer> map : mColorPalette.getColorPalette().entrySet()) {
-                            if (map.getValue() == mCurrentColor) {
-                                colorNumber = map.getKey();
-                                Log.v("colorNumber is " + colorNumber);
-                                break;
-                            }
-                        }
-
-                        if (mEndTime.after(mStartTime) &&
-                                !mEditTextEventName.getText().toString().isEmpty() &&
-                                bundle != null) {
-                            final Event event = bundle.getParcelable(EVENTS_KEY);
-                            if (event != null) {
-                                event.setName(name);
-                                event.setDescription(description);
-                                event.setColorId(colorNumber);
-                                event.setStartTime(startDate);
-                                event.setEndTime(endDate);
-                                event.setIsNotify(isNotify);
-
-                                mEventsRepository.addOrUpdateEvent(event, PATCH, new EventsRepository.OnEventsLoadedListener() {
-                                    @Override
-                                    public void onSuccess(List<Event> eventsList) {
-                                        eventsReadyListener.onEventsReady(eventsList);
-                                    }
-
-                                    @Override
-                                    public void onFail(String message) {
-                                        Toast.makeText(getActivity(), message, Toast.LENGTH_LONG).show();
-                                    }
-                                });
-                            }
-                        } else if (mStartTime.getTime() < mEndTime.getTime() &&
-                                !mEditTextEventName.getText().toString().isEmpty() &&
-                                bundle == null) {
-
-                            Event event = new Event(UUID.randomUUID().toString(),
-                                    name,
-                                    description,
-                                    colorNumber,
-                                    startDate,
-                                    endDate,
-                                    isNotify);
-                            mEventsRepository.addOrUpdateEvent(event, POST,
-                                    new EventsRepository.OnEventsLoadedListener() {
-                                        @Override
-                                        public void onSuccess(List<Event> eventsList) {
-                                            eventsReadyListener.onEventsReady(eventsList);
-                                        }
-
-                                        @Override
-                                        public void onFail(String message) {
-                                            Toast.makeText(getActivity(), message, Toast.LENGTH_LONG).show();
-                                        }
-                                    });
-
-                        } else {
-                            Toast.makeText(getContext(),
-                                    R.string.time_error_msg,
-                                    Toast.LENGTH_LONG).show();
-                        }
+                        addOrUpdateEvent(bundle);
                     }
                 });
 
+        setViews(view);
+
+        setTimeAndDatePickersListeners();
+
+        if (bundle != null) {
+            setEventInfoViews(bundle);
+        }
+
+        return builder.create();
+    }
+
+    private void setViews(View view) {
         mHour = DateUtils.getHour();
         mMinute = DateUtils.getMinute();
 
@@ -208,6 +145,73 @@ public class EventsDialog extends AppCompatDialogFragment {
             }
         });
 
+    }
+
+    private void addOrUpdateEvent(Bundle bundle) {
+        String name = mEditTextEventName.getText().toString();
+        String description = mEditTextEventDescription.getText().toString();
+        Date startDate = DateUtils.getEventDate(mTextViewDate.getText().toString(), mStartTime);
+        Date endDate = DateUtils.getEventDate(mTextViewDate.getText().toString(), mEndTime);
+        int isNotify = mSwitchNotification.isChecked() ? 1 : 0;
+
+        int colorNumber = mColorMap.keyAt(mColorMap.indexOfValue(mCurrentColor));
+
+        if (mEndTime.after(mStartTime) && !mEditTextEventName.getText().toString().isEmpty()) {
+            if (bundle != null) {
+                updateEvent(bundle, name, description, colorNumber, startDate, endDate, isNotify);
+            } else {
+                addEvent(name, description, colorNumber, startDate, endDate, isNotify);
+            }
+        } else {
+            Toast.makeText(getContext(), R.string.time_error_msg, Toast.LENGTH_LONG).show();
+        }
+    }
+
+    private void addEvent(String name, String description, int colorNumber, Date startDate,
+                          Date endDate, int isNotify) {
+        Event event = createEventObject(UUID.randomUUID().toString(), name, description,
+                colorNumber, startDate, endDate, isNotify);
+        mEventsRepository.addOrUpdateEvent(event, POST,
+                new EventsRepository.OnEventsLoadedListener() {
+                    @Override
+                    public void onSuccess(List<Event> eventsList) {
+                        eventsReadyListener.onEventsReady(eventsList);
+                    }
+
+                    @Override
+                    public void onFail(String message) {
+                        ((BaseActivity) requireActivity()).onError(message);
+                    }
+                });
+
+    }
+
+    private void updateEvent(Bundle bundle, String name, String description, int colorNumber,
+                             Date startDate, Date endDate, int isNotify) {
+        Event event = bundle.getParcelable(EVENTS_KEY);
+        if (event != null) {
+            event = createEventObject(event.getId(), name, description, colorNumber, startDate, endDate, isNotify);
+
+            mEventsRepository.addOrUpdateEvent(event, PATCH, new EventsRepository.OnEventsLoadedListener() {
+                @Override
+                public void onSuccess(List<Event> eventsList) {
+                    eventsReadyListener.onEventsReady(eventsList);
+                }
+
+                @Override
+                public void onFail(String message) {
+                    ((BaseActivity) requireActivity()).onError(message);
+                }
+            });
+        }
+    }
+
+    private Event createEventObject(String id, String name, String description, int colorNumber,
+                                    Date startDate, Date endDate, int isNotify) {
+        return new Event(id, name, description, colorNumber, startDate, endDate, isNotify);
+    }
+
+    private void setTimeAndDatePickersListeners() {
         mTextViewStartTime.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -238,7 +242,7 @@ public class EventsDialog extends AppCompatDialogFragment {
             @RequiresApi(api = Build.VERSION_CODES.N)
             @Override
             public void onClick(View v) {
-                DatePickerDialog datePickerDialog = new DatePickerDialog(getActivity(), new DatePickerDialog.OnDateSetListener() {
+                DatePickerDialog datePickerDialog = new DatePickerDialog(requireActivity(), new DatePickerDialog.OnDateSetListener() {
 
                     @Override
                     public void onDateSet(DatePicker view, int year, int monthOfYear, int dayOfMonth) {
@@ -249,12 +253,6 @@ public class EventsDialog extends AppCompatDialogFragment {
                 datePickerDialog.show();
             }
         });
-
-        if (bundle != null) {
-            setEventInfoViews(bundle);
-        }
-
-        return builder.create();
     }
 
     private void setEventInfoViews(Bundle bundle) {
@@ -263,22 +261,14 @@ public class EventsDialog extends AppCompatDialogFragment {
             mEditTextEventName.setText(event.getName());
             mEditTextEventDescription.setText(event.getDescription());
 
-            for (HashMap.Entry<Integer, Integer> map : mColorPalette.getColorPalette().entrySet()) {
-                if (event.getColorId() == map.getKey()) {
-                    mImageButtonColorPicker.setColorFilter(map.getValue());
-                    mCurrentColor = map.getKey();
-                }
-            }
+            mImageButtonColorPicker.setColorFilter(mColorMap.get(event.getColorId()));
+            mCurrentColor = mColorMap.get(event.getColorId());
 
             mTextViewStartTime.setText(DateUtils.formatTimeWithoutA(event.getStartTime()));
             mTextViewEndTime.setText(DateUtils.formatTimeWithoutA(event.getEndTime()));
-            mTextViewDate.setText((DateUtils.getEventDate(event.getStartTime())));
+            mTextViewDate.setText((DateUtils.formatEventDate(event.getStartTime())));
 
-            if (event.getIsNotify() == 1) {
-                mSwitchNotification.setChecked(true);
-            } else {
-                mSwitchNotification.setChecked(false);
-            }
+            mSwitchNotification.setChecked(event.getIsNotify() == 1);
 
             mStartTime = DateUtils.getTimeWithoutA(DateUtils.formatTimeWithoutA(event.getStartTime()));
             mEndTime = DateUtils.getTimeWithoutA(DateUtils.formatTimeWithoutA(event.getEndTime()));
@@ -288,9 +278,9 @@ public class EventsDialog extends AppCompatDialogFragment {
     private void openColorPicker() {
         final ColorPicker colorPicker = new ColorPicker(requireActivity());
         ArrayList<String> colors = new ArrayList<>();
-        ColorPalette colorPalette = new ColorPalette(getActivity());
-        for (HashMap.Entry<Integer, Integer> map : colorPalette.getColorPalette().entrySet()) {
-            colors.add("#" + Integer.toHexString(map.getValue()));
+
+        for (int i = 0; i < mColorMap.size(); i++) {
+            colors.add("#" + Integer.toHexString(mColorMap.valueAt(i)));
         }
 
         colorPicker.setColors(colors)
@@ -311,13 +301,11 @@ public class EventsDialog extends AppCompatDialogFragment {
 
     }
 
-    public interface EventsReadyListener {
-        void onEventsReady(List<Event> events);
-    }
-
     public void setEventsReadyListener(EventsReadyListener listener) {
         this.eventsReadyListener = listener;
     }
 
-    private EventsReadyListener eventsReadyListener;
+    public interface EventsReadyListener {
+        void onEventsReady(List<Event> events);
+    }
 }

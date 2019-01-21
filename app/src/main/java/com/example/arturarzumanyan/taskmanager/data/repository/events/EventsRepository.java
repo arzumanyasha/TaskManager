@@ -1,6 +1,5 @@
 package com.example.arturarzumanyan.taskmanager.data.repository.events;
 
-import android.content.Context;
 import android.os.AsyncTask;
 
 import com.example.arturarzumanyan.taskmanager.auth.FirebaseWebService;
@@ -14,31 +13,27 @@ import com.example.arturarzumanyan.taskmanager.networking.util.DateUtils;
 import com.example.arturarzumanyan.taskmanager.networking.util.EventsParser;
 import com.example.arturarzumanyan.taskmanager.networking.util.Log;
 
-import java.net.HttpURLConnection;
 import java.util.Collections;
 import java.util.List;
 
 import static com.example.arturarzumanyan.taskmanager.auth.FirebaseWebService.RequestMethods.DELETE;
 import static com.example.arturarzumanyan.taskmanager.auth.FirebaseWebService.RequestMethods.GET;
-import static com.example.arturarzumanyan.taskmanager.auth.FirebaseWebService.RequestMethods.PATCH;
 import static com.example.arturarzumanyan.taskmanager.auth.FirebaseWebService.RequestMethods.POST;
 
 public class EventsRepository {
     private EventsDbStore mEventsDbStore;
     private EventsCloudStore mEventsCloudStore;
     private RepositoryLoadHelper mRepositoryLoadHelper;
-    private FirebaseWebService mFirebaseWebService;
 
-    public EventsRepository(Context context) {
-        mEventsCloudStore = new EventsCloudStore(context);
-        mEventsDbStore = new EventsDbStore(context);
-        mRepositoryLoadHelper = new RepositoryLoadHelper(context);
-        mFirebaseWebService = new FirebaseWebService(context);
+    public EventsRepository() {
+        mEventsCloudStore = new EventsCloudStore();
+        mEventsDbStore = new EventsDbStore();
+        mRepositoryLoadHelper = new RepositoryLoadHelper();
     }
 
     public void getEvents(EventsSpecification eventsSpecification, final OnEventsLoadedListener listener) {
         EventsAsyncTask eventsAsyncTask = new EventsAsyncTask(null,
-                mRepositoryLoadHelper, mFirebaseWebService, mEventsDbStore, mEventsCloudStore,
+                mRepositoryLoadHelper, mEventsDbStore, mEventsCloudStore,
                 eventsSpecification, listener);
 
         eventsAsyncTask.setDataInfoLoadingListener(new BaseDataLoadingAsyncTask.UserDataLoadingListener<Event>() {
@@ -59,10 +54,10 @@ public class EventsRepository {
     public void addOrUpdateEvent(Event event, final FirebaseWebService.RequestMethods requestMethod,
                                  final OnEventsLoadedListener listener) {
         EventsFromDateSpecification eventsFromDateSpecification = new EventsFromDateSpecification();
-        eventsFromDateSpecification.setDate(DateUtils.getEventDate(event.getStartTime()));
+        eventsFromDateSpecification.setDate(DateUtils.formatEventDate(event.getStartTime()));
 
         EventsAsyncTask eventsAsyncTask = new EventsAsyncTask(event,
-                mRepositoryLoadHelper, mFirebaseWebService, mEventsDbStore, mEventsCloudStore,
+                mRepositoryLoadHelper, mEventsDbStore, mEventsCloudStore,
                 eventsFromDateSpecification, null);
         eventsAsyncTask.setDataInfoLoadingListener(new BaseDataLoadingAsyncTask.UserDataLoadingListener<Event>() {
             @Override
@@ -87,7 +82,7 @@ public class EventsRepository {
         eventsFromDateSpecification.setDate(DateUtils.getCurrentTime());
 
         EventsAsyncTask eventsAsyncTask = new EventsAsyncTask(event,
-                mRepositoryLoadHelper, mFirebaseWebService, mEventsDbStore, mEventsCloudStore,
+                mRepositoryLoadHelper, mEventsDbStore, mEventsCloudStore,
                 eventsFromDateSpecification, null);
 
         eventsAsyncTask.setDataInfoLoadingListener(new BaseDataLoadingAsyncTask.UserDataLoadingListener<Event>() {
@@ -116,22 +111,19 @@ public class EventsRepository {
 
         private Event mEvent;
         private RepositoryLoadHelper mRepositoryLoadHelper;
-        private FirebaseWebService mFirebaseWebService;
         private EventsDbStore mEventsDbStore;
         private EventsCloudStore mEventsCloudStore;
         private EventsSpecification mEventsSpecification;
         private OnEventsLoadedListener mListener;
 
-        public EventsAsyncTask(Event event,
-                               RepositoryLoadHelper repositoryLoadHelper,
-                               FirebaseWebService firebaseWebService,
-                               EventsDbStore eventsDbStore,
-                               EventsCloudStore eventsCloudStore,
-                               EventsSpecification eventsSpecification,
-                               OnEventsLoadedListener listener) {
+        EventsAsyncTask(Event event,
+                        RepositoryLoadHelper repositoryLoadHelper,
+                        EventsDbStore eventsDbStore,
+                        EventsCloudStore eventsCloudStore,
+                        EventsSpecification eventsSpecification,
+                        OnEventsLoadedListener listener) {
             this.mEvent = event;
             this.mRepositoryLoadHelper = repositoryLoadHelper;
-            this.mFirebaseWebService = firebaseWebService;
             this.mEventsDbStore = eventsDbStore;
             this.mEventsCloudStore = eventsCloudStore;
             this.mEventsSpecification = eventsSpecification;
@@ -140,70 +132,73 @@ public class EventsRepository {
 
         @Override
         protected List<Event> doInBackground(FirebaseWebService.RequestMethods... requestMethods) {
-            if (mRepositoryLoadHelper.isOnline()) {
+            return super.doInBackground(requestMethods[0]);
+        }
 
-                ResponseDto responseDto = getResponseFromServer(requestMethods[0]);
+        @Override
+        protected ResponseDto doGetRequest() {
+            return mEventsCloudStore.getEventsFromServer(mEventsSpecification);
+        }
 
-                int responseCode;
-                if (responseDto != null) {
-                    responseCode = responseDto.getResponseCode();
-                    if (responseCode == HttpURLConnection.HTTP_UNAUTHORIZED) {
-                        retryGetResultFromServer(requestMethods[0]);
-                    } else {
-                        if (responseCode == HttpURLConnection.HTTP_OK ||
-                                responseCode == HttpURLConnection.HTTP_NO_CONTENT) {
-                            if (requestMethods[0] == POST || requestMethods[0] == PATCH) {
-                                Event event = parseEvent(responseDto.getResponseData());
-                                dbQuery(event, requestMethods[0]);
-                            } else if (requestMethods[0] == GET) {
-                                List<Event> events = parseEventsData(responseDto.getResponseData());
-                                updateDbQuery(events);
-                            } else {
-                                dbQuery(mEvent, requestMethods[0]);
-                            }
-                        }
-                    }
-                } else {
-                    mListener.onFail("Server error");
-                }
+        @Override
+        protected ResponseDto doPostRequest() {
+            return mEventsCloudStore.addEventOnServer(mEvent);
+        }
 
-            } else {
-                if (requestMethods[0] != GET) {
-                    dbQuery(mEvent, requestMethods[0]);
-                } else {
-                    return mEventsDbStore.getEvents(mEventsSpecification);
-                }
-            }
+        @Override
+        protected ResponseDto doPatchRequest() {
+            return mEventsCloudStore.updateEventOnServer(mEvent);
+        }
 
+        @Override
+        protected ResponseDto doDeleteRequest() {
+            return mEventsCloudStore.deleteEventOnServer(mEvent);
+        }
+
+        @Override
+        protected List<Event> doSelectQuery() {
             return mEventsDbStore.getEvents(mEventsSpecification);
         }
 
-        private ResponseDto getResponseFromServer(FirebaseWebService.RequestMethods requestMethod) {
-            switch (requestMethod) {
-                case GET: {
-                    return mEventsCloudStore.getEventsFromServer(mEventsSpecification);
-                }
-                case POST: {
-                    return mEventsCloudStore.addEventOnServer(mEvent);
-                }
-                case PATCH: {
-                    return mEventsCloudStore.updateEventOnServer(mEvent);
-                }
-                case DELETE: {
-                    return mEventsCloudStore.deleteEventOnServer(mEvent);
-                }
-                default: {
-                    return null;
-                }
-            }
+        @Override
+        protected void refreshDbQuery(ResponseDto responseDto) {
+            List<Event> events = parseEventsData(responseDto.getResponseData());
+            updateDbQuery(events);
         }
 
-        private void retryGetResultFromServer(final FirebaseWebService.RequestMethods requestMethod) {
-            mFirebaseWebService.refreshAccessToken(new FirebaseWebService.AccessTokenUpdatedListener() {
+        @Override
+        protected void doInsertQuery(ResponseDto responseDto) {
+            Event event;
+            if (responseDto != null) {
+                event = parseEvent(responseDto.getResponseData());
+            } else {
+                event = mEvent;
+            }
+            mEventsDbStore.addOrUpdateEvents(Collections.singletonList(event));
+        }
+
+        @Override
+        protected void doUpdateQuery() {
+            mEventsDbStore.addOrUpdateEvents(Collections.singletonList(mEvent));
+        }
+
+        @Override
+        protected void doDeleteQuery() {
+            mEventsDbStore.deleteEvent(mEvent);
+        }
+
+        @Override
+        protected void onServerError() {
+            mListener.onFail("Calendar API server error");
+        }
+
+        @Override
+        protected void retryGetResultFromServer(final FirebaseWebService.RequestMethods requestMethod) {
+            FirebaseWebService.getFirebaseWebServiceInstance().refreshAccessToken(new FirebaseWebService.AccessTokenUpdatedListener() {
                 @Override
                 public void onAccessTokenUpdated() {
                     EventsAsyncTask eventsAsyncTask = new EventsAsyncTask(null,
-                            mRepositoryLoadHelper, mFirebaseWebService, mEventsDbStore, mEventsCloudStore,
+                            mRepositoryLoadHelper, mEventsDbStore, mEventsCloudStore,
                             mEventsSpecification, mListener);
 
                     if (requestMethod != DELETE) {
@@ -233,14 +228,6 @@ public class EventsRepository {
         private List<Event> parseEventsData(String data) {
             EventsParser eventsParser = new EventsParser();
             return eventsParser.parseEvents(data);
-        }
-
-        private void dbQuery(Event event, FirebaseWebService.RequestMethods requestMethod) {
-            if (requestMethod == POST || requestMethod == PATCH) {
-                mEventsDbStore.addOrUpdateEvents(Collections.singletonList(event));
-            } else if (requestMethod == DELETE) {
-                mEventsDbStore.deleteEvent(event);
-            }
         }
 
         private void updateDbQuery(List<Event> events) {

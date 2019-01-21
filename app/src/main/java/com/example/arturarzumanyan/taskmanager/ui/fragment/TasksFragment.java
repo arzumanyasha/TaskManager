@@ -1,7 +1,6 @@
 package com.example.arturarzumanyan.taskmanager.ui.fragment;
 
 import android.content.Context;
-import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -11,12 +10,12 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Toast;
 
 import com.example.arturarzumanyan.taskmanager.R;
 import com.example.arturarzumanyan.taskmanager.data.repository.tasks.TasksRepository;
 import com.example.arturarzumanyan.taskmanager.domain.Task;
 import com.example.arturarzumanyan.taskmanager.domain.TaskList;
+import com.example.arturarzumanyan.taskmanager.ui.activity.BaseActivity;
 import com.example.arturarzumanyan.taskmanager.ui.activity.IntentionActivity;
 import com.example.arturarzumanyan.taskmanager.ui.adapter.TasksAdapter;
 import com.example.arturarzumanyan.taskmanager.ui.dialog.TasksDialog;
@@ -31,11 +30,11 @@ public class TasksFragment extends Fragment {
     private RecyclerView mTasksRecyclerView;
     private TasksAdapter mTasksAdapter;
 
+    private TasksRepository mTasksRepository;
     private TaskList mTaskList;
 
-    private OnFragmentInteractionListener mListener;
-
     public TasksFragment() {
+        mTasksRepository = new TasksRepository();
     }
 
     public static TasksFragment newInstance(TaskList taskList) {
@@ -69,21 +68,7 @@ public class TasksFragment extends Fragment {
         LinearLayoutManager layoutManager = new LinearLayoutManager(getActivity());
         mTasksRecyclerView.setLayoutManager(layoutManager);
 
-        TasksRepository tasksRepository = new TasksRepository(getActivity());
-
-        tasksRepository.loadTasks(mTaskList, new TasksRepository.OnTasksLoadedListener() {
-            @Override
-            public void onSuccess(List<Task> taskArrayList) {
-                setTasksAdapter(taskArrayList);
-            }
-
-            @Override
-            public void onFail(String message) {
-                Toast.makeText(getActivity(), message, Toast.LENGTH_LONG).show();
-            }
-        });
-        requireActivity().setTitle(mTaskList.getTitle());
-
+        loadTasks();
 
         ((IntentionActivity) requireActivity()).setTaskFragmentInteractionListener(new IntentionActivity.TaskFragmentInteractionListener() {
             @Override
@@ -101,22 +86,26 @@ public class TasksFragment extends Fragment {
 
     }
 
+    private void loadTasks() {
+        mTasksRepository.loadTasks(mTaskList, new TasksRepository.OnTasksLoadedListener() {
+            @Override
+            public void onSuccess(List<Task> taskArrayList) {
+                setTasksAdapter(taskArrayList);
+            }
+
+            @Override
+            public void onFail(String message) {
+                ((BaseActivity) requireActivity()).onError(message);
+            }
+        });
+        requireActivity().setTitle(mTaskList.getTitle());
+    }
+
     private void setTasksAdapter(List<Task> taskArrayList) {
         mTasksAdapter = new TasksAdapter(taskArrayList, new TasksAdapter.OnItemClickListener() {
             @Override
             public void onItemDelete(final Task task) {
-                TasksRepository tasksRepository = new TasksRepository(getActivity());
-                tasksRepository.deleteTask(mTaskList, task, new TasksRepository.OnTasksLoadedListener() {
-                    @Override
-                    public void onSuccess(List<Task> taskArrayList) {
-
-                    }
-
-                    @Override
-                    public void onFail(String message) {
-                        Toast.makeText(getActivity(), message, Toast.LENGTH_LONG).show();
-                    }
-                });
+                deleteTask(task);
             }
 
             @Override
@@ -126,25 +115,12 @@ public class TasksFragment extends Fragment {
 
             @Override
             public void onChangeItemExecuted(final Task task) {
-                TasksRepository tasksRepository = new TasksRepository(getActivity());
-                tasksRepository.addOrUpdateTask(mTaskList,
-                        task, PATCH, new TasksRepository.OnTasksLoadedListener() {
-                            @Override
-                            public void onSuccess(List<Task> taskArrayList) {
-                                mTasksAdapter.updateList(taskArrayList);
-                            }
-
-                            @Override
-                            public void onFail(String message) {
-                                Toast.makeText(getActivity(), message, Toast.LENGTH_LONG).show();
-                            }
-                        });
+                updateTask(task);
             }
         });
 
         mTasksRecyclerView.setAdapter(mTasksAdapter);
     }
-
 
     private void openTasksDialog(Task task) {
         TasksDialog tasksDialog = TasksDialog.newInstance(task, mTaskList);
@@ -158,27 +134,42 @@ public class TasksFragment extends Fragment {
         tasksDialog.show(requireFragmentManager(), TASKS_KEY);
     }
 
-    public void onButtonPressed(Uri uri) {
-        if (mListener != null) {
-            mListener.onFragmentInteraction(uri);
-        }
+    private void updateTask(Task task) {
+        mTasksRepository.addOrUpdateTask(mTaskList,
+                task, PATCH, new TasksRepository.OnTasksLoadedListener() {
+                    @Override
+                    public void onSuccess(List<Task> taskArrayList) {
+                        mTasksAdapter.updateList(taskArrayList);
+                    }
+
+                    @Override
+                    public void onFail(String message) {
+                        ((BaseActivity) requireActivity()).onError(message);
+                    }
+                });
+    }
+
+    private void deleteTask(Task task) {
+        mTasksRepository.deleteTask(mTaskList, task, new TasksRepository.OnTasksLoadedListener() {
+            @Override
+            public void onSuccess(List<Task> taskArrayList) {
+
+            }
+
+            @Override
+            public void onFail(String message) {
+                ((BaseActivity) requireActivity()).onError(message);
+            }
+        });
     }
 
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
-        if (context instanceof OnFragmentInteractionListener) {
-            mListener = (OnFragmentInteractionListener) context;
-        }
     }
 
     @Override
     public void onDetach() {
         super.onDetach();
-        mListener = null;
-    }
-
-    public interface OnFragmentInteractionListener {
-        void onFragmentInteraction(Uri uri);
     }
 }

@@ -1,7 +1,6 @@
 package com.example.arturarzumanyan.taskmanager.ui.fragment;
 
 import android.content.Context;
-import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -11,13 +10,13 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Toast;
 
 import com.example.arturarzumanyan.taskmanager.R;
 import com.example.arturarzumanyan.taskmanager.data.repository.events.EventsRepository;
 import com.example.arturarzumanyan.taskmanager.data.repository.events.specification.EventsFromDateSpecification;
 import com.example.arturarzumanyan.taskmanager.domain.Event;
 import com.example.arturarzumanyan.taskmanager.networking.util.DateUtils;
+import com.example.arturarzumanyan.taskmanager.ui.activity.BaseActivity;
 import com.example.arturarzumanyan.taskmanager.ui.activity.IntentionActivity;
 import com.example.arturarzumanyan.taskmanager.ui.adapter.EventsAdapter;
 import com.example.arturarzumanyan.taskmanager.ui.dialog.EventsDialog;
@@ -30,8 +29,6 @@ public class DailyEventsFragment extends Fragment {
     private RecyclerView mEventsRecyclerView;
 
     private EventsAdapter mEventsAdapter;
-
-    private OnFragmentInteractionListener mListener;
 
     public DailyEventsFragment() {
 
@@ -57,7 +54,11 @@ public class DailyEventsFragment extends Fragment {
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-        final EventsRepository eventsRepository = new EventsRepository(getActivity());
+        loadDailyEvents();
+    }
+
+    private void loadDailyEvents() {
+        final EventsRepository eventsRepository = new EventsRepository();
 
         final EventsFromDateSpecification eventsFromDateSpecification = new EventsFromDateSpecification();
         eventsFromDateSpecification.setDate(DateUtils.getCurrentTime());
@@ -69,7 +70,7 @@ public class DailyEventsFragment extends Fragment {
 
             @Override
             public void onFail(String message) {
-                Toast.makeText(getActivity(), message, Toast.LENGTH_LONG).show();
+                ((BaseActivity) requireActivity()).onError(message);
             }
         });
     }
@@ -81,17 +82,7 @@ public class DailyEventsFragment extends Fragment {
         mEventsAdapter = new EventsAdapter(getActivity(), events, new EventsAdapter.OnItemClickListener() {
             @Override
             public void onItemDelete(Event event) {
-                eventsRepository.deleteEvent(event, new EventsRepository.OnEventsLoadedListener() {
-                    @Override
-                    public void onSuccess(List<Event> eventsList) {
-
-                    }
-
-                    @Override
-                    public void onFail(String message) {
-                        Toast.makeText(getActivity(), message, Toast.LENGTH_LONG).show();
-                    }
-                });
+                deleteEvent(eventsRepository, event);
             }
 
             @Override
@@ -110,6 +101,20 @@ public class DailyEventsFragment extends Fragment {
         mEventsRecyclerView.setAdapter(mEventsAdapter);
     }
 
+    private void deleteEvent(EventsRepository eventsRepository, Event event) {
+        eventsRepository.deleteEvent(event, new EventsRepository.OnEventsLoadedListener() {
+            @Override
+            public void onSuccess(List<Event> eventsList) {
+
+            }
+
+            @Override
+            public void onFail(String message) {
+                ((BaseActivity) requireActivity()).onError(message);
+            }
+        });
+    }
+
     private void openEventsDialog(Event event) {
         EventsDialog eventsDialog = EventsDialog.newInstance(event);
         eventsDialog.setEventsReadyListener(new EventsDialog.EventsReadyListener() {
@@ -123,27 +128,13 @@ public class DailyEventsFragment extends Fragment {
         }
     }
 
-    public void onButtonPressed(Uri uri) {
-        if (mListener != null) {
-            mListener.onFragmentInteraction(uri);
-        }
-    }
-
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
-        if (context instanceof OnFragmentInteractionListener) {
-            mListener = (OnFragmentInteractionListener) context;
-        }
     }
 
     @Override
     public void onDetach() {
         super.onDetach();
-        mListener = null;
-    }
-
-    public interface OnFragmentInteractionListener {
-        void onFragmentInteraction(Uri uri);
     }
 }

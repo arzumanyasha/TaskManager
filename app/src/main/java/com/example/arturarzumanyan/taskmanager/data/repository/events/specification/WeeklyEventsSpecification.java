@@ -14,11 +14,6 @@ public class WeeklyEventsSpecification implements EventsSpecification {
     }
 
     @Override
-    public int getCountOfDays() {
-        return 7;
-    }
-
-    @Override
     public String getStartDate() {
         int date = DateUtils.getEventWeek(DateUtils.getCurrentTime()) - 1;
         Date monday = DateUtils.getMondayDate(date - 1);

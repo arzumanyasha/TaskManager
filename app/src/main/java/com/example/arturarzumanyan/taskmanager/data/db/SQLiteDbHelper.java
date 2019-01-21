@@ -11,7 +11,7 @@ import com.example.arturarzumanyan.taskmanager.data.db.contract.TasksContract.Ta
 
 public class SQLiteDbHelper extends SQLiteOpenHelper {
     private static final String DATABASE_NAME = "Tasks.db";
-    private static final int DATABASE_VERSION = 29;
+    private static final int DATABASE_VERSION = 2;
 
     public SQLiteDbHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
@@ -56,11 +56,18 @@ public class SQLiteDbHelper extends SQLiteOpenHelper {
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
+        recreateDatabase(db);
+    }
+
+    @Override
+    public void onDowngrade(SQLiteDatabase db, int oldVersion, int newVersion) {
+        recreateDatabase(db);
+    }
+
+    private void recreateDatabase(SQLiteDatabase db) {
         db.execSQL("DROP TABLE IF EXISTS " + EventsTable.TABLE_NAME);
         db.execSQL("DROP TABLE IF EXISTS " + TasksTable.TABLE_NAME);
         db.execSQL("DROP TABLE IF EXISTS " + TaskListTable.TABLE_NAME);
         onCreate(db);
     }
-
-
 }

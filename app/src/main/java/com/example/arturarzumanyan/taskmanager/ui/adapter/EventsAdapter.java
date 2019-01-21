@@ -4,6 +4,7 @@ import android.content.Context;
 import android.support.annotation.NonNull;
 import android.support.constraint.ConstraintLayout;
 import android.support.v7.widget.RecyclerView;
+import android.util.SparseIntArray;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,18 +15,19 @@ import com.example.arturarzumanyan.taskmanager.R;
 import com.example.arturarzumanyan.taskmanager.domain.Event;
 import com.example.arturarzumanyan.taskmanager.networking.util.DateUtils;
 
-import java.util.HashMap;
 import java.util.List;
 
-public class EventsAdapter extends RecyclerView.Adapter<EventsAdapter.ViewHolder> implements View.OnClickListener {
+public class EventsAdapter extends RecyclerView.Adapter<EventsAdapter.ViewHolder> {
     private List<Event> mDataset;
     private EventsAdapter.OnItemClickListener mListener;
-    private Context mContext;
+
+    private SparseIntArray mColorPaletteArray;
 
     public EventsAdapter(Context context, List<Event> dataset, EventsAdapter.OnItemClickListener onItemClickListener) {
-        this.mContext = context;
         this.mDataset = dataset;
         this.mListener = onItemClickListener;
+        ColorPalette mColorPalette = new ColorPalette(context);
+        this.mColorPaletteArray = mColorPalette.getColorPalette();
     }
 
     @NonNull
@@ -42,15 +44,7 @@ public class EventsAdapter extends RecyclerView.Adapter<EventsAdapter.ViewHolder
         holder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (mListener != null) {
-                    int position = (int) v.getTag();
-                    if (position != RecyclerView.NO_POSITION) {
-                        Event event = mDataset.get(position);
-                        mListener.onItemClick(event);
-                        notifyItemChanged(position);
-                        notifyItemRangeChanged(position, mDataset.size());
-                    }
-                }
+                triggerItemClick(v);
             }
         });
         holder.eventName.setText(event.getName());
@@ -59,31 +53,29 @@ public class EventsAdapter extends RecyclerView.Adapter<EventsAdapter.ViewHolder
         holder.eventDelete.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (mListener != null) {
-                    int position = (int) v.getTag();
-                    if (position != RecyclerView.NO_POSITION) {
-                        Event event = mDataset.get(position);
-                        mListener.onItemDelete(event);
-                        mDataset.remove(event);
-                        notifyItemRemoved(position);
-                        notifyItemRangeChanged(position, mDataset.size());
-                    }
-                }
+                deleteItem(v);
             }
         });
         holder.eventDelete.setTag(position);
         holder.itemView.setTag(position);
 
-        ColorPalette colorPalette = new ColorPalette(mContext);
-        HashMap<Integer, Integer> map = colorPalette.getColorPalette();
-        holder.constraintLayout.setBackgroundColor(map.get(event.getColorId()));
+        holder.constraintLayout.setBackgroundColor(mColorPaletteArray.get(event.getColorId()));
 
         holder.eventTime.setText(DateUtils.formatTime(event.getStartTime())
                 + " - " + DateUtils.formatTime(event.getEndTime()));
     }
 
-    @Override
-    public void onClick(View v) {
+    private void triggerItemClick(View v) {
+        if (mListener != null) {
+            int position = (int) v.getTag();
+            if (position != RecyclerView.NO_POSITION) {
+                Event event = mDataset.get(position);
+                mListener.onItemClick(event);
+            }
+        }
+    }
+
+    private void deleteItem(View v) {
         if (mListener != null) {
             int position = (int) v.getTag();
             if (position != RecyclerView.NO_POSITION) {
@@ -107,14 +99,14 @@ public class EventsAdapter extends RecyclerView.Adapter<EventsAdapter.ViewHolder
     }
 
     static class ViewHolder extends RecyclerView.ViewHolder {
-        View mView;
         ConstraintLayout constraintLayout;
-        TextView eventName, eventDescription, eventTime;
+        TextView eventName;
+        TextView eventDescription;
+        TextView eventTime;
         ImageView eventDelete;
 
         ViewHolder(View view) {
             super(view);
-            mView = view;
             constraintLayout = view.findViewById(R.id.constraint_layout_events_holder);
             eventName = view.findViewById(R.id.text_event_name);
             eventDescription = view.findViewById(R.id.text_event_description);
