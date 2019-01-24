@@ -21,8 +21,6 @@ import com.example.arturarzumanyan.taskmanager.ui.activity.BaseActivity;
 import com.example.arturarzumanyan.taskmanager.ui.adapter.ColorPalette;
 
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
@@ -42,6 +40,7 @@ public class WeekDashboardFragment extends Fragment {
     private LinearLayout mLinearLayoutSun;
 
     private SparseIntArray mColorPaletteArray;
+    private List<Event> mWeeklyEventsList;
     private Map<Date, List<Event>> mWeeklyEvents = new HashMap<>();
 
     public WeekDashboardFragment() {
@@ -54,6 +53,7 @@ public class WeekDashboardFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setRetainInstance(true);
     }
 
     @Override
@@ -92,13 +92,18 @@ public class WeekDashboardFragment extends Fragment {
         Date nextDate = mondayDate;
         final List<Date> weekDateList = new ArrayList<>();
 
-        loadWeeklyEvents(linearLayouts, weekDateList);
-
         for (int i = 0; i < DAYS_IN_WEEK; i++) {
             weekDateList.add(nextDate);
             if (nextDate != null) {
                 nextDate = DateUtils.getNextDate(nextDate);
             }
+        }
+
+        if (mWeeklyEventsList == null) {
+            loadWeeklyEvents(linearLayouts, weekDateList);
+        } else {
+            fetchWeeklyEventsWithDate(mWeeklyEventsList);
+            displayDashboard(linearLayouts, mWeeklyEvents, weekDateList);
         }
     }
 
@@ -110,6 +115,7 @@ public class WeekDashboardFragment extends Fragment {
             public void onSuccess(List<Event> eventsList) {
                 Log.v("Weekly events loaded");
 
+                mWeeklyEventsList = eventsList;
                 fetchWeeklyEventsWithDate(eventsList);
                 displayDashboard(linearLayouts, mWeeklyEvents, weekDateList);
             }

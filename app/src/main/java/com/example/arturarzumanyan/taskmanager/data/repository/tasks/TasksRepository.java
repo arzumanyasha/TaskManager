@@ -1,6 +1,5 @@
 package com.example.arturarzumanyan.taskmanager.data.repository.tasks;
 
-import android.content.Context;
 import android.os.AsyncTask;
 
 import com.example.arturarzumanyan.taskmanager.auth.FirebaseWebService;
@@ -31,6 +30,7 @@ public class TasksRepository {
     }
 
     public void loadTasks(TaskList taskList, final OnTasksLoadedListener listener) {
+        Log.v("Loading tasks from tasklist");
         TasksAsyncTask tasksAsyncTask = new TasksAsyncTask(null, taskList, mRepositoryLoadHelper,
                 mTasksDbStore, mTasksCloudStore, listener);
 
@@ -47,12 +47,6 @@ public class TasksRepository {
         });
 
         tasksAsyncTask.executeOnExecutor(AsyncTask.SERIAL_EXECUTOR, GET);
-    }
-
-    public interface OnTasksLoadedListener {
-        void onSuccess(List<Task> taskArrayList);
-
-        void onFail(String message);
     }
 
     public void addOrUpdateTask(TaskList taskList, Task task, final FirebaseWebService.RequestMethods requestMethod,
@@ -96,6 +90,12 @@ public class TasksRepository {
         });
 
         tasksAsyncTask.executeOnExecutor(AsyncTask.SERIAL_EXECUTOR, DELETE);
+    }
+
+    public interface OnTasksLoadedListener {
+        void onSuccess(List<Task> taskArrayList);
+
+        void onFail(String message);
     }
 
     public static class TasksAsyncTask extends BaseDataLoadingAsyncTask<Task> {

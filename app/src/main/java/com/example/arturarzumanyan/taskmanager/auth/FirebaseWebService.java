@@ -99,6 +99,8 @@ public class FirebaseWebService implements GoogleApiClient.OnConnectionFailedLis
             } else {
                 userInfoLoadingListener.onFail("Authentication error");
             }
+        } else {
+            userInfoLoadingListener.onFail("Authentication error");
         }
     }
 
