@@ -3,9 +3,7 @@ package com.example.arturarzumanyan.taskmanager.auth;
 import android.content.Context;
 import android.content.Intent;
 import android.support.annotation.NonNull;
-import android.support.v4.app.FragmentActivity;
 
-import com.example.arturarzumanyan.taskmanager.data.db.DbHelper;
 import com.example.arturarzumanyan.taskmanager.networking.base.RequestParameters;
 import com.example.arturarzumanyan.taskmanager.networking.util.Log;
 import com.google.android.gms.auth.api.Auth;
