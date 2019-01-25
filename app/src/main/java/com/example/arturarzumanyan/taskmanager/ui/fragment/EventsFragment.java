@@ -42,7 +42,7 @@ public class EventsFragment extends Fragment {
         BottomNavigationView bottomNav = view.findViewById(R.id.bottom_navigation);
         bottomNav.setOnNavigationItemSelectedListener(navListener);
 
-        if(mSelectedFragmentItem == null){
+        if (mSelectedFragmentItem == null) {
             bottomNav.setSelectedItemId(R.id.nav_today);
         } else {
             bottomNav.setSelectedItemId(mSelectedFragmentItem.getItemId());

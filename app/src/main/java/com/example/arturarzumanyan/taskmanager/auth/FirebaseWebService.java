@@ -43,6 +43,7 @@ public class FirebaseWebService implements GoogleApiClient.OnConnectionFailedLis
     private static final String CONTENT_TYPE = "application/x-www-form-urlencoded";
     private static final String CODE_KEY = "code";
     private static final String AUTHORIZATION_CODE = "authorization_code";
+    private static final String AUTHENTICATION_ERROR = "Authentication error";
     public static final String ACCESS_TOKEN_KEY = "access_token";
     public static final String REFRESH_TOKEN_KEY = "refresh_token";
 
@@ -97,10 +98,10 @@ public class FirebaseWebService implements GoogleApiClient.OnConnectionFailedLis
                 mAuth.signInWithCredential(credential)
                         .addOnCompleteListener(this);
             } else {
-                userInfoLoadingListener.onFail("Authentication error");
+                userInfoLoadingListener.onFail(AUTHENTICATION_ERROR);
             }
         } else {
-            userInfoLoadingListener.onFail("Authentication error");
+            userInfoLoadingListener.onFail(AUTHENTICATION_ERROR);
         }
     }
 
@@ -114,9 +115,11 @@ public class FirebaseWebService implements GoogleApiClient.OnConnectionFailedLis
                             user.getEmail(),
                             String.valueOf(user.getPhotoUrl()));
                 } else {
-                    userInfoLoadingListener.onFail("Authentication error");
+                    userInfoLoadingListener.onFail(AUTHENTICATION_ERROR);
                 }
             }
+        } else {
+            userInfoLoadingListener.onFail(AUTHENTICATION_ERROR);
         }
     }
 

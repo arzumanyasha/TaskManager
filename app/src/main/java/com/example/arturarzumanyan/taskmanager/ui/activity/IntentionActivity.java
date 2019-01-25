@@ -47,7 +47,7 @@ public class IntentionActivity extends BaseActivity {
     public static final String EVENTS_KEY = "Events";
     public static final String TASKS_KEY = "Tasks";
     public static final String TASK_LISTS_KEY = "TaskLists";
-    private static final String TASKLIST_KEY = "TaskList";
+    private static final String TASK_LIST_KEY = "TaskList";
     private static final String TITLE_KEY = "title";
     private static final String RETAINED_TASK_FRAGMENT_TAG = "RetainedTaskFragment";
     private static final String RETAINED_EVENT_FRAGMENT_TAG = "RetainedEventFragment";
@@ -83,7 +83,7 @@ public class IntentionActivity extends BaseActivity {
             fetchTaskListsData();
         } else {
             mTaskLists = savedInstanceState.getParcelableArrayList(TASK_LISTS_KEY);
-            mCurrentTaskList = savedInstanceState.getParcelable(TASKLIST_KEY);
+            mCurrentTaskList = savedInstanceState.getParcelable(TASK_LIST_KEY);
 
             displayDefaultUi(mTaskLists, savedInstanceState.getString(TITLE_KEY, TASK_LISTS_KEY));
         }
@@ -177,7 +177,7 @@ public class IntentionActivity extends BaseActivity {
         mRetainedTasksFragment = getRetainedTaskFragment();
         if (mRetainedTasksFragment == null) {
             mRetainedTasksFragment = TasksFragment.newInstance(mTaskLists.get(0));
-            openRetainedTaskFragment(mRetainedTasksFragment);
+            openRetainedFragment(mRetainedTasksFragment, RETAINED_TASK_FRAGMENT_TAG);
         }
 
         mCurrentTaskList = mTaskLists.get(0);
@@ -187,7 +187,7 @@ public class IntentionActivity extends BaseActivity {
         mRetainedEventsFragment = getRetainedEventsFragment();
         if (mRetainedEventsFragment == null) {
             mRetainedEventsFragment = EventsFragment.newInstance();
-            openRetainedEventFragment(mRetainedEventsFragment);
+            openRetainedFragment(mRetainedEventsFragment, RETAINED_EVENT_FRAGMENT_TAG);
         }
     }
 
@@ -230,7 +230,7 @@ public class IntentionActivity extends BaseActivity {
                         if (mRetainedEventsFragment == null) {
                             mRetainedEventsFragment = EventsFragment.newInstance();
                         }
-                        openRetainedEventFragment(mRetainedEventsFragment);
+                        openRetainedFragment(mRetainedEventsFragment, RETAINED_EVENT_FRAGMENT_TAG);
                         mDrawer.closeDrawer(Gravity.START);
                         invalidateOptionsMenu();
                         return false;
@@ -336,29 +336,22 @@ public class IntentionActivity extends BaseActivity {
                     }
                 });
                 mCurrentTaskList = taskList;
-                openRetainedTaskFragment(TasksFragment.newInstance(taskList));
+                openRetainedFragment(TasksFragment.newInstance(taskList), RETAINED_TASK_FRAGMENT_TAG);
             }
         });
         taskListsDialog.show(getSupportFragmentManager(), TASK_LISTS_KEY);
     }
 
     private void updateTaskUi(TaskList taskList) {
-        openRetainedTaskFragment(TasksFragment.newInstance(taskList));
+        openRetainedFragment(TasksFragment.newInstance(taskList), RETAINED_TASK_FRAGMENT_TAG);
         mCurrentTaskList = taskList;
         mDrawer.closeDrawer(Gravity.START);
     }
 
-    private void openRetainedTaskFragment(TasksFragment retainedTasksFragment) {
+    private void openRetainedFragment(Fragment retainedFragment, String tag) {
         getSupportFragmentManager().beginTransaction()
-                .add(retainedTasksFragment, RETAINED_TASK_FRAGMENT_TAG)
-                .replace(R.id.main_container, retainedTasksFragment)
-                .commit();
-    }
-
-    private void openRetainedEventFragment(EventsFragment eventsFragment) {
-        getSupportFragmentManager().beginTransaction()
-                .add(eventsFragment, RETAINED_EVENT_FRAGMENT_TAG)
-                .replace(R.id.main_container, eventsFragment)
+                .add(retainedFragment, tag)
+                .replace(R.id.main_container, retainedFragment)
                 .commit();
     }
 
@@ -454,8 +447,7 @@ public class IntentionActivity extends BaseActivity {
         }
         if (previousTaskList != null) {
             mCurrentTaskList = previousTaskList;
-            //openTaskFragment(previousTaskList);
-            openRetainedTaskFragment(TasksFragment.newInstance(previousTaskList));
+            openRetainedFragment(TasksFragment.newInstance(previousTaskList), RETAINED_TASK_FRAGMENT_TAG);
         }
     }
 
@@ -538,7 +530,7 @@ public class IntentionActivity extends BaseActivity {
         super.onSaveInstanceState(outState);
 
         outState.putParcelableArrayList(TASK_LISTS_KEY, (ArrayList<? extends Parcelable>) mTaskLists);
-        outState.putParcelable(TASKLIST_KEY, mCurrentTaskList);
+        outState.putParcelable(TASK_LIST_KEY, mCurrentTaskList);
         outState.putString(TITLE_KEY, getTitle().toString());
     }
 

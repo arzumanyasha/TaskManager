@@ -58,18 +58,13 @@ public class DailyEventsFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_daily_events, container, false);
         mEventsRecyclerView = view.findViewById(R.id.recycler_events);
 
-        if(mDailyEventsList == null) {
+        if (mDailyEventsList == null) {
             loadDailyEvents();
         } else {
             setEventsAdapter(mDailyEventsList);
         }
 
         return view;
-    }
-
-    @Override
-    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
-        super.onActivityCreated(savedInstanceState);
     }
 
     private void loadDailyEvents() {
