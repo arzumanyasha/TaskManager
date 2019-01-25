@@ -7,6 +7,7 @@ import android.support.v4.app.FragmentActivity;
 
 import com.example.arturarzumanyan.taskmanager.data.db.DbHelper;
 import com.example.arturarzumanyan.taskmanager.networking.base.RequestParameters;
+import com.example.arturarzumanyan.taskmanager.networking.util.Log;
 import com.google.android.gms.auth.api.Auth;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
@@ -101,6 +102,7 @@ public class FirebaseWebService implements GoogleApiClient.OnConnectionFailedLis
                 userInfoLoadingListener.onFail(AUTHENTICATION_ERROR);
             }
         } else {
+            Log.e(result.getStatus().toString());
             userInfoLoadingListener.onFail(AUTHENTICATION_ERROR);
         }
     }
@@ -119,12 +121,14 @@ public class FirebaseWebService implements GoogleApiClient.OnConnectionFailedLis
                 }
             }
         } else {
+            Log.e(task.getResult().toString());
             userInfoLoadingListener.onFail(AUTHENTICATION_ERROR);
         }
     }
 
     @Override
     public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
+        Log.v(connectionResult.getErrorMessage());
         userInfoLoadingListener.onFail(connectionResult.getErrorMessage());
     }
 
