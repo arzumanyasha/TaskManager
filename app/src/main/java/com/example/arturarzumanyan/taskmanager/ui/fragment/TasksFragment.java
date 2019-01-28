@@ -15,6 +15,7 @@ import com.example.arturarzumanyan.taskmanager.R;
 import com.example.arturarzumanyan.taskmanager.data.repository.tasks.TasksRepository;
 import com.example.arturarzumanyan.taskmanager.domain.Task;
 import com.example.arturarzumanyan.taskmanager.domain.TaskList;
+import com.example.arturarzumanyan.taskmanager.networking.util.Log;
 import com.example.arturarzumanyan.taskmanager.ui.activity.BaseActivity;
 import com.example.arturarzumanyan.taskmanager.ui.activity.IntentionActivity;
 import com.example.arturarzumanyan.taskmanager.ui.adapter.TasksAdapter;
@@ -32,6 +33,7 @@ public class TasksFragment extends Fragment {
 
     private TasksRepository mTasksRepository;
     private TaskList mTaskList;
+    private List<Task> mTasks;
 
     public TasksFragment() {
         mTasksRepository = new TasksRepository();
@@ -47,7 +49,9 @@ public class TasksFragment extends Fragment {
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
+        Log.v("onCreate");
         super.onCreate(savedInstanceState);
+        setRetainInstance(true);
         if (getArguments() != null) {
             mTaskList = getArguments().getParcelable(TASK_LISTS_KEY);
         }
@@ -56,19 +60,26 @@ public class TasksFragment extends Fragment {
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
+        Log.v("onCreateView");
         View view = inflater.inflate(R.layout.fragment_tasks, container, false);
         mTasksRecyclerView = view.findViewById(R.id.recycler_tasks);
+        LinearLayoutManager layoutManager = new LinearLayoutManager(getActivity());
+        mTasksRecyclerView.setLayoutManager(layoutManager);
+
+        if (mTasks == null) {
+            loadTasks();
+        } else {
+            setTasksAdapter(mTasks);
+            requireActivity().setTitle(mTaskList.getTitle());
+        }
+
         return view;
     }
 
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
+        Log.v("onActivityCreated");
         super.onActivityCreated(savedInstanceState);
-
-        LinearLayoutManager layoutManager = new LinearLayoutManager(getActivity());
-        mTasksRecyclerView.setLayoutManager(layoutManager);
-
-        loadTasks();
 
         ((IntentionActivity) requireActivity()).setTaskFragmentInteractionListener(new IntentionActivity.TaskFragmentInteractionListener() {
             @Override
@@ -86,10 +97,12 @@ public class TasksFragment extends Fragment {
 
     }
 
-    private void loadTasks() {
+    public void loadTasks() {
+        Log.v("Loading tasks");
         mTasksRepository.loadTasks(mTaskList, new TasksRepository.OnTasksLoadedListener() {
             @Override
             public void onSuccess(List<Task> taskArrayList) {
+                mTasks = taskArrayList;
                 setTasksAdapter(taskArrayList);
             }
 

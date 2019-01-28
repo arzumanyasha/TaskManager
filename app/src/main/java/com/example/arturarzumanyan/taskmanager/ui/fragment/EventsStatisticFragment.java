@@ -43,6 +43,8 @@ public class EventsStatisticFragment extends Fragment {
     private PieChart pieChart;
     private Spinner spinnerMode;
 
+    private Integer mCountOfMinutes;
+    private List<Event> mEvents;
     private SparseIntArray mColorPaletteArray;
     private EventsRepository mEventsRepository;
 
@@ -56,6 +58,7 @@ public class EventsStatisticFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setRetainInstance(true);
     }
 
     @Override
@@ -78,7 +81,7 @@ public class EventsStatisticFragment extends Fragment {
 
         ColorPalette colorPalette = new ColorPalette(getActivity());
         mColorPaletteArray = colorPalette.getColorPalette();
-        
+
         mEventsRepository = new EventsRepository();
 
         spinnerMode.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
@@ -86,15 +89,18 @@ public class EventsStatisticFragment extends Fragment {
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 switch (position) {
                     case 0: {
-                        getDailyEvents();
+                        mCountOfMinutes = MINUTES_IN_DAY;
+                        getDailyEvents(mCountOfMinutes);
                         break;
                     }
                     case 1: {
-                        getWeeklyEvents();
+                        mCountOfMinutes = MINUTES_IN_WEEK;
+                        getWeeklyEvents(mCountOfMinutes);
                         break;
                     }
                     case 2: {
-                        getMonthlyEvents();
+                        mCountOfMinutes = DateUtils.getDaysInCurrentMonth() * MINUTES_IN_DAY;
+                        getMonthlyEvents(mCountOfMinutes);
                         break;
                     }
                 }
@@ -106,15 +112,19 @@ public class EventsStatisticFragment extends Fragment {
             }
         });
 
+        if (mEvents != null) {
+            createPieChart(mEvents, mCountOfMinutes);
+        }
     }
 
-    private void getDailyEvents() {
+    private void getDailyEvents(final int countOfMinutes) {
         EventsFromDateSpecification eventsFromDateSpecification = new EventsFromDateSpecification();
         eventsFromDateSpecification.setDate(DateUtils.getCurrentTime());
         mEventsRepository.getEvents(eventsFromDateSpecification, new EventsRepository.OnEventsLoadedListener() {
             @Override
             public void onSuccess(List<Event> eventsList) {
-                createPieChart(eventsList, MINUTES_IN_DAY);
+                mEvents = eventsList;
+                createPieChart(eventsList, countOfMinutes);
             }
 
             @Override
@@ -124,12 +134,13 @@ public class EventsStatisticFragment extends Fragment {
         });
     }
 
-    private void getWeeklyEvents() {
+    private void getWeeklyEvents(final int countOfMinutes) {
         WeeklyEventsSpecification weeklyEventsSpecification = new WeeklyEventsSpecification();
         mEventsRepository.getEvents(weeklyEventsSpecification, new EventsRepository.OnEventsLoadedListener() {
             @Override
             public void onSuccess(List<Event> eventsList) {
-                createPieChart(eventsList, MINUTES_IN_WEEK);
+                mEvents = eventsList;
+                createPieChart(eventsList, countOfMinutes);
             }
 
             @Override
@@ -139,12 +150,13 @@ public class EventsStatisticFragment extends Fragment {
         });
     }
 
-    private void getMonthlyEvents() {
+    private void getMonthlyEvents(final int countOfMinutes) {
         MonthlyEventsSpecification monthlyEventsSpecification = new MonthlyEventsSpecification();
         mEventsRepository.getEvents(monthlyEventsSpecification, new EventsRepository.OnEventsLoadedListener() {
             @Override
             public void onSuccess(List<Event> eventsList) {
-                createPieChart(eventsList, DateUtils.getDaysInCurrentMonth() * MINUTES_IN_DAY);
+                mEvents = eventsList;
+                createPieChart(eventsList, countOfMinutes);
             }
 
             @Override

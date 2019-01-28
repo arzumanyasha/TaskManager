@@ -27,8 +27,10 @@ import static com.example.arturarzumanyan.taskmanager.ui.activity.IntentionActiv
 
 public class DailyEventsFragment extends Fragment {
     private RecyclerView mEventsRecyclerView;
+    private EventsRepository mEventsRepository;
 
     private EventsAdapter mEventsAdapter;
+    private List<Event> mDailyEventsList;
 
     public DailyEventsFragment() {
 
@@ -41,6 +43,13 @@ public class DailyEventsFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setRetainInstance(true);
+
+        initEventsRepository();
+    }
+
+    private void initEventsRepository() {
+        mEventsRepository = new EventsRepository();
     }
 
     @Override
@@ -48,24 +57,24 @@ public class DailyEventsFragment extends Fragment {
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_daily_events, container, false);
         mEventsRecyclerView = view.findViewById(R.id.recycler_events);
+
+        if (mDailyEventsList == null) {
+            loadDailyEvents();
+        } else {
+            setEventsAdapter(mDailyEventsList);
+        }
+
         return view;
     }
 
-    @Override
-    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
-        super.onActivityCreated(savedInstanceState);
-        loadDailyEvents();
-    }
-
     private void loadDailyEvents() {
-        final EventsRepository eventsRepository = new EventsRepository();
-
         final EventsFromDateSpecification eventsFromDateSpecification = new EventsFromDateSpecification();
         eventsFromDateSpecification.setDate(DateUtils.getCurrentTime());
-        eventsRepository.getEvents(eventsFromDateSpecification, new EventsRepository.OnEventsLoadedListener() {
+        mEventsRepository.getEvents(eventsFromDateSpecification, new EventsRepository.OnEventsLoadedListener() {
             @Override
             public void onSuccess(List<Event> eventsList) {
-                setEventsAdapter(eventsList, eventsRepository);
+                mDailyEventsList = eventsList;
+                setEventsAdapter(eventsList);
             }
 
             @Override
@@ -75,14 +84,14 @@ public class DailyEventsFragment extends Fragment {
         });
     }
 
-    private void setEventsAdapter(List<Event> events, final EventsRepository eventsRepository) {
+    private void setEventsAdapter(List<Event> events) {
         LinearLayoutManager layoutManager = new LinearLayoutManager(getActivity());
         mEventsRecyclerView.setLayoutManager(layoutManager);
 
         mEventsAdapter = new EventsAdapter(getActivity(), events, new EventsAdapter.OnItemClickListener() {
             @Override
             public void onItemDelete(Event event) {
-                deleteEvent(eventsRepository, event);
+                deleteEvent(mEventsRepository, event);
             }
 
             @Override
