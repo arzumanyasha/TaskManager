@@ -93,6 +93,7 @@ public class SignInActivity extends BaseActivity {
     @Override
     protected void onDestroy() {
         FirebaseWebService.getFirebaseWebServiceInstance().closeAuthConnection();
+        FirebaseWebService.getFirebaseWebServiceInstance().unsubscribe();
         super.onDestroy();
     }
 }

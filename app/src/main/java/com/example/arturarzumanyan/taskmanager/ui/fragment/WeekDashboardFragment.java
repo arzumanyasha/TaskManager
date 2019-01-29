@@ -12,6 +12,7 @@ import android.view.ViewGroup;
 import android.widget.LinearLayout;
 
 import com.example.arturarzumanyan.taskmanager.R;
+import com.example.arturarzumanyan.taskmanager.TaskManagerApp;
 import com.example.arturarzumanyan.taskmanager.data.repository.events.EventsRepository;
 import com.example.arturarzumanyan.taskmanager.data.repository.events.specification.WeeklyEventsSpecification;
 import com.example.arturarzumanyan.taskmanager.domain.Event;
@@ -19,6 +20,7 @@ import com.example.arturarzumanyan.taskmanager.networking.util.DateUtils;
 import com.example.arturarzumanyan.taskmanager.networking.util.Log;
 import com.example.arturarzumanyan.taskmanager.ui.activity.BaseActivity;
 import com.example.arturarzumanyan.taskmanager.ui.adapter.ColorPalette;
+import com.squareup.leakcanary.RefWatcher;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -113,16 +115,20 @@ public class WeekDashboardFragment extends Fragment {
         eventsRepository.getEvents(weeklyEventsSpecification, new EventsRepository.OnEventsLoadedListener() {
             @Override
             public void onSuccess(List<Event> eventsList) {
-                Log.v("Weekly events loaded");
+                if (isVisible()) {
+                    Log.v("Weekly events loaded");
 
-                mWeeklyEventsList = eventsList;
-                fetchWeeklyEventsWithDate(eventsList);
-                displayDashboard(linearLayouts, mWeeklyEvents, weekDateList);
+                    mWeeklyEventsList = eventsList;
+                    fetchWeeklyEventsWithDate(eventsList);
+                    displayDashboard(linearLayouts, mWeeklyEvents, weekDateList);
+                }
             }
 
             @Override
             public void onFail(String message) {
-                ((BaseActivity) requireActivity()).onError(message);
+                if (isVisible()) {
+                    ((BaseActivity) requireActivity()).onError(message);
+                }
             }
         });
     }
@@ -183,5 +189,12 @@ public class WeekDashboardFragment extends Fragment {
     @Override
     public void onDetach() {
         super.onDetach();
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        RefWatcher refWatcher = TaskManagerApp.getRefWatcher(requireActivity());
+        refWatcher.watch(this);
     }
 }

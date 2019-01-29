@@ -129,6 +129,10 @@ public class TasksAdapter extends RecyclerView.Adapter<TasksAdapter.ViewHolder> 
         }
     }
 
+    public void unsubscribe() {
+        mListener = null;
+    }
+
     public interface OnItemClickListener {
         void onItemDelete(Task task);
 
