@@ -40,7 +40,7 @@
                android:layout_width="wrap_content"
                android:layout_height="wrap_content"
                android:layout_weight="1"
-               tools:text="@string/thursday_name"
+               android:text="@string/thursday_name"
                android:textSize="22sp"/>
 
            <TextView
@@ -137,4 +137,11 @@
                android:weightSum="1440">
            </LinearLayout>
        </LinearLayout>
+
+    <ProgressBar
+        android:id="@+id/week_dashboard_progress_bar"
+        style="?android:attr/progressBarStyle"
+        android:layout_width="80dp"
+        android:layout_height="80dp"
+        android:layout_centerInParent="true" />
 </RelativeLayout>

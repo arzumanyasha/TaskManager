@@ -444,16 +444,13 @@ public class IntentionActivity extends BaseActivity {
         TaskList previousTaskList = null;
         for (int i = 0; i < menuSize; i++) {
             if (mTaskLists.get(i).getId() == taskList.getId()) {
-                Log.v("menu size was " + mTaskListsMenu.size());
-                mTaskListsMenu.getItem(i).setVisible(false);
-                int itemId = mTaskListsMenu.getItem(i).getItemId();
-                mTaskListsMenu.removeItem(itemId);
-                Log.v("menu size is " + mTaskListsMenu.size());
                 mTaskLists.remove(i);
                 previousTaskList = mTaskLists.get(i - 1);
                 break;
             }
         }
+        updateTaskListsMenu(mTaskLists);
+
         if (previousTaskList != null) {
             mCurrentTaskList = previousTaskList;
             openRetainedFragment(TasksFragment.newInstance(previousTaskList), RETAINED_TASK_FRAGMENT_TAG);
@@ -508,7 +505,7 @@ public class IntentionActivity extends BaseActivity {
     }
 
     private void displayEventDatePicker() {
-        DatePickerDialog datePickerDialog = new DatePickerDialog(getApplicationContext(), new DatePickerDialog.OnDateSetListener() {
+        DatePickerDialog datePickerDialog = new DatePickerDialog(this, new DatePickerDialog.OnDateSetListener() {
 
             @Override
             public void onDateSet(DatePicker view, int year, int monthOfYear, int dayOfMonth) {

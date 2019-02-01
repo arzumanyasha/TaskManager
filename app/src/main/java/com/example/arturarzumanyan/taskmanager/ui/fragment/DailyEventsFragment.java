@@ -9,6 +9,7 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ProgressBar;
 
 import com.example.arturarzumanyan.taskmanager.R;
 import com.example.arturarzumanyan.taskmanager.TaskManagerApp;
@@ -29,6 +30,7 @@ import static com.example.arturarzumanyan.taskmanager.ui.activity.IntentionActiv
 
 public class DailyEventsFragment extends Fragment {
     private RecyclerView mEventsRecyclerView;
+    private ProgressBar mProgressBar;
     private EventsRepository mEventsRepository;
 
     private EventsAdapter mEventsAdapter;
@@ -61,6 +63,7 @@ public class DailyEventsFragment extends Fragment {
         Log.v("onCreateView");
         View view = inflater.inflate(R.layout.fragment_daily_events, container, false);
         mEventsRecyclerView = view.findViewById(R.id.recycler_events);
+        mProgressBar = view.findViewById(R.id.daily_events_progress_bar);
 
         if (mDailyEventsList == null) {
             loadDailyEvents();
@@ -79,6 +82,7 @@ public class DailyEventsFragment extends Fragment {
             public void onSuccess(List<Event> eventsList) {
                 if (isVisible()) {
                     mDailyEventsList = eventsList;
+                    mProgressBar.setVisibility(ProgressBar.INVISIBLE);
                     setEventsAdapter(eventsList);
                 }
             }

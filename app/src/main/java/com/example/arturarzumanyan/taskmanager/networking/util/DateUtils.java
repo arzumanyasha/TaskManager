@@ -186,7 +186,7 @@ public class DateUtils {
     }
 
     public static String getStringDateFromInt(int year, int month, int day) {
-        return Integer.toString(year) + Integer.toString(month + 1) + Integer.toString(day);
+        return Integer.toString(year) + "-" + Integer.toString(month + 1) + "-" + Integer.toString(day);
     }
 
     public static Date getNextDate(Date date) {

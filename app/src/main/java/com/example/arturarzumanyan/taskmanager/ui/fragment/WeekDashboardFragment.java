@@ -10,6 +10,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
+import android.widget.ProgressBar;
 
 import com.example.arturarzumanyan.taskmanager.R;
 import com.example.arturarzumanyan.taskmanager.TaskManagerApp;
@@ -33,6 +34,7 @@ import static com.example.arturarzumanyan.taskmanager.networking.util.DateUtils.
 import static com.example.arturarzumanyan.taskmanager.networking.util.DateUtils.MINUTES_IN_HOUR;
 
 public class WeekDashboardFragment extends Fragment {
+    private ProgressBar progressBar;
     private LinearLayout mLinearLayoutMon;
     private LinearLayout mLinearLayoutTue;
     private LinearLayout mLinearLayoutWed;
@@ -62,6 +64,7 @@ public class WeekDashboardFragment extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_week_dashboard, container, false);
+        progressBar = view.findViewById(R.id.week_dashboard_progress_bar);
         mLinearLayoutMon = view.findViewById(R.id.linear_layout_mon);
         mLinearLayoutTue = view.findViewById(R.id.linear_layout_tue);
         mLinearLayoutWed = view.findViewById(R.id.linear_layout_wed);
@@ -120,6 +123,7 @@ public class WeekDashboardFragment extends Fragment {
 
                     mWeeklyEventsList = eventsList;
                     fetchWeeklyEventsWithDate(eventsList);
+                    progressBar.setVisibility(ProgressBar.INVISIBLE);
                     displayDashboard(linearLayouts, mWeeklyEvents, weekDateList);
                 }
             }

@@ -77,9 +77,7 @@ public class RepositoryLoadHelper {
 
             requestBody.put(REMINDERS_KEY, remindersMap);
         } else {
-            Map<String, Object> remindersMap = new HashMap<>();
-            remindersMap.put(USE_DEFAULT_KEY, false);
-            requestBody.put(REMINDERS_KEY, remindersMap);
+            requestBody.put(REMINDERS_KEY, null);
         }
 
         Map<String, String> requestHeaderParameters = new HashMap<>();
