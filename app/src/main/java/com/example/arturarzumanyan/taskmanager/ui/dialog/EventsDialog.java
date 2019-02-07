@@ -166,6 +166,8 @@ public class EventsDialog extends AppCompatDialogFragment {
             } else {
                 Toast.makeText(getContext(), R.string.time_error_msg, Toast.LENGTH_LONG).show();
             }
+        } else {
+            Toast.makeText(getContext(), R.string.time_error_msg, Toast.LENGTH_LONG).show();
         }
     }
 
