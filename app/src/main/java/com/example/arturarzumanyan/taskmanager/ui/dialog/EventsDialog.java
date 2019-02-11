@@ -156,15 +156,11 @@ public class EventsDialog extends AppCompatDialogFragment {
 
         int colorNumber = mColorMap.keyAt(mColorMap.indexOfValue(mCurrentColor));
 
-        if (endDate != null) {
-            if (endDate.after(startDate) && !mEditTextEventName.getText().toString().isEmpty()) {
-                if (bundle != null) {
-                    updateEvent(bundle, name, description, colorNumber, startDate, endDate, isNotify);
-                } else {
-                    addEvent(name, description, colorNumber, startDate, endDate, isNotify);
-                }
+        if (endDate != null && endDate.after(startDate) && !mEditTextEventName.getText().toString().isEmpty()) {
+            if (bundle != null) {
+                updateEvent(bundle, name, description, colorNumber, startDate, endDate, isNotify);
             } else {
-                Toast.makeText(getContext(), R.string.time_error_msg, Toast.LENGTH_LONG).show();
+                addEvent(name, description, colorNumber, startDate, endDate, isNotify);
             }
         } else {
             Toast.makeText(getContext(), R.string.time_error_msg, Toast.LENGTH_LONG).show();

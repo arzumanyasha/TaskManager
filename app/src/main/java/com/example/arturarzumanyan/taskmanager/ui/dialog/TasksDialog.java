@@ -103,15 +103,7 @@ public class TasksDialog extends AppCompatDialogFragment {
 
                     @Override
                     public void onDateSet(DatePicker view, int year, int monthOfYear, int dayOfMonth) {
-                        if (monthOfYear < 9 && dayOfMonth < 10) {
-                            mTextViewTaskDate.setText(year + "-0" + (monthOfYear + 1) + "-0" + dayOfMonth);
-                        } else if (monthOfYear < 9) {
-                            mTextViewTaskDate.setText(year + "-0" + (monthOfYear + 1) + "-" + dayOfMonth);
-                        } else if (dayOfMonth < 10) {
-                            mTextViewTaskDate.setText(year + "-" + (monthOfYear + 1) + "-0" + dayOfMonth);
-                        } else {
-                            mTextViewTaskDate.setText(year + "-" + (monthOfYear + 1) + "-" + dayOfMonth);
-                        }
+                        mTextViewTaskDate.setText(DateUtils.getStringDateFromInt(year, monthOfYear, dayOfMonth));
                         taskDate = DateUtils.getTaskDateFromString(mTextViewTaskDate.getText().toString());
                     }
                 }, year, month, day);
