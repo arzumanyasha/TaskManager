@@ -10,8 +10,10 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ProgressBar;
 
 import com.example.arturarzumanyan.taskmanager.R;
+import com.example.arturarzumanyan.taskmanager.TaskManagerApp;
 import com.example.arturarzumanyan.taskmanager.data.repository.tasks.TasksRepository;
 import com.example.arturarzumanyan.taskmanager.domain.Task;
 import com.example.arturarzumanyan.taskmanager.domain.TaskList;
@@ -20,6 +22,7 @@ import com.example.arturarzumanyan.taskmanager.ui.activity.BaseActivity;
 import com.example.arturarzumanyan.taskmanager.ui.activity.IntentionActivity;
 import com.example.arturarzumanyan.taskmanager.ui.adapter.TasksAdapter;
 import com.example.arturarzumanyan.taskmanager.ui.dialog.TasksDialog;
+import com.squareup.leakcanary.RefWatcher;
 
 import java.util.List;
 
@@ -29,6 +32,7 @@ import static com.example.arturarzumanyan.taskmanager.ui.activity.IntentionActiv
 
 public class TasksFragment extends Fragment {
     private RecyclerView mTasksRecyclerView;
+    private ProgressBar mProgressBar;
     private TasksAdapter mTasksAdapter;
 
     private TasksRepository mTasksRepository;
@@ -62,6 +66,7 @@ public class TasksFragment extends Fragment {
                              Bundle savedInstanceState) {
         Log.v("onCreateView");
         View view = inflater.inflate(R.layout.fragment_tasks, container, false);
+        mProgressBar = view.findViewById(R.id.tasks_progress_bar);
         mTasksRecyclerView = view.findViewById(R.id.recycler_tasks);
         LinearLayoutManager layoutManager = new LinearLayoutManager(getActivity());
         mTasksRecyclerView.setLayoutManager(layoutManager);
@@ -103,6 +108,7 @@ public class TasksFragment extends Fragment {
             @Override
             public void onSuccess(List<Task> taskArrayList) {
                 mTasks = taskArrayList;
+                mProgressBar.setVisibility(ProgressBar.INVISIBLE);
                 setTasksAdapter(taskArrayList);
             }
 
@@ -152,12 +158,16 @@ public class TasksFragment extends Fragment {
                 task, PATCH, new TasksRepository.OnTasksLoadedListener() {
                     @Override
                     public void onSuccess(List<Task> taskArrayList) {
-                        mTasksAdapter.updateList(taskArrayList);
+                        if (isVisible()) {
+                            mTasksAdapter.updateList(taskArrayList);
+                        }
                     }
 
                     @Override
                     public void onFail(String message) {
-                        ((BaseActivity) requireActivity()).onError(message);
+                        if (isVisible()) {
+                            ((BaseActivity) requireActivity()).onError(message);
+                        }
                     }
                 });
     }
@@ -171,7 +181,9 @@ public class TasksFragment extends Fragment {
 
             @Override
             public void onFail(String message) {
-                ((BaseActivity) requireActivity()).onError(message);
+                if (isVisible()) {
+                    ((BaseActivity) requireActivity()).onError(message);
+                }
             }
         });
     }
@@ -183,6 +195,15 @@ public class TasksFragment extends Fragment {
 
     @Override
     public void onDetach() {
+        ((IntentionActivity) requireActivity()).unsubscribeTaskListeners();
+        mTasksAdapter.unsubscribe();
         super.onDetach();
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        RefWatcher refWatcher = TaskManagerApp.getRefWatcher(requireActivity());
+        refWatcher.watch(this);
     }
 }

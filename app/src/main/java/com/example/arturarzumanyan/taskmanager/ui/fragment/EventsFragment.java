@@ -13,12 +13,22 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.example.arturarzumanyan.taskmanager.R;
+import com.example.arturarzumanyan.taskmanager.TaskManagerApp;
+import com.example.arturarzumanyan.taskmanager.networking.util.Log;
+import com.squareup.leakcanary.RefWatcher;
 
 import static com.example.arturarzumanyan.taskmanager.ui.activity.IntentionActivity.EVENTS_KEY;
 
 public class EventsFragment extends Fragment {
     private static final String BACK_STACK_ROOT_TAG = "root_fragment";
+    private static final String DAILY_FRAGMENT_TAG = "daily_fragment_tag";
+    private static final String WEEK_DASHBOARD_FRAGMENT_TAG = "week_dashboard_fragment_tag";
+    private static final String STATISTIC_FRAGMENT_TAG = "statistic_fragment_tag";
     private MenuItem mSelectedFragmentItem;
+    private BottomNavigationView mBottomNav;
+    private DailyEventsFragment mRetainedDailyEventsFragment;
+    private WeekDashboardFragment mRetainedWeekDashboardFragment;
+    private EventsStatisticFragment mRetainedEventsStatisticFragment;
 
     public EventsFragment() {
 
@@ -39,13 +49,13 @@ public class EventsFragment extends Fragment {
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_events, container, false);
 
-        BottomNavigationView bottomNav = view.findViewById(R.id.bottom_navigation);
-        bottomNav.setOnNavigationItemSelectedListener(navListener);
+        mBottomNav = view.findViewById(R.id.bottom_navigation);
+        mBottomNav.setOnNavigationItemSelectedListener(navListener);
 
         if (mSelectedFragmentItem == null) {
-            bottomNav.setSelectedItemId(R.id.nav_today);
+            mBottomNav.setSelectedItemId(R.id.nav_today);
         } else {
-            bottomNav.setSelectedItemId(mSelectedFragmentItem.getItemId());
+            mBottomNav.setSelectedItemId(mSelectedFragmentItem.getItemId());
         }
         return view;
     }
@@ -54,6 +64,7 @@ public class EventsFragment extends Fragment {
             new BottomNavigationView.OnNavigationItemSelectedListener() {
                 @Override
                 public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+                    Log.v("Selected");
                     requireFragmentManager().popBackStack(BACK_STACK_ROOT_TAG,
                             FragmentManager.POP_BACK_STACK_INCLUSIVE);
 
@@ -68,42 +79,75 @@ public class EventsFragment extends Fragment {
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
 
-        setDailyEventsFragment(savedInstanceState);
+        requireActivity().setTitle(EVENTS_KEY);
     }
 
     private void setSelectedFragment(MenuItem item) {
-        Fragment selectedFragment = null;
         mSelectedFragmentItem = item;
 
         switch (item.getItemId()) {
             case R.id.nav_week:
-                selectedFragment = WeekDashboardFragment.newInstance();
+                mRetainedDailyEventsFragment = null;
+                mRetainedEventsStatisticFragment = null;
+                displayRetainedWeekDashboardFragment();
                 break;
             case R.id.nav_today:
-                selectedFragment = DailyEventsFragment.newInstance();
+                mRetainedWeekDashboardFragment = null;
+                mRetainedEventsStatisticFragment = null;
+                displayRetainedDailyEventsFragment();
                 break;
             case R.id.nav_stats:
-                selectedFragment = EventsStatisticFragment.newInstance();
+                mRetainedWeekDashboardFragment = null;
+                mRetainedDailyEventsFragment = null;
+                displayRetainedEventsStatisticFragment();
                 break;
         }
-
-        requireFragmentManager()
-                .beginTransaction()
-                .replace(R.id.fragment_container, selectedFragment)
-                .addToBackStack(BACK_STACK_ROOT_TAG)
-                .commit();
-
     }
 
-    private void setDailyEventsFragment(Bundle savedInstanceState) {
-        if (savedInstanceState == null) {
-            requireFragmentManager()
-                    .beginTransaction()
-                    .replace(R.id.fragment_container, new DailyEventsFragment())
-                    .commit();
-        }
+    private DailyEventsFragment getRetainedDailyEventsFragment() {
+        mRetainedDailyEventsFragment = (DailyEventsFragment) requireFragmentManager().findFragmentByTag(DAILY_FRAGMENT_TAG);
+        return mRetainedDailyEventsFragment;
+    }
 
-        requireActivity().setTitle(EVENTS_KEY);
+    private WeekDashboardFragment getRetainedWeekDashboardFragment() {
+        mRetainedWeekDashboardFragment = (WeekDashboardFragment) requireFragmentManager().findFragmentByTag(WEEK_DASHBOARD_FRAGMENT_TAG);
+        return mRetainedWeekDashboardFragment;
+    }
+
+    private EventsStatisticFragment getRetainedEventsStatisticFragment() {
+        mRetainedEventsStatisticFragment = (EventsStatisticFragment) requireFragmentManager().findFragmentByTag(STATISTIC_FRAGMENT_TAG);
+        return mRetainedEventsStatisticFragment;
+    }
+
+    private void displayRetainedDailyEventsFragment() {
+        mRetainedDailyEventsFragment = getRetainedDailyEventsFragment();
+        if (mRetainedDailyEventsFragment == null) {
+            mRetainedDailyEventsFragment = DailyEventsFragment.newInstance();
+        }
+        openRetainedFragment(mRetainedDailyEventsFragment, DAILY_FRAGMENT_TAG);
+    }
+
+    private void displayRetainedWeekDashboardFragment() {
+        mRetainedWeekDashboardFragment = getRetainedWeekDashboardFragment();
+        if (mRetainedWeekDashboardFragment == null) {
+            mRetainedWeekDashboardFragment = WeekDashboardFragment.newInstance();
+        }
+        openRetainedFragment(mRetainedWeekDashboardFragment, WEEK_DASHBOARD_FRAGMENT_TAG);
+    }
+
+    private void displayRetainedEventsStatisticFragment() {
+        mRetainedEventsStatisticFragment = getRetainedEventsStatisticFragment();
+        if (mRetainedEventsStatisticFragment == null) {
+            mRetainedEventsStatisticFragment = EventsStatisticFragment.newInstance();
+        }
+        openRetainedFragment(mRetainedEventsStatisticFragment, STATISTIC_FRAGMENT_TAG);
+    }
+
+    private void openRetainedFragment(Fragment retainedFragment, String tag) {
+        requireFragmentManager().beginTransaction()
+                .add(retainedFragment, tag)
+                .replace(R.id.fragment_container, retainedFragment)
+                .commit();
     }
 
     @Override
@@ -113,6 +157,15 @@ public class EventsFragment extends Fragment {
 
     @Override
     public void onDetach() {
+        mBottomNav.setOnNavigationItemSelectedListener(null);
+        navListener = null;
         super.onDetach();
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        RefWatcher refWatcher = TaskManagerApp.getRefWatcher(requireActivity());
+        refWatcher.watch(this);
     }
 }

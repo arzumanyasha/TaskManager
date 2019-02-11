@@ -10,8 +10,10 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
+import android.widget.ProgressBar;
 
 import com.example.arturarzumanyan.taskmanager.R;
+import com.example.arturarzumanyan.taskmanager.TaskManagerApp;
 import com.example.arturarzumanyan.taskmanager.data.repository.events.EventsRepository;
 import com.example.arturarzumanyan.taskmanager.data.repository.events.specification.WeeklyEventsSpecification;
 import com.example.arturarzumanyan.taskmanager.domain.Event;
@@ -19,6 +21,7 @@ import com.example.arturarzumanyan.taskmanager.networking.util.DateUtils;
 import com.example.arturarzumanyan.taskmanager.networking.util.Log;
 import com.example.arturarzumanyan.taskmanager.ui.activity.BaseActivity;
 import com.example.arturarzumanyan.taskmanager.ui.adapter.ColorPalette;
+import com.squareup.leakcanary.RefWatcher;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -31,6 +34,7 @@ import static com.example.arturarzumanyan.taskmanager.networking.util.DateUtils.
 import static com.example.arturarzumanyan.taskmanager.networking.util.DateUtils.MINUTES_IN_HOUR;
 
 public class WeekDashboardFragment extends Fragment {
+    private ProgressBar progressBar;
     private LinearLayout mLinearLayoutMon;
     private LinearLayout mLinearLayoutTue;
     private LinearLayout mLinearLayoutWed;
@@ -60,6 +64,7 @@ public class WeekDashboardFragment extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_week_dashboard, container, false);
+        progressBar = view.findViewById(R.id.week_dashboard_progress_bar);
         mLinearLayoutMon = view.findViewById(R.id.linear_layout_mon);
         mLinearLayoutTue = view.findViewById(R.id.linear_layout_tue);
         mLinearLayoutWed = view.findViewById(R.id.linear_layout_wed);
@@ -113,16 +118,21 @@ public class WeekDashboardFragment extends Fragment {
         eventsRepository.getEvents(weeklyEventsSpecification, new EventsRepository.OnEventsLoadedListener() {
             @Override
             public void onSuccess(List<Event> eventsList) {
-                Log.v("Weekly events loaded");
+                if (isVisible()) {
+                    Log.v("Weekly events loaded");
 
-                mWeeklyEventsList = eventsList;
-                fetchWeeklyEventsWithDate(eventsList);
-                displayDashboard(linearLayouts, mWeeklyEvents, weekDateList);
+                    mWeeklyEventsList = eventsList;
+                    fetchWeeklyEventsWithDate(eventsList);
+                    progressBar.setVisibility(ProgressBar.INVISIBLE);
+                    displayDashboard(linearLayouts, mWeeklyEvents, weekDateList);
+                }
             }
 
             @Override
             public void onFail(String message) {
-                ((BaseActivity) requireActivity()).onError(message);
+                if (isVisible()) {
+                    ((BaseActivity) requireActivity()).onError(message);
+                }
             }
         });
     }
@@ -183,5 +193,12 @@ public class WeekDashboardFragment extends Fragment {
     @Override
     public void onDetach() {
         super.onDetach();
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        RefWatcher refWatcher = TaskManagerApp.getRefWatcher(requireActivity());
+        refWatcher.watch(this);
     }
 }

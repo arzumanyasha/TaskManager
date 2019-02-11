@@ -156,7 +156,7 @@ public class EventsDialog extends AppCompatDialogFragment {
 
         int colorNumber = mColorMap.keyAt(mColorMap.indexOfValue(mCurrentColor));
 
-        if (mEndTime.after(mStartTime) && !mEditTextEventName.getText().toString().isEmpty()) {
+        if (endDate != null && endDate.after(startDate) && !mEditTextEventName.getText().toString().isEmpty()) {
             if (bundle != null) {
                 updateEvent(bundle, name, description, colorNumber, startDate, endDate, isNotify);
             } else {
@@ -239,7 +239,6 @@ public class EventsDialog extends AppCompatDialogFragment {
         });
 
         mTextViewDate.setOnClickListener(new View.OnClickListener() {
-            @RequiresApi(api = Build.VERSION_CODES.N)
             @Override
             public void onClick(View v) {
                 DatePickerDialog datePickerDialog = new DatePickerDialog(requireActivity(), new DatePickerDialog.OnDateSetListener() {

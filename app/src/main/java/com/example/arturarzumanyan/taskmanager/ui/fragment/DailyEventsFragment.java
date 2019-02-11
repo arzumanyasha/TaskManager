@@ -3,23 +3,26 @@ package com.example.arturarzumanyan.taskmanager.ui.fragment;
 import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ProgressBar;
 
 import com.example.arturarzumanyan.taskmanager.R;
+import com.example.arturarzumanyan.taskmanager.TaskManagerApp;
 import com.example.arturarzumanyan.taskmanager.data.repository.events.EventsRepository;
 import com.example.arturarzumanyan.taskmanager.data.repository.events.specification.EventsFromDateSpecification;
 import com.example.arturarzumanyan.taskmanager.domain.Event;
 import com.example.arturarzumanyan.taskmanager.networking.util.DateUtils;
+import com.example.arturarzumanyan.taskmanager.networking.util.Log;
 import com.example.arturarzumanyan.taskmanager.ui.activity.BaseActivity;
 import com.example.arturarzumanyan.taskmanager.ui.activity.IntentionActivity;
 import com.example.arturarzumanyan.taskmanager.ui.adapter.EventsAdapter;
 import com.example.arturarzumanyan.taskmanager.ui.dialog.EventsDialog;
+import com.squareup.leakcanary.RefWatcher;
 
 import java.util.List;
 
@@ -27,6 +30,7 @@ import static com.example.arturarzumanyan.taskmanager.ui.activity.IntentionActiv
 
 public class DailyEventsFragment extends Fragment {
     private RecyclerView mEventsRecyclerView;
+    private ProgressBar mProgressBar;
     private EventsRepository mEventsRepository;
 
     private EventsAdapter mEventsAdapter;
@@ -42,6 +46,7 @@ public class DailyEventsFragment extends Fragment {
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
+        Log.v("onCreate");
         super.onCreate(savedInstanceState);
         setRetainInstance(true);
 
@@ -55,8 +60,10 @@ public class DailyEventsFragment extends Fragment {
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
+        Log.v("onCreateView");
         View view = inflater.inflate(R.layout.fragment_daily_events, container, false);
         mEventsRecyclerView = view.findViewById(R.id.recycler_events);
+        mProgressBar = view.findViewById(R.id.daily_events_progress_bar);
 
         if (mDailyEventsList == null) {
             loadDailyEvents();
@@ -73,13 +80,18 @@ public class DailyEventsFragment extends Fragment {
         mEventsRepository.getEvents(eventsFromDateSpecification, new EventsRepository.OnEventsLoadedListener() {
             @Override
             public void onSuccess(List<Event> eventsList) {
-                mDailyEventsList = eventsList;
-                setEventsAdapter(eventsList);
+                if (isVisible()) {
+                    mDailyEventsList = eventsList;
+                    mProgressBar.setVisibility(ProgressBar.INVISIBLE);
+                    setEventsAdapter(eventsList);
+                }
             }
 
             @Override
             public void onFail(String message) {
-                ((BaseActivity) requireActivity()).onError(message);
+                if (isVisible()) {
+                    ((BaseActivity) requireActivity()).onError(message);
+                }
             }
         });
     }
@@ -139,11 +151,23 @@ public class DailyEventsFragment extends Fragment {
 
     @Override
     public void onAttach(Context context) {
+        Log.v("onAttach");
         super.onAttach(context);
     }
 
     @Override
     public void onDetach() {
+        ((IntentionActivity) requireActivity()).unsubscribeEventListeners();
+        if (mEventsAdapter != null) {
+            mEventsAdapter.unsubscribe();
+        }
         super.onDetach();
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        RefWatcher refWatcher = TaskManagerApp.getRefWatcher(requireActivity());
+        refWatcher.watch(this);
     }
 }

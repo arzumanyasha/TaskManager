@@ -186,7 +186,10 @@ public class DateUtils {
     }
 
     public static String getStringDateFromInt(int year, int month, int day) {
-        return Integer.toString(year) + Integer.toString(month + 1) + Integer.toString(day);
+        SimpleDateFormat df = new SimpleDateFormat(YEAR_MONTH_DAY_DATE_PATTERN, Locale.ENGLISH);
+        Calendar c = Calendar.getInstance();
+        c.set(year, month, day);
+        return df.format(c.getTime());
     }
 
     public static Date getNextDate(Date date) {

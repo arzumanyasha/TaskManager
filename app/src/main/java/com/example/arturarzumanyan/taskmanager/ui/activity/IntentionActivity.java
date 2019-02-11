@@ -7,7 +7,6 @@ import android.os.Parcelable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentTransaction;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.app.NotificationManagerCompat;
 import android.support.v4.view.GravityCompat;
@@ -177,8 +176,9 @@ public class IntentionActivity extends BaseActivity {
         mRetainedTasksFragment = getRetainedTaskFragment();
         if (mRetainedTasksFragment == null) {
             mRetainedTasksFragment = TasksFragment.newInstance(mTaskLists.get(0));
-            openRetainedFragment(mRetainedTasksFragment, RETAINED_TASK_FRAGMENT_TAG);
+            mRetainedEventsFragment = null;
         }
+        openRetainedFragment(mRetainedTasksFragment, RETAINED_TASK_FRAGMENT_TAG);
 
         mCurrentTaskList = mTaskLists.get(0);
     }
@@ -187,8 +187,9 @@ public class IntentionActivity extends BaseActivity {
         mRetainedEventsFragment = getRetainedEventsFragment();
         if (mRetainedEventsFragment == null) {
             mRetainedEventsFragment = EventsFragment.newInstance();
-            openRetainedFragment(mRetainedEventsFragment, RETAINED_EVENT_FRAGMENT_TAG);
+            mRetainedTasksFragment = null;
         }
+        openRetainedFragment(mRetainedEventsFragment, RETAINED_EVENT_FRAGMENT_TAG);
     }
 
     private void updateTaskListsMenu(List<TaskList> taskLists) {
@@ -230,6 +231,7 @@ public class IntentionActivity extends BaseActivity {
                         if (mRetainedEventsFragment == null) {
                             mRetainedEventsFragment = EventsFragment.newInstance();
                         }
+                        mRetainedTasksFragment = null;
                         openRetainedFragment(mRetainedEventsFragment, RETAINED_EVENT_FRAGMENT_TAG);
                         mDrawer.closeDrawer(Gravity.START);
                         invalidateOptionsMenu();
@@ -343,16 +345,23 @@ public class IntentionActivity extends BaseActivity {
     }
 
     private void updateTaskUi(TaskList taskList) {
+        mRetainedEventsFragment = null;
         openRetainedFragment(TasksFragment.newInstance(taskList), RETAINED_TASK_FRAGMENT_TAG);
         mCurrentTaskList = taskList;
         mDrawer.closeDrawer(Gravity.START);
     }
 
     private void openRetainedFragment(Fragment retainedFragment, String tag) {
-        getSupportFragmentManager().beginTransaction()
-                .add(retainedFragment, tag)
-                .replace(R.id.main_container, retainedFragment)
-                .commit();
+        if (!retainedFragment.isAdded()) {
+            getSupportFragmentManager().beginTransaction()
+                    .add(retainedFragment, tag)
+                    .replace(R.id.main_container, retainedFragment)
+                    .commit();
+        } else {
+            getSupportFragmentManager().beginTransaction()
+                    .replace(R.id.main_container, retainedFragment)
+                    .commit();
+        }
     }
 
     @Override
@@ -435,16 +444,13 @@ public class IntentionActivity extends BaseActivity {
         TaskList previousTaskList = null;
         for (int i = 0; i < menuSize; i++) {
             if (mTaskLists.get(i).getId() == taskList.getId()) {
-                Log.v("menu size was " + mTaskListsMenu.size());
-                mTaskListsMenu.getItem(i).setVisible(false);
-                int itemId = mTaskListsMenu.getItem(i).getItemId();
-                mTaskListsMenu.removeItem(itemId);
-                Log.v("menu size is " + mTaskListsMenu.size());
                 mTaskLists.remove(i);
                 previousTaskList = mTaskLists.get(i - 1);
                 break;
             }
         }
+        updateTaskListsMenu(mTaskLists);
+
         if (previousTaskList != null) {
             mCurrentTaskList = previousTaskList;
             openRetainedFragment(TasksFragment.newInstance(previousTaskList), RETAINED_TASK_FRAGMENT_TAG);
@@ -499,7 +505,7 @@ public class IntentionActivity extends BaseActivity {
     }
 
     private void displayEventDatePicker() {
-        DatePickerDialog datePickerDialog = new DatePickerDialog(getApplicationContext(), new DatePickerDialog.OnDateSetListener() {
+        DatePickerDialog datePickerDialog = new DatePickerDialog(this, new DatePickerDialog.OnDateSetListener() {
 
             @Override
             public void onDateSet(DatePicker view, int year, int monthOfYear, int dayOfMonth) {
@@ -541,6 +547,15 @@ public class IntentionActivity extends BaseActivity {
         taskFragmentInteractionListener = null;
         eventFragmentInteractionListener = null;
         taskListFragmentInteractionListener = null;
+    }
+
+    public void unsubscribeTaskListeners() {
+        taskListFragmentInteractionListener = null;
+        taskFragmentInteractionListener = null;
+    }
+
+    public void unsubscribeEventListeners() {
+        eventFragmentInteractionListener = null;
     }
 
     public void setTaskFragmentInteractionListener(TaskFragmentInteractionListener listener) {

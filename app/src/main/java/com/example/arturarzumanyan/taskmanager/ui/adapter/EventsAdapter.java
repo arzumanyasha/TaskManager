@@ -115,6 +115,10 @@ public class EventsAdapter extends RecyclerView.Adapter<EventsAdapter.ViewHolder
         }
     }
 
+    public void unsubscribe() {
+        mListener = null;
+    }
+
     public interface OnItemClickListener {
         void onItemDelete(Event event);
 

@@ -1,7 +1,5 @@
 package com.example.arturarzumanyan.taskmanager.data.repository;
 
-import android.content.Context;
-
 import com.example.arturarzumanyan.taskmanager.auth.FirebaseWebService;
 import com.example.arturarzumanyan.taskmanager.domain.Event;
 import com.example.arturarzumanyan.taskmanager.domain.Task;
@@ -75,10 +73,6 @@ public class RepositoryLoadHelper {
             remindersMap.put(OVERRIDES_KEY, overrides);
             remindersMap.put(USE_DEFAULT_KEY, false);
 
-            requestBody.put(REMINDERS_KEY, remindersMap);
-        } else {
-            Map<String, Object> remindersMap = new HashMap<>();
-            remindersMap.put(USE_DEFAULT_KEY, false);
             requestBody.put(REMINDERS_KEY, remindersMap);
         }
 

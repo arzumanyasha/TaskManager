@@ -228,6 +228,10 @@ public class FirebaseWebService implements GoogleApiClient.OnConnectionFailedLis
         }
     }
 
+    public void unsubscribe() {
+        userInfoLoadingListener = null;
+    }
+
     public void setUserInfoLoadingListener(UserInfoLoadingListener listener) {
         this.userInfoLoadingListener = listener;
     }

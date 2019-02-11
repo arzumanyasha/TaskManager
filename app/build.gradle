@@ -1,6 +1,14 @@
 apply plugin: 'com.android.application'
 
 android {
+    signingConfigs {
+        config {
+            keyAlias 'TaskManager'
+            keyPassword 'Vadeika10'
+            storeFile file('D:/KeyStore/TaskManager.keystore.jks')
+            storePassword 'Vadeika10'
+        }
+    }
     compileSdkVersion 28
     defaultConfig {
         applicationId "com.example.arturarzumanyan.taskmanager"
@@ -14,12 +22,13 @@ android {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            signingConfig signingConfigs.config
         }
     }
 }
 
 dependencies {
-    implementation fileTree(dir: 'libs', include: ['*.jar'])
+    implementation fileTree(include: ['*.jar'], dir: 'libs')
     implementation 'com.android.support:appcompat-v7:28.0.0-alpha1'
     implementation 'com.android.support:animated-vector-drawable:28.0.0-alpha1'
     implementation 'com.android.support:support-media-compat:28.0.0-alpha1'
@@ -36,6 +45,7 @@ dependencies {
     implementation 'com.squareup.picasso:picasso:2.71828'
     implementation 'com.github.PhilJay:MPAndroidChart:v3.0.3'
     implementation 'petrov.kristiyan:colorpicker-library:1.1.8'
+    debugImplementation 'com.squareup.leakcanary:leakcanary-android:1.5.4'
     testImplementation 'junit:junit:4.12'
     androidTestImplementation 'com.android.support.test:runner:1.0.2'
     androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.2'
