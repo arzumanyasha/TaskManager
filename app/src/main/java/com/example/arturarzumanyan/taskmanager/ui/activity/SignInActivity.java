@@ -58,9 +58,6 @@ public class SignInActivity extends BaseActivity {
             updateUI(FirebaseWebService.getFirebaseWebServiceInstance().getCurrentUser().getDisplayName(),
                     FirebaseWebService.getFirebaseWebServiceInstance().getCurrentUser().getEmail(),
                     String.valueOf(FirebaseWebService.getFirebaseWebServiceInstance().getCurrentUser().getPhotoUrl()));
-
-        } else {
-            Toast.makeText(getApplicationContext(), getString(R.string.failed_log_in_message), Toast.LENGTH_LONG).show();
         }
     }
 

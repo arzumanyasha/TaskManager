@@ -31,6 +31,14 @@
           }
         },
         {
+          "client_id": "685238908043-k3u1lscrlpscrnrf06e695prns73c4nv.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.arturarzumanyan.taskmanager",
+            "certificate_hash": "70aacc51531f526a46292ffa5be976d2bd396afe"
+          }
+        },
+        {
           "client_id": "685238908043-obre149i2k2gh9a71g2it0emsa97glma.apps.googleusercontent.com",
           "client_type": 3
         }
