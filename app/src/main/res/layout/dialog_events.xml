@@ -29,7 +29,8 @@
     <EditText
         android:id="@+id/edit_text_event_description"
         android:layout_width="0dp"
-        android:layout_height="150dp"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="8dp"
         android:layout_marginEnd="16dp"
         android:layout_marginLeft="16dp"
         android:layout_marginRight="16dp"
@@ -38,9 +39,23 @@
         android:ems="10"
         android:hint="@string/description_hint"
         android:inputType="textMultiLine"
+        app:layout_constraintBottom_toTopOf="@+id/colorTextView"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/edit_text_event_name" />
+
+    <TextView
+        android:id="@+id/colorTextView"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="16dp"
+        android:layout_marginLeft="16dp"
+        android:layout_marginRight="16dp"
+        android:layout_marginStart="16dp"
+        android:text="@string/choose_color"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/edit_text_event_description" />
 
     <ImageButton
         android:id="@+id/image_button_color_picker"
@@ -53,7 +68,7 @@
         android:layout_marginTop="8dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/edit_text_event_description"
+        app:layout_constraintTop_toBottomOf="@+id/colorTextView"
         app:srcCompat="@color/_9" />
 
     <TextView
@@ -66,6 +81,7 @@
         android:layout_marginTop="8dp"
         android:layout_weight="1"
         android:clickable="true"
+        android:focusable="true"
         android:textAlignment="center"
         android:textStyle="bold"
         app:layout_constraintBottom_toTopOf="@+id/text_event_date"
@@ -83,6 +99,7 @@
         android:layout_marginTop="8dp"
         android:layout_weight="1"
         android:clickable="true"
+        android:focusable="true"
         android:textAlignment="center"
         android:textStyle="bold"
         app:layout_constraintBottom_toTopOf="@+id/text_event_date"
@@ -100,6 +117,9 @@
         android:layout_marginRight="16dp"
         android:layout_marginStart="16dp"
         android:clickable="true"
+        android:focusable="true"
+        android:textAlignment="center"
+        android:textStyle="bold"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -115,9 +135,9 @@
         android:layout_marginRight="16dp"
         android:layout_marginStart="16dp"
         android:layout_marginTop="8dp"
+        android:text="@string/notification_text"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/text_event_date"
-        tools:text="@string/notification_text" />
+        app:layout_constraintTop_toBottomOf="@+id/text_event_date" />
 
 </android.support.constraint.ConstraintLayout>

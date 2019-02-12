@@ -36,10 +36,12 @@
                 android:layout_gravity="start"
                 android:clickable="true"
                 android:foreground="?android:attr/selectableItemBackground"
-                android:textAlignment="textStart"
+                android:background="@color/white"
+                android:textAlignment="center"
                 android:textColor="@android:color/black"
                 android:textSize="24sp"
-                android:text="@string/add_task_list" />
+                android:text="@string/add_task_list"
+                android:focusable="true" />
         </RelativeLayout>
     </android.support.design.widget.NavigationView>
 </android.support.v4.widget.DrawerLayout>

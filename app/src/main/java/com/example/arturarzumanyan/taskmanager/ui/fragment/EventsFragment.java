@@ -145,10 +145,18 @@ public class EventsFragment extends Fragment {
     }
 
     private void openRetainedFragment(Fragment retainedFragment, String tag) {
-        requireFragmentManager().beginTransaction()
-                .add(retainedFragment, tag)
-                .replace(R.id.fragment_container, retainedFragment)
-                .commit();
+        if (!retainedFragment.isAdded()) {
+            Log.v(retainedFragment.toString() + " is not added");
+            requireFragmentManager().beginTransaction()
+                    .add(retainedFragment, tag)
+                    .replace(R.id.fragment_container, retainedFragment)
+                    .commit();
+        } else {
+            Log.v(retainedFragment.toString() + " is added");
+            requireFragmentManager().beginTransaction()
+                    .replace(R.id.fragment_container, retainedFragment)
+                    .commit();
+        }
     }
 
     @Override
@@ -159,6 +167,9 @@ public class EventsFragment extends Fragment {
     @Override
     public void onDetach() {
         mBottomNav.setOnNavigationItemSelectedListener(null);
+        mRetainedDailyEventsFragment = null;
+        mRetainedWeekDashboardFragment = null;
+        mRetainedEventsStatisticFragment = null;
         navListener = null;
         super.onDetach();
     }

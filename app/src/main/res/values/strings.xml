@@ -51,6 +51,7 @@
                 <string name="add_task_list"> + Add list</string>
 
             <!--dialog_events-->
+                <string name="choose_color">Choose color</string>
                 <string name="notification_text">Notification</string>
 
             <!--dialog_tasklists-->
@@ -67,7 +68,7 @@
             <!--fragment_week_dashboard-->
                 <string name="monday_name">Mon</string>
                 <string name="tuesday_name">Tue</string>
-                <string name="wednesday_name">wed</string>
+                <string name="wednesday_name">Wed</string>
                 <string name="thursday_name">Thu</string>
                 <string name="friday_name">Fri</string>
                 <string name="saturday_name">Sat</string>

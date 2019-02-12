@@ -30,6 +30,7 @@ import com.example.arturarzumanyan.taskmanager.data.repository.tasklists.specifi
 import com.example.arturarzumanyan.taskmanager.domain.Event;
 import com.example.arturarzumanyan.taskmanager.domain.Task;
 import com.example.arturarzumanyan.taskmanager.domain.TaskList;
+import com.example.arturarzumanyan.taskmanager.networking.util.CircleTransformation;
 import com.example.arturarzumanyan.taskmanager.networking.util.DateUtils;
 import com.example.arturarzumanyan.taskmanager.networking.util.Log;
 import com.example.arturarzumanyan.taskmanager.ui.dialog.EventsDialog;
@@ -274,6 +275,7 @@ public class IntentionActivity extends BaseActivity {
         userEmailTextView.setText(mUserData.getStringExtra(SignInActivity.EXTRA_USER_EMAIL));
         Picasso.get()
                 .load(mUserData.getStringExtra(SignInActivity.EXTRA_USER_PHOTO_URL))
+                .transform(new CircleTransformation())
                 .into(userPhotoImageView);
 
         addTaskListTextView.setOnClickListener(new View.OnClickListener() {
@@ -353,11 +355,13 @@ public class IntentionActivity extends BaseActivity {
 
     private void openRetainedFragment(Fragment retainedFragment, String tag) {
         if (!retainedFragment.isAdded()) {
+            Log.v(retainedFragment.toString() + " is not added");
             getSupportFragmentManager().beginTransaction()
                     .add(retainedFragment, tag)
                     .replace(R.id.main_container, retainedFragment)
                     .commit();
         } else {
+            Log.v(retainedFragment.toString() + " is added");
             getSupportFragmentManager().beginTransaction()
                     .replace(R.id.main_container, retainedFragment)
                     .commit();
