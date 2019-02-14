@@ -1,7 +1,6 @@
 package com.example.arturarzumanyan.taskmanager;
 
 import android.content.Context;
-import android.support.multidex.MultiDex;
 import android.support.multidex.MultiDexApplication;
 
 import com.example.arturarzumanyan.taskmanager.auth.FirebaseWebService;
@@ -20,12 +19,6 @@ public class TaskManagerApp extends MultiDexApplication {
         FirebaseWebService.initFirebaseWebServiceInstance(this);
         DbHelper.initDbHelperInstance(this);
         installLeakCanary();
-    }
-
-    @Override
-    protected void attachBaseContext(Context newBase) {
-        super.attachBaseContext(newBase);
-        MultiDex.install(this);
     }
 
     public static RefWatcher getRefWatcher(Context context) {

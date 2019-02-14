@@ -10,6 +10,7 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.WindowManager;
 import android.widget.ProgressBar;
 
 import com.example.arturarzumanyan.taskmanager.BuildConfig;
@@ -50,6 +51,12 @@ public class TasksFragment extends Fragment {
         args.putParcelable(TASK_LISTS_KEY, taskList);
         fragment.setArguments(args);
         return fragment;
+    }
+
+    public void setTaskList(TaskList mTaskList) {
+        this.mTaskList = mTaskList;
+        mProgressBar.setVisibility(View.VISIBLE);
+        loadTasks();
     }
 
     @Override
@@ -135,6 +142,9 @@ public class TasksFragment extends Fragment {
 
             @Override
             public void onChangeItemExecuted(final Task task) {
+                mProgressBar.setVisibility(View.VISIBLE);
+                requireActivity().getWindow().setFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE,
+                        WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
                 updateTask(task);
             }
         });
@@ -160,6 +170,8 @@ public class TasksFragment extends Fragment {
                     @Override
                     public void onSuccess(List<Task> taskArrayList) {
                         if (isVisible()) {
+                            mProgressBar.setVisibility(View.INVISIBLE);
+                            requireActivity().getWindow().clearFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
                             mTasksAdapter.updateList(taskArrayList);
                         }
                     }
@@ -167,6 +179,8 @@ public class TasksFragment extends Fragment {
                     @Override
                     public void onFail(String message) {
                         if (isVisible()) {
+                            mProgressBar.setVisibility(View.INVISIBLE);
+                            requireActivity().getWindow().clearFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
                             ((BaseActivity) requireActivity()).onError(message);
                         }
                     }
@@ -197,7 +211,9 @@ public class TasksFragment extends Fragment {
     @Override
     public void onDetach() {
         ((IntentionActivity) requireActivity()).unsubscribeTaskListeners();
-        mTasksAdapter.unsubscribe();
+        if (mTasksAdapter != null) {
+            mTasksAdapter.unsubscribe();
+        }
         super.onDetach();
     }
 

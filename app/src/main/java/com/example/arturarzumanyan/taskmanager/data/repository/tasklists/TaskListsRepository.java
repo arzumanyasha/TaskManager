@@ -107,7 +107,7 @@ public class TaskListsRepository {
 
         TaskListsAsyncTask taskListsAsyncTask = new TaskListsAsyncTask(taskList,
                 mRepositoryLoadHelper, mTaskListsDbStore, mTaskListsCloudStore,
-                mTasksDbStore, null, taskListFromIdSpecification, null);
+                mTasksDbStore, null, taskListFromIdSpecification, listener);
 
         taskListsAsyncTask.setDataInfoLoadingListener(new BaseDataLoadingAsyncTask.UserDataLoadingListener<TaskList>() {
             @Override
@@ -184,7 +184,11 @@ public class TaskListsRepository {
 
         @Override
         protected ResponseDto doDeleteRequest() {
-            return mTaskListsCloudStore.deleteTaskListOnServer(mTaskList);
+            if (mTaskList.getId() != 1) {
+                return mTaskListsCloudStore.deleteTaskListOnServer(mTaskList);
+            } else {
+                return null;
+            }
         }
 
         @Override
@@ -215,13 +219,13 @@ public class TaskListsRepository {
         }
 
         @Override
-        protected void doDeleteQuery() {
-            mTaskListsDbStore.deleteTaskList(mTaskList);
-        }
-
-        @Override
-        protected void onServerError() {
-            mListener.onFail("Tasks API server error");
+        protected boolean doDeleteQuery() {
+            if (mTaskList.getId() != 1) {
+                mTaskListsDbStore.deleteTaskList(mTaskList);
+                return true;
+            } else {
+                return false;
+            }
         }
 
         @Override

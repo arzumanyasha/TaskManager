@@ -169,18 +169,14 @@ public class TasksRepository {
         }
 
         @Override
-        protected void doDeleteQuery() {
+        protected boolean doDeleteQuery() {
             mTasksDbStore.deleteTask(mTask);
+            return true;
         }
 
         @Override
         protected List<Task> doSelectQuery() {
             return mTasksDbStore.getTasksFromTaskList(mTaskList.getId());
-        }
-
-        @Override
-        protected void onServerError() {
-            mListener.onFail("Tasks API server error");
         }
 
         @Override

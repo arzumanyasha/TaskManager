@@ -5,10 +5,8 @@ import android.app.DatePickerDialog;
 import android.app.Dialog;
 import android.app.TimePickerDialog;
 import android.content.DialogInterface;
-import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
-import android.support.annotation.RequiresApi;
 import android.support.v7.app.AppCompatDialogFragment;
 import android.util.SparseIntArray;
 import android.view.LayoutInflater;
@@ -134,9 +132,10 @@ public class EventsDialog extends AppCompatDialogFragment {
         mTextViewDate = view.findViewById(R.id.text_event_date);
         mSwitchNotification = view.findViewById(R.id.switch_notification);
 
-        mTextViewStartTime.setText(mHour + ":" + mMinute);
-        mTextViewEndTime.setText((mHour + 1) + ":" + mMinute);
-        mTextViewDate.setText(mYear + "-" + (mMonth + 1) + "-" + mDay);
+        mTextViewStartTime.setText(DateUtils.formatHourMinuteTime(mHour, mMinute));
+        mTextViewEndTime.setText(DateUtils.formatHourMinuteTime(mHour + 1, mMinute));
+        mTextViewDate.setText(DateUtils.getStringDateFromInt(mYear, mMonth, mDay));
+        mImageButtonColorPicker.setColorFilter(requireActivity().getResources().getColor(R.color._9));
 
         mImageButtonColorPicker.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -144,14 +143,13 @@ public class EventsDialog extends AppCompatDialogFragment {
                 openColorPicker();
             }
         });
-
     }
 
     private void addOrUpdateEvent(Bundle bundle) {
         String name = mEditTextEventName.getText().toString();
         String description = mEditTextEventDescription.getText().toString();
-        Date startDate = DateUtils.getEventDate(mTextViewDate.getText().toString(), mStartTime);
-        Date endDate = DateUtils.getEventDate(mTextViewDate.getText().toString(), mEndTime);
+        Date startDate = DateUtils.getEventDate(DateUtils.formatReversedYearMonthDayDate(mTextViewDate.getText().toString()), mStartTime);
+        Date endDate = DateUtils.getEventDate(DateUtils.formatReversedYearMonthDayDate(mTextViewDate.getText().toString()), mEndTime);
         int isNotify = mSwitchNotification.isChecked() ? 1 : 0;
 
         int colorNumber = mColorMap.keyAt(mColorMap.indexOfValue(mCurrentColor));
@@ -218,7 +216,7 @@ public class EventsDialog extends AppCompatDialogFragment {
                 new TimePickerDialog(getActivity(), new TimePickerDialog.OnTimeSetListener() {
                     @Override
                     public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
-                        mTextViewStartTime.setText(hourOfDay + ":" + minute);
+                        mTextViewStartTime.setText(DateUtils.formatHourMinuteTime(hourOfDay, minute));
                         mStartTime = new Date(0, 0, 0, hourOfDay, minute);
                     }
                 }, mHour, mMinute, true).show();
@@ -231,7 +229,7 @@ public class EventsDialog extends AppCompatDialogFragment {
                 new TimePickerDialog(getActivity(), new TimePickerDialog.OnTimeSetListener() {
                     @Override
                     public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
-                        mTextViewEndTime.setText(hourOfDay + ":" + minute);
+                        mTextViewEndTime.setText(DateUtils.formatHourMinuteTime(hourOfDay, minute));
                         mEndTime = new Date(0, 0, 0, hourOfDay, minute);
                     }
                 }, mHour, mMinute, true).show();
@@ -245,7 +243,7 @@ public class EventsDialog extends AppCompatDialogFragment {
 
                     @Override
                     public void onDateSet(DatePicker view, int year, int monthOfYear, int dayOfMonth) {
-                        mTextViewDate.setText(year + "-" + (monthOfYear + 1) + "-" + dayOfMonth);
+                        mTextViewDate.setText(DateUtils.getStringDateFromInt(year, monthOfYear, dayOfMonth));
                     }
                 }, mYear, mMonth, mDay);
 
@@ -265,7 +263,7 @@ public class EventsDialog extends AppCompatDialogFragment {
 
             mTextViewStartTime.setText(DateUtils.formatTimeWithoutA(event.getStartTime()));
             mTextViewEndTime.setText(DateUtils.formatTimeWithoutA(event.getEndTime()));
-            mTextViewDate.setText((DateUtils.formatEventDate(event.getStartTime())));
+            mTextViewDate.setText(DateUtils.formatReversedDayMonthYearDate(DateUtils.formatEventDate(event.getStartTime())));
 
             mSwitchNotification.setChecked(event.getIsNotify() == 1);
 

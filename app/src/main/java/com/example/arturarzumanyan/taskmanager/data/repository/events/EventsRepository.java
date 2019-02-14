@@ -183,13 +183,9 @@ public class EventsRepository {
         }
 
         @Override
-        protected void doDeleteQuery() {
+        protected boolean doDeleteQuery() {
             mEventsDbStore.deleteEvent(mEvent);
-        }
-
-        @Override
-        protected void onServerError() {
-            mListener.onFail("Calendar API server error");
+            return true;
         }
 
         @Override

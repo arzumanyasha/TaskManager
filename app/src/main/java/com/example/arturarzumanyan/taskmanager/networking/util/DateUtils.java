@@ -13,6 +13,7 @@ public class DateUtils {
     private static final String HOUR_MINUTE_TIME_A_PATTERN = "HH:mm a";
     private static final String HOUR_MINUTE_TIME_PATTERN = "HH:mm";
     private static final String YEAR_MONTH_DAY_DATE_PATTERN = "yyyy-MM-dd";
+    private static final String DAY_MONTH_YEAR_DATE_PATTERN = "dd-MM-yyyy";
     private static final String YEAR_MONTH_DAY_PATTERN = "yyyyMMdd";
     private static final int HOURS_IN_DAY = 24;
     private static final int MILLIS_IN_SECONDS = 1000;
@@ -61,6 +62,29 @@ public class DateUtils {
         return null;
     }
 
+    public static String formatReversedYearMonthDayDate(String date) {
+        return reverseDate(date, DAY_MONTH_YEAR_DATE_PATTERN, YEAR_MONTH_DAY_DATE_PATTERN);
+    }
+
+    public static String formatReversedDayMonthYearDate(String date) {
+        return reverseDate(date, YEAR_MONTH_DAY_DATE_PATTERN, DAY_MONTH_YEAR_DATE_PATTERN);
+    }
+
+    private static String reverseDate(String date, String reverseFromPattern, String reverseToPattern) {
+        SimpleDateFormat simpleDateFormatTo = new SimpleDateFormat(reverseToPattern, Locale.getDefault());
+        SimpleDateFormat simpleDateFormatFrom = new SimpleDateFormat(reverseFromPattern, Locale.getDefault());
+        if(isValidFormat(reverseFromPattern, date)){
+            Date reversedDate = null;
+            try {
+                reversedDate = simpleDateFormatFrom.parse(date);
+            } catch (ParseException e) {
+                e.printStackTrace();
+            }
+            return simpleDateFormatTo.format(reversedDate);
+        }
+        return null;
+    }
+
     public static Date getTaskDateFromString(String date) {
         DateFormat dateFormat = new SimpleDateFormat(TASK_DATE_PATTERN, Locale.ENGLISH);
         if (isValidFormat(TASK_DATE_PATTERN, date)) {
@@ -89,6 +113,14 @@ public class DateUtils {
             e.printStackTrace();
         }
         return null;
+    }
+
+    public static String formatHourMinuteTime(int hour, int minute) {
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat(HOUR_MINUTE_TIME_PATTERN, Locale.getDefault());
+        Calendar c = Calendar.getInstance();
+        c.set(Calendar.HOUR_OF_DAY, hour);
+        c.set(Calendar.MINUTE, minute);
+        return simpleDateFormat.format(c.getTime());
     }
 
     public static int getDaysInCurrentMonth() {
@@ -186,7 +218,7 @@ public class DateUtils {
     }
 
     public static String getStringDateFromInt(int year, int month, int day) {
-        SimpleDateFormat df = new SimpleDateFormat(YEAR_MONTH_DAY_DATE_PATTERN, Locale.ENGLISH);
+        SimpleDateFormat df = new SimpleDateFormat(DAY_MONTH_YEAR_DATE_PATTERN, Locale.ENGLISH);
         Calendar c = Calendar.getInstance();
         c.set(year, month, day);
         return df.format(c.getTime());

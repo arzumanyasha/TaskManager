@@ -33,7 +33,7 @@ import static com.example.arturarzumanyan.taskmanager.ui.activity.IntentionActiv
 public class TasksDialog extends AppCompatDialogFragment {
     private EditText mEditTextTaskName, mEditTextTaskDescription;
     private TextView mTextViewTaskDate;
-    private Date taskDate;
+    private Date mTaskDate;
 
     private TasksReadyListener tasksReadyListener;
 
@@ -104,7 +104,7 @@ public class TasksDialog extends AppCompatDialogFragment {
                     @Override
                     public void onDateSet(DatePicker view, int year, int monthOfYear, int dayOfMonth) {
                         mTextViewTaskDate.setText(DateUtils.getStringDateFromInt(year, monthOfYear, dayOfMonth));
-                        taskDate = DateUtils.getTaskDateFromString(mTextViewTaskDate.getText().toString());
+                        mTaskDate = DateUtils.getTaskDateFromString(DateUtils.formatReversedYearMonthDayDate(mTextViewTaskDate.getText().toString()));
                     }
                 }, year, month, day);
 
@@ -120,7 +120,7 @@ public class TasksDialog extends AppCompatDialogFragment {
                 mEditTextTaskName.setText(task.getName());
                 mEditTextTaskDescription.setText(task.getDescription());
                 if (task.getDate() != null) {
-                    mTextViewTaskDate.setText(DateUtils.getTaskDate(task.getDate()));
+                    mTextViewTaskDate.setText(DateUtils.formatReversedDayMonthYearDate(DateUtils.getTaskDate(task.getDate())));
                 }
             }
         }
@@ -149,7 +149,7 @@ public class TasksDialog extends AppCompatDialogFragment {
             Date date = null;
 
             if (!mTextViewTaskDate.getText().equals(getString(R.string.set_task_date_title))) {
-                date = DateUtils.getTaskDateFromString(mTextViewTaskDate.getText().toString());
+                date = DateUtils.getTaskDateFromString(DateUtils.formatReversedYearMonthDayDate(mTextViewTaskDate.getText().toString()));
             }
 
             Task task = new Task(taskId, taskName, taskDescription, isExecuted, taskListId, date);
@@ -174,7 +174,7 @@ public class TasksDialog extends AppCompatDialogFragment {
         if (task != null) {
             task.setName(taskName);
             task.setDescription(mEditTextTaskDescription.getText().toString());
-            task.setDate(taskDate);
+            task.setDate(mTaskDate);
             tasksRepository.addOrUpdateTask(taskList, task, PATCH, new TasksRepository.OnTasksLoadedListener() {
                 @Override
                 public void onSuccess(List<Task> taskArrayList) {
