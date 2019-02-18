@@ -126,10 +126,7 @@ public class EventsStatisticFragment extends Fragment {
         mEventsRepository.getEvents(eventsFromDateSpecification, new EventsRepository.OnEventsLoadedListener() {
             @Override
             public void onSuccess(List<Event> eventsList) {
-                if (isVisible()) {
-                    mEvents = eventsList;
-                    createPieChart(eventsList, countOfMinutes);
-                }
+                updateUi(eventsList, countOfMinutes);
             }
 
             @Override
@@ -146,10 +143,7 @@ public class EventsStatisticFragment extends Fragment {
         mEventsRepository.getEvents(weeklyEventsSpecification, new EventsRepository.OnEventsLoadedListener() {
             @Override
             public void onSuccess(List<Event> eventsList) {
-                if (isVisible()) {
-                    mEvents = eventsList;
-                    createPieChart(eventsList, countOfMinutes);
-                }
+                updateUi(eventsList, countOfMinutes);
             }
 
             @Override
@@ -166,10 +160,7 @@ public class EventsStatisticFragment extends Fragment {
         mEventsRepository.getEvents(monthlyEventsSpecification, new EventsRepository.OnEventsLoadedListener() {
             @Override
             public void onSuccess(List<Event> eventsList) {
-                if (isVisible()) {
-                    mEvents = eventsList;
-                    createPieChart(eventsList, countOfMinutes);
-                }
+                updateUi(eventsList, countOfMinutes);
             }
 
             @Override
@@ -179,6 +170,16 @@ public class EventsStatisticFragment extends Fragment {
                 }
             }
         });
+    }
+
+    private void updateUi(List<Event> eventsList, int countOfMinutes) {
+        if (isVisible()) {
+            mEvents = eventsList;
+            createPieChart(eventsList, countOfMinutes);
+            if (eventsList.size() == 0) {
+                pieChart.setCenterText(requireActivity().getString(R.string.no_events_to_show_message));
+            }
+        }
     }
 
     private void createPieChart(List<Event> events, int minutes) {
@@ -220,7 +221,7 @@ public class EventsStatisticFragment extends Fragment {
 
         pieChart.animateY(1000, Easing.EasingOption.EaseInOutCubic);
 
-        PieDataSet pieDataSet = new PieDataSet(dailyEventsValues, "Time");
+        PieDataSet pieDataSet = new PieDataSet(dailyEventsValues, null);
 
         pieDataSet.setSliceSpace(3f);
         pieDataSet.setSelectionShift(5f);

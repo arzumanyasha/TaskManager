@@ -13,6 +13,16 @@
 
     </com.github.mikephil.charting.charts.PieChart>
 
+    <TextView
+        android:id="@+id/text_choose_watch_mode"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="25dp"
+        android:layout_marginStart="25dp"
+        android:text="@string/choose_watch_mode"
+        android:textColor="@color/black_de"
+        android:textSize="14sp" />
+
     <Spinner
         android:id="@+id/spinner_mode"
         android:layout_width="match_parent"
