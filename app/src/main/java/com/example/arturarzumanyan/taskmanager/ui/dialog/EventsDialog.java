@@ -24,7 +24,7 @@ import com.example.arturarzumanyan.taskmanager.data.repository.events.EventsRepo
 import com.example.arturarzumanyan.taskmanager.domain.Event;
 import com.example.arturarzumanyan.taskmanager.networking.util.DateUtils;
 import com.example.arturarzumanyan.taskmanager.ui.activity.BaseActivity;
-import com.example.arturarzumanyan.taskmanager.ui.adapter.ColorPalette;
+import com.example.arturarzumanyan.taskmanager.ui.util.ColorPalette;
 
 import java.util.ArrayList;
 import java.util.Date;

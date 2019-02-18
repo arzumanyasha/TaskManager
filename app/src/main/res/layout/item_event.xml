@@ -7,7 +7,8 @@
     android:layout_marginBottom="5dp"
     android:clickable="true"
     android:foreground="?android:attr/selectableItemBackground"
-    app:cardCornerRadius="4dp">
+    app:cardCornerRadius="4dp"
+    android:focusable="true">
 
     <android.support.constraint.ConstraintLayout
         android:id="@+id/constraint_layout_events_holder"
@@ -31,7 +32,7 @@
             android:layout_width="wrap_content"
             android:layout_height="23dp"
             android:textSize="15sp"
-            app:layout_constraintTop_toBottomOf="@+id/text_event_name"
+            app:layout_constraintTop_toBottomOf="@id/text_event_name"
             tools:text="@string/event_time" />
 
         <TextView
@@ -39,7 +40,7 @@
             android:layout_width="wrap_content"
             android:layout_height="18dp"
             android:textSize="15sp"
-            app:layout_constraintTop_toBottomOf="@+id/text_event_time"
+            app:layout_constraintTop_toBottomOf="@id/text_event_time"
             tools:text="@string/event_description" />
 
         <ImageView

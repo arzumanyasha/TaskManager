@@ -14,6 +14,7 @@ import android.widget.TextView;
 import com.example.arturarzumanyan.taskmanager.R;
 import com.example.arturarzumanyan.taskmanager.domain.Event;
 import com.example.arturarzumanyan.taskmanager.networking.util.DateUtils;
+import com.example.arturarzumanyan.taskmanager.ui.util.ColorPalette;
 
 import java.util.List;
 

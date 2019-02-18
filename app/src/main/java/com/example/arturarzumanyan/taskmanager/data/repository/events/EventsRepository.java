@@ -48,7 +48,7 @@ public class EventsRepository {
             }
         });
 
-        eventsAsyncTask.executeOnExecutor(AsyncTask.SERIAL_EXECUTOR, GET);
+        eventsAsyncTask.execute(GET);
     }
 
     public void addOrUpdateEvent(Event event, final FirebaseWebService.RequestMethods requestMethod,
@@ -74,7 +74,7 @@ public class EventsRepository {
                 }
             }
         });
-        eventsAsyncTask.executeOnExecutor(AsyncTask.SERIAL_EXECUTOR, requestMethod);
+        eventsAsyncTask.execute(requestMethod);
     }
 
     public void deleteEvent(Event event, final OnEventsLoadedListener listener) {
@@ -98,7 +98,7 @@ public class EventsRepository {
             }
         });
 
-        eventsAsyncTask.executeOnExecutor(AsyncTask.SERIAL_EXECUTOR, DELETE);
+        eventsAsyncTask.execute(DELETE);
     }
 
     public interface OnEventsLoadedListener {
@@ -211,7 +211,7 @@ public class EventsRepository {
                         });
                     }
 
-                    eventsAsyncTask.executeOnExecutor(SERIAL_EXECUTOR, requestMethod);
+                    eventsAsyncTask.execute(requestMethod);
                 }
             });
         }

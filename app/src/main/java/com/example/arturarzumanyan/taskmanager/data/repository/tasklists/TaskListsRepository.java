@@ -55,7 +55,7 @@ public class TaskListsRepository {
             }
         });
 
-        taskListsAsyncTask.executeOnExecutor(AsyncTask.SERIAL_EXECUTOR, GET);
+        taskListsAsyncTask.execute(GET);
     }
 
     public void addTaskList(TaskList taskList, final OnTaskListsLoadedListener listener) {
@@ -76,7 +76,7 @@ public class TaskListsRepository {
                 listener.onFail(message + '\n' + "Failed to create task list");
             }
         });
-        taskListsAsyncTask.executeOnExecutor(AsyncTask.SERIAL_EXECUTOR, POST);
+        taskListsAsyncTask.execute(POST);
     }
 
     public void updateTaskList(TaskList taskList, final OnTaskListsLoadedListener listener) {
@@ -98,7 +98,7 @@ public class TaskListsRepository {
                 listener.onFail(message + '\n' + "Failed to update task list");
             }
         });
-        taskListsAsyncTask.executeOnExecutor(AsyncTask.SERIAL_EXECUTOR, PATCH);
+        taskListsAsyncTask.execute(PATCH);
     }
 
     public void deleteTaskList(TaskList taskList, final OnTaskListsLoadedListener listener) {
@@ -120,7 +120,7 @@ public class TaskListsRepository {
                 listener.onFail(message + '\n' + "Failed to delete task list");
             }
         });
-        taskListsAsyncTask.executeOnExecutor(AsyncTask.SERIAL_EXECUTOR, DELETE);
+        taskListsAsyncTask.execute(DELETE);
     }
 
     public interface OnTaskListsLoadedListener {
@@ -250,7 +250,7 @@ public class TaskListsRepository {
                         }
                     });
 
-                    taskListsAsyncTask.executeOnExecutor(SERIAL_EXECUTOR, requestMethod);
+                    taskListsAsyncTask.execute(requestMethod);
                 }
             });
         }

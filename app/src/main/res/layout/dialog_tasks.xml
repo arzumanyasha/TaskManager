@@ -28,6 +28,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:clickable="true"
+        android:focusable="true"
         android:text="@string/set_task_date_title"
         android:textAlignment="center"
         android:textSize="18sp" />

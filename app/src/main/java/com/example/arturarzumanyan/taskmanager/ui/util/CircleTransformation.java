@@ -1,4 +1,4 @@
-package com.example.arturarzumanyan.taskmanager.networking.util;
+package com.example.arturarzumanyan.taskmanager.ui.util;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapShader;

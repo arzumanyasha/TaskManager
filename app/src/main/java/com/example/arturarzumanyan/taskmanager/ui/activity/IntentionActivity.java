@@ -26,7 +26,7 @@ import com.example.arturarzumanyan.taskmanager.data.repository.tasklists.specifi
 import com.example.arturarzumanyan.taskmanager.domain.Event;
 import com.example.arturarzumanyan.taskmanager.domain.Task;
 import com.example.arturarzumanyan.taskmanager.domain.TaskList;
-import com.example.arturarzumanyan.taskmanager.networking.util.CircleTransformation;
+import com.example.arturarzumanyan.taskmanager.ui.util.CircleTransformation;
 import com.example.arturarzumanyan.taskmanager.networking.util.Log;
 import com.example.arturarzumanyan.taskmanager.ui.dialog.EventsDialog;
 import com.example.arturarzumanyan.taskmanager.ui.dialog.TaskListsDialog;

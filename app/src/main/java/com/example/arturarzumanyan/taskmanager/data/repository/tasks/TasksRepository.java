@@ -1,7 +1,5 @@
 package com.example.arturarzumanyan.taskmanager.data.repository.tasks;
 
-import android.os.AsyncTask;
-
 import com.example.arturarzumanyan.taskmanager.auth.FirebaseWebService;
 import com.example.arturarzumanyan.taskmanager.data.repository.BaseDataLoadingAsyncTask;
 import com.example.arturarzumanyan.taskmanager.data.repository.RepositoryLoadHelper;
@@ -46,7 +44,7 @@ public class TasksRepository {
             }
         });
 
-        tasksAsyncTask.executeOnExecutor(AsyncTask.SERIAL_EXECUTOR, GET);
+        tasksAsyncTask.execute(GET);
     }
 
     public void addOrUpdateTask(TaskList taskList, Task task, final FirebaseWebService.RequestMethods requestMethod,
@@ -69,7 +67,7 @@ public class TasksRepository {
             }
         });
 
-        tasksAsyncTask.executeOnExecutor(AsyncTask.SERIAL_EXECUTOR, requestMethod);
+        tasksAsyncTask.execute(requestMethod);
     }
 
     public void deleteTask(TaskList taskList, Task task, final OnTasksLoadedListener listener) {
@@ -89,7 +87,7 @@ public class TasksRepository {
             }
         });
 
-        tasksAsyncTask.executeOnExecutor(AsyncTask.SERIAL_EXECUTOR, DELETE);
+        tasksAsyncTask.execute(DELETE);
     }
 
     public interface OnTasksLoadedListener {
@@ -201,7 +199,7 @@ public class TasksRepository {
                         });
                     }
 
-                    tasksAsyncTask.executeOnExecutor(SERIAL_EXECUTOR, requestMethod);
+                    tasksAsyncTask.execute(requestMethod);
                 }
             });
         }
