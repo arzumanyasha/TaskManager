@@ -68,6 +68,9 @@
                 <string name="event_time">Event time</string>
                 <string name="event_description">Event description</string>
 
+            <!--fragment_daily_events-->
+                <string name="no_events_for_today">No events for today</string>
+
             <!--fragment_week_dashboard-->
                 <string name="monday_name">Mon</string>
                 <string name="tuesday_name">Tue</string>
@@ -76,6 +79,7 @@
                 <string name="friday_name">Fri</string>
                 <string name="saturday_name">Sat</string>
                 <string name="sunday_name">Sun</string>
+                <string name="time">Time</string>
                 <string name="late_night_time">04:00</string>
                 <string name="morning_time">08:00</string>
                 <string name="noon_time">12:00</string>
@@ -103,5 +107,4 @@
             <!--intention-->
                 <string name="update_tasklist_title">Update task list</string>
                 <string name="delete_tasklist_title">Delete task list</string>
-    <string name="time">Time</string>
 </resources>

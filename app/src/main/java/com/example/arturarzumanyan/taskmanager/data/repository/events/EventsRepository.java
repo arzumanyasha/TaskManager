@@ -88,6 +88,7 @@ public class EventsRepository {
         eventsAsyncTask.setDataInfoLoadingListener(new BaseDataLoadingAsyncTask.UserDataLoadingListener<Event>() {
             @Override
             public void onSuccess(List<Event> list) {
+                listener.onSuccess(list);
                 Log.v("Event successfully deleted");
             }
 
@@ -105,6 +106,8 @@ public class EventsRepository {
         void onSuccess(List<Event> eventsList);
 
         void onFail(String message);
+
+        void onPermissionDenied();
     }
 
     public static class EventsAsyncTask extends BaseDataLoadingAsyncTask<Event> {
@@ -212,6 +215,11 @@ public class EventsRepository {
                     }
 
                     eventsAsyncTask.execute(requestMethod);
+                }
+
+                @Override
+                public void onFail() {
+                    mListener.onPermissionDenied();
                 }
             });
         }

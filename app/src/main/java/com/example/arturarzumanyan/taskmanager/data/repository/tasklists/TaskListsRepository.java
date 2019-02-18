@@ -131,6 +131,8 @@ public class TaskListsRepository {
         void onSuccess(TaskList taskList);
 
         void onFail(String message);
+
+        void onPermissionDenied();
     }
 
     public static class TaskListsAsyncTask extends BaseDataLoadingAsyncTask<TaskList> {
@@ -251,6 +253,11 @@ public class TaskListsRepository {
                     });
 
                     taskListsAsyncTask.execute(requestMethod);
+                }
+
+                @Override
+                public void onFail() {
+                    mListener.onPermissionDenied();
                 }
             });
         }

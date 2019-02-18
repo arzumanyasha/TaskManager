@@ -135,6 +135,11 @@ public class WeekDashboardFragment extends Fragment {
                     ((BaseActivity) requireActivity()).onError(message);
                 }
             }
+
+            @Override
+            public void onPermissionDenied() {
+                /** To-do: add realization with start signInActivity*/
+            }
         });
     }
 

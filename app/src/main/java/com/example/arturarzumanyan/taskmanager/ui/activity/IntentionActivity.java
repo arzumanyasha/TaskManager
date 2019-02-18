@@ -49,6 +49,7 @@ public class IntentionActivity extends BaseActivity {
     private final String CHANNEL_ID = "notification_channel";
     private final int NOTIFICATION_ID = 001;
     private NavigationView mNavigationView;
+    private FloatingActionButton mAddButton;
     private DrawerLayout mDrawer;
     private Intent mUserData;
 
@@ -88,7 +89,7 @@ public class IntentionActivity extends BaseActivity {
         Toolbar toolbar = findViewById(R.id.toolbar);
         mDrawer = findViewById(R.id.drawer_layout);
         mNavigationView = findViewById(R.id.nav_view);
-        FloatingActionButton fab = findViewById(R.id.fab);
+        mAddButton = findViewById(R.id.fab);
 
         setSupportActionBar(toolbar);
 
@@ -99,7 +100,7 @@ public class IntentionActivity extends BaseActivity {
 
         mDrawer.closeDrawers();
 
-        fab.setOnClickListener(new View.OnClickListener() {
+        mAddButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 if (getTitle() == EVENTS_KEY) {
@@ -147,6 +148,11 @@ public class IntentionActivity extends BaseActivity {
             @Override
             public void onFail(String message) {
                 onError(message);
+            }
+
+            @Override
+            public void onPermissionDenied() {
+                /** To-do: add realization with start signInActivity*/
             }
         };
 
@@ -336,8 +342,6 @@ public class IntentionActivity extends BaseActivity {
                 });
                 mCurrentTaskList = taskList;
                 updateRetainedTasksFragment(mCurrentTaskList);
-
-                //openRetainedFragment(TasksFragment.newInstance(taskList), RETAINED_TASK_FRAGMENT_TAG);
             }
         });
         taskListsDialog.show(getSupportFragmentManager(), TASK_LISTS_KEY);
@@ -345,7 +349,6 @@ public class IntentionActivity extends BaseActivity {
 
     private void updateTaskUi(TaskList taskList) {
         mRetainedEventsFragment = null;
-        //openRetainedFragment(TasksFragment.newInstance(taskList), RETAINED_TASK_FRAGMENT_TAG);
         mCurrentTaskList = taskList;
         updateRetainedTasksFragment(taskList);
         mDrawer.closeDrawer(Gravity.START);
@@ -401,6 +404,14 @@ public class IntentionActivity extends BaseActivity {
         }
     }
 
+    public void setFloatingActionButtonInvisible() {
+        mAddButton.setVisibility(View.INVISIBLE);
+    }
+
+    public void setFloatingActionButtonVisible() {
+        mAddButton.setVisibility(View.VISIBLE);
+    }
+
     private void setActionBarMenuItemsVisibility(Menu menu, boolean visibility) {
         menu.findItem(R.id.update_task_list).setVisible(visibility);
         menu.findItem(R.id.delete_task_list).setVisible(visibility);
@@ -448,12 +459,12 @@ public class IntentionActivity extends BaseActivity {
     private void updateRetainedTasksFragment(TaskList taskList) {
         mRetainedTasksFragment = getRetainedTaskFragment();
         if (mRetainedTasksFragment == null) {
-            Log.v( "Retained fragment is null");
+            Log.v("Retained fragment is null");
             mRetainedTasksFragment = TasksFragment.newInstance(taskList);
             mRetainedEventsFragment = null;
             openRetainedFragment(mRetainedTasksFragment, RETAINED_TASK_FRAGMENT_TAG);
         } else {
-            Log.v( "Retained fragment is not null");
+            Log.v("Retained fragment is not null");
             mRetainedTasksFragment.setTaskList(taskList);
         }
 
@@ -490,6 +501,11 @@ public class IntentionActivity extends BaseActivity {
             @Override
             public void onFail(String message) {
                 onError(message);
+            }
+
+            @Override
+            public void onPermissionDenied() {
+                /** To-do: add realization with start signInActivity*/
             }
         });
     }

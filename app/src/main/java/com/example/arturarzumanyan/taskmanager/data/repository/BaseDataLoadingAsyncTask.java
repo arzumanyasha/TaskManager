@@ -41,7 +41,7 @@ public abstract class BaseDataLoadingAsyncTask<T> extends AsyncTask<FirebaseWebS
                         } else if (requestMethods[0] == GET) {
                             refreshDbQuery(responseDto);
                         } else {
-                            if(!doDeleteQuery()){
+                            if (!doDeleteQuery()) {
                                 return null;
                             }
                         }
@@ -58,7 +58,7 @@ public abstract class BaseDataLoadingAsyncTask<T> extends AsyncTask<FirebaseWebS
             } else if (requestMethods[0] == GET) {
                 return doSelectQuery();
             } else {
-                if(!doDeleteQuery()){
+                if (!doDeleteQuery()) {
                     return null;
                 }
             }

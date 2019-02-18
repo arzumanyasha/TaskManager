@@ -77,6 +77,7 @@ public class TasksRepository {
         tasksAsyncTask.setDataInfoLoadingListener(new BaseDataLoadingAsyncTask.UserDataLoadingListener<Task>() {
             @Override
             public void onSuccess(List<Task> list) {
+                listener.onSuccess(list);
                 Log.v("Task successfully deleted");
             }
 
@@ -94,6 +95,8 @@ public class TasksRepository {
         void onSuccess(List<Task> taskArrayList);
 
         void onFail(String message);
+
+        void onPermissionDenied();
     }
 
     public static class TasksAsyncTask extends BaseDataLoadingAsyncTask<Task> {
@@ -200,6 +203,11 @@ public class TasksRepository {
                     }
 
                     tasksAsyncTask.execute(requestMethod);
+                }
+
+                @Override
+                public void onFail() {
+                    mListener.onPermissionDenied();
                 }
             });
         }

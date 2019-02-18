@@ -69,6 +69,9 @@ public class EventsStatisticFragment extends Fragment {
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_events_statistic, container, false);
         pieChart = view.findViewById(R.id.pie_chart);
+        pieChart.setNoDataTextColor(Color.BLACK);
+        pieChart.setNoDataText(requireActivity().getString(R.string.no_events_to_show_message));
+
         spinnerMode = view.findViewById(R.id.spinner_mode);
         ArrayAdapter<CharSequence> arrayAdapter = ArrayAdapter.createFromResource(requireActivity(),
                 R.array.modes, android.R.layout.simple_spinner_item);
@@ -115,6 +118,8 @@ public class EventsStatisticFragment extends Fragment {
             }
         });
 
+        //if(requireActivity().)
+
         if (mEvents != null) {
             createPieChart(mEvents, mCountOfMinutes);
         }
@@ -135,6 +140,11 @@ public class EventsStatisticFragment extends Fragment {
                     ((BaseActivity) requireActivity()).onError(message);
                 }
             }
+
+            @Override
+            public void onPermissionDenied() {
+                /** To-do: add realization with start signInActivity*/
+            }
         });
     }
 
@@ -151,6 +161,11 @@ public class EventsStatisticFragment extends Fragment {
                 if (isVisible()) {
                     ((BaseActivity) requireActivity()).onError(message);
                 }
+            }
+
+            @Override
+            public void onPermissionDenied() {
+                /** To-do: add realization with start signInActivity*/
             }
         });
     }
@@ -169,15 +184,19 @@ public class EventsStatisticFragment extends Fragment {
                     ((BaseActivity) requireActivity()).onError(message);
                 }
             }
+
+            @Override
+            public void onPermissionDenied() {
+                /** To-do: add realization with start signInActivity*/
+            }
         });
     }
 
     private void updateUi(List<Event> eventsList, int countOfMinutes) {
         if (isVisible()) {
             mEvents = eventsList;
-            createPieChart(eventsList, countOfMinutes);
-            if (eventsList.size() == 0) {
-                pieChart.setCenterText(requireActivity().getString(R.string.no_events_to_show_message));
+            if (eventsList.size() != 0) {
+                createPieChart(eventsList, countOfMinutes);
             }
         }
     }

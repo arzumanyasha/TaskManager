@@ -180,6 +180,11 @@ public class EventsDialog extends AppCompatDialogFragment {
                     public void onFail(String message) {
                         ((BaseActivity) requireActivity()).onError(message);
                     }
+
+                    @Override
+                    public void onPermissionDenied() {
+                        /** To-do: add realization with start signInActivity*/
+                    }
                 });
 
     }
@@ -199,6 +204,11 @@ public class EventsDialog extends AppCompatDialogFragment {
                 @Override
                 public void onFail(String message) {
                     ((BaseActivity) requireActivity()).onError(message);
+                }
+
+                @Override
+                public void onPermissionDenied() {
+                    /** To-do: add realization with start signInActivity*/
                 }
             });
         }

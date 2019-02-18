@@ -108,6 +108,7 @@ public class TasksFragment extends Fragment {
             }
         });
 
+        ((IntentionActivity) requireActivity()).setFloatingActionButtonVisible();
     }
 
     public void loadTasks() {
@@ -123,6 +124,11 @@ public class TasksFragment extends Fragment {
             @Override
             public void onFail(String message) {
                 ((BaseActivity) requireActivity()).onError(message);
+            }
+
+            @Override
+            public void onPermissionDenied() {
+                /** To-do: add realization with start signInActivity*/
             }
         });
         requireActivity().setTitle(mTaskList.getTitle());
@@ -184,6 +190,11 @@ public class TasksFragment extends Fragment {
                             ((BaseActivity) requireActivity()).onError(message);
                         }
                     }
+
+                    @Override
+                    public void onPermissionDenied() {
+                        /** To-do: add realization with start signInActivity*/
+                    }
                 });
     }
 
@@ -199,6 +210,11 @@ public class TasksFragment extends Fragment {
                 if (isVisible()) {
                     ((BaseActivity) requireActivity()).onError(message);
                 }
+            }
+
+            @Override
+            public void onPermissionDenied() {
+                /** To-do: add realization with start signInActivity*/
             }
         });
     }
