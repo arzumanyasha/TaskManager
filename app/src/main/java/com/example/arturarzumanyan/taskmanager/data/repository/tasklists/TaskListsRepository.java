@@ -63,7 +63,7 @@ public class TaskListsRepository {
 
         TaskListsAsyncTask taskListsAsyncTask = new TaskListsAsyncTask(taskList,
                 mRepositoryLoadHelper, mTaskListsDbStore, mTaskListsCloudStore,
-                mTasksDbStore, null, allTaskListsSpecification, null);
+                mTasksDbStore, null, allTaskListsSpecification, listener);
 
         taskListsAsyncTask.setDataInfoLoadingListener(new BaseDataLoadingAsyncTask.UserDataLoadingListener<TaskList>() {
             @Override
