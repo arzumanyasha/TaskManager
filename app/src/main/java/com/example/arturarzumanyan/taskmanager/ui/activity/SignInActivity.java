@@ -7,6 +7,7 @@ import android.widget.Toast;
 
 import com.example.arturarzumanyan.taskmanager.R;
 import com.example.arturarzumanyan.taskmanager.auth.FirebaseWebService;
+import com.example.arturarzumanyan.taskmanager.networking.util.Log;
 import com.google.android.gms.common.SignInButton;
 
 public class SignInActivity extends BaseActivity {
@@ -80,6 +81,7 @@ public class SignInActivity extends BaseActivity {
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        Log.v("START ACTIVITY FOR RESULT RESULT CODE = " + resultCode);
         if (resultCode == RESULT_OK) {
             if (requestCode == AUTHENTICATION_REQUEST_CODE) {
                 FirebaseWebService.getFirebaseWebServiceInstance().authWithGoogle(data);

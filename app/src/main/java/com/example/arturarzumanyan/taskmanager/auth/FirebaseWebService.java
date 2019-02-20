@@ -3,6 +3,7 @@ package com.example.arturarzumanyan.taskmanager.auth;
 import android.content.Context;
 import android.content.Intent;
 import android.support.annotation.NonNull;
+import android.support.v4.app.FragmentActivity;
 
 import com.example.arturarzumanyan.taskmanager.data.repository.RepositoryLoadHelper;
 import com.example.arturarzumanyan.taskmanager.networking.base.RequestParameters;
@@ -76,7 +77,7 @@ public class FirebaseWebService implements GoogleApiClient.OnConnectionFailedLis
 
         GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
                 .requestIdToken(CLIENT_ID)
-                .requestServerAuthCode(CLIENT_ID)
+                .requestServerAuthCode(CLIENT_ID, true)
                 .requestEmail()
                 .requestScopes(new Scope(CALENDAR_SCOPE),
                         new Scope(TASKS_SCOPE))
