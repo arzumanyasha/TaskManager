@@ -10,5 +10,6 @@
         android:layout_height="wrap_content"
         android:ems="10"
         android:hint="@string/tasklist_name_hint"
-        android:inputType="textPersonName" />
+        android:inputType="textPersonName"
+        android:textSize="24sp" />
 </RelativeLayout>

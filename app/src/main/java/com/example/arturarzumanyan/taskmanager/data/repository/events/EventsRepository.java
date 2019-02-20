@@ -48,7 +48,7 @@ public class EventsRepository {
             }
         });
 
-        eventsAsyncTask.executeOnExecutor(AsyncTask.SERIAL_EXECUTOR, GET);
+        eventsAsyncTask.execute(GET);
     }
 
     public void addOrUpdateEvent(Event event, final FirebaseWebService.RequestMethods requestMethod,
@@ -74,7 +74,7 @@ public class EventsRepository {
                 }
             }
         });
-        eventsAsyncTask.executeOnExecutor(AsyncTask.SERIAL_EXECUTOR, requestMethod);
+        eventsAsyncTask.execute(requestMethod);
     }
 
     public void deleteEvent(Event event, final OnEventsLoadedListener listener) {
@@ -88,6 +88,7 @@ public class EventsRepository {
         eventsAsyncTask.setDataInfoLoadingListener(new BaseDataLoadingAsyncTask.UserDataLoadingListener<Event>() {
             @Override
             public void onSuccess(List<Event> list) {
+                listener.onSuccess(list);
                 Log.v("Event successfully deleted");
             }
 
@@ -98,13 +99,15 @@ public class EventsRepository {
             }
         });
 
-        eventsAsyncTask.executeOnExecutor(AsyncTask.SERIAL_EXECUTOR, DELETE);
+        eventsAsyncTask.execute(DELETE);
     }
 
     public interface OnEventsLoadedListener {
         void onSuccess(List<Event> eventsList);
 
         void onFail(String message);
+
+        void onPermissionDenied();
     }
 
     public static class EventsAsyncTask extends BaseDataLoadingAsyncTask<Event> {
@@ -183,13 +186,9 @@ public class EventsRepository {
         }
 
         @Override
-        protected void doDeleteQuery() {
+        protected boolean doDeleteQuery() {
             mEventsDbStore.deleteEvent(mEvent);
-        }
-
-        @Override
-        protected void onServerError() {
-            mListener.onFail("Calendar API server error");
+            return true;
         }
 
         @Override
@@ -215,7 +214,12 @@ public class EventsRepository {
                         });
                     }
 
-                    eventsAsyncTask.executeOnExecutor(SERIAL_EXECUTOR, requestMethod);
+                    eventsAsyncTask.execute(requestMethod);
+                }
+
+                @Override
+                public void onFail() {
+                    mListener.onPermissionDenied();
                 }
             });
         }

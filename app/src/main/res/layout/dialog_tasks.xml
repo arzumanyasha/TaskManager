@@ -12,23 +12,25 @@
         android:layout_height="wrap_content"
         android:ems="10"
         android:hint="@string/name_hint"
-        android:inputType="textPersonName"/>
+        android:inputType="textPersonName"
+        android:textSize="24sp" />
 
     <EditText
         android:id="@+id/edit_text_task_description"
         android:layout_width="match_parent"
-        android:layout_height="150dp"
+        android:layout_height="wrap_content"
         android:ems="10"
-        android:inputType="textMultiLine"
-        android:hint="@string/description_hint" />
+        android:hint="@string/description_hint"
+        android:inputType="textMultiLine" />
 
     <TextView
         android:id="@+id/text_task_date"
         android:layout_width="match_parent"
-        android:layout_height="40dp"
+        android:layout_height="wrap_content"
         android:clickable="true"
+        android:focusable="true"
         android:text="@string/set_task_date_title"
         android:textAlignment="center"
-        android:textSize="20sp" />
+        android:textSize="18sp" />
 
 </LinearLayout>

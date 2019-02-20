@@ -1,6 +1,5 @@
 package com.example.arturarzumanyan.taskmanager.ui.activity;
 
-import android.app.DatePickerDialog;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Parcelable;
@@ -18,19 +17,16 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.SubMenu;
 import android.view.View;
-import android.widget.DatePicker;
 import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.example.arturarzumanyan.taskmanager.R;
-import com.example.arturarzumanyan.taskmanager.data.repository.events.EventsRepository;
-import com.example.arturarzumanyan.taskmanager.data.repository.events.specification.EventsFromDateSpecification;
 import com.example.arturarzumanyan.taskmanager.data.repository.tasklists.TaskListsRepository;
 import com.example.arturarzumanyan.taskmanager.data.repository.tasklists.specification.AllTaskListsSpecification;
 import com.example.arturarzumanyan.taskmanager.domain.Event;
 import com.example.arturarzumanyan.taskmanager.domain.Task;
 import com.example.arturarzumanyan.taskmanager.domain.TaskList;
-import com.example.arturarzumanyan.taskmanager.networking.util.DateUtils;
+import com.example.arturarzumanyan.taskmanager.ui.util.CircleTransformation;
 import com.example.arturarzumanyan.taskmanager.networking.util.Log;
 import com.example.arturarzumanyan.taskmanager.ui.dialog.EventsDialog;
 import com.example.arturarzumanyan.taskmanager.ui.dialog.TaskListsDialog;
@@ -53,6 +49,7 @@ public class IntentionActivity extends BaseActivity {
     private final String CHANNEL_ID = "notification_channel";
     private final int NOTIFICATION_ID = 001;
     private NavigationView mNavigationView;
+    private FloatingActionButton mAddButton;
     private DrawerLayout mDrawer;
     private Intent mUserData;
 
@@ -92,7 +89,7 @@ public class IntentionActivity extends BaseActivity {
         Toolbar toolbar = findViewById(R.id.toolbar);
         mDrawer = findViewById(R.id.drawer_layout);
         mNavigationView = findViewById(R.id.nav_view);
-        FloatingActionButton fab = findViewById(R.id.fab);
+        mAddButton = findViewById(R.id.fab);
 
         setSupportActionBar(toolbar);
 
@@ -103,7 +100,7 @@ public class IntentionActivity extends BaseActivity {
 
         mDrawer.closeDrawers();
 
-        fab.setOnClickListener(new View.OnClickListener() {
+        mAddButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 if (getTitle() == EVENTS_KEY) {
@@ -151,6 +148,11 @@ public class IntentionActivity extends BaseActivity {
             @Override
             public void onFail(String message) {
                 onError(message);
+            }
+
+            @Override
+            public void onPermissionDenied() {
+                /** To-do: add realization with start signInActivity*/
             }
         };
 
@@ -274,6 +276,7 @@ public class IntentionActivity extends BaseActivity {
         userEmailTextView.setText(mUserData.getStringExtra(SignInActivity.EXTRA_USER_EMAIL));
         Picasso.get()
                 .load(mUserData.getStringExtra(SignInActivity.EXTRA_USER_PHOTO_URL))
+                .transform(new CircleTransformation())
                 .into(userPhotoImageView);
 
         addTaskListTextView.setOnClickListener(new View.OnClickListener() {
@@ -338,7 +341,7 @@ public class IntentionActivity extends BaseActivity {
                     }
                 });
                 mCurrentTaskList = taskList;
-                openRetainedFragment(TasksFragment.newInstance(taskList), RETAINED_TASK_FRAGMENT_TAG);
+                updateRetainedTasksFragment(mCurrentTaskList);
             }
         });
         taskListsDialog.show(getSupportFragmentManager(), TASK_LISTS_KEY);
@@ -346,18 +349,20 @@ public class IntentionActivity extends BaseActivity {
 
     private void updateTaskUi(TaskList taskList) {
         mRetainedEventsFragment = null;
-        openRetainedFragment(TasksFragment.newInstance(taskList), RETAINED_TASK_FRAGMENT_TAG);
         mCurrentTaskList = taskList;
+        updateRetainedTasksFragment(taskList);
         mDrawer.closeDrawer(Gravity.START);
     }
 
     private void openRetainedFragment(Fragment retainedFragment, String tag) {
         if (!retainedFragment.isAdded()) {
+            Log.v(retainedFragment.toString() + " is not added");
             getSupportFragmentManager().beginTransaction()
                     .add(retainedFragment, tag)
                     .replace(R.id.main_container, retainedFragment)
                     .commit();
         } else {
+            Log.v(retainedFragment.toString() + " is added");
             getSupportFragmentManager().beginTransaction()
                     .replace(R.id.main_container, retainedFragment)
                     .commit();
@@ -376,7 +381,6 @@ public class IntentionActivity extends BaseActivity {
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.date_picking, menu);
         getMenuInflater().inflate(R.menu.intention, menu);
 
         return true;
@@ -393,24 +397,24 @@ public class IntentionActivity extends BaseActivity {
     private void updateActionBarMenuItems(Menu menu) {
         if (!getTitle().equals(EVENTS_KEY)) {
             Log.v("TaskLists key");
-            if (menu.findItem(R.id.pick_date) != null) {
-                Log.v("intention");
-                setActionBarMenuItemsVisibility(menu, false);
-            }
+            setActionBarMenuItemsVisibility(menu, true);
         } else {
             Log.v("Events key");
-            if (menu.findItem(R.id.update_task_list) != null &&
-                    menu.findItem(R.id.delete_task_list) != null) {
-                Log.v("datePicking");
-                setActionBarMenuItemsVisibility(menu, true);
-            }
+            setActionBarMenuItemsVisibility(menu, false);
         }
     }
 
+    public void setFloatingActionButtonInvisible() {
+        mAddButton.setVisibility(View.INVISIBLE);
+    }
+
+    public void setFloatingActionButtonVisible() {
+        mAddButton.setVisibility(View.VISIBLE);
+    }
+
     private void setActionBarMenuItemsVisibility(Menu menu, boolean visibility) {
-        menu.findItem(R.id.pick_date).setVisible(visibility);
-        menu.findItem(R.id.update_task_list).setVisible(!visibility);
-        menu.findItem(R.id.delete_task_list).setVisible(!visibility);
+        menu.findItem(R.id.update_task_list).setVisible(visibility);
+        menu.findItem(R.id.delete_task_list).setVisible(visibility);
     }
 
     @Override
@@ -428,11 +432,6 @@ public class IntentionActivity extends BaseActivity {
                     deleteTaskList(mCurrentTaskList);
                 }
                 break;
-            }
-            case R.id.pick_date: {
-                if (getTitle().equals(EVENTS_KEY)) {
-                    displayEventDatePicker();
-                }
             }
         }
 
@@ -453,8 +452,22 @@ public class IntentionActivity extends BaseActivity {
 
         if (previousTaskList != null) {
             mCurrentTaskList = previousTaskList;
-            openRetainedFragment(TasksFragment.newInstance(previousTaskList), RETAINED_TASK_FRAGMENT_TAG);
+            updateRetainedTasksFragment(previousTaskList);
         }
+    }
+
+    private void updateRetainedTasksFragment(TaskList taskList) {
+        mRetainedTasksFragment = getRetainedTaskFragment();
+        if (mRetainedTasksFragment == null) {
+            Log.v("Retained fragment is null");
+            mRetainedTasksFragment = TasksFragment.newInstance(taskList);
+            mRetainedEventsFragment = null;
+            openRetainedFragment(mRetainedTasksFragment, RETAINED_TASK_FRAGMENT_TAG);
+        } else {
+            Log.v("Retained fragment is not null");
+            mRetainedTasksFragment.setTaskList(taskList);
+        }
+
     }
 
     private void updateTaskList(TaskList taskList) {
@@ -489,6 +502,11 @@ public class IntentionActivity extends BaseActivity {
             public void onFail(String message) {
                 onError(message);
             }
+
+            @Override
+            public void onPermissionDenied() {
+                /** To-do: add realization with start signInActivity*/
+            }
         });
     }
 
@@ -502,33 +520,6 @@ public class IntentionActivity extends BaseActivity {
             }
         });
         taskListsDialog.show(getSupportFragmentManager(), TASK_LISTS_KEY);
-    }
-
-    private void displayEventDatePicker() {
-        DatePickerDialog datePickerDialog = new DatePickerDialog(this, new DatePickerDialog.OnDateSetListener() {
-
-            @Override
-            public void onDateSet(DatePicker view, int year, int monthOfYear, int dayOfMonth) {
-                EventsRepository eventsRepository = new EventsRepository();
-
-                EventsFromDateSpecification eventsFromDateSpecification = new EventsFromDateSpecification();
-                eventsFromDateSpecification.setDate(DateUtils.getStringDateFromInt(year, monthOfYear, dayOfMonth));
-
-                eventsRepository.getEvents(eventsFromDateSpecification, new EventsRepository.OnEventsLoadedListener() {
-                    @Override
-                    public void onSuccess(List<Event> eventsList) {
-
-                    }
-
-                    @Override
-                    public void onFail(String message) {
-                        onError(message);
-                    }
-                });
-
-            }
-        }, DateUtils.getYear(), DateUtils.getMonth(), DateUtils.getDay());
-        datePickerDialog.show();
     }
 
     @Override

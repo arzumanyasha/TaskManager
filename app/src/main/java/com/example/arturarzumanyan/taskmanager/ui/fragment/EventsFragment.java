@@ -12,9 +12,11 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.example.arturarzumanyan.taskmanager.BuildConfig;
 import com.example.arturarzumanyan.taskmanager.R;
 import com.example.arturarzumanyan.taskmanager.TaskManagerApp;
 import com.example.arturarzumanyan.taskmanager.networking.util.Log;
+import com.example.arturarzumanyan.taskmanager.ui.activity.IntentionActivity;
 import com.squareup.leakcanary.RefWatcher;
 
 import static com.example.arturarzumanyan.taskmanager.ui.activity.IntentionActivity.EVENTS_KEY;
@@ -89,16 +91,19 @@ public class EventsFragment extends Fragment {
             case R.id.nav_week:
                 mRetainedDailyEventsFragment = null;
                 mRetainedEventsStatisticFragment = null;
+                ((IntentionActivity)requireActivity()).setFloatingActionButtonInvisible();
                 displayRetainedWeekDashboardFragment();
                 break;
             case R.id.nav_today:
                 mRetainedWeekDashboardFragment = null;
                 mRetainedEventsStatisticFragment = null;
+                ((IntentionActivity)requireActivity()).setFloatingActionButtonVisible();
                 displayRetainedDailyEventsFragment();
                 break;
             case R.id.nav_stats:
                 mRetainedWeekDashboardFragment = null;
                 mRetainedDailyEventsFragment = null;
+                ((IntentionActivity)requireActivity()).setFloatingActionButtonInvisible();
                 displayRetainedEventsStatisticFragment();
                 break;
         }
@@ -144,10 +149,18 @@ public class EventsFragment extends Fragment {
     }
 
     private void openRetainedFragment(Fragment retainedFragment, String tag) {
-        requireFragmentManager().beginTransaction()
-                .add(retainedFragment, tag)
-                .replace(R.id.fragment_container, retainedFragment)
-                .commit();
+        if (!retainedFragment.isAdded()) {
+            Log.v(retainedFragment.toString() + " is not added");
+            requireFragmentManager().beginTransaction()
+                    .add(retainedFragment, tag)
+                    .replace(R.id.fragment_container, retainedFragment)
+                    .commit();
+        } else {
+            Log.v(retainedFragment.toString() + " is added");
+            requireFragmentManager().beginTransaction()
+                    .replace(R.id.fragment_container, retainedFragment)
+                    .commit();
+        }
     }
 
     @Override
@@ -158,6 +171,9 @@ public class EventsFragment extends Fragment {
     @Override
     public void onDetach() {
         mBottomNav.setOnNavigationItemSelectedListener(null);
+        mRetainedDailyEventsFragment = null;
+        mRetainedWeekDashboardFragment = null;
+        mRetainedEventsStatisticFragment = null;
         navListener = null;
         super.onDetach();
     }
@@ -165,7 +181,9 @@ public class EventsFragment extends Fragment {
     @Override
     public void onDestroy() {
         super.onDestroy();
-        RefWatcher refWatcher = TaskManagerApp.getRefWatcher(requireActivity());
-        refWatcher.watch(this);
+        if (BuildConfig.DEBUG) {
+            RefWatcher refWatcher = TaskManagerApp.getRefWatcher(requireActivity());
+            refWatcher.watch(this);
+        }
     }
 }

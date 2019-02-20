@@ -5,6 +5,6 @@ import android.widget.Toast;
 
 public class BaseActivity extends AppCompatActivity {
     public void onError(String message) {
-        Toast.makeText(getApplicationContext(), message, Toast.LENGTH_LONG).show();
+        Toast.makeText(this, message, Toast.LENGTH_LONG).show();
     }
 }

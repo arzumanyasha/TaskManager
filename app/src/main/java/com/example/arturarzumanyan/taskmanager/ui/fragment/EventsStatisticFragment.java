@@ -14,6 +14,7 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Spinner;
 
+import com.example.arturarzumanyan.taskmanager.BuildConfig;
 import com.example.arturarzumanyan.taskmanager.R;
 import com.example.arturarzumanyan.taskmanager.TaskManagerApp;
 import com.example.arturarzumanyan.taskmanager.data.repository.events.EventsRepository;
@@ -23,7 +24,7 @@ import com.example.arturarzumanyan.taskmanager.data.repository.events.specificat
 import com.example.arturarzumanyan.taskmanager.domain.Event;
 import com.example.arturarzumanyan.taskmanager.networking.util.DateUtils;
 import com.example.arturarzumanyan.taskmanager.ui.activity.BaseActivity;
-import com.example.arturarzumanyan.taskmanager.ui.adapter.ColorPalette;
+import com.example.arturarzumanyan.taskmanager.ui.util.ColorPalette;
 import com.github.mikephil.charting.animation.Easing;
 import com.github.mikephil.charting.charts.PieChart;
 import com.github.mikephil.charting.data.PieData;
@@ -68,6 +69,9 @@ public class EventsStatisticFragment extends Fragment {
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_events_statistic, container, false);
         pieChart = view.findViewById(R.id.pie_chart);
+        pieChart.setNoDataTextColor(Color.BLACK);
+        pieChart.setNoDataText(requireActivity().getString(R.string.no_events_to_show_message));
+
         spinnerMode = view.findViewById(R.id.spinner_mode);
         ArrayAdapter<CharSequence> arrayAdapter = ArrayAdapter.createFromResource(requireActivity(),
                 R.array.modes, android.R.layout.simple_spinner_item);
@@ -114,6 +118,8 @@ public class EventsStatisticFragment extends Fragment {
             }
         });
 
+        //if(requireActivity().)
+
         if (mEvents != null) {
             createPieChart(mEvents, mCountOfMinutes);
         }
@@ -125,10 +131,7 @@ public class EventsStatisticFragment extends Fragment {
         mEventsRepository.getEvents(eventsFromDateSpecification, new EventsRepository.OnEventsLoadedListener() {
             @Override
             public void onSuccess(List<Event> eventsList) {
-                if (isVisible()) {
-                    mEvents = eventsList;
-                    createPieChart(eventsList, countOfMinutes);
-                }
+                updateUi(eventsList, countOfMinutes);
             }
 
             @Override
@@ -136,6 +139,11 @@ public class EventsStatisticFragment extends Fragment {
                 if (isVisible()) {
                     ((BaseActivity) requireActivity()).onError(message);
                 }
+            }
+
+            @Override
+            public void onPermissionDenied() {
+                /** To-do: add realization with start signInActivity*/
             }
         });
     }
@@ -145,10 +153,7 @@ public class EventsStatisticFragment extends Fragment {
         mEventsRepository.getEvents(weeklyEventsSpecification, new EventsRepository.OnEventsLoadedListener() {
             @Override
             public void onSuccess(List<Event> eventsList) {
-                if (isVisible()) {
-                    mEvents = eventsList;
-                    createPieChart(eventsList, countOfMinutes);
-                }
+                updateUi(eventsList, countOfMinutes);
             }
 
             @Override
@@ -156,6 +161,11 @@ public class EventsStatisticFragment extends Fragment {
                 if (isVisible()) {
                     ((BaseActivity) requireActivity()).onError(message);
                 }
+            }
+
+            @Override
+            public void onPermissionDenied() {
+                /** To-do: add realization with start signInActivity*/
             }
         });
     }
@@ -165,10 +175,7 @@ public class EventsStatisticFragment extends Fragment {
         mEventsRepository.getEvents(monthlyEventsSpecification, new EventsRepository.OnEventsLoadedListener() {
             @Override
             public void onSuccess(List<Event> eventsList) {
-                if (isVisible()) {
-                    mEvents = eventsList;
-                    createPieChart(eventsList, countOfMinutes);
-                }
+                updateUi(eventsList, countOfMinutes);
             }
 
             @Override
@@ -177,7 +184,21 @@ public class EventsStatisticFragment extends Fragment {
                     ((BaseActivity) requireActivity()).onError(message);
                 }
             }
+
+            @Override
+            public void onPermissionDenied() {
+                /** To-do: add realization with start signInActivity*/
+            }
         });
+    }
+
+    private void updateUi(List<Event> eventsList, int countOfMinutes) {
+        if (isVisible()) {
+            mEvents = eventsList;
+            if (eventsList.size() != 0) {
+                createPieChart(eventsList, countOfMinutes);
+            }
+        }
     }
 
     private void createPieChart(List<Event> events, int minutes) {
@@ -219,7 +240,7 @@ public class EventsStatisticFragment extends Fragment {
 
         pieChart.animateY(1000, Easing.EasingOption.EaseInOutCubic);
 
-        PieDataSet pieDataSet = new PieDataSet(dailyEventsValues, "Time");
+        PieDataSet pieDataSet = new PieDataSet(dailyEventsValues, null);
 
         pieDataSet.setSliceSpace(3f);
         pieDataSet.setSelectionShift(5f);
@@ -246,7 +267,9 @@ public class EventsStatisticFragment extends Fragment {
     @Override
     public void onDestroy() {
         super.onDestroy();
-        RefWatcher refWatcher = TaskManagerApp.getRefWatcher(requireActivity());
-        refWatcher.watch(this);
+        if (BuildConfig.DEBUG) {
+            RefWatcher refWatcher = TaskManagerApp.getRefWatcher(requireActivity());
+            refWatcher.watch(this);
+        }
     }
 }

@@ -1,5 +1,6 @@
 package com.example.arturarzumanyan.taskmanager.ui.adapter;
 
+import android.support.annotation.MainThread;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -41,8 +42,12 @@ public class TasksAdapter extends RecyclerView.Adapter<TasksAdapter.ViewHolder> 
             }
         });
         holder.taskName.setText(task.getName());
-        holder.taskDescription.setText(task.getDescription().replaceAll("[\n]", ""));
 
+        if (task.getDescription().replaceAll("[\n]", "").isEmpty()) {
+            holder.taskDescription.setVisibility(View.GONE);
+        } else {
+            holder.taskDescription.setText(task.getDescription().replaceAll("[\n]", ""));
+        }
         holder.taskDelete.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {

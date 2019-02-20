@@ -10,8 +10,10 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.WindowManager;
 import android.widget.ProgressBar;
 
+import com.example.arturarzumanyan.taskmanager.BuildConfig;
 import com.example.arturarzumanyan.taskmanager.R;
 import com.example.arturarzumanyan.taskmanager.TaskManagerApp;
 import com.example.arturarzumanyan.taskmanager.data.repository.tasks.TasksRepository;
@@ -49,6 +51,12 @@ public class TasksFragment extends Fragment {
         args.putParcelable(TASK_LISTS_KEY, taskList);
         fragment.setArguments(args);
         return fragment;
+    }
+
+    public void setTaskList(TaskList mTaskList) {
+        this.mTaskList = mTaskList;
+        mProgressBar.setVisibility(View.VISIBLE);
+        loadTasks();
     }
 
     @Override
@@ -100,6 +108,7 @@ public class TasksFragment extends Fragment {
             }
         });
 
+        ((IntentionActivity) requireActivity()).setFloatingActionButtonVisible();
     }
 
     public void loadTasks() {
@@ -115,6 +124,11 @@ public class TasksFragment extends Fragment {
             @Override
             public void onFail(String message) {
                 ((BaseActivity) requireActivity()).onError(message);
+            }
+
+            @Override
+            public void onPermissionDenied() {
+                /** To-do: add realization with start signInActivity*/
             }
         });
         requireActivity().setTitle(mTaskList.getTitle());
@@ -134,6 +148,9 @@ public class TasksFragment extends Fragment {
 
             @Override
             public void onChangeItemExecuted(final Task task) {
+                mProgressBar.setVisibility(View.VISIBLE);
+                requireActivity().getWindow().setFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE,
+                        WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
                 updateTask(task);
             }
         });
@@ -159,6 +176,8 @@ public class TasksFragment extends Fragment {
                     @Override
                     public void onSuccess(List<Task> taskArrayList) {
                         if (isVisible()) {
+                            mProgressBar.setVisibility(View.INVISIBLE);
+                            requireActivity().getWindow().clearFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
                             mTasksAdapter.updateList(taskArrayList);
                         }
                     }
@@ -166,8 +185,15 @@ public class TasksFragment extends Fragment {
                     @Override
                     public void onFail(String message) {
                         if (isVisible()) {
+                            mProgressBar.setVisibility(View.INVISIBLE);
+                            requireActivity().getWindow().clearFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
                             ((BaseActivity) requireActivity()).onError(message);
                         }
+                    }
+
+                    @Override
+                    public void onPermissionDenied() {
+                        /** To-do: add realization with start signInActivity*/
                     }
                 });
     }
@@ -185,6 +211,11 @@ public class TasksFragment extends Fragment {
                     ((BaseActivity) requireActivity()).onError(message);
                 }
             }
+
+            @Override
+            public void onPermissionDenied() {
+                /** To-do: add realization with start signInActivity*/
+            }
         });
     }
 
@@ -196,14 +227,18 @@ public class TasksFragment extends Fragment {
     @Override
     public void onDetach() {
         ((IntentionActivity) requireActivity()).unsubscribeTaskListeners();
-        mTasksAdapter.unsubscribe();
+        if (mTasksAdapter != null) {
+            mTasksAdapter.unsubscribe();
+        }
         super.onDetach();
     }
 
     @Override
     public void onDestroy() {
         super.onDestroy();
-        RefWatcher refWatcher = TaskManagerApp.getRefWatcher(requireActivity());
-        refWatcher.watch(this);
+        if (BuildConfig.DEBUG) {
+            RefWatcher refWatcher = TaskManagerApp.getRefWatcher(requireActivity());
+            refWatcher.watch(this);
+        }
     }
 }

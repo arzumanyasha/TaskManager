@@ -1,7 +1,5 @@
 package com.example.arturarzumanyan.taskmanager.data.repository.tasks;
 
-import android.os.AsyncTask;
-
 import com.example.arturarzumanyan.taskmanager.auth.FirebaseWebService;
 import com.example.arturarzumanyan.taskmanager.data.repository.BaseDataLoadingAsyncTask;
 import com.example.arturarzumanyan.taskmanager.data.repository.RepositoryLoadHelper;
@@ -46,7 +44,7 @@ public class TasksRepository {
             }
         });
 
-        tasksAsyncTask.executeOnExecutor(AsyncTask.SERIAL_EXECUTOR, GET);
+        tasksAsyncTask.execute(GET);
     }
 
     public void addOrUpdateTask(TaskList taskList, Task task, final FirebaseWebService.RequestMethods requestMethod,
@@ -69,7 +67,7 @@ public class TasksRepository {
             }
         });
 
-        tasksAsyncTask.executeOnExecutor(AsyncTask.SERIAL_EXECUTOR, requestMethod);
+        tasksAsyncTask.execute(requestMethod);
     }
 
     public void deleteTask(TaskList taskList, Task task, final OnTasksLoadedListener listener) {
@@ -79,6 +77,7 @@ public class TasksRepository {
         tasksAsyncTask.setDataInfoLoadingListener(new BaseDataLoadingAsyncTask.UserDataLoadingListener<Task>() {
             @Override
             public void onSuccess(List<Task> list) {
+                listener.onSuccess(list);
                 Log.v("Task successfully deleted");
             }
 
@@ -89,13 +88,15 @@ public class TasksRepository {
             }
         });
 
-        tasksAsyncTask.executeOnExecutor(AsyncTask.SERIAL_EXECUTOR, DELETE);
+        tasksAsyncTask.execute(DELETE);
     }
 
     public interface OnTasksLoadedListener {
         void onSuccess(List<Task> taskArrayList);
 
         void onFail(String message);
+
+        void onPermissionDenied();
     }
 
     public static class TasksAsyncTask extends BaseDataLoadingAsyncTask<Task> {
@@ -169,18 +170,14 @@ public class TasksRepository {
         }
 
         @Override
-        protected void doDeleteQuery() {
+        protected boolean doDeleteQuery() {
             mTasksDbStore.deleteTask(mTask);
+            return true;
         }
 
         @Override
         protected List<Task> doSelectQuery() {
             return mTasksDbStore.getTasksFromTaskList(mTaskList.getId());
-        }
-
-        @Override
-        protected void onServerError() {
-            mListener.onFail("Tasks API server error");
         }
 
         @Override
@@ -205,7 +202,12 @@ public class TasksRepository {
                         });
                     }
 
-                    tasksAsyncTask.executeOnExecutor(SERIAL_EXECUTOR, requestMethod);
+                    tasksAsyncTask.execute(requestMethod);
+                }
+
+                @Override
+                public void onFail() {
+                    mListener.onPermissionDenied();
                 }
             });
         }

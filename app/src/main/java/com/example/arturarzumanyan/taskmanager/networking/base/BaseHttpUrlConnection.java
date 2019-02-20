@@ -76,6 +76,7 @@ public class BaseHttpUrlConnection {
             throws IOException {
 
         int responseCode = connection.getResponseCode();
+        Log.v("NETWORKING RESPONSE CODE " + responseCode);
         switch (responseCode) {
             case HttpURLConnection.HTTP_OK: {
                 String buffer = "";
@@ -92,6 +93,7 @@ public class BaseHttpUrlConnection {
                     }
                 }
 
+                Log.v("NETWORKING RESPONSE OK BUFFER " + buffer);
                 return new ResponseDto(HttpURLConnection.HTTP_OK, buffer);
             }
             case HttpURLConnection.HTTP_UNAUTHORIZED: {

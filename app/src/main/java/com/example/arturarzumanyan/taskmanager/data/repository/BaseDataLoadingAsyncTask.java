@@ -4,6 +4,7 @@ import android.os.AsyncTask;
 
 import com.example.arturarzumanyan.taskmanager.auth.FirebaseWebService;
 import com.example.arturarzumanyan.taskmanager.domain.ResponseDto;
+import com.example.arturarzumanyan.taskmanager.networking.util.Log;
 
 import java.net.HttpURLConnection;
 import java.util.List;
@@ -27,6 +28,7 @@ public abstract class BaseDataLoadingAsyncTask<T> extends AsyncTask<FirebaseWebS
             int responseCode;
             if (responseDto != null) {
                 responseCode = responseDto.getResponseCode();
+                Log.v(Integer.toString(responseCode));
                 if (responseCode == HttpURLConnection.HTTP_UNAUTHORIZED) {
                     retryGetResultFromServer(requestMethods[0]);
                 } else {
@@ -39,12 +41,14 @@ public abstract class BaseDataLoadingAsyncTask<T> extends AsyncTask<FirebaseWebS
                         } else if (requestMethods[0] == GET) {
                             refreshDbQuery(responseDto);
                         } else {
-                            doDeleteQuery();
+                            if (!doDeleteQuery()) {
+                                return null;
+                            }
                         }
                     }
                 }
             } else {
-                onServerError();
+                return null;
             }
         } else {
             if (requestMethods[0] == POST) {
@@ -54,7 +58,9 @@ public abstract class BaseDataLoadingAsyncTask<T> extends AsyncTask<FirebaseWebS
             } else if (requestMethods[0] == GET) {
                 return doSelectQuery();
             } else {
-                doDeleteQuery();
+                if (!doDeleteQuery()) {
+                    return null;
+                }
             }
         }
 
@@ -84,7 +90,11 @@ public abstract class BaseDataLoadingAsyncTask<T> extends AsyncTask<FirebaseWebS
     @Override
     protected void onPostExecute(List<T> data) {
         super.onPostExecute(data);
-        userDataLoadingListener.onSuccess(data);
+        if (data != null) {
+            userDataLoadingListener.onSuccess(data);
+        } else {
+            userDataLoadingListener.onFail("Error occurred");
+        }
     }
 
     protected abstract ResponseDto doGetRequest();
@@ -103,11 +113,9 @@ public abstract class BaseDataLoadingAsyncTask<T> extends AsyncTask<FirebaseWebS
 
     protected abstract void doUpdateQuery();
 
-    protected abstract void doDeleteQuery();
+    protected abstract boolean doDeleteQuery();
 
     protected abstract void retryGetResultFromServer(FirebaseWebService.RequestMethods requestMethod);
-
-    protected abstract void onServerError();
 
     public interface UserDataLoadingListener<T> {
         void onSuccess(List<T> list);

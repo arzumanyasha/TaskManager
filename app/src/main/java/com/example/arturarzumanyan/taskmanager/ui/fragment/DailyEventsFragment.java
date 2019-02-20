@@ -10,7 +10,9 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ProgressBar;
+import android.widget.TextView;
 
+import com.example.arturarzumanyan.taskmanager.BuildConfig;
 import com.example.arturarzumanyan.taskmanager.R;
 import com.example.arturarzumanyan.taskmanager.TaskManagerApp;
 import com.example.arturarzumanyan.taskmanager.data.repository.events.EventsRepository;
@@ -30,6 +32,7 @@ import static com.example.arturarzumanyan.taskmanager.ui.activity.IntentionActiv
 
 public class DailyEventsFragment extends Fragment {
     private RecyclerView mEventsRecyclerView;
+    private TextView mNoEventsTextView;
     private ProgressBar mProgressBar;
     private EventsRepository mEventsRepository;
 
@@ -64,6 +67,7 @@ public class DailyEventsFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_daily_events, container, false);
         mEventsRecyclerView = view.findViewById(R.id.recycler_events);
         mProgressBar = view.findViewById(R.id.daily_events_progress_bar);
+        mNoEventsTextView = view.findViewById(R.id.text_view_no_events);
 
         if (mDailyEventsList == null) {
             loadDailyEvents();
@@ -84,6 +88,9 @@ public class DailyEventsFragment extends Fragment {
                     mDailyEventsList = eventsList;
                     mProgressBar.setVisibility(ProgressBar.INVISIBLE);
                     setEventsAdapter(eventsList);
+                    if (eventsList.isEmpty()) {
+                        mNoEventsTextView.setVisibility(View.VISIBLE);
+                    }
                 }
             }
 
@@ -92,6 +99,11 @@ public class DailyEventsFragment extends Fragment {
                 if (isVisible()) {
                     ((BaseActivity) requireActivity()).onError(message);
                 }
+            }
+
+            @Override
+            public void onPermissionDenied() {
+                /** To-do: add realization with start signInActivity*/
             }
         });
     }
@@ -115,6 +127,7 @@ public class DailyEventsFragment extends Fragment {
         ((IntentionActivity) requireActivity()).setEventFragmentInteractionListener(new IntentionActivity.EventFragmentInteractionListener() {
             @Override
             public void onEventsReady(List<Event> events) {
+                mNoEventsTextView.setVisibility(View.INVISIBLE);
                 mEventsAdapter.updateList(events);
             }
         });
@@ -126,12 +139,20 @@ public class DailyEventsFragment extends Fragment {
         eventsRepository.deleteEvent(event, new EventsRepository.OnEventsLoadedListener() {
             @Override
             public void onSuccess(List<Event> eventsList) {
-
+                mDailyEventsList = eventsList;
+                if (eventsList.isEmpty()) {
+                    mNoEventsTextView.setVisibility(View.VISIBLE);
+                }
             }
 
             @Override
             public void onFail(String message) {
                 ((BaseActivity) requireActivity()).onError(message);
+            }
+
+            @Override
+            public void onPermissionDenied() {
+                /** To-do: add realization with start signInActivity*/
             }
         });
     }
@@ -141,12 +162,11 @@ public class DailyEventsFragment extends Fragment {
         eventsDialog.setEventsReadyListener(new EventsDialog.EventsReadyListener() {
             @Override
             public void onEventsReady(List<Event> events) {
+                mNoEventsTextView.setVisibility(View.INVISIBLE);
                 mEventsAdapter.updateList(events);
             }
         });
-        if (getFragmentManager() != null) {
-            eventsDialog.show(getFragmentManager(), EVENTS_KEY);
-        }
+        eventsDialog.show(requireFragmentManager(), EVENTS_KEY);
     }
 
     @Override
@@ -167,7 +187,9 @@ public class DailyEventsFragment extends Fragment {
     @Override
     public void onDestroy() {
         super.onDestroy();
-        RefWatcher refWatcher = TaskManagerApp.getRefWatcher(requireActivity());
-        refWatcher.watch(this);
+        if (BuildConfig.DEBUG) {
+            RefWatcher refWatcher = TaskManagerApp.getRefWatcher(requireActivity());
+            refWatcher.watch(this);
+        }
     }
 }

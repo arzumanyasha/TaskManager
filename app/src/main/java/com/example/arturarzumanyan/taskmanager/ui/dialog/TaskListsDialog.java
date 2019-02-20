@@ -112,6 +112,11 @@ public class TaskListsDialog extends AppCompatDialogFragment {
             public void onFail(String message) {
                 ((BaseActivity) requireActivity()).onError(message);
             }
+
+            @Override
+            public void onPermissionDenied() {
+                /** To-do: add realization with start signInActivity*/
+            }
         };
     }
 

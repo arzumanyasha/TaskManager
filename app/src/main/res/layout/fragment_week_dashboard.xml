@@ -5,138 +5,202 @@
     android:layout_height="match_parent"
     tools:context=".ui.fragment.WeekDashboardFragment">
 
-       <LinearLayout
-           android:layout_width="match_parent"
-           android:layout_height="match_parent"
-           android:orientation="horizontal"
-           android:weightSum="7">
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="horizontal"
+        android:weightSum="8">
 
-           <TextView
-               android:id="@+id/text_mon"
-               android:layout_width="wrap_content"
-               android:layout_height="wrap_content"
-               android:layout_weight="1"
-               android:text="@string/monday_name"
-               android:textSize="22sp" />
+        <TextView
+            android:id="@+id/text_view_time"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="@string/time"
+            android:textSize="14sp" />
 
-           <TextView
-               android:id="@+id/text_tue"
-               android:layout_width="wrap_content"
-               android:layout_height="wrap_content"
-               android:layout_weight="1"
-               android:text="@string/tuesday_name"
-               android:textSize="22sp"/>
+        <TextView
+            android:id="@+id/text_mon"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="@string/monday_name"
+            android:textSize="22sp" />
 
-           <TextView
-               android:id="@+id/text_wed"
-               android:layout_width="wrap_content"
-               android:layout_height="wrap_content"
-               android:layout_weight="1"
-               android:text="@string/wednesday_name"
-               android:textSize="22sp" />
+        <TextView
+            android:id="@+id/text_tue"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="@string/tuesday_name"
+            android:textSize="22sp" />
 
-           <TextView
-               android:id="@+id/text_thu"
-               android:layout_width="wrap_content"
-               android:layout_height="wrap_content"
-               android:layout_weight="1"
-               android:text="@string/thursday_name"
-               android:textSize="22sp"/>
+        <TextView
+            android:id="@+id/text_wed"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="@string/wednesday_name"
+            android:textSize="22sp" />
 
-           <TextView
-               android:id="@+id/text_fri"
-               android:layout_width="wrap_content"
-               android:layout_height="wrap_content"
-               android:layout_weight="1"
-               android:text="@string/friday_name"
-               android:textSize="22sp"/>
+        <TextView
+            android:id="@+id/text_thu"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="@string/thursday_name"
+            android:textSize="22sp" />
 
-           <TextView
-               android:id="@+id/text_sat"
-               android:layout_width="wrap_content"
-               android:layout_height="wrap_content"
-               android:layout_weight="1"
-               android:text="@string/saturday_name"
-               android:textSize="22sp"/>
+        <TextView
+            android:id="@+id/text_fri"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="@string/friday_name"
+            android:textSize="22sp" />
 
-           <TextView
-               android:id="@+id/text_sun"
-               android:layout_width="wrap_content"
-               android:layout_height="wrap_content"
-               android:layout_weight="1"
-               android:text="@string/sunday_name"
-               android:textSize="22sp"/>
-       </LinearLayout>
+        <TextView
+            android:id="@+id/text_sat"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="@string/saturday_name"
+            android:textSize="22sp" />
 
-       <LinearLayout
-           android:layout_width="match_parent"
-           android:layout_height="match_parent"
-           android:orientation="horizontal"
-           android:weightSum="7">
+        <TextView
+            android:id="@+id/text_sun"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="@string/sunday_name"
+            android:textSize="22sp" />
+    </LinearLayout>
 
-           <LinearLayout
-               android:id="@+id/linear_layout_mon"
-               android:layout_width="match_parent"
-               android:layout_height="match_parent"
-               android:layout_weight="1"
-               android:orientation="vertical"
-               android:weightSum="1440">
-           </LinearLayout>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="horizontal"
+        android:weightSum="8"
+        android:baselineAligned="false">
 
-           <LinearLayout
-               android:id="@+id/linear_layout_tue"
-               android:layout_width="match_parent"
-               android:layout_height="match_parent"
-               android:layout_weight="1"
-               android:orientation="vertical"
-               android:weightSum="1440">
-           </LinearLayout>
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:orientation="vertical"
+            android:weightSum="6">
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:text="@string/late_night_time"
+                android:textSize="14sp"
+                android:gravity="bottom" />
 
-           <LinearLayout
-               android:id="@+id/linear_layout_wed"
-               android:layout_width="match_parent"
-               android:layout_height="match_parent"
-               android:layout_weight="1"
-               android:orientation="vertical"
-               android:weightSum="1440">
-           </LinearLayout>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:text="@string/morning_time"
+                android:textSize="14sp"
+                android:gravity="bottom" />
 
-           <LinearLayout
-               android:id="@+id/linear_layout_thu"
-               android:layout_width="match_parent"
-               android:layout_height="match_parent"
-               android:layout_weight="1"
-               android:orientation="vertical"
-               android:weightSum="1440">
-           </LinearLayout>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:text="@string/noon_time"
+                android:textSize="14sp"
+                android:gravity="bottom" />
 
-           <LinearLayout
-               android:id="@+id/linear_layout_fri"
-               android:layout_width="match_parent"
-               android:layout_height="match_parent"
-               android:layout_weight="1"
-               android:orientation="vertical"
-               android:weightSum="1440">
-           </LinearLayout>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:text="@string/afternoon_time"
+                android:textSize="14sp"
+                android:gravity="bottom" />
 
-           <LinearLayout
-               android:id="@+id/linear_layout_sat"
-               android:layout_width="match_parent"
-               android:layout_height="match_parent"
-               android:layout_weight="1"
-               android:orientation="vertical"
-               android:weightSum="1440">
-           </LinearLayout>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:text="@string/evening_time"
+                android:textSize="14sp"
+                android:gravity="bottom" />
 
-           <LinearLayout
-               android:id="@+id/linear_layout_sun"
-               android:layout_width="match_parent"
-               android:layout_height="match_parent"
-               android:layout_weight="1"
-               android:orientation="vertical"
-               android:weightSum="1440">
-           </LinearLayout>
-       </LinearLayout>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:text="@string/night_time"
+                android:textSize="14sp"
+                android:gravity="bottom" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/linear_layout_mon"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:orientation="vertical"
+            android:weightSum="1440">
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/linear_layout_tue"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:orientation="vertical"
+            android:weightSum="1440">
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/linear_layout_wed"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:orientation="vertical"
+            android:weightSum="1440">
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/linear_layout_thu"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:orientation="vertical"
+            android:weightSum="1440">
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/linear_layout_fri"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:orientation="vertical"
+            android:weightSum="1440">
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/linear_layout_sat"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:orientation="vertical"
+            android:weightSum="1440">
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/linear_layout_sun"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:orientation="vertical"
+            android:weightSum="1440">
+        </LinearLayout>
+    </LinearLayout>
 
     <ProgressBar
         android:id="@+id/week_dashboard_progress_bar"

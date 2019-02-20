@@ -55,7 +55,7 @@ public class TaskListsRepository {
             }
         });
 
-        taskListsAsyncTask.executeOnExecutor(AsyncTask.SERIAL_EXECUTOR, GET);
+        taskListsAsyncTask.execute(GET);
     }
 
     public void addTaskList(TaskList taskList, final OnTaskListsLoadedListener listener) {
@@ -63,7 +63,7 @@ public class TaskListsRepository {
 
         TaskListsAsyncTask taskListsAsyncTask = new TaskListsAsyncTask(taskList,
                 mRepositoryLoadHelper, mTaskListsDbStore, mTaskListsCloudStore,
-                mTasksDbStore, null, allTaskListsSpecification, null);
+                mTasksDbStore, null, allTaskListsSpecification, listener);
 
         taskListsAsyncTask.setDataInfoLoadingListener(new BaseDataLoadingAsyncTask.UserDataLoadingListener<TaskList>() {
             @Override
@@ -76,7 +76,7 @@ public class TaskListsRepository {
                 listener.onFail(message + '\n' + "Failed to create task list");
             }
         });
-        taskListsAsyncTask.executeOnExecutor(AsyncTask.SERIAL_EXECUTOR, POST);
+        taskListsAsyncTask.execute(POST);
     }
 
     public void updateTaskList(TaskList taskList, final OnTaskListsLoadedListener listener) {
@@ -98,7 +98,7 @@ public class TaskListsRepository {
                 listener.onFail(message + '\n' + "Failed to update task list");
             }
         });
-        taskListsAsyncTask.executeOnExecutor(AsyncTask.SERIAL_EXECUTOR, PATCH);
+        taskListsAsyncTask.execute(PATCH);
     }
 
     public void deleteTaskList(TaskList taskList, final OnTaskListsLoadedListener listener) {
@@ -107,7 +107,7 @@ public class TaskListsRepository {
 
         TaskListsAsyncTask taskListsAsyncTask = new TaskListsAsyncTask(taskList,
                 mRepositoryLoadHelper, mTaskListsDbStore, mTaskListsCloudStore,
-                mTasksDbStore, null, taskListFromIdSpecification, null);
+                mTasksDbStore, null, taskListFromIdSpecification, listener);
 
         taskListsAsyncTask.setDataInfoLoadingListener(new BaseDataLoadingAsyncTask.UserDataLoadingListener<TaskList>() {
             @Override
@@ -120,7 +120,7 @@ public class TaskListsRepository {
                 listener.onFail(message + '\n' + "Failed to delete task list");
             }
         });
-        taskListsAsyncTask.executeOnExecutor(AsyncTask.SERIAL_EXECUTOR, DELETE);
+        taskListsAsyncTask.execute(DELETE);
     }
 
     public interface OnTaskListsLoadedListener {
@@ -131,6 +131,8 @@ public class TaskListsRepository {
         void onSuccess(TaskList taskList);
 
         void onFail(String message);
+
+        void onPermissionDenied();
     }
 
     public static class TaskListsAsyncTask extends BaseDataLoadingAsyncTask<TaskList> {
@@ -184,7 +186,11 @@ public class TaskListsRepository {
 
         @Override
         protected ResponseDto doDeleteRequest() {
-            return mTaskListsCloudStore.deleteTaskListOnServer(mTaskList);
+            if (mTaskList.getId() != 1) {
+                return mTaskListsCloudStore.deleteTaskListOnServer(mTaskList);
+            } else {
+                return null;
+            }
         }
 
         @Override
@@ -215,13 +221,13 @@ public class TaskListsRepository {
         }
 
         @Override
-        protected void doDeleteQuery() {
-            mTaskListsDbStore.deleteTaskList(mTaskList);
-        }
-
-        @Override
-        protected void onServerError() {
-            mListener.onFail("Tasks API server error");
+        protected boolean doDeleteQuery() {
+            if (mTaskList.getId() != 1) {
+                mTaskListsDbStore.deleteTaskList(mTaskList);
+                return true;
+            } else {
+                return false;
+            }
         }
 
         @Override
@@ -246,7 +252,12 @@ public class TaskListsRepository {
                         }
                     });
 
-                    taskListsAsyncTask.executeOnExecutor(SERIAL_EXECUTOR, requestMethod);
+                    taskListsAsyncTask.execute(requestMethod);
+                }
+
+                @Override
+                public void onFail() {
+                    mListener.onPermissionDenied();
                 }
             });
         }

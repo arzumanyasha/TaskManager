@@ -3,7 +3,9 @@ package com.example.arturarzumanyan.taskmanager.auth;
 import android.content.Context;
 import android.content.Intent;
 import android.support.annotation.NonNull;
+import android.support.v4.app.FragmentActivity;
 
+import com.example.arturarzumanyan.taskmanager.data.repository.RepositoryLoadHelper;
 import com.example.arturarzumanyan.taskmanager.networking.base.RequestParameters;
 import com.example.arturarzumanyan.taskmanager.networking.util.Log;
 import com.google.android.gms.auth.api.Auth;
@@ -75,7 +77,7 @@ public class FirebaseWebService implements GoogleApiClient.OnConnectionFailedLis
 
         GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
                 .requestIdToken(CLIENT_ID)
-                .requestServerAuthCode(CLIENT_ID)
+                .requestServerAuthCode(CLIENT_ID, true)
                 .requestEmail()
                 .requestScopes(new Scope(CALENDAR_SCOPE),
                         new Scope(TASKS_SCOPE))
@@ -176,10 +178,14 @@ public class FirebaseWebService implements GoogleApiClient.OnConnectionFailedLis
         accessTokenAsyncTask.setTokensLoadingListener(new AccessTokenAsyncTask.TokensLoadingListener() {
             @Override
             public void onDataLoaded(String buffer) throws JSONException {
-                String accessToken = getAccessTokenFromBuffer(buffer);
+                if (RepositoryLoadHelper.isOnline() && buffer.isEmpty()) {
+                    listener.onFail();
+                } else {
+                    String accessToken = getAccessTokenFromBuffer(buffer);
 
-                TokenStorage.getTokenStorageInstance().writeAccessToken(accessToken);
-                listener.onAccessTokenUpdated();
+                    TokenStorage.getTokenStorageInstance().writeAccessToken(accessToken);
+                    listener.onAccessTokenUpdated();
+                }
             }
         });
 
@@ -208,8 +214,7 @@ public class FirebaseWebService implements GoogleApiClient.OnConnectionFailedLis
     }
 
     public String getUserEmail() {
-        mAuth = FirebaseAuth.getInstance();
-        FirebaseUser firebaseUser = mAuth.getCurrentUser();
+        FirebaseUser firebaseUser = getCurrentUser();
         if (firebaseUser != null) {
             return firebaseUser.getEmail();
         } else {
@@ -244,5 +249,6 @@ public class FirebaseWebService implements GoogleApiClient.OnConnectionFailedLis
 
     public interface AccessTokenUpdatedListener {
         void onAccessTokenUpdated();
+        void onFail();
     }
 }

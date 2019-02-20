@@ -51,7 +51,11 @@
                 <string name="add_task_list"> + Add list</string>
 
             <!--dialog_events-->
-                <string name="notification_text">Notification</string>
+                <string name="choose_color">Choose color</string>
+                <string name="start_time">Start time</string>
+                <string name="end_time">End time</string>
+                <string name="event_date">Event date</string>
+                <string name="notification_text">Enable notification</string>
 
             <!--dialog_tasklists-->
                 <string name="tasklist_name_hint">Title</string>
@@ -64,14 +68,28 @@
                 <string name="event_time">Event time</string>
                 <string name="event_description">Event description</string>
 
+            <!--fragment_daily_events-->
+                <string name="no_events_for_today">No events for today</string>
+
             <!--fragment_week_dashboard-->
                 <string name="monday_name">Mon</string>
                 <string name="tuesday_name">Tue</string>
-                <string name="wednesday_name">wed</string>
+                <string name="wednesday_name">Wed</string>
                 <string name="thursday_name">Thu</string>
                 <string name="friday_name">Fri</string>
                 <string name="saturday_name">Sat</string>
                 <string name="sunday_name">Sun</string>
+                <string name="time">Time</string>
+                <string name="late_night_time">04:00</string>
+                <string name="morning_time">08:00</string>
+                <string name="noon_time">12:00</string>
+                <string name="afternoon_time">16:00</string>
+                <string name="evening_time">20:00</string>
+                <string name="night_time">24:00</string>
+
+            <!--fragment_events_statistic-->
+                <string name="choose_watch_mode">Choose watch mode</string>
+                <string name="no_events_to_show_message">No events to show</string>
 
             <!--item_task-->
                 <string name="task_name">Task title</string>

@@ -4,8 +4,8 @@ import com.example.arturarzumanyan.taskmanager.auth.FirebaseWebService;
 import com.example.arturarzumanyan.taskmanager.domain.ResponseDto;
 import com.example.arturarzumanyan.taskmanager.networking.base.BaseHttpUrlConnection;
 import com.example.arturarzumanyan.taskmanager.networking.base.RequestParameters;
+import com.example.arturarzumanyan.taskmanager.networking.util.Log;
 
-import java.util.HashMap;
 import java.util.Map;
 
 public class NetworkUtil {
@@ -15,6 +15,12 @@ public class NetworkUtil {
         Map<String, Object> requestBodyParameters = requestParameters.getRequestBodyParameters();
         Map<String, String> requestHeaderParameters = requestParameters.getRequestHeaderParameters();
 
+        Log.v("NETWORKING REQUEST " + requestParameters.getUrl());
+        Log.v("NETWORKING REQUEST " + requestParameters.getRequestMethod().toString());
+        Log.v("NETWORKING REQUEST " + requestParameters.getRequestHeaderParameters().toString());
+        if(requestBodyParameters != null) {
+            Log.v("NETWORKING REQUEST " + requestParameters.getRequestBodyParameters().toString());
+        }
         BaseHttpUrlConnection baseHttpUrlConnection = new BaseHttpUrlConnection();
         return baseHttpUrlConnection.getResult(url,
                 requestMethod,
