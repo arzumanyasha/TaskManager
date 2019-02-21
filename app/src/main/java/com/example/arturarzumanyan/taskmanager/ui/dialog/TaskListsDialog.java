@@ -18,7 +18,7 @@ import com.example.arturarzumanyan.taskmanager.ui.activity.BaseActivity;
 import java.util.List;
 import java.util.UUID;
 
-import static com.example.arturarzumanyan.taskmanager.ui.activity.IntentionActivity.TASK_LISTS_KEY;
+import static com.example.arturarzumanyan.taskmanager.ui.activity.intention.IntentionActivity.TASK_LISTS_KEY;
 
 public class TaskListsDialog extends AppCompatDialogFragment {
     private EditText mEditTextTaskListTitle;
