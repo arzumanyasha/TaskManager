@@ -7,11 +7,11 @@ import com.example.arturarzumanyan.taskmanager.ui.activity.signin.mvp.contract.S
 
 import static android.app.Activity.RESULT_OK;
 
-public class SignInPresenter implements SignInContract.SignInPresenter {
+public class SignInPresenterImpl implements SignInContract.SignInPresenter {
     private static final int AUTHENTICATION_REQUEST_CODE = 101;
     private SignInContract.SignInView mSignInView;
 
-    public SignInPresenter(SignInContract.SignInView mSignInView) {
+    public SignInPresenterImpl(SignInContract.SignInView mSignInView) {
         this.mSignInView = mSignInView;
     }
 

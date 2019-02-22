@@ -10,7 +10,7 @@ import com.example.arturarzumanyan.taskmanager.networking.util.Log;
 import com.example.arturarzumanyan.taskmanager.ui.activity.BaseActivity;
 import com.example.arturarzumanyan.taskmanager.ui.activity.intention.IntentionActivity;
 import com.example.arturarzumanyan.taskmanager.ui.activity.signin.mvp.contract.SignInContract;
-import com.example.arturarzumanyan.taskmanager.ui.activity.signin.mvp.presenter.SignInPresenter;
+import com.example.arturarzumanyan.taskmanager.ui.activity.signin.mvp.presenter.SignInPresenterImpl;
 import com.google.android.gms.common.SignInButton;
 
 public class SignInActivity extends BaseActivity implements SignInContract.SignInView {
@@ -19,23 +19,20 @@ public class SignInActivity extends BaseActivity implements SignInContract.SignI
     public static final String EXTRA_USER_EMAIL = "userEmail";
     public static final String EXTRA_USER_PHOTO_URL = "userPhotoUrl";
 
-    private SignInPresenter mSignInPresenter;
-
-
-    private SignInButton signInButton;
-
+    private SignInContract.SignInPresenter mSignInPresenter;
+    
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_sign_in);
 
         setViews();
-        mSignInPresenter = new SignInPresenter(this);
+        mSignInPresenter = new SignInPresenterImpl(this);
         mSignInPresenter.setAuthenticationOptions();
     }
 
     private void setViews() {
-        signInButton = findViewById(R.id.btn_sign_in);
+        SignInButton signInButton = findViewById(R.id.btn_sign_in);
         signInButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
