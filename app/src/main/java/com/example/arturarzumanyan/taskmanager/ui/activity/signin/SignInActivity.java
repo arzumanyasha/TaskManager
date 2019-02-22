@@ -65,7 +65,6 @@ public class SignInActivity extends BaseActivity implements SignInContract.SignI
     private void unsubscribe() {
         mSignInPresenter.unsubscribe();
         mSignInPresenter = null;
-        signInButton.setOnClickListener(null);
     }
 
     @Override
