@@ -39,7 +39,6 @@ public class SignInActivity extends BaseActivity implements SignInContract.SignI
         signInButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                mSignInPresenter = new SignInPresenter(SignInActivity.this);
                 mSignInPresenter.performSignIn();
             }
         });
@@ -48,16 +47,13 @@ public class SignInActivity extends BaseActivity implements SignInContract.SignI
     @Override
     public void onStart() {
         super.onStart();
-
-        mSignInPresenter.checkIsCurrentUserNull();
+        mSignInPresenter.processCurrentUserSignInStatus();
     }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         Log.v("START ACTIVITY FOR RESULT RESULT CODE = " + resultCode);
-        if (mSignInPresenter.checkIsAuthenticationResultOk(requestCode, resultCode)) {
-            mSignInPresenter.authWithGoogle(data);
-        }
+        mSignInPresenter.processAuthWithGoogle(requestCode, resultCode, data);
     }
 
     @Override

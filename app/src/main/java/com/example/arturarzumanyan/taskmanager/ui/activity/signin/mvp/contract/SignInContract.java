@@ -8,11 +8,9 @@ public class SignInContract {
 
         void setAuthenticationOptions();
 
-        void authWithGoogle(Intent data);
+        void processAuthWithGoogle(int requestCode, int resultCode, Intent data);
 
-        boolean checkIsAuthenticationResultOk(int requestCode, int resultCode);
-
-        void checkIsCurrentUserNull();
+        void processCurrentUserSignInStatus();
 
         void unsubscribe();
     }

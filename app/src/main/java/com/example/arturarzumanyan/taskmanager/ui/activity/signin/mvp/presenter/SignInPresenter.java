@@ -38,17 +38,14 @@ public class SignInPresenter implements SignInContract.SignInPresenter {
     }
 
     @Override
-    public void authWithGoogle(Intent data) {
-        FirebaseWebService.getFirebaseWebServiceInstance().authWithGoogle(data);
+    public void processAuthWithGoogle(int requestCode, int resultCode, Intent data) {
+        if (resultCode == RESULT_OK && requestCode == AUTHENTICATION_REQUEST_CODE) {
+            FirebaseWebService.getFirebaseWebServiceInstance().authWithGoogle(data);
+        }
     }
 
     @Override
-    public boolean checkIsAuthenticationResultOk(int requestCode, int resultCode) {
-        return resultCode == RESULT_OK && requestCode == AUTHENTICATION_REQUEST_CODE;
-    }
-
-    @Override
-    public void checkIsCurrentUserNull() {
+    public void processCurrentUserSignInStatus() {
         if (FirebaseWebService.getFirebaseWebServiceInstance().getCurrentUser() != null) {
             mSignInView.onSignInSuccess(FirebaseWebService.getFirebaseWebServiceInstance().getCurrentUser().getDisplayName(),
                     FirebaseWebService.getFirebaseWebServiceInstance().getCurrentUser().getEmail(),
