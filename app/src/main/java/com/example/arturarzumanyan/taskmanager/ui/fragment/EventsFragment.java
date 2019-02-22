@@ -16,10 +16,10 @@ import com.example.arturarzumanyan.taskmanager.BuildConfig;
 import com.example.arturarzumanyan.taskmanager.R;
 import com.example.arturarzumanyan.taskmanager.TaskManagerApp;
 import com.example.arturarzumanyan.taskmanager.networking.util.Log;
-import com.example.arturarzumanyan.taskmanager.ui.activity.IntentionActivity;
+import com.example.arturarzumanyan.taskmanager.ui.activity.intention.IntentionActivity;
 import com.squareup.leakcanary.RefWatcher;
 
-import static com.example.arturarzumanyan.taskmanager.ui.activity.IntentionActivity.EVENTS_KEY;
+import static com.example.arturarzumanyan.taskmanager.ui.activity.intention.IntentionActivity.EVENTS_KEY;
 
 public class EventsFragment extends Fragment {
     private static final String BACK_STACK_ROOT_TAG = "root_fragment";

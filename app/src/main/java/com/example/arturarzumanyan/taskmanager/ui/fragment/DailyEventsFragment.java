@@ -21,14 +21,14 @@ import com.example.arturarzumanyan.taskmanager.domain.Event;
 import com.example.arturarzumanyan.taskmanager.networking.util.DateUtils;
 import com.example.arturarzumanyan.taskmanager.networking.util.Log;
 import com.example.arturarzumanyan.taskmanager.ui.activity.BaseActivity;
-import com.example.arturarzumanyan.taskmanager.ui.activity.IntentionActivity;
+import com.example.arturarzumanyan.taskmanager.ui.activity.intention.IntentionActivity;
 import com.example.arturarzumanyan.taskmanager.ui.adapter.EventsAdapter;
 import com.example.arturarzumanyan.taskmanager.ui.dialog.EventsDialog;
 import com.squareup.leakcanary.RefWatcher;
 
 import java.util.List;
 
-import static com.example.arturarzumanyan.taskmanager.ui.activity.IntentionActivity.EVENTS_KEY;
+import static com.example.arturarzumanyan.taskmanager.ui.activity.intention.IntentionActivity.EVENTS_KEY;
 
 public class DailyEventsFragment extends Fragment {
     private RecyclerView mEventsRecyclerView;

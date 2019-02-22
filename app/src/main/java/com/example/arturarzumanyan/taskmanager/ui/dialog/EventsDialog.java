@@ -35,7 +35,7 @@ import petrov.kristiyan.colorpicker.ColorPicker;
 
 import static com.example.arturarzumanyan.taskmanager.auth.FirebaseWebService.RequestMethods.PATCH;
 import static com.example.arturarzumanyan.taskmanager.auth.FirebaseWebService.RequestMethods.POST;
-import static com.example.arturarzumanyan.taskmanager.ui.activity.IntentionActivity.EVENTS_KEY;
+import static com.example.arturarzumanyan.taskmanager.ui.activity.intention.IntentionActivity.EVENTS_KEY;
 
 public class EventsDialog extends AppCompatDialogFragment {
     private static final int DEFAULT_COLOR = 9;

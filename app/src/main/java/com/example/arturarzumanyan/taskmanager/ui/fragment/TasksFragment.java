@@ -21,7 +21,7 @@ import com.example.arturarzumanyan.taskmanager.domain.Task;
 import com.example.arturarzumanyan.taskmanager.domain.TaskList;
 import com.example.arturarzumanyan.taskmanager.networking.util.Log;
 import com.example.arturarzumanyan.taskmanager.ui.activity.BaseActivity;
-import com.example.arturarzumanyan.taskmanager.ui.activity.IntentionActivity;
+import com.example.arturarzumanyan.taskmanager.ui.activity.intention.IntentionActivity;
 import com.example.arturarzumanyan.taskmanager.ui.adapter.TasksAdapter;
 import com.example.arturarzumanyan.taskmanager.ui.dialog.TasksDialog;
 import com.squareup.leakcanary.RefWatcher;
@@ -29,8 +29,8 @@ import com.squareup.leakcanary.RefWatcher;
 import java.util.List;
 
 import static com.example.arturarzumanyan.taskmanager.auth.FirebaseWebService.RequestMethods.PATCH;
-import static com.example.arturarzumanyan.taskmanager.ui.activity.IntentionActivity.TASKS_KEY;
-import static com.example.arturarzumanyan.taskmanager.ui.activity.IntentionActivity.TASK_LISTS_KEY;
+import static com.example.arturarzumanyan.taskmanager.ui.activity.intention.IntentionActivity.TASKS_KEY;
+import static com.example.arturarzumanyan.taskmanager.ui.activity.intention.IntentionActivity.TASK_LISTS_KEY;
 
 public class TasksFragment extends Fragment {
     private RecyclerView mTasksRecyclerView;
