@@ -41,8 +41,8 @@ public class IntentionPresenterImpl implements IntentionContract.IntentionPresen
     }
 
     @Override
-    public void processAddButtonClick(String currentTitle) {
-        if (currentTitle.equals(EVENTS_KEY)) {
+    public void processAddButtonClick(String title) {
+        if (title.equals(EVENTS_KEY)) {
             processEventsDialog();
         } else {
             processTasksDialog();

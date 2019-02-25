@@ -14,7 +14,7 @@ public class IntentionContract {
 
         void processTaskListMenuItemClick(TaskList taskList);
 
-        void processAddButtonClick(String currentTitle);
+        void processAddButtonClick(String title);
 
         void processRestoredInfo(String key);
 
