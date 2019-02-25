@@ -1,7 +1,5 @@
 package com.example.arturarzumanyan.taskmanager.ui.activity.intention.mvp.presenter;
 
-import android.os.Bundle;
-
 import com.example.arturarzumanyan.taskmanager.data.repository.tasklists.TaskListsRepository;
 import com.example.arturarzumanyan.taskmanager.data.repository.tasklists.specification.AllTaskListsSpecification;
 import com.example.arturarzumanyan.taskmanager.domain.Event;
@@ -21,6 +19,8 @@ public class IntentionPresenterImpl implements IntentionContract.IntentionPresen
 
     private TaskListsRepository mTaskListsRepository;
 
+    private List<TaskList> mTaskLists;
+    private TaskList mCurrentTaskList;
     private IntentionContract.IntentionView mIntentionView;
 
     public IntentionPresenterImpl(IntentionContract.IntentionView intentionView) {
@@ -29,7 +29,27 @@ public class IntentionPresenterImpl implements IntentionContract.IntentionPresen
     }
 
     @Override
-    public void openEventsDialog() {
+    public void setCurrentTaskList(TaskList taskList) {
+        this.mCurrentTaskList = taskList;
+    }
+
+    @Override
+    public void setTaskLists(List<TaskList> taskLists) {
+        this.mTaskLists = taskLists;
+    }
+
+    @Override
+    public TaskList getCurrentTaskList() {
+        return this.mCurrentTaskList;
+    }
+
+    @Override
+    public List<TaskList> getTaskLists() {
+        return this.mTaskLists;
+    }
+
+    @Override
+    public void processEventsDialog() {
         EventsDialog eventsDialog = EventsDialog.newInstance(null);
         eventsDialog.setEventsReadyListener(new EventsDialog.EventsReadyListener() {
             @Override
@@ -41,9 +61,9 @@ public class IntentionPresenterImpl implements IntentionContract.IntentionPresen
     }
 
     @Override
-    public void openTasksDialog(List<TaskList> taskLists, TaskList currentTaskList) {
-        for (TaskList taskList : taskLists) {
-            if (currentTaskList.getId() == taskList.getId()) {
+    public void processTasksDialog() {
+        for (TaskList taskList : mTaskLists) {
+            if (mCurrentTaskList.getId() == taskList.getId()) {
                 TasksDialog tasksDialog = TasksDialog.newInstance(null, taskList);
                 tasksDialog.setTasksReadyListener(new TasksDialog.TasksReadyListener() {
                     @Override
@@ -58,7 +78,7 @@ public class IntentionPresenterImpl implements IntentionContract.IntentionPresen
     }
 
     @Override
-    public void openTaskListCreatingDialog() {
+    public void processTaskListCreatingDialog() {
         TaskListsDialog taskListsDialog = TaskListsDialog.newInstance(null);
         taskListsDialog.setTaskListReadyListener(new TaskListsDialog.TaskListReadyListener() {
             @Override
@@ -70,13 +90,13 @@ public class IntentionPresenterImpl implements IntentionContract.IntentionPresen
     }
 
     @Override
-    public void openTaskListUpdatingDialog(TaskList taskList) {
+    public void processTaskListUpdatingDialog(TaskList taskList) {
         TaskListsDialog taskListsDialog = TaskListsDialog.newInstance(taskList);
 
         taskListsDialog.setTaskListReadyListener(new TaskListsDialog.TaskListReadyListener() {
             @Override
             public void onTaskListReady(TaskList taskList) {
-                mIntentionView.updateTaskList(taskList);
+                mIntentionView.updateTaskListOnUi(taskList);
             }
         });
         mIntentionView.showDialog(taskListsDialog, TASK_LISTS_KEY);
@@ -88,7 +108,6 @@ public class IntentionPresenterImpl implements IntentionContract.IntentionPresen
             @Override
             public void onSuccess(List<TaskList> taskListArrayList) {
                 mIntentionView.displayPreviousTaskFragment(taskList);
-                //openPreviousFragment(mCurrentTaskList);
             }
 
             @Override
@@ -104,7 +123,6 @@ public class IntentionPresenterImpl implements IntentionContract.IntentionPresen
             @Override
             public void onFail(String message) {
                 mIntentionView.onFail(message);
-                //onError(message);
             }
 
             @Override
@@ -121,14 +139,13 @@ public class IntentionPresenterImpl implements IntentionContract.IntentionPresen
         TaskListsRepository.OnTaskListsLoadedListener onTaskListsLoadedListener = new TaskListsRepository.OnTaskListsLoadedListener() {
             @Override
             public void onSuccess(List<TaskList> taskLists) {
-                mIntentionView.displayDefaultUi(taskLists, taskLists.get(0).getTitle());
-                //displayDefaultUi(taskLists, taskLists.get(0).getTitle());
+                mTaskLists = taskLists;
+                mIntentionView.displayDefaultUi(taskLists.get(0).getTitle());
             }
 
             @Override
             public void onUpdate(List<TaskList> taskLists) {
                 mIntentionView.updateTaskListsMenu(taskLists);
-                //updateTaskListsMenu(taskLists);
             }
 
             @Override
@@ -139,7 +156,6 @@ public class IntentionPresenterImpl implements IntentionContract.IntentionPresen
             @Override
             public void onFail(String message) {
                 mIntentionView.onFail(message);
-                //onError(message);
             }
 
             @Override
@@ -149,5 +165,10 @@ public class IntentionPresenterImpl implements IntentionContract.IntentionPresen
         };
 
         mTaskListsRepository.loadTaskLists(allTaskListsSpecification, onTaskListsLoadedListener);
+    }
+
+    @Override
+    public void unsubscribe() {
+        mIntentionView = null;
     }
 }

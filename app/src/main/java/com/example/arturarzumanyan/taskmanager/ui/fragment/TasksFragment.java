@@ -82,6 +82,7 @@ public class TasksFragment extends Fragment {
         if (mTasks == null) {
             loadTasks();
         } else {
+            mProgressBar.setVisibility(View.INVISIBLE);
             setTasksAdapter(mTasks);
             requireActivity().setTitle(mTaskList.getTitle());
         }
