@@ -10,13 +10,11 @@ import java.util.List;
 
 public class IntentionContract {
     public interface IntentionPresenter {
-        void setCurrentTaskList(TaskList taskList);
+        void attachView(IntentionView intentionView);
 
-        void setTaskLists(List<TaskList> taskLists);
+        void processMenuItemClick(TaskList taskList);
 
-        TaskList getCurrentTaskList();
-
-        List<TaskList> getTaskLists();
+        void processRestoredInfo(String key);
 
         void processEventsDialog();
 
@@ -24,9 +22,9 @@ public class IntentionContract {
 
         void processTaskListCreatingDialog();
 
-        void processTaskListUpdatingDialog(TaskList taskList);
+        void processTaskListUpdatingDialog();
 
-        void deleteTaskList(TaskList taskList);
+        void deleteTaskList();
 
         void fetchTaskListsData();
 
@@ -42,13 +40,15 @@ public class IntentionContract {
 
         void onTaskListReady(TaskList taskList);
 
-        void displayDefaultUi(String title);
+        void displayDefaultUi(List<TaskList> taskLists, String title);
 
-        void displayPreviousTaskFragment(TaskList taskList);
+        void displayPreviousTaskFragment(List<TaskList> taskLists, TaskList taskList);
 
-        void updateTaskListsMenu(List<TaskList> taskLists);
+        void recreateTaskListsMenu(List<TaskList> taskLists);
 
-        void updateTaskListOnUi(TaskList taskList);
+        void updateTaskListOnUi(TaskList taskList, int index);
+
+        void updateTaskUi(TaskList taskList);
 
         void onFail(String message);
     }

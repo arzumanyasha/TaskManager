@@ -47,10 +47,17 @@ public class TaskListsDialog extends AppCompatDialogFragment {
 
         final Bundle bundle = getArguments();
 
+        int titleResId;
+        if (bundle == null) {
+            titleResId = R.string.task_lists_add_title;
+        } else {
+            titleResId = R.string.task_list_rename_title;
+        }
+
         mEditTextTaskListTitle = view.findViewById(R.id.edit_text_tasklist_name);
 
         builder.setView(view)
-                .setTitle(R.string.task_lists_add_title)
+                .setTitle(titleResId)
                 .setNegativeButton(getString(R.string.cancel_button), new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {

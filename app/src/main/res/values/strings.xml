@@ -27,6 +27,7 @@
             <string name="tasks_title">Tasks</string>
 
         <!--TaskLists Dialog-->
+            <string name="task_list_rename_title">Rename list</string>
             <string name="task_lists_add_title">Add new list</string>
 
     <!--Res-->
