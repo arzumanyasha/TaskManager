@@ -12,21 +12,21 @@ public class IntentionContract {
     public interface IntentionPresenter {
         void attachView(IntentionView intentionView);
 
-        void processMenuItemClick(TaskList taskList);
+        void processTaskListMenuItemClick(TaskList taskList);
+
+        void processAddButtonClick(String currentTitle);
 
         void processRestoredInfo(String key);
 
-        void processEventsDialog();
-
-        void processTasksDialog();
-
         void processTaskListCreatingDialog();
 
-        void processTaskListUpdatingDialog();
+        void processTaskListUpdatingDialog(String title);
 
-        void deleteTaskList();
+        void deleteTaskList(String title);
 
         void fetchTaskListsData();
+
+        void processActionBarMenuItems(String title);
 
         void unsubscribe();
     }
@@ -40,13 +40,19 @@ public class IntentionContract {
 
         void onTaskListReady(TaskList taskList);
 
-        void displayDefaultUi(List<TaskList> taskLists, String title);
+        void displayDefaultUi(List<TaskList> taskLists);
+
+        void displayDefaultTasksUi(List<TaskList> taskLists);
+
+        void displayRestoredEventsUi();
 
         void displayPreviousTaskFragment(List<TaskList> taskLists, TaskList taskList);
 
         void recreateTaskListsMenu(List<TaskList> taskLists);
 
         void updateTaskListOnUi(TaskList taskList, int index);
+
+        void setActionBarMenuItemsVisibility(boolean visibility);
 
         void updateTaskUi(TaskList taskList);
 

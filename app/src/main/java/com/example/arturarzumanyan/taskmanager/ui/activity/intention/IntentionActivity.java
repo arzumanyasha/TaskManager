@@ -52,6 +52,7 @@ public class IntentionActivity extends BaseActivity implements IntentionContract
 
     private IntentionContract.IntentionPresenter mIntentionPresenter;
     private SubMenu mTaskListsMenu;
+    private Menu mActionBarMenu;
 
     private TaskFragmentInteractionListener taskFragmentInteractionListener;
     private EventFragmentInteractionListener eventFragmentInteractionListener;
@@ -101,11 +102,7 @@ public class IntentionActivity extends BaseActivity implements IntentionContract
         mAddButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if (getTitle() == EVENTS_KEY) {
-                    mIntentionPresenter.processEventsDialog();
-                } else {
-                    mIntentionPresenter.processTasksDialog();
-                }
+                mIntentionPresenter.processAddButtonClick(getTitle().toString());
             }
         });
     }
@@ -125,18 +122,13 @@ public class IntentionActivity extends BaseActivity implements IntentionContract
     }
 
     @Override
-    public void displayDefaultUi(List<TaskList> taskLists, String title) {
+    public void displayDefaultUi(List<TaskList> taskLists) {
         displayMenu(taskLists);
         notifyDataLoaded();
-
-        if (!title.equals(EVENTS_KEY)) {
-            displayDefaultTasksUi(taskLists);
-        } else {
-            displayRestoredEventsUi();
-        }
     }
 
-    private void displayDefaultTasksUi(List<TaskList> taskLists) {
+    @Override
+    public void displayDefaultTasksUi(List<TaskList> taskLists) {
         Log.v("Loaded tasklists");
 
         mRetainedTasksFragment = getRetainedTaskFragment();
@@ -147,7 +139,8 @@ public class IntentionActivity extends BaseActivity implements IntentionContract
         openRetainedFragment(mRetainedTasksFragment, RETAINED_TASK_FRAGMENT_TAG);
     }
 
-    private void displayRestoredEventsUi() {
+    @Override
+    public void displayRestoredEventsUi() {
         mRetainedEventsFragment = getRetainedEventsFragment();
         if (mRetainedEventsFragment == null) {
             mRetainedEventsFragment = EventsFragment.newInstance();
@@ -166,7 +159,7 @@ public class IntentionActivity extends BaseActivity implements IntentionContract
             mTaskListsMenu.add(taskList.getTitle()).setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
                 @Override
                 public boolean onMenuItemClick(MenuItem item) {
-                    mIntentionPresenter.processMenuItemClick(taskList);
+                    mIntentionPresenter.processTaskListMenuItemClick(taskList);
                     return false;
                 }
             });
@@ -215,7 +208,7 @@ public class IntentionActivity extends BaseActivity implements IntentionContract
                 @Override
                 public boolean onMenuItemClick(MenuItem item) {
                     Log.v("Populating tasks menu " + taskList.getTitle());
-                    mIntentionPresenter.processMenuItemClick(taskList);
+                    mIntentionPresenter.processTaskListMenuItemClick(taskList);
                     return false;
                 }
             });
@@ -274,8 +267,7 @@ public class IntentionActivity extends BaseActivity implements IntentionContract
         if (!retainedFragment.isAdded()) {
             Log.v(retainedFragment.toString() + " is not added");
             getSupportFragmentManager().beginTransaction()
-                    .add(retainedFragment, tag)
-                    .replace(R.id.main_container, retainedFragment)
+                    .replace(R.id.main_container, retainedFragment, tag)
                     .commit();
         } else {
             Log.v(retainedFragment.toString() + " is added");
@@ -303,6 +295,7 @@ public class IntentionActivity extends BaseActivity implements IntentionContract
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.intention, menu);
+        mActionBarMenu = menu;
 
         return true;
     }
@@ -311,18 +304,9 @@ public class IntentionActivity extends BaseActivity implements IntentionContract
     public boolean onPrepareOptionsMenu(Menu menu) {
         super.onPrepareOptionsMenu(menu);
 
-        updateActionBarMenuItems(menu);
+        mActionBarMenu = menu;
+        mIntentionPresenter.processActionBarMenuItems(getTitle().toString());
         return true;
-    }
-
-    private void updateActionBarMenuItems(Menu menu) {
-        if (!getTitle().equals(EVENTS_KEY)) {
-            Log.v("TaskLists key");
-            setActionBarMenuItemsVisibility(menu, true);
-        } else {
-            Log.v("Events key");
-            setActionBarMenuItemsVisibility(menu, false);
-        }
     }
 
     public void setFloatingActionButtonInvisible() {
@@ -333,9 +317,10 @@ public class IntentionActivity extends BaseActivity implements IntentionContract
         mAddButton.setVisibility(View.VISIBLE);
     }
 
-    private void setActionBarMenuItemsVisibility(Menu menu, boolean visibility) {
-        menu.findItem(R.id.update_task_list).setVisible(visibility);
-        menu.findItem(R.id.delete_task_list).setVisible(visibility);
+    @Override
+    public void setActionBarMenuItemsVisibility(boolean visibility) {
+        mActionBarMenu.findItem(R.id.update_task_list).setVisible(visibility);
+        mActionBarMenu.findItem(R.id.delete_task_list).setVisible(visibility);
     }
 
     @Override
@@ -343,15 +328,11 @@ public class IntentionActivity extends BaseActivity implements IntentionContract
 
         switch (item.getItemId()) {
             case R.id.update_task_list: {
-                if (!getTitle().equals(EVENTS_KEY)) {
-                    mIntentionPresenter.processTaskListUpdatingDialog();
-                }
+                mIntentionPresenter.processTaskListUpdatingDialog(getTitle().toString());
                 break;
             }
             case R.id.delete_task_list: {
-                if (!getTitle().equals(EVENTS_KEY)) {
-                    mIntentionPresenter.deleteTaskList();
-                }
+                mIntentionPresenter.deleteTaskList(getTitle().toString());
                 break;
             }
         }
@@ -412,7 +393,7 @@ public class IntentionActivity extends BaseActivity implements IntentionContract
         mTaskListsMenu.add(taskList.getTitle()).setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
             @Override
             public boolean onMenuItemClick(MenuItem item) {
-                mIntentionPresenter.processMenuItemClick(taskList);
+                mIntentionPresenter.processTaskListMenuItemClick(taskList);
                 return false;
             }
         });

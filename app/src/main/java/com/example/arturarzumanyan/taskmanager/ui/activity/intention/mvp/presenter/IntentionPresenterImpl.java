@@ -5,6 +5,7 @@ import com.example.arturarzumanyan.taskmanager.data.repository.tasklists.specifi
 import com.example.arturarzumanyan.taskmanager.domain.Event;
 import com.example.arturarzumanyan.taskmanager.domain.Task;
 import com.example.arturarzumanyan.taskmanager.domain.TaskList;
+import com.example.arturarzumanyan.taskmanager.networking.util.Log;
 import com.example.arturarzumanyan.taskmanager.ui.activity.intention.mvp.contract.IntentionContract;
 import com.example.arturarzumanyan.taskmanager.ui.dialog.EventsDialog;
 import com.example.arturarzumanyan.taskmanager.ui.dialog.TaskListsDialog;
@@ -34,19 +35,28 @@ public class IntentionPresenterImpl implements IntentionContract.IntentionPresen
     }
 
     @Override
-    public void processMenuItemClick(TaskList taskList) {
+    public void processTaskListMenuItemClick(TaskList taskList) {
         mCurrentTaskList = taskList;
         mIntentionView.updateTaskUi(taskList);
     }
 
     @Override
-    public void processRestoredInfo(String key) {
-        mCurrentTaskList = mTaskLists.get(0);
-        mIntentionView.displayDefaultUi(mTaskLists, key);
+    public void processAddButtonClick(String currentTitle) {
+        if (currentTitle.equals(EVENTS_KEY)) {
+            processEventsDialog();
+        } else {
+            processTasksDialog();
+        }
     }
 
     @Override
-    public void processEventsDialog() {
+    public void processRestoredInfo(String key) {
+        mCurrentTaskList = mTaskLists.get(0);
+        mIntentionView.displayDefaultUi(mTaskLists);
+        mIntentionView.displayRestoredEventsUi();
+    }
+
+    private void processEventsDialog() {
         EventsDialog eventsDialog = EventsDialog.newInstance(null);
         eventsDialog.setEventsReadyListener(new EventsDialog.EventsReadyListener() {
             @Override
@@ -57,8 +67,7 @@ public class IntentionPresenterImpl implements IntentionContract.IntentionPresen
         mIntentionView.showDialog(eventsDialog, EVENTS_KEY);
     }
 
-    @Override
-    public void processTasksDialog() {
+    private void processTasksDialog() {
         for (TaskList taskList : mTaskLists) {
             if (mCurrentTaskList.getId() == taskList.getId()) {
                 TasksDialog tasksDialog = TasksDialog.newInstance(null, taskList);
@@ -89,15 +98,17 @@ public class IntentionPresenterImpl implements IntentionContract.IntentionPresen
     }
 
     @Override
-    public void processTaskListUpdatingDialog() {
-        TaskListsDialog taskListsDialog = TaskListsDialog.newInstance(mCurrentTaskList);
-        taskListsDialog.setTaskListReadyListener(new TaskListsDialog.TaskListReadyListener() {
-            @Override
-            public void onTaskListReady(TaskList taskList) {
-                mIntentionView.updateTaskListOnUi(taskList, getTaskListIndex(taskList));
-            }
-        });
-        mIntentionView.showDialog(taskListsDialog, TASK_LISTS_KEY);
+    public void processTaskListUpdatingDialog(String title) {
+        if (!title.equals(EVENTS_KEY)) {
+            TaskListsDialog taskListsDialog = TaskListsDialog.newInstance(mCurrentTaskList);
+            taskListsDialog.setTaskListReadyListener(new TaskListsDialog.TaskListReadyListener() {
+                @Override
+                public void onTaskListReady(TaskList taskList) {
+                    mIntentionView.updateTaskListOnUi(taskList, getTaskListIndex(taskList));
+                }
+            });
+            mIntentionView.showDialog(taskListsDialog, TASK_LISTS_KEY);
+        }
     }
 
     private int getTaskListIndex(TaskList taskList) {
@@ -111,34 +122,36 @@ public class IntentionPresenterImpl implements IntentionContract.IntentionPresen
     }
 
     @Override
-    public void deleteTaskList() {
-        mTaskListsRepository.deleteTaskList(mCurrentTaskList, new TaskListsRepository.OnTaskListsLoadedListener() {
-            @Override
-            public void onSuccess(List<TaskList> taskListArrayList) {
-                processPreviousTaskList(mCurrentTaskList);
-                mIntentionView.displayPreviousTaskFragment(mTaskLists, mCurrentTaskList);
-            }
+    public void deleteTaskList(String title) {
+        if (!title.equals(EVENTS_KEY)) {
+            mTaskListsRepository.deleteTaskList(mCurrentTaskList, new TaskListsRepository.OnTaskListsLoadedListener() {
+                @Override
+                public void onSuccess(List<TaskList> taskListArrayList) {
+                    processPreviousTaskList(mCurrentTaskList);
+                    mIntentionView.displayPreviousTaskFragment(mTaskLists, mCurrentTaskList);
+                }
 
-            @Override
-            public void onUpdate(List<TaskList> taskLists) {
+                @Override
+                public void onUpdate(List<TaskList> taskLists) {
 
-            }
+                }
 
-            @Override
-            public void onSuccess(TaskList taskList) {
+                @Override
+                public void onSuccess(TaskList taskList) {
 
-            }
+                }
 
-            @Override
-            public void onFail(String message) {
-                mIntentionView.onFail(message);
-            }
+                @Override
+                public void onFail(String message) {
+                    mIntentionView.onFail(message);
+                }
 
-            @Override
-            public void onPermissionDenied() {
-                /** To-do: add realization with start signInActivity*/
-            }
-        });
+                @Override
+                public void onPermissionDenied() {
+                    /** To-do: add realization with start signInActivity*/
+                }
+            });
+        }
     }
 
     private void processPreviousTaskList(TaskList taskList) {
@@ -163,7 +176,8 @@ public class IntentionPresenterImpl implements IntentionContract.IntentionPresen
             public void onSuccess(List<TaskList> taskLists) {
                 mTaskLists = taskLists;
                 mCurrentTaskList = taskLists.get(0);
-                mIntentionView.displayDefaultUi(taskLists, taskLists.get(0).getTitle());
+                mIntentionView.displayDefaultUi(taskLists);
+                mIntentionView.displayDefaultTasksUi(mTaskLists);
             }
 
             @Override
@@ -189,6 +203,17 @@ public class IntentionPresenterImpl implements IntentionContract.IntentionPresen
         };
 
         mTaskListsRepository.loadTaskLists(allTaskListsSpecification, onTaskListsLoadedListener);
+    }
+
+    @Override
+    public void processActionBarMenuItems(String title) {
+        if (!title.equals(EVENTS_KEY)) {
+            Log.v("TaskLists key");
+            mIntentionView.setActionBarMenuItemsVisibility(true);
+        } else {
+            Log.v("Events key");
+            mIntentionView.setActionBarMenuItemsVisibility(false);
+        }
     }
 
     @Override
