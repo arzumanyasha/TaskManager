@@ -17,6 +17,7 @@ import com.example.arturarzumanyan.taskmanager.R;
 import com.example.arturarzumanyan.taskmanager.TaskManagerApp;
 import com.example.arturarzumanyan.taskmanager.networking.util.Log;
 import com.example.arturarzumanyan.taskmanager.ui.activity.intention.IntentionActivity;
+import com.example.arturarzumanyan.taskmanager.ui.fragment.daily.DailyEventsFragment;
 import com.squareup.leakcanary.RefWatcher;
 
 import static com.example.arturarzumanyan.taskmanager.ui.activity.intention.IntentionActivity.EVENTS_KEY;
