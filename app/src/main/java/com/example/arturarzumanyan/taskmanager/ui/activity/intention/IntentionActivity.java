@@ -2,9 +2,9 @@ package com.example.arturarzumanyan.taskmanager.ui.activity.intention;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.os.Parcelable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
+import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.app.NotificationManagerCompat;
@@ -21,30 +21,25 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.example.arturarzumanyan.taskmanager.R;
-import com.example.arturarzumanyan.taskmanager.data.repository.tasklists.TaskListsRepository;
-import com.example.arturarzumanyan.taskmanager.data.repository.tasklists.specification.AllTaskListsSpecification;
 import com.example.arturarzumanyan.taskmanager.domain.Event;
 import com.example.arturarzumanyan.taskmanager.domain.Task;
 import com.example.arturarzumanyan.taskmanager.domain.TaskList;
-import com.example.arturarzumanyan.taskmanager.ui.activity.BaseActivity;
-import com.example.arturarzumanyan.taskmanager.ui.activity.signin.SignInActivity;
-import com.example.arturarzumanyan.taskmanager.ui.util.CircleTransformation;
 import com.example.arturarzumanyan.taskmanager.networking.util.Log;
-import com.example.arturarzumanyan.taskmanager.ui.dialog.EventsDialog;
-import com.example.arturarzumanyan.taskmanager.ui.dialog.TaskListsDialog;
-import com.example.arturarzumanyan.taskmanager.ui.dialog.TasksDialog;
+import com.example.arturarzumanyan.taskmanager.ui.activity.BaseActivity;
+import com.example.arturarzumanyan.taskmanager.ui.activity.intention.mvp.contract.IntentionContract;
+import com.example.arturarzumanyan.taskmanager.ui.activity.intention.mvp.presenter.IntentionPresenterImpl;
+import com.example.arturarzumanyan.taskmanager.ui.activity.signin.SignInActivity;
 import com.example.arturarzumanyan.taskmanager.ui.fragment.EventsFragment;
 import com.example.arturarzumanyan.taskmanager.ui.fragment.TasksFragment;
+import com.example.arturarzumanyan.taskmanager.ui.util.CircleTransformation;
 import com.squareup.picasso.Picasso;
 
-import java.util.ArrayList;
 import java.util.List;
 
-public class IntentionActivity extends BaseActivity {
+public class IntentionActivity extends BaseActivity implements IntentionContract.IntentionView {
     public static final String EVENTS_KEY = "Events";
     public static final String TASKS_KEY = "Tasks";
     public static final String TASK_LISTS_KEY = "TaskLists";
-    private static final String TASK_LIST_KEY = "TaskList";
     private static final String TITLE_KEY = "title";
     private static final String RETAINED_TASK_FRAGMENT_TAG = "RetainedTaskFragment";
     private static final String RETAINED_EVENT_FRAGMENT_TAG = "RetainedEventFragment";
@@ -55,13 +50,10 @@ public class IntentionActivity extends BaseActivity {
     private DrawerLayout mDrawer;
     private Intent mUserData;
 
+    private IntentionContract.IntentionPresenter mIntentionPresenter;
     private SubMenu mTaskListsMenu;
+    private Menu mActionBarMenu;
 
-    private TaskListsRepository mTaskListsRepository;
-    private List<TaskList> mTaskLists;
-    private TaskList mCurrentTaskList;
-
-    private TaskListsRepository.OnTaskListsLoadedListener onTaskListsLoadedListener;
     private TaskFragmentInteractionListener taskFragmentInteractionListener;
     private EventFragmentInteractionListener eventFragmentInteractionListener;
     private TaskListFragmentInteractionListener taskListFragmentInteractionListener;
@@ -74,17 +66,22 @@ public class IntentionActivity extends BaseActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_intention);
 
-        fetchUserInfoData();
+        getUserInfoData();
         setViews();
 
         if (savedInstanceState == null) {
-            fetchTaskListsData();
+            mIntentionPresenter = new IntentionPresenterImpl(this);
+            mIntentionPresenter.fetchTaskListsData();
         } else {
-            mTaskLists = savedInstanceState.getParcelableArrayList(TASK_LISTS_KEY);
-            mCurrentTaskList = savedInstanceState.getParcelable(TASK_LIST_KEY);
-
-            displayDefaultUi(mTaskLists, savedInstanceState.getString(TITLE_KEY, TASK_LISTS_KEY));
+            mIntentionPresenter = (IntentionContract.IntentionPresenter) getLastCustomNonConfigurationInstance();
+            mIntentionPresenter.attachView(this);
+            mIntentionPresenter.processRestoredInfo(savedInstanceState.getString(TITLE_KEY, TASK_LISTS_KEY));
         }
+    }
+
+    @Override
+    public Object onRetainCustomNonConfigurationInstance() {
+        return mIntentionPresenter;
     }
 
     private void setViews() {
@@ -105,11 +102,7 @@ public class IntentionActivity extends BaseActivity {
         mAddButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if (getTitle() == EVENTS_KEY) {
-                    openEventsDialog();
-                } else {
-                    openTasksDialog();
-                }
+                mIntentionPresenter.processAddButtonClick(getTitle().toString());
             }
         });
     }
@@ -124,70 +117,30 @@ public class IntentionActivity extends BaseActivity {
         return mRetainedEventsFragment;
     }
 
-    private void fetchUserInfoData() {
+    private void getUserInfoData() {
         mUserData = getIntent();
     }
 
-    private void fetchTaskListsData() {
-        AllTaskListsSpecification allTaskListsSpecification = new AllTaskListsSpecification();
-
-        onTaskListsLoadedListener = new TaskListsRepository.OnTaskListsLoadedListener() {
-            @Override
-            public void onSuccess(List<TaskList> taskLists) {
-                displayDefaultUi(taskLists, taskLists.get(0).getTitle());
-            }
-
-            @Override
-            public void onUpdate(List<TaskList> taskLists) {
-                updateTaskListsMenu(taskLists);
-            }
-
-            @Override
-            public void onSuccess(TaskList taskList) {
-
-            }
-
-            @Override
-            public void onFail(String message) {
-                onError(message);
-            }
-
-            @Override
-            public void onPermissionDenied() {
-                /** To-do: add realization with start signInActivity*/
-            }
-        };
-
-        mTaskListsRepository = new TaskListsRepository();
-        mTaskListsRepository.loadTaskLists(allTaskListsSpecification, onTaskListsLoadedListener);
-    }
-
-    private void displayDefaultUi(List<TaskList> taskLists, String title) {
-        mTaskLists = taskLists;
-        displayMenu();
+    @Override
+    public void displayDefaultUi(List<TaskList> taskLists) {
+        displayMenu(taskLists);
         notifyDataLoaded();
-
-        if (!title.equals(EVENTS_KEY)) {
-            displayDefaultTasksUi();
-        } else {
-            displayRestoredEventsUi();
-        }
     }
 
-    private void displayDefaultTasksUi() {
+    @Override
+    public void displayDefaultTasksUi(TaskList taskList) {
         Log.v("Loaded tasklists");
 
         mRetainedTasksFragment = getRetainedTaskFragment();
         if (mRetainedTasksFragment == null) {
-            mRetainedTasksFragment = TasksFragment.newInstance(mTaskLists.get(0));
+            mRetainedTasksFragment = TasksFragment.newInstance(taskList);
             mRetainedEventsFragment = null;
         }
         openRetainedFragment(mRetainedTasksFragment, RETAINED_TASK_FRAGMENT_TAG);
-
-        mCurrentTaskList = mTaskLists.get(0);
     }
 
-    private void displayRestoredEventsUi() {
+    @Override
+    public void displayRestoredEventsUi() {
         mRetainedEventsFragment = getRetainedEventsFragment();
         if (mRetainedEventsFragment == null) {
             mRetainedEventsFragment = EventsFragment.newInstance();
@@ -196,31 +149,31 @@ public class IntentionActivity extends BaseActivity {
         openRetainedFragment(mRetainedEventsFragment, RETAINED_EVENT_FRAGMENT_TAG);
     }
 
-    private void updateTaskListsMenu(List<TaskList> taskLists) {
+    @Override
+    public void recreateTaskListsMenu(List<TaskList> taskLists) {
         Log.v("TaskLists Menu updating");
 
         mTaskListsMenu.clear();
 
-        mTaskLists = taskLists;
-        for (final TaskList taskList : mTaskLists) {
+        for (final TaskList taskList : taskLists) {
             mTaskListsMenu.add(taskList.getTitle()).setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
                 @Override
                 public boolean onMenuItemClick(MenuItem item) {
-                    updateTaskUi(taskList);
+                    mIntentionPresenter.processTaskListMenuItemClick(taskList);
                     return false;
                 }
             });
         }
     }
 
-    private void displayMenu() {
+    private void displayMenu(List<TaskList> taskLists) {
         Log.v("Displaying menu");
 
         setDisplayMenuViews();
 
         Menu mainMenu = mNavigationView.getMenu();
         mainMenu = populateCalendarMenu(mainMenu);
-        populateTasksMenu(mainMenu);
+        populateTasksMenu(taskLists, mainMenu);
     }
 
     private Menu populateCalendarMenu(Menu menu) {
@@ -229,16 +182,7 @@ public class IntentionActivity extends BaseActivity {
                 .setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
                     @Override
                     public boolean onMenuItemClick(MenuItem item) {
-                        Log.v(item.getTitle().toString() + " clicked");
-
-                        mRetainedEventsFragment = getRetainedEventsFragment();
-                        if (mRetainedEventsFragment == null) {
-                            mRetainedEventsFragment = EventsFragment.newInstance();
-                        }
-                        mRetainedTasksFragment = null;
-                        openRetainedFragment(mRetainedEventsFragment, RETAINED_EVENT_FRAGMENT_TAG);
-                        mDrawer.closeDrawer(Gravity.START);
-                        invalidateOptionsMenu();
+                        openCalendarFragment();
                         return false;
                     }
                 });
@@ -246,15 +190,25 @@ public class IntentionActivity extends BaseActivity {
         return menu;
     }
 
-    private void populateTasksMenu(Menu menu) {
+    private void openCalendarFragment() {
+        mRetainedEventsFragment = getRetainedEventsFragment();
+        if (mRetainedEventsFragment == null) {
+            mRetainedEventsFragment = EventsFragment.newInstance();
+        }
+        mRetainedTasksFragment = null;
+        openRetainedFragment(mRetainedEventsFragment, RETAINED_EVENT_FRAGMENT_TAG);
+        mDrawer.closeDrawer(Gravity.START);
+        invalidateOptionsMenu();
+    }
+
+    private void populateTasksMenu(List<TaskList> taskLists, Menu menu) {
         mTaskListsMenu = menu.addSubMenu("TaskLists");
-        for (final TaskList taskList : mTaskLists) {
+        for (final TaskList taskList : taskLists) {
             mTaskListsMenu.add(taskList.getTitle()).setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
                 @Override
                 public boolean onMenuItemClick(MenuItem item) {
                     Log.v("Populating tasks menu " + taskList.getTitle());
-                    updateTaskUi(taskList);
-                    invalidateOptionsMenu();
+                    mIntentionPresenter.processTaskListMenuItemClick(taskList);
                     return false;
                 }
             });
@@ -285,7 +239,7 @@ public class IntentionActivity extends BaseActivity {
             @Override
             public void onClick(View v) {
                 mDrawer.closeDrawer(Gravity.START);
-                openTaskListCreatingDialog();
+                mIntentionPresenter.processTaskListCreatingDialog();
             }
         });
     }
@@ -301,74 +255,23 @@ public class IntentionActivity extends BaseActivity {
         notificationManagerCompat.notify(NOTIFICATION_ID, builder.build());
     }
 
-    private void openEventsDialog() {
-        EventsDialog eventsDialog = EventsDialog.newInstance(null);
-        eventsDialog.setEventsReadyListener(new EventsDialog.EventsReadyListener() {
-            @Override
-            public void onEventsReady(List<Event> events) {
-                eventFragmentInteractionListener.onEventsReady(events);
-            }
-        });
-        eventsDialog.show(getSupportFragmentManager(), EVENTS_KEY);
-    }
-
-    private void openTasksDialog() {
-        for (TaskList taskList : mTaskLists) {
-            if (mCurrentTaskList.getId() == taskList.getId()) {
-                TasksDialog tasksDialog = TasksDialog.newInstance(null, taskList);
-                tasksDialog.setTasksReadyListener(new TasksDialog.TasksReadyListener() {
-                    @Override
-                    public void onTasksReady(List<Task> tasks) {
-                        taskFragmentInteractionListener.onTasksReady(tasks);
-                    }
-                });
-                tasksDialog.show(getSupportFragmentManager(), TASKS_KEY);
-                break;
-            }
-        }
-
-    }
-
-    private void openTaskListCreatingDialog() {
-        TaskListsDialog taskListsDialog = TaskListsDialog.newInstance(null);
-        taskListsDialog.setTaskListReadyListener(new TaskListsDialog.TaskListReadyListener() {
-            @Override
-            public void onTaskListReady(final TaskList taskList) {
-                mTaskLists.add(taskList);
-                mTaskListsMenu.add(taskList.getTitle()).setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
-                    @Override
-                    public boolean onMenuItemClick(MenuItem item) {
-                        updateTaskUi(taskList);
-                        return false;
-                    }
-                });
-                mCurrentTaskList = taskList;
-                updateRetainedTasksFragment(mCurrentTaskList);
-            }
-        });
-        taskListsDialog.show(getSupportFragmentManager(), TASK_LISTS_KEY);
-    }
-
-    private void updateTaskUi(TaskList taskList) {
+    @Override
+    public void updateTaskUi(TaskList taskList) {
         mRetainedEventsFragment = null;
-        mCurrentTaskList = taskList;
         updateRetainedTasksFragment(taskList);
         mDrawer.closeDrawer(Gravity.START);
+        invalidateOptionsMenu();
     }
 
     private void openRetainedFragment(Fragment retainedFragment, String tag) {
-        if (!retainedFragment.isAdded()) {
-            Log.v(retainedFragment.toString() + " is not added");
-            getSupportFragmentManager().beginTransaction()
-                    .add(retainedFragment, tag)
-                    .replace(R.id.main_container, retainedFragment)
-                    .commit();
-        } else {
-            Log.v(retainedFragment.toString() + " is added");
-            getSupportFragmentManager().beginTransaction()
-                    .replace(R.id.main_container, retainedFragment)
-                    .commit();
-        }
+        getSupportFragmentManager().beginTransaction()
+                .replace(R.id.main_container, retainedFragment, tag)
+                .commit();
+    }
+
+    @Override
+    public void onFail(String message) {
+        onError(message);
     }
 
     @Override
@@ -384,6 +287,7 @@ public class IntentionActivity extends BaseActivity {
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.intention, menu);
+        mActionBarMenu = menu;
 
         return true;
     }
@@ -392,18 +296,9 @@ public class IntentionActivity extends BaseActivity {
     public boolean onPrepareOptionsMenu(Menu menu) {
         super.onPrepareOptionsMenu(menu);
 
-        updateActionBarMenuItems(menu);
+        mActionBarMenu = menu;
+        mIntentionPresenter.processActionBarMenuItems(getTitle().toString());
         return true;
-    }
-
-    private void updateActionBarMenuItems(Menu menu) {
-        if (!getTitle().equals(EVENTS_KEY)) {
-            Log.v("TaskLists key");
-            setActionBarMenuItemsVisibility(menu, true);
-        } else {
-            Log.v("Events key");
-            setActionBarMenuItemsVisibility(menu, false);
-        }
     }
 
     public void setFloatingActionButtonInvisible() {
@@ -414,9 +309,10 @@ public class IntentionActivity extends BaseActivity {
         mAddButton.setVisibility(View.VISIBLE);
     }
 
-    private void setActionBarMenuItemsVisibility(Menu menu, boolean visibility) {
-        menu.findItem(R.id.update_task_list).setVisible(visibility);
-        menu.findItem(R.id.delete_task_list).setVisible(visibility);
+    @Override
+    public void setActionBarMenuItemsVisibility(boolean visibility) {
+        mActionBarMenu.findItem(R.id.update_task_list).setVisible(visibility);
+        mActionBarMenu.findItem(R.id.delete_task_list).setVisible(visibility);
     }
 
     @Override
@@ -424,15 +320,11 @@ public class IntentionActivity extends BaseActivity {
 
         switch (item.getItemId()) {
             case R.id.update_task_list: {
-                if (!getTitle().equals(EVENTS_KEY)) {
-                    displayTaskListUpdatingDialog(mCurrentTaskList);
-                }
+                mIntentionPresenter.processTaskListUpdatingDialog(getTitle().toString());
                 break;
             }
             case R.id.delete_task_list: {
-                if (!getTitle().equals(EVENTS_KEY)) {
-                    deleteTaskList(mCurrentTaskList);
-                }
+                mIntentionPresenter.deleteTaskList(getTitle().toString());
                 break;
             }
         }
@@ -440,22 +332,10 @@ public class IntentionActivity extends BaseActivity {
         return super.onOptionsItemSelected(item);
     }
 
-    private void openPreviousFragment(TaskList taskList) {
-        int menuSize = mTaskListsMenu.size();
-        TaskList previousTaskList = null;
-        for (int i = 0; i < menuSize; i++) {
-            if (mTaskLists.get(i).getId() == taskList.getId()) {
-                mTaskLists.remove(i);
-                previousTaskList = mTaskLists.get(i - 1);
-                break;
-            }
-        }
-        updateTaskListsMenu(mTaskLists);
-
-        if (previousTaskList != null) {
-            mCurrentTaskList = previousTaskList;
-            updateRetainedTasksFragment(previousTaskList);
-        }
+    @Override
+    public void displayPreviousTaskFragment(List<TaskList> taskLists, TaskList taskList) {
+        recreateTaskListsMenu(taskLists);
+        updateRetainedTasksFragment(taskList);
     }
 
     private void updateRetainedTasksFragment(TaskList taskList) {
@@ -472,74 +352,52 @@ public class IntentionActivity extends BaseActivity {
 
     }
 
-    private void updateTaskList(TaskList taskList) {
-        for (int i = 0; i < mTaskLists.size(); i++) {
-            if (mTaskLists.get(i).getId() == taskList.getId()) {
-                mTaskLists.get(i).setTitle(taskList.getTitle());
-                mTaskListsMenu.getItem(i).setTitle(taskList.getTitle());
-                taskListFragmentInteractionListener.onTaskListReady(taskList);
-                break;
-            }
-        }
-    }
-
-    private void deleteTaskList(TaskList taskList) {
-        mTaskListsRepository.deleteTaskList(taskList, new TaskListsRepository.OnTaskListsLoadedListener() {
-            @Override
-            public void onSuccess(List<TaskList> taskListArrayList) {
-                openPreviousFragment(mCurrentTaskList);
-            }
-
-            @Override
-            public void onUpdate(List<TaskList> taskLists) {
-
-            }
-
-            @Override
-            public void onSuccess(TaskList taskList) {
-
-            }
-
-            @Override
-            public void onFail(String message) {
-                onError(message);
-            }
-
-            @Override
-            public void onPermissionDenied() {
-                /** To-do: add realization with start signInActivity*/
-            }
-        });
-    }
-
-    private void displayTaskListUpdatingDialog(TaskList taskList) {
-        TaskListsDialog taskListsDialog = TaskListsDialog.newInstance(taskList);
-
-        taskListsDialog.setTaskListReadyListener(new TaskListsDialog.TaskListReadyListener() {
-            @Override
-            public void onTaskListReady(TaskList taskList) {
-                updateTaskList(taskList);
-            }
-        });
-        taskListsDialog.show(getSupportFragmentManager(), TASK_LISTS_KEY);
+    @Override
+    public void updateTaskListOnUi(TaskList taskList, int index) {
+        mTaskListsMenu.getItem(index).setTitle(taskList.getTitle());
+        taskListFragmentInteractionListener.onTaskListReady(taskList);
     }
 
     @Override
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
 
-        outState.putParcelableArrayList(TASK_LISTS_KEY, (ArrayList<? extends Parcelable>) mTaskLists);
-        outState.putParcelable(TASK_LIST_KEY, mCurrentTaskList);
         outState.putString(TITLE_KEY, getTitle().toString());
+    }
+
+    @Override
+    public void showDialog(DialogFragment dialogFragment, String key) {
+        dialogFragment.show(getSupportFragmentManager(), key);
+    }
+
+    @Override
+    public void onTasksReady(List<Task> tasks) {
+        taskFragmentInteractionListener.onTasksReady(tasks);
+    }
+
+    @Override
+    public void onEventsReady(List<Event> events) {
+        eventFragmentInteractionListener.onEventsReady(events);
+    }
+
+    @Override
+    public void onTaskListReady(final TaskList taskList) {
+        mTaskListsMenu.add(taskList.getTitle()).setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
+            @Override
+            public boolean onMenuItemClick(MenuItem item) {
+                mIntentionPresenter.processTaskListMenuItemClick(taskList);
+                return false;
+            }
+        });
+        updateRetainedTasksFragment(taskList);
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        onTaskListsLoadedListener = null;
-        taskFragmentInteractionListener = null;
-        eventFragmentInteractionListener = null;
-        taskListFragmentInteractionListener = null;
+        mIntentionPresenter.unsubscribe();
+        unsubscribeEventListeners();
+        unsubscribeTaskListeners();
     }
 
     public void unsubscribeTaskListeners() {

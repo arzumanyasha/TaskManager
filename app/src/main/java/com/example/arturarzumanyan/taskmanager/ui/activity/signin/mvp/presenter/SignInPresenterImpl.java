@@ -11,8 +11,8 @@ public class SignInPresenterImpl implements SignInContract.SignInPresenter {
     private static final int AUTHENTICATION_REQUEST_CODE = 101;
     private SignInContract.SignInView mSignInView;
 
-    public SignInPresenterImpl(SignInContract.SignInView mSignInView) {
-        this.mSignInView = mSignInView;
+    public SignInPresenterImpl(SignInContract.SignInView signInView) {
+        this.mSignInView = signInView;
     }
 
     @Override
