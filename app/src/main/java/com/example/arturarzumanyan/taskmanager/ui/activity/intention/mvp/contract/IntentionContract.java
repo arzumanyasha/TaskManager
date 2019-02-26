@@ -42,7 +42,7 @@ public class IntentionContract {
 
         void displayDefaultUi(List<TaskList> taskLists);
 
-        void displayDefaultTasksUi(List<TaskList> taskLists);
+        void displayDefaultTasksUi(TaskList taskList);
 
         void displayRestoredEventsUi();
 

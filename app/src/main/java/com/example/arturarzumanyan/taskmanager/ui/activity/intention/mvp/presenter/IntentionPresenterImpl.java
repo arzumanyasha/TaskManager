@@ -36,8 +36,10 @@ public class IntentionPresenterImpl implements IntentionContract.IntentionPresen
 
     @Override
     public void processTaskListMenuItemClick(TaskList taskList) {
-        mCurrentTaskList = taskList;
-        mIntentionView.updateTaskUi(taskList);
+        if (taskList != null) {
+            mCurrentTaskList = taskList;
+            mIntentionView.updateTaskUi(taskList);
+        }
     }
 
     @Override
@@ -45,15 +47,19 @@ public class IntentionPresenterImpl implements IntentionContract.IntentionPresen
         if (title.equals(EVENTS_KEY)) {
             processEventsDialog();
         } else {
-            processTasksDialog();
+            if (mTaskLists.size() != 0 && mCurrentTaskList != null) {
+                processTasksDialog();
+            }
         }
     }
 
     @Override
     public void processRestoredInfo(String key) {
-        mCurrentTaskList = mTaskLists.get(0);
-        mIntentionView.displayDefaultUi(mTaskLists);
-        mIntentionView.displayRestoredEventsUi();
+        if (mTaskLists.size() != 0) {
+            mCurrentTaskList = mTaskLists.get(0);
+            mIntentionView.displayDefaultUi(mTaskLists);
+            mIntentionView.displayRestoredEventsUi();
+        }
     }
 
     private void processEventsDialog() {
@@ -89,9 +95,11 @@ public class IntentionPresenterImpl implements IntentionContract.IntentionPresen
         taskListsDialog.setTaskListReadyListener(new TaskListsDialog.TaskListReadyListener() {
             @Override
             public void onTaskListReady(final TaskList taskList) {
-                mTaskLists.add(taskList);
-                mCurrentTaskList = taskList;
-                mIntentionView.onTaskListReady(taskList);
+                if (mTaskLists.size() != 0 && taskList != null) {
+                    mTaskLists.add(taskList);
+                    mCurrentTaskList = taskList;
+                    mIntentionView.onTaskListReady(taskList);
+                }
             }
         });
         mIntentionView.showDialog(taskListsDialog, TASK_LISTS_KEY);
@@ -104,7 +112,9 @@ public class IntentionPresenterImpl implements IntentionContract.IntentionPresen
             taskListsDialog.setTaskListReadyListener(new TaskListsDialog.TaskListReadyListener() {
                 @Override
                 public void onTaskListReady(TaskList taskList) {
-                    mIntentionView.updateTaskListOnUi(taskList, getTaskListIndex(taskList));
+                    if (taskList != null) {
+                        mIntentionView.updateTaskListOnUi(taskList, getTaskListIndex(taskList));
+                    }
                 }
             });
             mIntentionView.showDialog(taskListsDialog, TASK_LISTS_KEY);
@@ -127,8 +137,10 @@ public class IntentionPresenterImpl implements IntentionContract.IntentionPresen
             mTaskListsRepository.deleteTaskList(mCurrentTaskList, new TaskListsRepository.OnTaskListsLoadedListener() {
                 @Override
                 public void onSuccess(List<TaskList> taskListArrayList) {
-                    processPreviousTaskList(mCurrentTaskList);
-                    mIntentionView.displayPreviousTaskFragment(mTaskLists, mCurrentTaskList);
+                    if (mTaskLists.size() != 0 && mCurrentTaskList != null) {
+                        processPreviousTaskList(mCurrentTaskList);
+                        mIntentionView.displayPreviousTaskFragment(mTaskLists, mCurrentTaskList);
+                    }
                 }
 
                 @Override
@@ -174,16 +186,20 @@ public class IntentionPresenterImpl implements IntentionContract.IntentionPresen
         TaskListsRepository.OnTaskListsLoadedListener onTaskListsLoadedListener = new TaskListsRepository.OnTaskListsLoadedListener() {
             @Override
             public void onSuccess(List<TaskList> taskLists) {
-                mTaskLists = taskLists;
-                mCurrentTaskList = taskLists.get(0);
-                mIntentionView.displayDefaultUi(taskLists);
-                mIntentionView.displayDefaultTasksUi(mTaskLists);
+                if (taskLists.size() != 0) {
+                    mTaskLists = taskLists;
+                    mCurrentTaskList = taskLists.get(0);
+                    mIntentionView.displayDefaultUi(taskLists);
+                    mIntentionView.displayDefaultTasksUi(mTaskLists.get(0));
+                }
             }
 
             @Override
             public void onUpdate(List<TaskList> taskLists) {
-                mTaskLists = taskLists;
-                mIntentionView.recreateTaskListsMenu(taskLists);
+                if (taskLists.size() != 0) {
+                    mTaskLists = taskLists;
+                    mIntentionView.recreateTaskListsMenu(taskLists);
+                }
             }
 
             @Override

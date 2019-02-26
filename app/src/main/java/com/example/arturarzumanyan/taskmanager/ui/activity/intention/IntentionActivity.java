@@ -128,12 +128,12 @@ public class IntentionActivity extends BaseActivity implements IntentionContract
     }
 
     @Override
-    public void displayDefaultTasksUi(List<TaskList> taskLists) {
+    public void displayDefaultTasksUi(TaskList taskList) {
         Log.v("Loaded tasklists");
 
         mRetainedTasksFragment = getRetainedTaskFragment();
         if (mRetainedTasksFragment == null) {
-            mRetainedTasksFragment = TasksFragment.newInstance(taskLists.get(0));
+            mRetainedTasksFragment = TasksFragment.newInstance(taskList);
             mRetainedEventsFragment = null;
         }
         openRetainedFragment(mRetainedTasksFragment, RETAINED_TASK_FRAGMENT_TAG);
@@ -264,17 +264,9 @@ public class IntentionActivity extends BaseActivity implements IntentionContract
     }
 
     private void openRetainedFragment(Fragment retainedFragment, String tag) {
-        if (!retainedFragment.isAdded()) {
-            Log.v(retainedFragment.toString() + " is not added");
-            getSupportFragmentManager().beginTransaction()
-                    .replace(R.id.main_container, retainedFragment, tag)
-                    .commit();
-        } else {
-            Log.v(retainedFragment.toString() + " is added");
-            getSupportFragmentManager().beginTransaction()
-                    .replace(R.id.main_container, retainedFragment)
-                    .commit();
-        }
+        getSupportFragmentManager().beginTransaction()
+                .replace(R.id.main_container, retainedFragment, tag)
+                .commit();
     }
 
     @Override
