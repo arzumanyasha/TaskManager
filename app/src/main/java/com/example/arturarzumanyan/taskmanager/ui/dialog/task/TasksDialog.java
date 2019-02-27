@@ -1,4 +1,4 @@
-package com.example.arturarzumanyan.taskmanager.ui.dialog;
+package com.example.arturarzumanyan.taskmanager.ui.dialog.task;
 
 import android.app.AlertDialog;
 import android.app.DatePickerDialog;

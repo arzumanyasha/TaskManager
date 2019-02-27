@@ -1,4 +1,4 @@
-package com.example.arturarzumanyan.taskmanager.ui.fragment;
+package com.example.arturarzumanyan.taskmanager.ui.fragment.event;
 
 import android.content.Context;
 import android.graphics.Color;

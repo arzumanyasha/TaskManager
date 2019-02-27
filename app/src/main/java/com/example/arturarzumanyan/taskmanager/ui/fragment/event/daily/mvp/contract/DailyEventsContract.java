@@ -1,4 +1,4 @@
-package com.example.arturarzumanyan.taskmanager.ui.fragment.daily.mvp.contract;
+package com.example.arturarzumanyan.taskmanager.ui.fragment.event.daily.mvp.contract;
 
 import android.support.v4.app.DialogFragment;
 

@@ -29,8 +29,8 @@ import com.example.arturarzumanyan.taskmanager.ui.activity.BaseActivity;
 import com.example.arturarzumanyan.taskmanager.ui.activity.intention.mvp.contract.IntentionContract;
 import com.example.arturarzumanyan.taskmanager.ui.activity.intention.mvp.presenter.IntentionPresenterImpl;
 import com.example.arturarzumanyan.taskmanager.ui.activity.signin.SignInActivity;
-import com.example.arturarzumanyan.taskmanager.ui.fragment.EventsFragment;
-import com.example.arturarzumanyan.taskmanager.ui.fragment.TasksFragment;
+import com.example.arturarzumanyan.taskmanager.ui.fragment.event.EventsFragment;
+import com.example.arturarzumanyan.taskmanager.ui.fragment.task.TasksFragment;
 import com.example.arturarzumanyan.taskmanager.ui.util.CircleTransformation;
 import com.squareup.picasso.Picasso;
 

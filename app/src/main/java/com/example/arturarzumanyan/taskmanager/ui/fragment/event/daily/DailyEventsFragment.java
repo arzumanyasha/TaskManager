@@ -1,4 +1,4 @@
-package com.example.arturarzumanyan.taskmanager.ui.fragment.daily;
+package com.example.arturarzumanyan.taskmanager.ui.fragment.event.daily;
 
 import android.content.Context;
 import android.os.Bundle;
@@ -22,8 +22,8 @@ import com.example.arturarzumanyan.taskmanager.ui.activity.BaseActivity;
 import com.example.arturarzumanyan.taskmanager.ui.activity.intention.IntentionActivity;
 import com.example.arturarzumanyan.taskmanager.ui.adapter.event.EventsAdapter;
 import com.example.arturarzumanyan.taskmanager.ui.adapter.event.mvp.EventsListPresenter;
-import com.example.arturarzumanyan.taskmanager.ui.fragment.daily.mvp.contract.DailyEventsContract;
-import com.example.arturarzumanyan.taskmanager.ui.fragment.daily.mvp.presenter.DailyEventsPresenterImpl;
+import com.example.arturarzumanyan.taskmanager.ui.fragment.event.daily.mvp.contract.DailyEventsContract;
+import com.example.arturarzumanyan.taskmanager.ui.fragment.event.daily.mvp.presenter.DailyEventsPresenterImpl;
 import com.squareup.leakcanary.RefWatcher;
 
 import java.util.List;
@@ -91,17 +91,6 @@ public class DailyEventsFragment extends Fragment implements DailyEventsContract
                 }
             });
 
-            /*mEventsAdapter = new EventsAdapter(getActivity(), events, new EventsListPresenter.OnItemClickListener() {
-                @Override
-                public void onItemDelete(Event event) {
-                    mDailyEventsPresenter.deleteEvent(event);
-                }
-
-                @Override
-                public void onItemClick(Event event) {
-                    mDailyEventsPresenter.processEventDialog(event);
-                }
-            });*/
             mEventsAdapter = new EventsAdapter(eventsListPresenter);
 
             ((IntentionActivity) requireActivity()).setEventFragmentInteractionListener(new IntentionActivity.EventFragmentInteractionListener() {

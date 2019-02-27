@@ -1,4 +1,4 @@
-package com.example.arturarzumanyan.taskmanager.ui.fragment;
+package com.example.arturarzumanyan.taskmanager.ui.fragment.task;
 
 import android.content.Context;
 import android.os.Bundle;
@@ -22,8 +22,8 @@ import com.example.arturarzumanyan.taskmanager.domain.TaskList;
 import com.example.arturarzumanyan.taskmanager.networking.util.Log;
 import com.example.arturarzumanyan.taskmanager.ui.activity.BaseActivity;
 import com.example.arturarzumanyan.taskmanager.ui.activity.intention.IntentionActivity;
-import com.example.arturarzumanyan.taskmanager.ui.adapter.TasksAdapter;
-import com.example.arturarzumanyan.taskmanager.ui.dialog.TasksDialog;
+import com.example.arturarzumanyan.taskmanager.ui.adapter.task.TasksAdapter;
+import com.example.arturarzumanyan.taskmanager.ui.dialog.task.TasksDialog;
 import com.squareup.leakcanary.RefWatcher;
 
 import java.util.List;

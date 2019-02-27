@@ -1,11 +1,11 @@
-package com.example.arturarzumanyan.taskmanager.ui.fragment.daily.mvp.presenter;
+package com.example.arturarzumanyan.taskmanager.ui.fragment.event.daily.mvp.presenter;
 
 import com.example.arturarzumanyan.taskmanager.data.repository.events.EventsRepository;
 import com.example.arturarzumanyan.taskmanager.data.repository.events.specification.EventsFromDateSpecification;
 import com.example.arturarzumanyan.taskmanager.domain.Event;
 import com.example.arturarzumanyan.taskmanager.networking.util.DateUtils;
 import com.example.arturarzumanyan.taskmanager.ui.dialog.event.EventsDialog;
-import com.example.arturarzumanyan.taskmanager.ui.fragment.daily.mvp.contract.DailyEventsContract;
+import com.example.arturarzumanyan.taskmanager.ui.fragment.event.daily.mvp.contract.DailyEventsContract;
 
 import java.util.List;
 

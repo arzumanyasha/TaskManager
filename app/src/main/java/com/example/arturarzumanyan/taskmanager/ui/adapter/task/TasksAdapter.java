@@ -1,6 +1,5 @@
-package com.example.arturarzumanyan.taskmanager.ui.adapter;
+package com.example.arturarzumanyan.taskmanager.ui.adapter.task;
 
-import android.support.annotation.MainThread;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
