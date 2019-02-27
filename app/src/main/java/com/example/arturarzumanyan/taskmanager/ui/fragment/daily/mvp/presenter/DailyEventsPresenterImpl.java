@@ -4,7 +4,7 @@ import com.example.arturarzumanyan.taskmanager.data.repository.events.EventsRepo
 import com.example.arturarzumanyan.taskmanager.data.repository.events.specification.EventsFromDateSpecification;
 import com.example.arturarzumanyan.taskmanager.domain.Event;
 import com.example.arturarzumanyan.taskmanager.networking.util.DateUtils;
-import com.example.arturarzumanyan.taskmanager.ui.dialog.EventsDialog;
+import com.example.arturarzumanyan.taskmanager.ui.dialog.event.EventsDialog;
 import com.example.arturarzumanyan.taskmanager.ui.fragment.daily.mvp.contract.DailyEventsContract;
 
 import java.util.List;

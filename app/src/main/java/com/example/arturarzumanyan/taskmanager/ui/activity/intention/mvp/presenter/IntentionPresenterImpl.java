@@ -7,7 +7,7 @@ import com.example.arturarzumanyan.taskmanager.domain.Task;
 import com.example.arturarzumanyan.taskmanager.domain.TaskList;
 import com.example.arturarzumanyan.taskmanager.networking.util.Log;
 import com.example.arturarzumanyan.taskmanager.ui.activity.intention.mvp.contract.IntentionContract;
-import com.example.arturarzumanyan.taskmanager.ui.dialog.EventsDialog;
+import com.example.arturarzumanyan.taskmanager.ui.dialog.event.EventsDialog;
 import com.example.arturarzumanyan.taskmanager.ui.dialog.TaskListsDialog;
 import com.example.arturarzumanyan.taskmanager.ui.dialog.TasksDialog;
 
