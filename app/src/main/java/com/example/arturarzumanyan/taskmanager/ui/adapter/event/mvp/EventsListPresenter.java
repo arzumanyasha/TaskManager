@@ -44,6 +44,7 @@ public class EventsListPresenter {
 
     public void processItemDelete(int position) {
         Event event = mEventsList.get(position);
+        mEventsList.remove(event);
         if (mListener != null) {
             mListener.onItemDelete(event);
         }

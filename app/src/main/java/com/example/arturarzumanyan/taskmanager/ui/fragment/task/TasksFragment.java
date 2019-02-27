@@ -23,6 +23,7 @@ import com.example.arturarzumanyan.taskmanager.networking.util.Log;
 import com.example.arturarzumanyan.taskmanager.ui.activity.BaseActivity;
 import com.example.arturarzumanyan.taskmanager.ui.activity.intention.IntentionActivity;
 import com.example.arturarzumanyan.taskmanager.ui.adapter.task.TasksAdapter;
+import com.example.arturarzumanyan.taskmanager.ui.adapter.task.mvp.TasksListPresenter;
 import com.example.arturarzumanyan.taskmanager.ui.dialog.task.TasksDialog;
 import com.squareup.leakcanary.RefWatcher;
 
@@ -136,7 +137,27 @@ public class TasksFragment extends Fragment {
     }
 
     private void setTasksAdapter(List<Task> taskArrayList) {
-        mTasksAdapter = new TasksAdapter(taskArrayList, new TasksAdapter.OnItemClickListener() {
+        TasksListPresenter tasksListPresenter = new TasksListPresenter(taskArrayList, new TasksListPresenter.OnItemClickListener() {
+            @Override
+            public void onItemDelete(Task task) {
+                deleteTask(task);
+            }
+
+            @Override
+            public void onItemClick(Task task) {
+                openTasksDialog(task);
+            }
+
+            @Override
+            public void onChangeItemExecuted(Task task) {
+                mProgressBar.setVisibility(View.VISIBLE);
+                requireActivity().getWindow().setFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE,
+                        WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
+                updateTask(task);
+            }
+        });
+        mTasksAdapter = new TasksAdapter(tasksListPresenter);
+        /*mTasksAdapter = new TasksAdapter(taskArrayList, new TasksAdapter.OnItemClickListener() {
             @Override
             public void onItemDelete(final Task task) {
                 deleteTask(task);
@@ -154,7 +175,7 @@ public class TasksFragment extends Fragment {
                         WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
                 updateTask(task);
             }
-        });
+        });*/
 
         mTasksRecyclerView.setAdapter(mTasksAdapter);
     }
@@ -203,7 +224,7 @@ public class TasksFragment extends Fragment {
         mTasksRepository.deleteTask(mTaskList, task, new TasksRepository.OnTasksLoadedListener() {
             @Override
             public void onSuccess(List<Task> taskArrayList) {
-
+                mTasksAdapter.updateList(taskArrayList);
             }
 
             @Override
