@@ -71,6 +71,7 @@ public class DailyEventsPresenterImpl implements DailyEventsContract.DailyEvents
             @Override
             public void onSuccess(List<Event> eventsList) {
                 mDailyEventsList = eventsList;
+                mDailyEventsView.updateEventsAdapter(eventsList);
                 if (eventsList.isEmpty()) {
                     mDailyEventsView.setNoEventsTextViewVisible();
                 }

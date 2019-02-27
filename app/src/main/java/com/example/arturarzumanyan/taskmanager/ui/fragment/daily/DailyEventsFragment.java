@@ -20,7 +20,8 @@ import com.example.arturarzumanyan.taskmanager.domain.Event;
 import com.example.arturarzumanyan.taskmanager.networking.util.Log;
 import com.example.arturarzumanyan.taskmanager.ui.activity.BaseActivity;
 import com.example.arturarzumanyan.taskmanager.ui.activity.intention.IntentionActivity;
-import com.example.arturarzumanyan.taskmanager.ui.adapter.EventsAdapter;
+import com.example.arturarzumanyan.taskmanager.ui.adapter.event.EventsAdapter;
+import com.example.arturarzumanyan.taskmanager.ui.adapter.event.mvp.EventsListPresenter;
 import com.example.arturarzumanyan.taskmanager.ui.fragment.daily.mvp.contract.DailyEventsContract;
 import com.example.arturarzumanyan.taskmanager.ui.fragment.daily.mvp.presenter.DailyEventsPresenterImpl;
 import com.squareup.leakcanary.RefWatcher;
@@ -78,7 +79,7 @@ public class DailyEventsFragment extends Fragment implements DailyEventsContract
             LinearLayoutManager layoutManager = new LinearLayoutManager(getActivity());
             mEventsRecyclerView.setLayoutManager(layoutManager);
 
-            mEventsAdapter = new EventsAdapter(getActivity(), events, new EventsAdapter.OnItemClickListener() {
+            EventsListPresenter eventsListPresenter = new EventsListPresenter(events, getActivity(), new EventsListPresenter.OnItemClickListener() {
                 @Override
                 public void onItemDelete(Event event) {
                     mDailyEventsPresenter.deleteEvent(event);
@@ -89,6 +90,19 @@ public class DailyEventsFragment extends Fragment implements DailyEventsContract
                     mDailyEventsPresenter.processEventDialog(event);
                 }
             });
+
+            /*mEventsAdapter = new EventsAdapter(getActivity(), events, new EventsListPresenter.OnItemClickListener() {
+                @Override
+                public void onItemDelete(Event event) {
+                    mDailyEventsPresenter.deleteEvent(event);
+                }
+
+                @Override
+                public void onItemClick(Event event) {
+                    mDailyEventsPresenter.processEventDialog(event);
+                }
+            });*/
+            mEventsAdapter = new EventsAdapter(eventsListPresenter);
 
             ((IntentionActivity) requireActivity()).setEventFragmentInteractionListener(new IntentionActivity.EventFragmentInteractionListener() {
                 @Override
