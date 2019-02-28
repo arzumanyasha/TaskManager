@@ -4,6 +4,7 @@ import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -16,7 +17,6 @@ import android.widget.ProgressBar;
 import com.example.arturarzumanyan.taskmanager.BuildConfig;
 import com.example.arturarzumanyan.taskmanager.R;
 import com.example.arturarzumanyan.taskmanager.TaskManagerApp;
-import com.example.arturarzumanyan.taskmanager.data.repository.tasks.TasksRepository;
 import com.example.arturarzumanyan.taskmanager.domain.Task;
 import com.example.arturarzumanyan.taskmanager.domain.TaskList;
 import com.example.arturarzumanyan.taskmanager.networking.util.Log;
@@ -24,26 +24,22 @@ import com.example.arturarzumanyan.taskmanager.ui.activity.BaseActivity;
 import com.example.arturarzumanyan.taskmanager.ui.activity.intention.IntentionActivity;
 import com.example.arturarzumanyan.taskmanager.ui.adapter.task.TasksAdapter;
 import com.example.arturarzumanyan.taskmanager.ui.adapter.task.mvp.TasksListPresenter;
-import com.example.arturarzumanyan.taskmanager.ui.dialog.task.TasksDialog;
+import com.example.arturarzumanyan.taskmanager.ui.fragment.task.mvp.contract.TasksContract;
+import com.example.arturarzumanyan.taskmanager.ui.fragment.task.mvp.presenter.TasksPresenterImpl;
 import com.squareup.leakcanary.RefWatcher;
 
 import java.util.List;
 
-import static com.example.arturarzumanyan.taskmanager.auth.FirebaseWebService.RequestMethods.PATCH;
 import static com.example.arturarzumanyan.taskmanager.ui.activity.intention.IntentionActivity.TASKS_KEY;
 import static com.example.arturarzumanyan.taskmanager.ui.activity.intention.IntentionActivity.TASK_LISTS_KEY;
 
-public class TasksFragment extends Fragment {
+public class TasksFragment extends Fragment implements TasksContract.TasksView {
     private RecyclerView mTasksRecyclerView;
     private ProgressBar mProgressBar;
     private TasksAdapter mTasksAdapter;
-
-    private TasksRepository mTasksRepository;
-    private TaskList mTaskList;
-    private List<Task> mTasks;
+    private TasksContract.TasksPresenter mTasksPresenter;
 
     public TasksFragment() {
-        mTasksRepository = new TasksRepository();
     }
 
     public static TasksFragment newInstance(TaskList taskList) {
@@ -54,10 +50,9 @@ public class TasksFragment extends Fragment {
         return fragment;
     }
 
-    public void setTaskList(TaskList mTaskList) {
-        this.mTaskList = mTaskList;
-        mProgressBar.setVisibility(View.VISIBLE);
-        loadTasks();
+    public void setTaskList(TaskList taskList) {
+        setProgressBarVisible();
+        mTasksPresenter.loadTasks(taskList);
     }
 
     @Override
@@ -65,9 +60,6 @@ public class TasksFragment extends Fragment {
         Log.v("onCreate");
         super.onCreate(savedInstanceState);
         setRetainInstance(true);
-        if (getArguments() != null) {
-            mTaskList = getArguments().getParcelable(TASK_LISTS_KEY);
-        }
     }
 
     @Override
@@ -80,13 +72,14 @@ public class TasksFragment extends Fragment {
         LinearLayoutManager layoutManager = new LinearLayoutManager(getActivity());
         mTasksRecyclerView.setLayoutManager(layoutManager);
 
-        if (mTasks == null) {
-            loadTasks();
+        if (mTasksPresenter == null) {
+            mTasksPresenter = new TasksPresenterImpl(this);
         } else {
-            mProgressBar.setVisibility(View.INVISIBLE);
-            setTasksAdapter(mTasks);
-            requireActivity().setTitle(mTaskList.getTitle());
+            mTasksPresenter.attachView(this);
+            mTasksPresenter.processRetainedState();
         }
+        mTasksPresenter.processReceivedBundle(getArguments());
+        mTasksPresenter.processTasks();
 
         return view;
     }
@@ -99,146 +92,87 @@ public class TasksFragment extends Fragment {
         ((IntentionActivity) requireActivity()).setTaskFragmentInteractionListener(new IntentionActivity.TaskFragmentInteractionListener() {
             @Override
             public void onTasksReady(List<Task> tasks) {
-                mTasksAdapter.updateList(tasks);
+                updateTasksAdapter(tasks);
             }
         });
 
         ((IntentionActivity) requireActivity()).setTaskListFragmentInteractionListener(new IntentionActivity.TaskListFragmentInteractionListener() {
             @Override
             public void onTaskListReady(TaskList taskList) {
-                requireActivity().setTitle(taskList.getTitle());
+                updateAppTitle(taskList.getTitle());
             }
         });
 
         ((IntentionActivity) requireActivity()).setFloatingActionButtonVisible();
     }
 
-    public void loadTasks() {
-        Log.v("Loading tasks");
-        mTasksRepository.loadTasks(mTaskList, new TasksRepository.OnTasksLoadedListener() {
-            @Override
-            public void onSuccess(List<Task> taskArrayList) {
-                mTasks = taskArrayList;
-                mProgressBar.setVisibility(ProgressBar.INVISIBLE);
-                setTasksAdapter(taskArrayList);
-            }
-
-            @Override
-            public void onFail(String message) {
-                ((BaseActivity) requireActivity()).onError(message);
-            }
-
-            @Override
-            public void onPermissionDenied() {
-                /** To-do: add realization with start signInActivity*/
-            }
-        });
-        requireActivity().setTitle(mTaskList.getTitle());
-    }
-
-    private void setTasksAdapter(List<Task> taskArrayList) {
+    @Override
+    public void setTasksAdapter(List<Task> taskArrayList) {
         TasksListPresenter tasksListPresenter = new TasksListPresenter(taskArrayList, new TasksListPresenter.OnItemClickListener() {
             @Override
             public void onItemDelete(Task task) {
-                deleteTask(task);
+                mTasksPresenter.deleteTask(task);
             }
 
             @Override
             public void onItemClick(Task task) {
-                openTasksDialog(task);
+                mTasksPresenter.processTaskDialog(task);
             }
 
             @Override
             public void onChangeItemExecuted(Task task) {
-                mProgressBar.setVisibility(View.VISIBLE);
-                requireActivity().getWindow().setFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE,
-                        WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
-                updateTask(task);
+                mTasksPresenter.processItemExecutedStatus(task);
             }
         });
         mTasksAdapter = new TasksAdapter(tasksListPresenter);
-        /*mTasksAdapter = new TasksAdapter(taskArrayList, new TasksAdapter.OnItemClickListener() {
-            @Override
-            public void onItemDelete(final Task task) {
-                deleteTask(task);
-            }
-
-            @Override
-            public void onItemClick(Task task) {
-                openTasksDialog(task);
-            }
-
-            @Override
-            public void onChangeItemExecuted(final Task task) {
-                mProgressBar.setVisibility(View.VISIBLE);
-                requireActivity().getWindow().setFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE,
-                        WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
-                updateTask(task);
-            }
-        });*/
-
         mTasksRecyclerView.setAdapter(mTasksAdapter);
     }
 
-    private void openTasksDialog(Task task) {
-        TasksDialog tasksDialog = TasksDialog.newInstance(task, mTaskList);
-        tasksDialog.setTasksReadyListener(new TasksDialog.TasksReadyListener() {
-            @Override
-            public void onTasksReady(List<Task> tasks) {
-                mTasksAdapter.updateList(tasks);
-            }
-        });
-
-        tasksDialog.show(requireFragmentManager(), TASKS_KEY);
+    @Override
+    public void showDialog(DialogFragment dialogFragment) {
+        dialogFragment.show(requireFragmentManager(), TASKS_KEY);
     }
 
-    private void updateTask(Task task) {
-        mTasksRepository.addOrUpdateTask(mTaskList,
-                task, PATCH, new TasksRepository.OnTasksLoadedListener() {
-                    @Override
-                    public void onSuccess(List<Task> taskArrayList) {
-                        if (isVisible()) {
-                            mProgressBar.setVisibility(View.INVISIBLE);
-                            requireActivity().getWindow().clearFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
-                            mTasksAdapter.updateList(taskArrayList);
-                        }
-                    }
-
-                    @Override
-                    public void onFail(String message) {
-                        if (isVisible()) {
-                            mProgressBar.setVisibility(View.INVISIBLE);
-                            requireActivity().getWindow().clearFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
-                            ((BaseActivity) requireActivity()).onError(message);
-                        }
-                    }
-
-                    @Override
-                    public void onPermissionDenied() {
-                        /** To-do: add realization with start signInActivity*/
-                    }
-                });
+    @Override
+    public void updateTasksAdapter(List<Task> tasks) {
+        if (isAdded()) {
+            mTasksAdapter.updateList(tasks);
+        }
     }
 
-    private void deleteTask(Task task) {
-        mTasksRepository.deleteTask(mTaskList, task, new TasksRepository.OnTasksLoadedListener() {
-            @Override
-            public void onSuccess(List<Task> taskArrayList) {
-                mTasksAdapter.updateList(taskArrayList);
-            }
+    @Override
+    public void updateAppTitle(String title) {
+        if (isAdded()) {
+            requireActivity().setTitle(title);
+        }
+    }
 
-            @Override
-            public void onFail(String message) {
-                if (isVisible()) {
-                    ((BaseActivity) requireActivity()).onError(message);
-                }
-            }
+    @Override
+    public void setProgressBarVisible() {
+        if (isAdded()) {
+            mProgressBar.setVisibility(ProgressBar.VISIBLE);
+        }
+    }
 
-            @Override
-            public void onPermissionDenied() {
-                /** To-do: add realization with start signInActivity*/
-            }
-        });
+    @Override
+    public void setProgressBarInvisible() {
+        if (isAdded()) {
+            mProgressBar.setVisibility(ProgressBar.INVISIBLE);
+        }
+    }
+
+    @Override
+    public void setScreenNotTouchable() {
+        if (isAdded()) {
+            requireActivity().getWindow().clearFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
+        }
+    }
+
+    @Override
+    public void onFail(String message) {
+        if (isAdded()) {
+            ((BaseActivity) requireActivity()).onError(message);
+        }
     }
 
     @Override
@@ -252,6 +186,7 @@ public class TasksFragment extends Fragment {
         if (mTasksAdapter != null) {
             mTasksAdapter.unsubscribe();
         }
+        mTasksPresenter.unsubscribe();
         super.onDetach();
     }
 
