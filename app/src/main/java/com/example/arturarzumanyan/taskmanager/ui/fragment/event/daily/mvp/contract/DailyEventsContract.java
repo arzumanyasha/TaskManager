@@ -1,8 +1,7 @@
 package com.example.arturarzumanyan.taskmanager.ui.fragment.event.daily.mvp.contract;
 
-import android.support.v4.app.DialogFragment;
-
 import com.example.arturarzumanyan.taskmanager.domain.Event;
+import com.example.arturarzumanyan.taskmanager.ui.adapter.event.mvp.EventRowView;
 
 import java.util.List;
 
@@ -12,13 +11,19 @@ public class DailyEventsContract {
 
         void processDailyEvents();
 
-        void deleteEvent(Event event);
-
-        void processEventDialog(Event event);
-
         void processRetainedState();
 
         void processUpdatedEvents(List<Event> events);
+
+        void onBindEventsRowViewAtPosition(int position, EventRowView rowView);
+
+        void updateEventsList(List<Event> updatedList);
+
+        void processItemClick(int position);
+
+        void processItemDelete(int position);
+
+        int getEventsRowsCount();
 
         void unsubscribe();
     }
@@ -26,7 +31,7 @@ public class DailyEventsContract {
     public interface DailyEventsView {
         void setEventsAdapter(List<Event> events);
 
-        void showDialog(DialogFragment dialogFragment);
+        void showEventUpdatingDialog(Event event);
 
         void updateEventsAdapter(List<Event> events);
 

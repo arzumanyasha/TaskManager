@@ -6,7 +6,7 @@ import com.example.arturarzumanyan.taskmanager.data.repository.tasks.TasksReposi
 import com.example.arturarzumanyan.taskmanager.domain.Task;
 import com.example.arturarzumanyan.taskmanager.domain.TaskList;
 import com.example.arturarzumanyan.taskmanager.networking.util.Log;
-import com.example.arturarzumanyan.taskmanager.ui.dialog.task.TasksDialog;
+import com.example.arturarzumanyan.taskmanager.ui.adapter.task.mvp.TaskRowView;
 import com.example.arturarzumanyan.taskmanager.ui.fragment.task.mvp.contract.TasksContract;
 
 import java.util.List;
@@ -70,13 +70,6 @@ public class TasksPresenterImpl implements TasksContract.TasksPresenter {
         }
     }
 
-    @Override
-    public void processItemExecutedStatus(Task task) {
-        mTasksView.setProgressBarVisible();
-        mTasksView.setScreenNotTouchable();
-        updateTask(task);
-    }
-
     private void updateTask(Task task) {
         mTasksRepository.addOrUpdateTask(mTaskList,
                 task, PATCH, new TasksRepository.OnTasksLoadedListener() {
@@ -101,8 +94,7 @@ public class TasksPresenterImpl implements TasksContract.TasksPresenter {
                 });
     }
 
-    @Override
-    public void deleteTask(Task task) {
+    private void deleteTask(Task task) {
         mTasksRepository.deleteTask(mTaskList, task, new TasksRepository.OnTasksLoadedListener() {
             @Override
             public void onSuccess(List<Task> taskArrayList) {
@@ -122,15 +114,50 @@ public class TasksPresenterImpl implements TasksContract.TasksPresenter {
     }
 
     @Override
-    public void processTaskDialog(Task task) {
-        TasksDialog tasksDialog = TasksDialog.newInstance(task, mTaskList);
-        tasksDialog.setTasksReadyListener(new TasksDialog.TasksReadyListener() {
-            @Override
-            public void onTasksReady(List<Task> tasks) {
-                mTasksView.updateTasksAdapter(tasks);
-            }
-        });
-        mTasksView.showDialog(tasksDialog);
+    public void processUpdatedTasksList(List<Task> tasks) {
+        mTasksView.updateTasksAdapter(tasks);
+    }
+
+    @Override
+    public void onBindEventsRowViewAtPosition(int position, TaskRowView rowView) {
+        Task task = mTasks.get(position);
+        rowView.setItemViewClickListener(position);
+        rowView.setName(task.getName());
+        rowView.setDescription(task.getDescription().replaceAll("[\n]", ""));
+        rowView.setChecked(position, task.getIsExecuted() == 1);
+        rowView.setDelete(position);
+    }
+
+    @Override
+    public void updateTasksList(List<Task> updatedList) {
+        mTasks = updatedList;
+    }
+
+    @Override
+    public void processItemClick(int position) {
+        Task task = mTasks.get(position);
+        mTasksView.showTaskUpdatingDialog(task, mTaskList);
+    }
+
+    @Override
+    public void processTaskStatusChanging(int position) {
+        Task task = mTasks.get(position);
+        mTasks.get(position).setIsExecuted(task.getIsExecuted() ^ 1);
+        mTasksView.setProgressBarVisible();
+        mTasksView.setScreenNotTouchable();
+        updateTask(task);
+    }
+
+    @Override
+    public void processItemDelete(int position) {
+        Task task = mTasks.get(position);
+        mTasks.remove(task);
+        deleteTask(task);
+    }
+
+    @Override
+    public int getTasksRowsCount() {
+        return mTasks.size();
     }
 
     @Override

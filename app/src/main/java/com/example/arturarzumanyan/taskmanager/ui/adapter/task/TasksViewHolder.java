@@ -8,16 +8,16 @@ import android.widget.TextView;
 
 import com.example.arturarzumanyan.taskmanager.R;
 import com.example.arturarzumanyan.taskmanager.ui.adapter.task.mvp.TaskRowView;
-import com.example.arturarzumanyan.taskmanager.ui.adapter.task.mvp.TasksListPresenter;
+import com.example.arturarzumanyan.taskmanager.ui.fragment.task.mvp.contract.TasksContract;
 
 public class TasksViewHolder extends RecyclerView.ViewHolder implements TaskRowView {
-    private TasksListPresenter tasksListPresenter;
+    private TasksContract.TasksPresenter tasksListPresenter;
     private TextView taskName;
     private TextView taskDescription;
     private ImageView taskDelete;
     private CheckBox isExecutedCheckBox;
 
-    TasksViewHolder(View view, TasksListPresenter tasksListPresenter) {
+    TasksViewHolder(View view, TasksContract.TasksPresenter tasksListPresenter) {
         super(view);
         this.tasksListPresenter = tasksListPresenter;
         taskName = view.findViewById(R.id.text_task_name);

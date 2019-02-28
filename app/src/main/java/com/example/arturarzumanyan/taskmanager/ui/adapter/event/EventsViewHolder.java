@@ -8,17 +8,17 @@ import android.widget.TextView;
 
 import com.example.arturarzumanyan.taskmanager.R;
 import com.example.arturarzumanyan.taskmanager.ui.adapter.event.mvp.EventRowView;
-import com.example.arturarzumanyan.taskmanager.ui.adapter.event.mvp.EventsListPresenter;
+import com.example.arturarzumanyan.taskmanager.ui.fragment.event.daily.mvp.contract.DailyEventsContract;
 
 public class EventsViewHolder extends RecyclerView.ViewHolder implements EventRowView {
-    private EventsListPresenter eventsListPresenter;
+    private DailyEventsContract.DailyEventsPresenter eventsListPresenter;
     private ConstraintLayout constraintLayout;
     private TextView eventName;
     private TextView eventDescription;
     private TextView eventTime;
     private ImageView eventDelete;
 
-    EventsViewHolder(View view, EventsListPresenter eventsListPresenter) {
+    EventsViewHolder(View view, DailyEventsContract.DailyEventsPresenter eventsListPresenter) {
         super(view);
         this.eventsListPresenter = eventsListPresenter;
         constraintLayout = view.findViewById(R.id.constraint_layout_events_holder);

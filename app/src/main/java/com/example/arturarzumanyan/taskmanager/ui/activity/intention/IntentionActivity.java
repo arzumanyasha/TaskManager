@@ -4,7 +4,6 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
-import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.app.NotificationManagerCompat;
@@ -29,6 +28,9 @@ import com.example.arturarzumanyan.taskmanager.ui.activity.BaseActivity;
 import com.example.arturarzumanyan.taskmanager.ui.activity.intention.mvp.contract.IntentionContract;
 import com.example.arturarzumanyan.taskmanager.ui.activity.intention.mvp.presenter.IntentionPresenterImpl;
 import com.example.arturarzumanyan.taskmanager.ui.activity.signin.SignInActivity;
+import com.example.arturarzumanyan.taskmanager.ui.dialog.event.EventsDialog;
+import com.example.arturarzumanyan.taskmanager.ui.dialog.task.TasksDialog;
+import com.example.arturarzumanyan.taskmanager.ui.dialog.tasklist.TaskListsDialog;
 import com.example.arturarzumanyan.taskmanager.ui.fragment.event.EventsFragment;
 import com.example.arturarzumanyan.taskmanager.ui.fragment.task.TasksFragment;
 import com.example.arturarzumanyan.taskmanager.ui.util.CircleTransformation;
@@ -366,8 +368,51 @@ public class IntentionActivity extends BaseActivity implements IntentionContract
     }
 
     @Override
-    public void showDialog(DialogFragment dialogFragment, String key) {
-        dialogFragment.show(getSupportFragmentManager(), key);
+    public void showEventCreatingDialog() {
+        EventsDialog eventsDialog = EventsDialog.newInstance(null);
+        eventsDialog.setEventsReadyListener(new EventsDialog.EventsReadyListener() {
+            @Override
+            public void onEventsReady(List<Event> events) {
+                mIntentionPresenter.processUpdatedEventsList(events);
+            }
+        });
+        eventsDialog.show(getSupportFragmentManager(), EVENTS_KEY);
+    }
+
+    @Override
+    public void showTaskCreatingDialog(TaskList taskList) {
+        TasksDialog tasksDialog = TasksDialog.newInstance(null, taskList);
+        tasksDialog.setTasksReadyListener(new TasksDialog.TasksReadyListener() {
+            @Override
+            public void onTasksReady(List<Task> tasks) {
+                mIntentionPresenter.processUpdatedTasksList(tasks);
+            }
+        });
+        tasksDialog.show(getSupportFragmentManager(), TASKS_KEY);
+    }
+
+    @Override
+    public void showTaskListCreatingDialog() {
+        TaskListsDialog taskListsDialog = TaskListsDialog.newInstance(null);
+        taskListsDialog.setTaskListReadyListener(new TaskListsDialog.TaskListReadyListener() {
+            @Override
+            public void onTaskListReady(final TaskList taskList) {
+                mIntentionPresenter.processCreatedTaskList(taskList);
+            }
+        });
+        taskListsDialog.show(getSupportFragmentManager(), TASK_LISTS_KEY);
+    }
+
+    @Override
+    public void showTaskListUpdatingDialog(TaskList taskList) {
+        TaskListsDialog taskListsDialog = TaskListsDialog.newInstance(taskList);
+        taskListsDialog.setTaskListReadyListener(new TaskListsDialog.TaskListReadyListener() {
+            @Override
+            public void onTaskListReady(TaskList taskList) {
+                mIntentionPresenter.processUpdatedTaskList(taskList);
+            }
+        });
+        taskListsDialog.show(getSupportFragmentManager(), TASK_LISTS_KEY);
     }
 
     @Override

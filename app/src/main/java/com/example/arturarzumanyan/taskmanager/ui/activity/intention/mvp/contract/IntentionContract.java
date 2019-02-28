@@ -1,7 +1,5 @@
 package com.example.arturarzumanyan.taskmanager.ui.activity.intention.mvp.contract;
 
-import android.support.v4.app.DialogFragment;
-
 import com.example.arturarzumanyan.taskmanager.domain.Event;
 import com.example.arturarzumanyan.taskmanager.domain.Task;
 import com.example.arturarzumanyan.taskmanager.domain.TaskList;
@@ -18,6 +16,14 @@ public class IntentionContract {
 
         void processRestoredInfo(String key);
 
+        void processUpdatedEventsList(List<Event> events);
+
+        void processUpdatedTasksList(List<Task> tasks);
+
+        void processCreatedTaskList(TaskList taskList);
+
+        void processUpdatedTaskList(TaskList taskList);
+
         void processTaskListCreatingDialog();
 
         void processTaskListUpdatingDialog(String title);
@@ -32,7 +38,13 @@ public class IntentionContract {
     }
 
     public interface IntentionView {
-        void showDialog(DialogFragment dialogFragment, String key);
+        void showEventCreatingDialog();
+
+        void showTaskCreatingDialog(TaskList taskList);
+
+        void showTaskListCreatingDialog();
+
+        void showTaskListUpdatingDialog(TaskList taskList);
 
         void onTasksReady(List<Task> tasks);
 

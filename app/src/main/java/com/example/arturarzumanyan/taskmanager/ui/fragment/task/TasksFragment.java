@@ -4,7 +4,6 @@ import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -23,7 +22,7 @@ import com.example.arturarzumanyan.taskmanager.networking.util.Log;
 import com.example.arturarzumanyan.taskmanager.ui.activity.BaseActivity;
 import com.example.arturarzumanyan.taskmanager.ui.activity.intention.IntentionActivity;
 import com.example.arturarzumanyan.taskmanager.ui.adapter.task.TasksAdapter;
-import com.example.arturarzumanyan.taskmanager.ui.adapter.task.mvp.TasksListPresenter;
+import com.example.arturarzumanyan.taskmanager.ui.dialog.task.TasksDialog;
 import com.example.arturarzumanyan.taskmanager.ui.fragment.task.mvp.contract.TasksContract;
 import com.example.arturarzumanyan.taskmanager.ui.fragment.task.mvp.presenter.TasksPresenterImpl;
 import com.squareup.leakcanary.RefWatcher;
@@ -108,29 +107,20 @@ public class TasksFragment extends Fragment implements TasksContract.TasksView {
 
     @Override
     public void setTasksAdapter(List<Task> taskArrayList) {
-        TasksListPresenter tasksListPresenter = new TasksListPresenter(taskArrayList, new TasksListPresenter.OnItemClickListener() {
-            @Override
-            public void onItemDelete(Task task) {
-                mTasksPresenter.deleteTask(task);
-            }
-
-            @Override
-            public void onItemClick(Task task) {
-                mTasksPresenter.processTaskDialog(task);
-            }
-
-            @Override
-            public void onChangeItemExecuted(Task task) {
-                mTasksPresenter.processItemExecutedStatus(task);
-            }
-        });
-        mTasksAdapter = new TasksAdapter(tasksListPresenter);
+        mTasksAdapter = new TasksAdapter(mTasksPresenter);
         mTasksRecyclerView.setAdapter(mTasksAdapter);
     }
 
     @Override
-    public void showDialog(DialogFragment dialogFragment) {
-        dialogFragment.show(requireFragmentManager(), TASKS_KEY);
+    public void showTaskUpdatingDialog(Task task,TaskList taskList) {
+        TasksDialog tasksDialog = TasksDialog.newInstance(task, taskList);
+        tasksDialog.setTasksReadyListener(new TasksDialog.TasksReadyListener() {
+            @Override
+            public void onTasksReady(List<Task> tasks) {
+                mTasksPresenter.processUpdatedTasksList(tasks);
+            }
+        });
+        tasksDialog.show(requireFragmentManager(), TASKS_KEY);
     }
 
     @Override

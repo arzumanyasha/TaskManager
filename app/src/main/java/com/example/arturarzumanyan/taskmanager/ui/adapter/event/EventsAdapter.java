@@ -8,14 +8,14 @@ import android.view.ViewGroup;
 
 import com.example.arturarzumanyan.taskmanager.R;
 import com.example.arturarzumanyan.taskmanager.domain.Event;
-import com.example.arturarzumanyan.taskmanager.ui.adapter.event.mvp.EventsListPresenter;
+import com.example.arturarzumanyan.taskmanager.ui.fragment.event.daily.mvp.contract.DailyEventsContract;
 
 import java.util.List;
 
 public class EventsAdapter extends RecyclerView.Adapter<EventsViewHolder> {
-    private final EventsListPresenter mEventsListPresenter;
+    private final DailyEventsContract.DailyEventsPresenter mEventsListPresenter;
 
-    public EventsAdapter(EventsListPresenter eventsListPresenter) {
+    public EventsAdapter(DailyEventsContract.DailyEventsPresenter eventsListPresenter) {
         this.mEventsListPresenter = eventsListPresenter;
     }
 

@@ -8,7 +8,6 @@ import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatDialogFragment;
-import android.util.SparseIntArray;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.DatePicker;
@@ -25,7 +24,6 @@ import com.example.arturarzumanyan.taskmanager.networking.util.DateUtils;
 import com.example.arturarzumanyan.taskmanager.ui.activity.BaseActivity;
 import com.example.arturarzumanyan.taskmanager.ui.dialog.event.mvp.EventsDialogContract;
 import com.example.arturarzumanyan.taskmanager.ui.dialog.event.mvp.EventsDialogPresenterImpl;
-import com.example.arturarzumanyan.taskmanager.ui.util.ColorPalette;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -36,7 +34,6 @@ import petrov.kristiyan.colorpicker.ColorPicker;
 import static com.example.arturarzumanyan.taskmanager.ui.activity.intention.IntentionActivity.EVENTS_KEY;
 
 public class EventsDialog extends AppCompatDialogFragment implements EventsDialogContract.EventsDialogView {
-    private static final int DEFAULT_COLOR = 9;
     private EditText mEditTextEventName, mEditTextEventDescription;
     private ImageButton mImageButtonColorPicker;
     private TextView mTextViewStartTime, mTextViewEndTime, mTextViewDate;
@@ -45,12 +42,9 @@ public class EventsDialog extends AppCompatDialogFragment implements EventsDialo
     private EventsReadyListener eventsReadyListener;
     private EventsDialogContract.EventsDialogPresenter mEventsDialogPresenter;
 
-    private SparseIntArray mColorMap;
-
     private Date mStartTime;
     private Date mEndTime;
 
-    private int mCurrentColor;
     private int mHour, mMinute;
     private int mDay, mMonth, mYear;
 
@@ -78,12 +72,8 @@ public class EventsDialog extends AppCompatDialogFragment implements EventsDialo
 
         final Bundle bundle = getArguments();
 
-        ColorPalette colorPalette = new ColorPalette(getActivity());
-        mColorMap = colorPalette.getColorPalette();
-
-        mCurrentColor = mColorMap.get(DEFAULT_COLOR);
-
         mEventsDialogPresenter = new EventsDialogPresenterImpl(this);
+        mEventsDialogPresenter.setDefaultCurrentColor(getActivity());
 
         builder.setView(view)
                 .setTitle(getString(R.string.events_title))
@@ -96,11 +86,12 @@ public class EventsDialog extends AppCompatDialogFragment implements EventsDialo
                 .setPositiveButton(getString(R.string.ok_button), new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        mEventsDialogPresenter.processOkButtonClick(bundle, mEditTextEventName.getText().toString(),
+                        mEventsDialogPresenter.processOkButtonClick(bundle,
+                                mEditTextEventName.getText().toString(),
                                 mEditTextEventDescription.getText().toString(),
-                                mColorMap.keyAt(mColorMap.indexOfValue(mCurrentColor)),
-                                DateUtils.getEventDate(DateUtils.formatReversedYearMonthDayDate(mTextViewDate.getText().toString()), mStartTime),
-                                DateUtils.getEventDate(DateUtils.formatReversedYearMonthDayDate(mTextViewDate.getText().toString()), mEndTime),
+                                mTextViewDate.getText().toString(),
+                                mStartTime,
+                                mEndTime,
                                 mSwitchNotification.isChecked() ? 1 : 0);
                     }
                 });
@@ -141,7 +132,7 @@ public class EventsDialog extends AppCompatDialogFragment implements EventsDialo
         mImageButtonColorPicker.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                openColorPicker();
+                mEventsDialogPresenter.processColorPicker();
             }
         });
     }
@@ -209,8 +200,7 @@ public class EventsDialog extends AppCompatDialogFragment implements EventsDialo
         mEditTextEventName.setText(event.getName());
         mEditTextEventDescription.setText(event.getDescription());
 
-        mImageButtonColorPicker.setColorFilter(mColorMap.get(event.getColorId()));
-        mCurrentColor = mColorMap.get(event.getColorId());
+        mEventsDialogPresenter.setCurrentColor(event.getColorId());
 
         mTextViewStartTime.setText(DateUtils.formatTimeWithoutA(event.getStartTime()));
         mTextViewEndTime.setText(DateUtils.formatTimeWithoutA(event.getEndTime()));
@@ -222,22 +212,21 @@ public class EventsDialog extends AppCompatDialogFragment implements EventsDialo
         mEndTime = DateUtils.getTimeWithoutA(DateUtils.formatTimeWithoutA(event.getEndTime()));
     }
 
-    private void openColorPicker() {
+    @Override
+    public void setColorFilter(int colorId) {
+        mImageButtonColorPicker.setColorFilter(colorId);
+    }
+
+    @Override
+    public void showColorPicker(ArrayList<String> colors) {
         final ColorPicker colorPicker = new ColorPicker(requireActivity());
-        ArrayList<String> colors = new ArrayList<>();
-
-        for (int i = 0; i < mColorMap.size(); i++) {
-            colors.add("#" + Integer.toHexString(mColorMap.valueAt(i)));
-        }
-
         colorPicker.setColors(colors)
                 .setColumns(5)
                 .setRoundColorButton(true)
                 .setOnChooseColorListener(new ColorPicker.OnChooseColorListener() {
                     @Override
                     public void onChooseColor(int position, int color) {
-                        mImageButtonColorPicker.setColorFilter(color);
-                        mCurrentColor = color;
+                        mEventsDialogPresenter.setCurrentColor(position + 1);
                     }
 
                     @Override

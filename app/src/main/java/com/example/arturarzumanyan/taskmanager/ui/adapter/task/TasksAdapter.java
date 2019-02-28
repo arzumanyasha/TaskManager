@@ -8,14 +8,14 @@ import android.view.ViewGroup;
 
 import com.example.arturarzumanyan.taskmanager.R;
 import com.example.arturarzumanyan.taskmanager.domain.Task;
-import com.example.arturarzumanyan.taskmanager.ui.adapter.task.mvp.TasksListPresenter;
+import com.example.arturarzumanyan.taskmanager.ui.fragment.task.mvp.contract.TasksContract;
 
 import java.util.List;
 
 public class TasksAdapter extends RecyclerView.Adapter<TasksViewHolder> {
-    private TasksListPresenter mTasksListPresenter;
+    private TasksContract.TasksPresenter mTasksListPresenter;
 
-    public TasksAdapter(TasksListPresenter mTasksListPresenter) {
+    public TasksAdapter(TasksContract.TasksPresenter mTasksListPresenter) {
         this.mTasksListPresenter = mTasksListPresenter;
     }
 

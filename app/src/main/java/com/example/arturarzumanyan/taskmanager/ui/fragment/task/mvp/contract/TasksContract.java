@@ -1,10 +1,10 @@
 package com.example.arturarzumanyan.taskmanager.ui.fragment.task.mvp.contract;
 
 import android.os.Bundle;
-import android.support.v4.app.DialogFragment;
 
 import com.example.arturarzumanyan.taskmanager.domain.Task;
 import com.example.arturarzumanyan.taskmanager.domain.TaskList;
+import com.example.arturarzumanyan.taskmanager.ui.adapter.task.mvp.TaskRowView;
 
 import java.util.List;
 
@@ -18,11 +18,19 @@ public class TasksContract {
 
         void processReceivedBundle(Bundle bundle);
 
-        void deleteTask(Task task);
+        void onBindEventsRowViewAtPosition(int position, TaskRowView rowView);
 
-        void processItemExecutedStatus(Task task);
+        void updateTasksList(List<Task> updatedList);
 
-        void processTaskDialog(Task task);
+        void processUpdatedTasksList(List<Task> tasks);
+
+        void processItemClick(int position);
+
+        void processTaskStatusChanging(int position);
+
+        void processItemDelete(int position);
+
+        int getTasksRowsCount();
 
         void processRetainedState();
 
@@ -32,7 +40,7 @@ public class TasksContract {
     public interface TasksView {
         void setTasksAdapter(List<Task> tasks);
 
-        void showDialog(DialogFragment dialogFragment);
+        void showTaskUpdatingDialog(Task task,TaskList taskList);
 
         void updateTasksAdapter(List<Task> tasks);
 
