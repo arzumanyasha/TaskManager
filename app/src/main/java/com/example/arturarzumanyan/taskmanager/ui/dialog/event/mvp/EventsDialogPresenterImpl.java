@@ -4,7 +4,6 @@ import android.os.Bundle;
 
 import com.example.arturarzumanyan.taskmanager.data.repository.events.EventsRepository;
 import com.example.arturarzumanyan.taskmanager.domain.Event;
-import com.example.arturarzumanyan.taskmanager.ui.activity.BaseActivity;
 
 import java.util.Date;
 import java.util.List;

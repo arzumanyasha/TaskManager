@@ -14,25 +14,22 @@ import android.widget.EditText;
 import android.widget.TextView;
 
 import com.example.arturarzumanyan.taskmanager.R;
-import com.example.arturarzumanyan.taskmanager.data.repository.tasks.TasksRepository;
 import com.example.arturarzumanyan.taskmanager.domain.Task;
 import com.example.arturarzumanyan.taskmanager.domain.TaskList;
 import com.example.arturarzumanyan.taskmanager.networking.util.DateUtils;
 import com.example.arturarzumanyan.taskmanager.ui.activity.BaseActivity;
+import com.example.arturarzumanyan.taskmanager.ui.dialog.task.mvp.TasksDialogContract;
+import com.example.arturarzumanyan.taskmanager.ui.dialog.task.mvp.TasksDialogPresenterImpl;
 
-import java.util.Date;
 import java.util.List;
-import java.util.UUID;
 
-import static com.example.arturarzumanyan.taskmanager.auth.FirebaseWebService.RequestMethods.PATCH;
-import static com.example.arturarzumanyan.taskmanager.auth.FirebaseWebService.RequestMethods.POST;
 import static com.example.arturarzumanyan.taskmanager.ui.activity.intention.IntentionActivity.TASKS_KEY;
 import static com.example.arturarzumanyan.taskmanager.ui.activity.intention.IntentionActivity.TASK_LISTS_KEY;
 
-public class TasksDialog extends AppCompatDialogFragment {
+public class TasksDialog extends AppCompatDialogFragment implements TasksDialogContract.TasksDialogView {
     private EditText mEditTextTaskName, mEditTextTaskDescription;
     private TextView mTextViewTaskDate;
-    private Date mTaskDate;
+    private TasksDialogContract.TasksDialogPresenter mTasksDialogPresenter;
 
     private TasksReadyListener tasksReadyListener;
 
@@ -58,13 +55,15 @@ public class TasksDialog extends AppCompatDialogFragment {
         LayoutInflater inflater = requireActivity().getLayoutInflater();
         View view = inflater.inflate(R.layout.dialog_tasks, null);
 
+        mTasksDialogPresenter = new TasksDialogPresenterImpl(this);
+
         final Bundle bundle = getArguments();
 
         setViews(builder, view, bundle);
 
         setTaskDatePickerListener();
 
-        setTaskInfoViews(bundle);
+        mTasksDialogPresenter.processReceivedBundle(bundle);
 
         return builder.create();
     }
@@ -85,10 +84,12 @@ public class TasksDialog extends AppCompatDialogFragment {
                 .setPositiveButton(getString(R.string.ok_button), new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        addOrUpdateTask(bundle);
+                        mTasksDialogPresenter.processOkButtonClick(bundle, mEditTextTaskName.getText().toString(),
+                                mEditTextTaskDescription.getText().toString(),
+                                mTextViewTaskDate.getText().toString().equals(getString(R.string.set_task_date_title)) ? null :
+                                        mTextViewTaskDate.getText().toString());
                     }
                 });
-
     }
 
     private void setTaskDatePickerListener() {
@@ -103,7 +104,7 @@ public class TasksDialog extends AppCompatDialogFragment {
                     @Override
                     public void onDateSet(DatePicker view, int year, int monthOfYear, int dayOfMonth) {
                         mTextViewTaskDate.setText(DateUtils.getStringDateFromInt(year, monthOfYear, dayOfMonth));
-                        mTaskDate = DateUtils.getTaskDateFromString(DateUtils.formatReversedYearMonthDayDate(mTextViewTaskDate.getText().toString()));
+                        mTasksDialogPresenter.setTaskDate(DateUtils.getTaskDateFromString(DateUtils.formatReversedYearMonthDayDate(mTextViewTaskDate.getText().toString())));
                     }
                 }, year, month, day);
 
@@ -112,90 +113,23 @@ public class TasksDialog extends AppCompatDialogFragment {
         });
     }
 
-    private void setTaskInfoViews(Bundle bundle) {
-        if (bundle != null) {
-            Task task = bundle.getParcelable(TASKS_KEY);
-            if (task != null) {
-                mEditTextTaskName.setText(task.getName());
-                mEditTextTaskDescription.setText(task.getDescription());
-                if (task.getDate() != null) {
-                    mTextViewTaskDate.setText(DateUtils.formatReversedDayMonthYearDate(DateUtils.getTaskDate(task.getDate())));
-                }
-            }
+    @Override
+    public void setTaskInfoViews(Task task) {
+        mEditTextTaskName.setText(task.getName());
+        mEditTextTaskDescription.setText(task.getDescription());
+        if (task.getDate() != null) {
+            mTextViewTaskDate.setText(DateUtils.formatReversedDayMonthYearDate(DateUtils.getTaskDate(task.getDate())));
         }
     }
 
-    private void addOrUpdateTask(Bundle bundle) {
-        TasksRepository tasksRepository = new TasksRepository();
-        String taskName = mEditTextTaskName.getText().toString();
-        if (bundle != null && !taskName.isEmpty()) {
-            if (bundle.getParcelable(TASKS_KEY) != null) {
-                updateTask(tasksRepository, bundle, taskName);
-            } else {
-                addTask(tasksRepository, bundle, taskName);
-            }
-        }
+    @Override
+    public void onTaskReady(List<Task> tasks) {
+        tasksReadyListener.onTasksReady(tasks);
     }
 
-    private void addTask(TasksRepository tasksRepository, Bundle bundle, String taskName) {
-        String taskId = UUID.randomUUID().toString();
-        String taskDescription = mEditTextTaskDescription.getText().toString();
-        int isExecuted = 0;
-
-        TaskList taskList = bundle.getParcelable(TASK_LISTS_KEY);
-        if (taskList != null) {
-            int taskListId = taskList.getId();
-            Date date = null;
-
-            if (!mTextViewTaskDate.getText().equals(getString(R.string.set_task_date_title))) {
-                date = DateUtils.getTaskDateFromString(DateUtils.formatReversedYearMonthDayDate(mTextViewTaskDate.getText().toString()));
-            }
-
-            Task task = new Task(taskId, taskName, taskDescription, isExecuted, taskListId, date);
-
-            tasksRepository.addOrUpdateTask(taskList, task, POST, new TasksRepository.OnTasksLoadedListener() {
-                @Override
-                public void onSuccess(List<Task> taskArrayList) {
-                    tasksReadyListener.onTasksReady(taskArrayList);
-                }
-
-                @Override
-                public void onFail(String message) {
-                    ((BaseActivity) requireActivity()).onError(message);
-                }
-
-                @Override
-                public void onPermissionDenied() {
-                    /** To-do: add realization with start signInActivity*/
-                }
-            });
-        }
-    }
-
-    private void updateTask(TasksRepository tasksRepository, Bundle bundle, String taskName) {
-        Task task = bundle.getParcelable(TASKS_KEY);
-        TaskList taskList = bundle.getParcelable(TASK_LISTS_KEY);
-        if (task != null) {
-            task.setName(taskName);
-            task.setDescription(mEditTextTaskDescription.getText().toString());
-            task.setDate(mTaskDate);
-            tasksRepository.addOrUpdateTask(taskList, task, PATCH, new TasksRepository.OnTasksLoadedListener() {
-                @Override
-                public void onSuccess(List<Task> taskArrayList) {
-                    tasksReadyListener.onTasksReady(taskArrayList);
-                }
-
-                @Override
-                public void onFail(String message) {
-                    ((BaseActivity) requireActivity()).onError(message);
-                }
-
-                @Override
-                public void onPermissionDenied() {
-                    /** To-do: add realization with start signInActivity*/
-                }
-            });
-        }
+    @Override
+    public void onFail(String message) {
+        ((BaseActivity) requireActivity()).onError(message);
     }
 
     public void setTasksReadyListener(TasksReadyListener listener) {
