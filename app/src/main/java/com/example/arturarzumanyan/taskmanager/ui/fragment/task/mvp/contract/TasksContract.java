@@ -44,6 +44,8 @@ public class TasksContract {
 
         void updateTasksAdapter(List<Task> tasks);
 
+        void updateTasksAdapterAfterDelete(int position);
+
         void updateAppTitle(String title);
 
         void setProgressBarVisible();

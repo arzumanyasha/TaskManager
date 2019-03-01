@@ -131,6 +131,13 @@ public class TasksFragment extends Fragment implements TasksContract.TasksView {
     }
 
     @Override
+    public void updateTasksAdapterAfterDelete(int position) {
+        if (isAdded()) {
+            mTasksAdapter.updateListAfterDeleting(position);
+        }
+    }
+
+    @Override
     public void updateAppTitle(String title) {
         if (isAdded()) {
             requireActivity().setTitle(title);

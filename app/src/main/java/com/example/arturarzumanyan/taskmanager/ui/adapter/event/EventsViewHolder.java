@@ -29,18 +29,17 @@ public class EventsViewHolder extends RecyclerView.ViewHolder implements EventRo
     }
 
     @Override
-    public void setItemViewClickListener(int position) {
-        this.itemView.setTag(position);
+    public void setItemViewClickListener() {
         this.itemView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                triggerItemClick(v);
+                triggerItemClick();
             }
         });
     }
 
-    private void triggerItemClick(View v) {
-        int position = (int) v.getTag();
+    private void triggerItemClick() {
+        int position = getAdapterPosition();
         if (position != RecyclerView.NO_POSITION) {
             eventsListPresenter.processItemClick(position);
         }
@@ -67,18 +66,17 @@ public class EventsViewHolder extends RecyclerView.ViewHolder implements EventRo
     }
 
     @Override
-    public void setDelete(int position) {
-        this.eventDelete.setTag(position);
+    public void setDelete() {
         this.eventDelete.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                triggerDeleteItem(v);
+                triggerDeleteItem();
             }
         });
     }
 
-    private void triggerDeleteItem(View v) {
-        int position = (int) v.getTag();
+    private void triggerDeleteItem() {
+        int position = getAdapterPosition();
         if (position != RecyclerView.NO_POSITION) {
             eventsListPresenter.processItemDelete(position);
         }

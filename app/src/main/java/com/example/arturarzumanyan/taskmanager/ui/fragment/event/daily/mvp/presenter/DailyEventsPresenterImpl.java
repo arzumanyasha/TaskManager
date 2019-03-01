@@ -71,12 +71,15 @@ public class DailyEventsPresenterImpl implements DailyEventsContract.DailyEvents
         mDailyEventsView.setProgressBarInvisible();
     }
 
-    private void deleteEvent(Event event) {
+    @Override
+    public void processItemDelete(final int position) {
+        Event event = mDailyEventsList.get(position);
+        mDailyEventsList.remove(event);
         mEventsRepository.deleteEvent(event, new EventsRepository.OnEventsLoadedListener() {
             @Override
             public void onSuccess(List<Event> eventsList) {
                 mDailyEventsList = eventsList;
-                mDailyEventsView.updateEventsAdapter(eventsList);
+                mDailyEventsView.updateEventsAdapterAfterDelete(position);
                 if (eventsList.isEmpty()) {
                     mDailyEventsView.setNoEventsTextViewVisible();
                 }
@@ -103,12 +106,12 @@ public class DailyEventsPresenterImpl implements DailyEventsContract.DailyEvents
     @Override
     public void onBindEventsRowViewAtPosition(int position, EventRowView rowView) {
         Event event = mDailyEventsList.get(position);
-        rowView.setItemViewClickListener(position);
+        rowView.setItemViewClickListener();
         rowView.setName(event.getName());
         rowView.setDescription(event.getDescription().replaceAll("[\n]", ""));
         rowView.setEventColor(mColorPaletteArray.get(event.getColorId()));
         rowView.setTime(DateUtils.formatTime(event.getStartTime()) + " - " + DateUtils.formatTime(event.getEndTime()));
-        rowView.setDelete(position);
+        rowView.setDelete();
     }
 
     @Override
@@ -120,13 +123,6 @@ public class DailyEventsPresenterImpl implements DailyEventsContract.DailyEvents
     public void processItemClick(int position) {
         Event event = mDailyEventsList.get(position);
         mDailyEventsView.showEventUpdatingDialog(event);
-    }
-
-    @Override
-    public void processItemDelete(int position) {
-        Event event = mDailyEventsList.get(position);
-        mDailyEventsList.remove(event);
-        deleteEvent(event);
     }
 
     @Override

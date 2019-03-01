@@ -41,6 +41,10 @@ public class TasksAdapter extends RecyclerView.Adapter<TasksViewHolder> {
         notifyDataSetChanged();
     }
 
+    public void updateListAfterDeleting(int position) {
+        notifyItemRemoved(position);
+    }
+
     public void unsubscribe() {
         mTasksListPresenter.unsubscribe();
     }

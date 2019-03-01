@@ -26,7 +26,6 @@ import com.example.arturarzumanyan.taskmanager.ui.dialog.event.mvp.EventsDialogC
 import com.example.arturarzumanyan.taskmanager.ui.dialog.event.mvp.EventsDialogPresenterImpl;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 import petrov.kristiyan.colorpicker.ColorPicker;
@@ -41,12 +40,6 @@ public class EventsDialog extends AppCompatDialogFragment implements EventsDialo
 
     private EventsReadyListener eventsReadyListener;
     private EventsDialogContract.EventsDialogPresenter mEventsDialogPresenter;
-
-    private Date mStartTime;
-    private Date mEndTime;
-
-    private int mHour, mMinute;
-    private int mDay, mMonth, mYear;
 
     public EventsDialog() {
     }
@@ -90,15 +83,11 @@ public class EventsDialog extends AppCompatDialogFragment implements EventsDialo
                                 mEditTextEventName.getText().toString(),
                                 mEditTextEventDescription.getText().toString(),
                                 mTextViewDate.getText().toString(),
-                                mStartTime,
-                                mEndTime,
                                 mSwitchNotification.isChecked() ? 1 : 0);
                     }
                 });
 
         setViews(view);
-
-        setTimeAndDatePickersListeners();
 
         mEventsDialogPresenter.processReceivedBundle(bundle);
 
@@ -106,16 +95,6 @@ public class EventsDialog extends AppCompatDialogFragment implements EventsDialo
     }
 
     private void setViews(View view) {
-        mHour = DateUtils.getHour();
-        mMinute = DateUtils.getMinute();
-
-        mDay = DateUtils.getDay();
-        mMonth = DateUtils.getMonth();
-        mYear = DateUtils.getYear();
-
-        mStartTime = new Date(0, 0, 0, mHour, mMinute);
-        mEndTime = new Date(0, 0, 0, mHour + 1, mMinute);
-
         mEditTextEventName = view.findViewById(R.id.edit_text_event_name);
         mEditTextEventDescription = view.findViewById(R.id.edit_text_event_description);
         mImageButtonColorPicker = view.findViewById(R.id.image_button_color_picker);
@@ -124,9 +103,8 @@ public class EventsDialog extends AppCompatDialogFragment implements EventsDialo
         mTextViewDate = view.findViewById(R.id.text_event_date);
         mSwitchNotification = view.findViewById(R.id.switch_notification);
 
-        mTextViewStartTime.setText(DateUtils.formatHourMinuteTime(mHour, mMinute));
-        mTextViewEndTime.setText(DateUtils.formatHourMinuteTime(mHour + 1, mMinute));
-        mTextViewDate.setText(DateUtils.getStringDateFromInt(mYear, mMonth, mDay));
+        mEventsDialogPresenter.setDefaultTimeValues();
+
         mImageButtonColorPicker.setColorFilter(requireActivity().getResources().getColor(R.color._9));
 
         mImageButtonColorPicker.setOnClickListener(new View.OnClickListener() {
@@ -135,6 +113,13 @@ public class EventsDialog extends AppCompatDialogFragment implements EventsDialo
                 mEventsDialogPresenter.processColorPicker();
             }
         });
+    }
+
+    @Override
+    public void setDefaultTimeViews(int year, int month, int day, int hour, int minute) {
+        mTextViewStartTime.setText(DateUtils.formatHourMinuteTime(hour, minute));
+        mTextViewEndTime.setText(DateUtils.formatHourMinuteTime(hour + 1, minute));
+        mTextViewDate.setText(DateUtils.getStringDateFromInt(year, month, day));
     }
 
     @Override
@@ -152,17 +137,17 @@ public class EventsDialog extends AppCompatDialogFragment implements EventsDialo
         ((BaseActivity) requireActivity()).onError(message);
     }
 
-    private void setTimeAndDatePickersListeners() {
+    @Override
+    public void setTimeAndDatePickers(final int year, final int month, final int day, final int hour, final int minute) {
         mTextViewStartTime.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 new TimePickerDialog(getActivity(), new TimePickerDialog.OnTimeSetListener() {
                     @Override
                     public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
-                        mTextViewStartTime.setText(DateUtils.formatHourMinuteTime(hourOfDay, minute));
-                        mStartTime = new Date(0, 0, 0, hourOfDay, minute);
+                        mEventsDialogPresenter.setEventStartTime(hourOfDay, minute);
                     }
-                }, mHour, mMinute, true).show();
+                }, hour, minute, true).show();
             }
         });
 
@@ -172,10 +157,9 @@ public class EventsDialog extends AppCompatDialogFragment implements EventsDialo
                 new TimePickerDialog(getActivity(), new TimePickerDialog.OnTimeSetListener() {
                     @Override
                     public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
-                        mTextViewEndTime.setText(DateUtils.formatHourMinuteTime(hourOfDay, minute));
-                        mEndTime = new Date(0, 0, 0, hourOfDay, minute);
+                        mEventsDialogPresenter.setEventEndTime(hourOfDay, minute);
                     }
-                }, mHour, mMinute, true).show();
+                }, hour, minute, true).show();
             }
         });
 
@@ -186,13 +170,28 @@ public class EventsDialog extends AppCompatDialogFragment implements EventsDialo
 
                     @Override
                     public void onDateSet(DatePicker view, int year, int monthOfYear, int dayOfMonth) {
-                        mTextViewDate.setText(DateUtils.getStringDateFromInt(year, monthOfYear, dayOfMonth));
+                        mEventsDialogPresenter.setEventDate(year, monthOfYear, dayOfMonth);
                     }
-                }, mYear, mMonth, mDay);
+                }, year, month, day);
 
                 datePickerDialog.show();
             }
         });
+    }
+
+    @Override
+    public void setStartTimeView(int hour, int minute) {
+        mTextViewStartTime.setText(DateUtils.formatHourMinuteTime(hour, minute));
+    }
+
+    @Override
+    public void setEndTimeView(int hour, int minute) {
+        mTextViewEndTime.setText(DateUtils.formatHourMinuteTime(hour, minute));
+    }
+
+    @Override
+    public void setEventDateView(int year, int month, int day) {
+        mTextViewDate.setText(DateUtils.getStringDateFromInt(year, month, day));
     }
 
     @Override
@@ -208,8 +207,8 @@ public class EventsDialog extends AppCompatDialogFragment implements EventsDialo
 
         mSwitchNotification.setChecked(event.getIsNotify() == 1);
 
-        mStartTime = DateUtils.getTimeWithoutA(DateUtils.formatTimeWithoutA(event.getStartTime()));
-        mEndTime = DateUtils.getTimeWithoutA(DateUtils.formatTimeWithoutA(event.getEndTime()));
+        mEventsDialogPresenter.setEventStartTime(event.getStartTime());
+        mEventsDialogPresenter.setEventEndTime(event.getEndTime());
     }
 
     @Override

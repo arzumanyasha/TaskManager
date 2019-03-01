@@ -27,37 +27,35 @@ public class TasksViewHolder extends RecyclerView.ViewHolder implements TaskRowV
     }
 
     @Override
-    public void setItemViewClickListener(int position) {
-        this.itemView.setTag(position);
+    public void setItemViewClickListener() {
         this.itemView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                triggerItemClick(v);
+                triggerItemClick();
             }
         });
     }
 
-    private void triggerItemClick(View v) {
-        int position = (int) v.getTag();
+    private void triggerItemClick() {
+        int position = getAdapterPosition();
         if (position != RecyclerView.NO_POSITION) {
             tasksListPresenter.processItemClick(position);
         }
     }
 
     @Override
-    public void setChecked(int position, boolean isChecked) {
-        this.isExecutedCheckBox.setTag(position);
+    public void setChecked(boolean isChecked) {
         this.isExecutedCheckBox.setChecked(isChecked);
         this.isExecutedCheckBox.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                triggerTaskStatusChanging(v);
+                triggerTaskStatusChanging();
             }
         });
     }
 
-    private void triggerTaskStatusChanging(View v) {
-        int position = (int) v.getTag();
+    private void triggerTaskStatusChanging() {
+        int position = getAdapterPosition();
         if (position != RecyclerView.NO_POSITION) {
             tasksListPresenter.processTaskStatusChanging(position);
         }
@@ -78,18 +76,17 @@ public class TasksViewHolder extends RecyclerView.ViewHolder implements TaskRowV
     }
 
     @Override
-    public void setDelete(int position) {
-        this.taskDelete.setTag(position);
+    public void setDelete() {
         this.taskDelete.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                triggerDeleteItem(v);
+                triggerDeleteItem();
             }
         });
     }
 
-    private void triggerDeleteItem(View v) {
-        int position = (int) v.getTag();
+    private void triggerDeleteItem() {
+        int position = getAdapterPosition();
         if (position != RecyclerView.NO_POSITION) {
             tasksListPresenter.processItemDelete(position);
         }

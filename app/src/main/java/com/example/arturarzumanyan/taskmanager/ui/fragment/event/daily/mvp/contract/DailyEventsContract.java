@@ -35,6 +35,8 @@ public class DailyEventsContract {
 
         void updateEventsAdapter(List<Event> events);
 
+        void updateEventsAdapterAfterDelete(int position);
+
         void setProgressBarInvisible();
 
         void setNoEventsTextViewVisible();

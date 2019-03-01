@@ -41,6 +41,10 @@ public class EventsAdapter extends RecyclerView.Adapter<EventsViewHolder> {
         notifyDataSetChanged();
     }
 
+    public void updateListAfterDeleting(int position){
+        notifyItemRemoved(position);
+    }
+
     public void unsubscribe() {
         mEventsListPresenter.unsubscribe();
     }

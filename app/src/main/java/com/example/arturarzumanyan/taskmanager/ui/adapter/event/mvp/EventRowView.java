@@ -1,7 +1,7 @@
 package com.example.arturarzumanyan.taskmanager.ui.adapter.event.mvp;
 
 public interface EventRowView {
-    void setItemViewClickListener(int position);
+    void setItemViewClickListener();
 
     void setName(String name);
 
@@ -11,5 +11,5 @@ public interface EventRowView {
 
     void setEventColor(int colorId);
 
-    void setDelete(int position);
+    void setDelete();
 }

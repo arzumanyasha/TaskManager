@@ -94,11 +94,15 @@ public class TasksPresenterImpl implements TasksContract.TasksPresenter {
                 });
     }
 
-    private void deleteTask(Task task) {
+    @Override
+    public void processItemDelete(final int position) {
+        Task task = mTasks.get(position);
+        mTasks.remove(task);
         mTasksRepository.deleteTask(mTaskList, task, new TasksRepository.OnTasksLoadedListener() {
             @Override
             public void onSuccess(List<Task> taskArrayList) {
-                mTasksView.updateTasksAdapter(taskArrayList);
+                mTasks = taskArrayList;
+                mTasksView.updateTasksAdapterAfterDelete(position);
             }
 
             @Override
@@ -121,11 +125,11 @@ public class TasksPresenterImpl implements TasksContract.TasksPresenter {
     @Override
     public void onBindEventsRowViewAtPosition(int position, TaskRowView rowView) {
         Task task = mTasks.get(position);
-        rowView.setItemViewClickListener(position);
+        rowView.setItemViewClickListener();
         rowView.setName(task.getName());
         rowView.setDescription(task.getDescription().replaceAll("[\n]", ""));
-        rowView.setChecked(position, task.getIsExecuted() == 1);
-        rowView.setDelete(position);
+        rowView.setChecked(task.getIsExecuted() == 1);
+        rowView.setDelete();
     }
 
     @Override
@@ -146,13 +150,6 @@ public class TasksPresenterImpl implements TasksContract.TasksPresenter {
         mTasksView.setProgressBarVisible();
         mTasksView.setScreenNotTouchable();
         updateTask(task);
-    }
-
-    @Override
-    public void processItemDelete(int position) {
-        Task task = mTasks.get(position);
-        mTasks.remove(task);
-        deleteTask(task);
     }
 
     @Override

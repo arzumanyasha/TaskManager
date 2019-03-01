@@ -111,6 +111,13 @@ public class DailyEventsFragment extends Fragment implements DailyEventsContract
     }
 
     @Override
+    public void updateEventsAdapterAfterDelete(int position) {
+        if (isAdded()) {
+            mEventsAdapter.updateListAfterDeleting(position);
+        }
+    }
+
+    @Override
     public void setProgressBarInvisible() {
         if (isAdded()) {
             mProgressBar.setVisibility(ProgressBar.INVISIBLE);

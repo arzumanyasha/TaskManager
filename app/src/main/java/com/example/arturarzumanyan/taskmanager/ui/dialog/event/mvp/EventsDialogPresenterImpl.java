@@ -24,6 +24,8 @@ public class EventsDialogPresenterImpl implements EventsDialogContract.EventsDia
     private int mCurrentColor;
     private EventsDialogContract.EventsDialogView mEventsDialogView;
     private EventsRepository mEventsRepository;
+    private Date mStartTime;
+    private Date mEndTime;
 
     public EventsDialogPresenterImpl(EventsDialogContract.EventsDialogView mEventsDialogView) {
         this.mEventsDialogView = mEventsDialogView;
@@ -39,10 +41,53 @@ public class EventsDialogPresenterImpl implements EventsDialogContract.EventsDia
     }
 
     @Override
-    public void processOkButtonClick(Bundle bundle, String name, String description, /*int colorNumber,*/
-                                     String eventDate, Date startTime, Date endTime, int isNotify) {
-        Date startDate = DateUtils.getEventDate(DateUtils.formatReversedYearMonthDayDate(eventDate), startTime);
-        Date endDate = DateUtils.getEventDate(DateUtils.formatReversedYearMonthDayDate(eventDate), endTime);
+    public void setDefaultTimeValues() {
+        int mHour = DateUtils.getHour();
+        int mMinute = DateUtils.getMinute();
+
+        int mDay = DateUtils.getDay();
+        int mMonth = DateUtils.getMonth();
+        int mYear = DateUtils.getYear();
+
+        mStartTime = new Date(0, 0, 0, mHour, mMinute);
+        mEndTime = new Date(0, 0, 0, mHour + 1, mMinute);
+
+        mEventsDialogView.setDefaultTimeViews(mYear, mMonth, mDay, mHour, mMinute);
+        mEventsDialogView.setTimeAndDatePickers(mYear, mMonth, mDay, mHour, mMinute);
+    }
+
+    @Override
+    public void setEventStartTime(int hour, int minute) {
+        mStartTime = new Date(0, 0, 0, hour, minute);
+        mEventsDialogView.setStartTimeView(hour, minute);
+    }
+
+    @Override
+    public void setEventEndTime(int hour, int minute) {
+        mEndTime = new Date(0, 0, 0, hour, minute);
+        mEventsDialogView.setEndTimeView(hour, minute);
+    }
+
+    @Override
+    public void setEventStartTime(Date date) {
+        mStartTime = DateUtils.getTimeWithoutA(DateUtils.formatTimeWithoutA(date));
+    }
+
+    @Override
+    public void setEventEndTime(Date date) {
+        mEndTime = DateUtils.getTimeWithoutA(DateUtils.formatTimeWithoutA(date));
+    }
+
+    @Override
+    public void setEventDate(int year, int month, int day) {
+        mEventsDialogView.setEventDateView(year, month, day);
+    }
+
+    @Override
+    public void processOkButtonClick(Bundle bundle, String name, String description,
+                                     String eventDate, int isNotify) {
+        Date startDate = DateUtils.getEventDate(DateUtils.formatReversedYearMonthDayDate(eventDate), mStartTime);
+        Date endDate = DateUtils.getEventDate(DateUtils.formatReversedYearMonthDayDate(eventDate), mEndTime);
         int colorNumber = mColorMap.keyAt(mColorMap.indexOfValue(mCurrentColor));
         if (endDate != null && endDate.after(startDate) && !name.isEmpty()) {
             if (bundle != null) {
