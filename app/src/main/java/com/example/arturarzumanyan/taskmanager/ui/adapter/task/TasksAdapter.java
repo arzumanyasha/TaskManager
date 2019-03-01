@@ -7,10 +7,7 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.example.arturarzumanyan.taskmanager.R;
-import com.example.arturarzumanyan.taskmanager.domain.Task;
 import com.example.arturarzumanyan.taskmanager.ui.fragment.task.mvp.contract.TasksContract;
-
-import java.util.List;
 
 public class TasksAdapter extends RecyclerView.Adapter<TasksViewHolder> {
     private TasksContract.TasksPresenter mTasksListPresenter;
@@ -34,15 +31,6 @@ public class TasksAdapter extends RecyclerView.Adapter<TasksViewHolder> {
     @Override
     public int getItemCount() {
         return mTasksListPresenter.getTasksRowsCount();
-    }
-
-    public void updateList(List<Task> updatedList) {
-        mTasksListPresenter.updateTasksList(updatedList);
-        notifyDataSetChanged();
-    }
-
-    public void updateListAfterDeleting(int position) {
-        notifyItemRemoved(position);
     }
 
     public void unsubscribe() {

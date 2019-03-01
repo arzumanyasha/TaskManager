@@ -91,7 +91,7 @@ public class TasksFragment extends Fragment implements TasksContract.TasksView {
         ((IntentionActivity) requireActivity()).setTaskFragmentInteractionListener(new IntentionActivity.TaskFragmentInteractionListener() {
             @Override
             public void onTasksReady(List<Task> tasks) {
-                updateTasksAdapter(tasks);
+                mTasksPresenter.updateTasksList(tasks);
             }
         });
 
@@ -117,23 +117,23 @@ public class TasksFragment extends Fragment implements TasksContract.TasksView {
         tasksDialog.setTasksReadyListener(new TasksDialog.TasksReadyListener() {
             @Override
             public void onTasksReady(List<Task> tasks) {
-                mTasksPresenter.processUpdatedTasksList(tasks);
+                mTasksPresenter.updateTasksList(tasks);
             }
         });
         tasksDialog.show(requireFragmentManager(), TASKS_KEY);
     }
 
     @Override
-    public void updateTasksAdapter(List<Task> tasks) {
+    public void updateTasksAdapter() {
         if (isAdded()) {
-            mTasksAdapter.updateList(tasks);
+            mTasksAdapter.notifyDataSetChanged();
         }
     }
 
     @Override
     public void updateTasksAdapterAfterDelete(int position) {
         if (isAdded()) {
-            mTasksAdapter.updateListAfterDeleting(position);
+            mTasksAdapter.notifyItemRemoved(position);
         }
     }
 

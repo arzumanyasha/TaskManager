@@ -75,9 +75,10 @@ public class TasksPresenterImpl implements TasksContract.TasksPresenter {
                 task, PATCH, new TasksRepository.OnTasksLoadedListener() {
                     @Override
                     public void onSuccess(List<Task> taskArrayList) {
+                        mTasks = taskArrayList;
                         mTasksView.setProgressBarInvisible();
                         mTasksView.setScreenNotTouchable();
-                        mTasksView.updateTasksAdapter(taskArrayList);
+                        mTasksView.updateTasksAdapter();
                     }
 
                     @Override
@@ -118,11 +119,6 @@ public class TasksPresenterImpl implements TasksContract.TasksPresenter {
     }
 
     @Override
-    public void processUpdatedTasksList(List<Task> tasks) {
-        mTasksView.updateTasksAdapter(tasks);
-    }
-
-    @Override
     public void onBindEventsRowViewAtPosition(int position, TaskRowView rowView) {
         Task task = mTasks.get(position);
         rowView.setItemViewClickListener();
@@ -135,6 +131,7 @@ public class TasksPresenterImpl implements TasksContract.TasksPresenter {
     @Override
     public void updateTasksList(List<Task> updatedList) {
         mTasks = updatedList;
+        mTasksView.updateTasksAdapter();
     }
 
     @Override

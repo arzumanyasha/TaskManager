@@ -13,8 +13,6 @@ public class DailyEventsContract {
 
         void processRetainedState();
 
-        void processUpdatedEvents(List<Event> events);
-
         void onBindEventsRowViewAtPosition(int position, EventRowView rowView);
 
         void updateEventsList(List<Event> updatedList);
@@ -33,7 +31,7 @@ public class DailyEventsContract {
 
         void showEventUpdatingDialog(Event event);
 
-        void updateEventsAdapter(List<Event> events);
+        void updateEventsAdapter();
 
         void updateEventsAdapterAfterDelete(int position);
 

@@ -83,7 +83,7 @@ public class DailyEventsFragment extends Fragment implements DailyEventsContract
             ((IntentionActivity) requireActivity()).setEventFragmentInteractionListener(new IntentionActivity.EventFragmentInteractionListener() {
                 @Override
                 public void onEventsReady(List<Event> events) {
-                    mDailyEventsPresenter.processUpdatedEvents(events);
+                    mDailyEventsPresenter.updateEventsList(events);
                 }
             });
 
@@ -97,23 +97,23 @@ public class DailyEventsFragment extends Fragment implements DailyEventsContract
         eventsDialog.setEventsReadyListener(new EventsDialog.EventsReadyListener() {
             @Override
             public void onEventsReady(List<Event> events) {
-                mDailyEventsPresenter.processUpdatedEvents(events);
+                mDailyEventsPresenter.updateEventsList(events);
             }
         });
         eventsDialog.show(requireFragmentManager(), EVENTS_KEY);
     }
 
     @Override
-    public void updateEventsAdapter(List<Event> events) {
+    public void updateEventsAdapter() {
         if (isAdded()) {
-            mEventsAdapter.updateList(events);
+            mEventsAdapter.notifyDataSetChanged();
         }
     }
 
     @Override
     public void updateEventsAdapterAfterDelete(int position) {
         if (isAdded()) {
-            mEventsAdapter.updateListAfterDeleting(position);
+            mEventsAdapter.notifyItemRemoved(position);
         }
     }
 

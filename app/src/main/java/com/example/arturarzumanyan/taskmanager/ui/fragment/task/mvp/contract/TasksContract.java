@@ -22,8 +22,6 @@ public class TasksContract {
 
         void updateTasksList(List<Task> updatedList);
 
-        void processUpdatedTasksList(List<Task> tasks);
-
         void processItemClick(int position);
 
         void processTaskStatusChanging(int position);
@@ -42,7 +40,7 @@ public class TasksContract {
 
         void showTaskUpdatingDialog(Task task,TaskList taskList);
 
-        void updateTasksAdapter(List<Task> tasks);
+        void updateTasksAdapter();
 
         void updateTasksAdapterAfterDelete(int position);
 

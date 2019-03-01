@@ -7,10 +7,7 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.example.arturarzumanyan.taskmanager.R;
-import com.example.arturarzumanyan.taskmanager.domain.Event;
 import com.example.arturarzumanyan.taskmanager.ui.fragment.event.daily.mvp.contract.DailyEventsContract;
-
-import java.util.List;
 
 public class EventsAdapter extends RecyclerView.Adapter<EventsViewHolder> {
     private final DailyEventsContract.DailyEventsPresenter mEventsListPresenter;
@@ -34,15 +31,6 @@ public class EventsAdapter extends RecyclerView.Adapter<EventsViewHolder> {
     @Override
     public int getItemCount() {
         return mEventsListPresenter.getEventsRowsCount();
-    }
-
-    public void updateList(List<Event> updatedList) {
-        mEventsListPresenter.updateEventsList(updatedList);
-        notifyDataSetChanged();
-    }
-
-    public void updateListAfterDeleting(int position){
-        notifyItemRemoved(position);
     }
 
     public void unsubscribe() {

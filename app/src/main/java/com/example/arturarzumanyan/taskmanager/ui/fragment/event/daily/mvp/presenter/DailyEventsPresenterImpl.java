@@ -98,12 +98,6 @@ public class DailyEventsPresenterImpl implements DailyEventsContract.DailyEvents
     }
 
     @Override
-    public void processUpdatedEvents(List<Event> events) {
-        mDailyEventsView.setNoEventsTextViewInvisible();
-        mDailyEventsView.updateEventsAdapter(events);
-    }
-
-    @Override
     public void onBindEventsRowViewAtPosition(int position, EventRowView rowView) {
         Event event = mDailyEventsList.get(position);
         rowView.setItemViewClickListener();
@@ -117,6 +111,8 @@ public class DailyEventsPresenterImpl implements DailyEventsContract.DailyEvents
     @Override
     public void updateEventsList(List<Event> updatedList) {
         mDailyEventsList = updatedList;
+        mDailyEventsView.setNoEventsTextViewInvisible();
+        mDailyEventsView.updateEventsAdapter();
     }
 
     @Override
