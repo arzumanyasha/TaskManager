@@ -7,16 +7,11 @@ import com.example.arturarzumanyan.taskmanager.domain.Task;
 import com.example.arturarzumanyan.taskmanager.domain.TaskList;
 import com.example.arturarzumanyan.taskmanager.networking.util.Log;
 import com.example.arturarzumanyan.taskmanager.ui.activity.intention.mvp.contract.IntentionContract;
-import com.example.arturarzumanyan.taskmanager.ui.dialog.EventsDialog;
-import com.example.arturarzumanyan.taskmanager.ui.dialog.TaskListsDialog;
-import com.example.arturarzumanyan.taskmanager.ui.dialog.TasksDialog;
 
 import java.util.List;
 
 public class IntentionPresenterImpl implements IntentionContract.IntentionPresenter {
     private static final String EVENTS_KEY = "Events";
-    private static final String TASKS_KEY = "Tasks";
-    private static final String TASK_LISTS_KEY = "TaskLists";
 
     private TaskListsRepository mTaskListsRepository;
 
@@ -45,7 +40,7 @@ public class IntentionPresenterImpl implements IntentionContract.IntentionPresen
     @Override
     public void processAddButtonClick(String title) {
         if (title.equals(EVENTS_KEY)) {
-            processEventsDialog();
+            mIntentionView.showEventCreatingDialog();
         } else {
             if (mTaskLists.size() != 0 && mCurrentTaskList != null) {
                 processTasksDialog();
@@ -62,28 +57,20 @@ public class IntentionPresenterImpl implements IntentionContract.IntentionPresen
         }
     }
 
-    private void processEventsDialog() {
-        EventsDialog eventsDialog = EventsDialog.newInstance(null);
-        eventsDialog.setEventsReadyListener(new EventsDialog.EventsReadyListener() {
-            @Override
-            public void onEventsReady(List<Event> events) {
-                mIntentionView.onEventsReady(events);
-            }
-        });
-        mIntentionView.showDialog(eventsDialog, EVENTS_KEY);
+    @Override
+    public void processUpdatedEventsList(List<Event> events) {
+        mIntentionView.onEventsReady(events);
+    }
+
+    @Override
+    public void processUpdatedTasksList(List<Task> tasks) {
+        mIntentionView.onTasksReady(tasks);
     }
 
     private void processTasksDialog() {
         for (TaskList taskList : mTaskLists) {
             if (mCurrentTaskList.getId() == taskList.getId()) {
-                TasksDialog tasksDialog = TasksDialog.newInstance(null, taskList);
-                tasksDialog.setTasksReadyListener(new TasksDialog.TasksReadyListener() {
-                    @Override
-                    public void onTasksReady(List<Task> tasks) {
-                        mIntentionView.onTasksReady(tasks);
-                    }
-                });
-                mIntentionView.showDialog(tasksDialog, TASKS_KEY);
+                mIntentionView.showTaskCreatingDialog(taskList);
                 break;
             }
         }
@@ -91,33 +78,29 @@ public class IntentionPresenterImpl implements IntentionContract.IntentionPresen
 
     @Override
     public void processTaskListCreatingDialog() {
-        TaskListsDialog taskListsDialog = TaskListsDialog.newInstance(null);
-        taskListsDialog.setTaskListReadyListener(new TaskListsDialog.TaskListReadyListener() {
-            @Override
-            public void onTaskListReady(final TaskList taskList) {
-                if (mTaskLists.size() != 0 && taskList != null) {
-                    mTaskLists.add(taskList);
-                    mCurrentTaskList = taskList;
-                    mIntentionView.onTaskListReady(taskList);
-                }
-            }
-        });
-        mIntentionView.showDialog(taskListsDialog, TASK_LISTS_KEY);
+        mIntentionView.showTaskListCreatingDialog();
+    }
+
+    @Override
+    public void processCreatedTaskList(TaskList taskList) {
+        if (mTaskLists.size() != 0 && taskList != null) {
+            mTaskLists.add(taskList);
+            mCurrentTaskList = taskList;
+            mIntentionView.onTaskListReady(taskList);
+        }
     }
 
     @Override
     public void processTaskListUpdatingDialog(String title) {
         if (!title.equals(EVENTS_KEY)) {
-            TaskListsDialog taskListsDialog = TaskListsDialog.newInstance(mCurrentTaskList);
-            taskListsDialog.setTaskListReadyListener(new TaskListsDialog.TaskListReadyListener() {
-                @Override
-                public void onTaskListReady(TaskList taskList) {
-                    if (taskList != null) {
-                        mIntentionView.updateTaskListOnUi(taskList, getTaskListIndex(taskList));
-                    }
-                }
-            });
-            mIntentionView.showDialog(taskListsDialog, TASK_LISTS_KEY);
+            mIntentionView.showTaskListUpdatingDialog(mCurrentTaskList);
+        }
+    }
+
+    @Override
+    public void processUpdatedTaskList(TaskList taskList) {
+        if (taskList != null) {
+            mIntentionView.updateTaskListOnUi(taskList, getTaskListIndex(taskList));
         }
     }
 

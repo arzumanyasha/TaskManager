@@ -1,9 +1,8 @@
-package com.example.arturarzumanyan.taskmanager.ui.fragment.daily;
+package com.example.arturarzumanyan.taskmanager.ui.fragment.event.daily;
 
 import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
-import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -20,9 +19,10 @@ import com.example.arturarzumanyan.taskmanager.domain.Event;
 import com.example.arturarzumanyan.taskmanager.networking.util.Log;
 import com.example.arturarzumanyan.taskmanager.ui.activity.BaseActivity;
 import com.example.arturarzumanyan.taskmanager.ui.activity.intention.IntentionActivity;
-import com.example.arturarzumanyan.taskmanager.ui.adapter.EventsAdapter;
-import com.example.arturarzumanyan.taskmanager.ui.fragment.daily.mvp.contract.DailyEventsContract;
-import com.example.arturarzumanyan.taskmanager.ui.fragment.daily.mvp.presenter.DailyEventsPresenterImpl;
+import com.example.arturarzumanyan.taskmanager.ui.adapter.event.EventsAdapter;
+import com.example.arturarzumanyan.taskmanager.ui.dialog.event.EventsDialog;
+import com.example.arturarzumanyan.taskmanager.ui.fragment.event.daily.mvp.contract.DailyEventsContract;
+import com.example.arturarzumanyan.taskmanager.ui.fragment.event.daily.mvp.presenter.DailyEventsPresenterImpl;
 import com.squareup.leakcanary.RefWatcher;
 
 import java.util.List;
@@ -62,7 +62,7 @@ public class DailyEventsFragment extends Fragment implements DailyEventsContract
         mNoEventsTextView = view.findViewById(R.id.text_view_no_events);
 
         if (mDailyEventsPresenter == null) {
-            mDailyEventsPresenter = new DailyEventsPresenterImpl(this);
+            mDailyEventsPresenter = new DailyEventsPresenterImpl(this, requireActivity());
         } else {
             mDailyEventsPresenter.attachView(this);
             mDailyEventsPresenter.processRetainedState();
@@ -78,22 +78,12 @@ public class DailyEventsFragment extends Fragment implements DailyEventsContract
             LinearLayoutManager layoutManager = new LinearLayoutManager(getActivity());
             mEventsRecyclerView.setLayoutManager(layoutManager);
 
-            mEventsAdapter = new EventsAdapter(getActivity(), events, new EventsAdapter.OnItemClickListener() {
-                @Override
-                public void onItemDelete(Event event) {
-                    mDailyEventsPresenter.deleteEvent(event);
-                }
-
-                @Override
-                public void onItemClick(Event event) {
-                    mDailyEventsPresenter.processEventDialog(event);
-                }
-            });
+            mEventsAdapter = new EventsAdapter(mDailyEventsPresenter);
 
             ((IntentionActivity) requireActivity()).setEventFragmentInteractionListener(new IntentionActivity.EventFragmentInteractionListener() {
                 @Override
                 public void onEventsReady(List<Event> events) {
-                    mDailyEventsPresenter.processUpdatedEvents(events);
+                    mDailyEventsPresenter.updateEventsList(events);
                 }
             });
 
@@ -102,14 +92,28 @@ public class DailyEventsFragment extends Fragment implements DailyEventsContract
     }
 
     @Override
-    public void showDialog(DialogFragment dialogFragment) {
-        dialogFragment.show(requireFragmentManager(), EVENTS_KEY);
+    public void showEventUpdatingDialog(Event event) {
+        EventsDialog eventsDialog = EventsDialog.newInstance(event);
+        eventsDialog.setEventsReadyListener(new EventsDialog.EventsReadyListener() {
+            @Override
+            public void onEventsReady(List<Event> events) {
+                mDailyEventsPresenter.updateEventsList(events);
+            }
+        });
+        eventsDialog.show(requireFragmentManager(), EVENTS_KEY);
     }
 
     @Override
-    public void updateEventsAdapter(List<Event> events) {
+    public void updateEventsAdapter() {
         if (isAdded()) {
-            mEventsAdapter.updateList(events);
+            mEventsAdapter.notifyDataSetChanged();
+        }
+    }
+
+    @Override
+    public void updateEventsAdapterAfterDelete(int position) {
+        if (isAdded()) {
+            mEventsAdapter.notifyItemRemoved(position);
         }
     }
 
