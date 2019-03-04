@@ -98,23 +98,22 @@ public class WeekDashboardFragment extends Fragment implements WeekDashboardCont
     }
 
     @Override
-    public void makeEmptiness(int startPosition, int endPosition, int layoutNumber) {
+    public void makeEmptiness(int layoutNumber, float weight) {
         if (isAdded()) {
             LinearLayout.LayoutParams lParams = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 0);
             View view = new View(getActivity());
-            lParams.weight = endPosition - startPosition;
+            lParams.weight = weight;
             mLinearLayouts.get(layoutNumber).addView(view, lParams);
         }
     }
 
     @Override
-    public void makeEventPart(Event event, int color, int layoutNumber) {
+    public void makeEventPart(int color, int layoutNumber, float weight) {
         if (isAdded()) {
             LinearLayout.LayoutParams lParams = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 0);
             View view = new View(getActivity());
             view.setBackgroundColor(color);
-            lParams.weight = event.getEndTime().getHours() * MINUTES_IN_HOUR + event.getEndTime().getMinutes()
-                    - event.getStartTime().getHours() * MINUTES_IN_HOUR - event.getStartTime().getMinutes();
+            lParams.weight = weight;
             mLinearLayouts.get(layoutNumber).addView(view, lParams);
         }
     }
@@ -128,6 +127,7 @@ public class WeekDashboardFragment extends Fragment implements WeekDashboardCont
     public void onDetach() {
         super.onDetach();
         mWeekDashboardPresenter.unsubscribe();
+        setProgressBarInvisible();
     }
 
     @Override

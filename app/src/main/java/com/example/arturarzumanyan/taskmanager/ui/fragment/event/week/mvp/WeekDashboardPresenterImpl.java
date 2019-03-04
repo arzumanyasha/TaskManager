@@ -50,8 +50,10 @@ public class WeekDashboardPresenterImpl implements WeekDashboardContract.WeekDas
 
                 mWeeklyEventsList = eventsList;
                 fetchWeeklyEventsWithDate();
-                mWeekDashboardView.setProgressBarInvisible();
-                processWeekDashboard();
+                if (mWeekDashboardView != null) {
+                    mWeekDashboardView.setProgressBarInvisible();
+                    processWeekDashboard();
+                }
             }
 
             @Override
@@ -105,8 +107,10 @@ public class WeekDashboardPresenterImpl implements WeekDashboardContract.WeekDas
                 for (Event event : currentEventList) {
                     Date startTime = event.getStartTime();
                     int minutes = startTime.getHours() * MINUTES_IN_HOUR + startTime.getMinutes();
-                    mWeekDashboardView.makeEmptiness(lastMinute, minutes, i);
-                    mWeekDashboardView.makeEventPart(event, mColorPaletteArray.get(event.getColorId()), i);
+                    mWeekDashboardView.makeEmptiness(i, minutes - lastMinute);
+                    mWeekDashboardView.makeEventPart(mColorPaletteArray.get(event.getColorId()), i,
+                            event.getEndTime().getHours() * MINUTES_IN_HOUR + event.getEndTime().getMinutes()
+                                    - event.getStartTime().getHours() * MINUTES_IN_HOUR - event.getStartTime().getMinutes());
                     lastMinute = event.getEndTime().getHours() * MINUTES_IN_HOUR + event.getEndTime().getMinutes();
                 }
                 lastMinute = 0;

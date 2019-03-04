@@ -19,12 +19,10 @@ import com.example.arturarzumanyan.taskmanager.networking.util.Log;
 import com.example.arturarzumanyan.taskmanager.ui.activity.intention.IntentionActivity;
 import com.example.arturarzumanyan.taskmanager.ui.fragment.event.container.mvp.BottomNavigationContract;
 import com.example.arturarzumanyan.taskmanager.ui.fragment.event.container.mvp.BottomNavigationPresenterImpl;
-import com.example.arturarzumanyan.taskmanager.ui.fragment.event.statistic.EventsStatisticFragment;
 import com.example.arturarzumanyan.taskmanager.ui.fragment.event.daily.DailyEventsFragment;
+import com.example.arturarzumanyan.taskmanager.ui.fragment.event.statistic.EventsStatisticFragment;
 import com.example.arturarzumanyan.taskmanager.ui.fragment.event.week.WeekDashboardFragment;
 import com.squareup.leakcanary.RefWatcher;
-
-import static com.example.arturarzumanyan.taskmanager.ui.activity.intention.IntentionActivity.EVENTS_KEY;
 
 public class EventsFragment extends Fragment implements BottomNavigationContract.BottomNavigationView {
     private static final String BACK_STACK_ROOT_TAG = "root_fragment";
@@ -165,18 +163,9 @@ public class EventsFragment extends Fragment implements BottomNavigationContract
     }
 
     private void openRetainedFragment(Fragment retainedFragment, String tag) {
-        if (!retainedFragment.isAdded()) {
-            Log.v(retainedFragment.toString() + " is not added");
-            requireFragmentManager().beginTransaction()
-                    .add(retainedFragment, tag)
-                    .replace(R.id.fragment_container, retainedFragment)
-                    .commit();
-        } else {
-            Log.v(retainedFragment.toString() + " is added");
-            requireFragmentManager().beginTransaction()
-                    .replace(R.id.fragment_container, retainedFragment)
-                    .commit();
-        }
+        requireFragmentManager().beginTransaction()
+                .replace(R.id.fragment_container, retainedFragment, tag)
+                .commit();
     }
 
     @Override

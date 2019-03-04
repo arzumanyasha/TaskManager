@@ -2,8 +2,6 @@ package com.example.arturarzumanyan.taskmanager.ui.fragment.event.week.mvp;
 
 import android.content.Context;
 
-import com.example.arturarzumanyan.taskmanager.domain.Event;
-
 public class WeekDashboardContract {
     public interface WeekDashboardPresenter {
         void attachView(WeekDashboardView weekDashboardView, Context context);
@@ -20,9 +18,9 @@ public class WeekDashboardContract {
     public interface WeekDashboardView {
         void setProgressBarInvisible();
 
-        void makeEmptiness(int startPosition, int endPosition, int layoutNumber);
+        void makeEmptiness(int layoutNumber, float weight);
 
-        void makeEventPart(Event event, int color, int layoutNumber);
+        void makeEventPart(int color, int layoutNumber, float weight);
 
         void onFail(String message);
 

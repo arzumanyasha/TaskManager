@@ -45,14 +45,18 @@ public class TasksPresenterImpl implements TasksContract.TasksPresenter {
         mTasksRepository.loadTasks(taskList, new TasksRepository.OnTasksLoadedListener() {
             @Override
             public void onSuccess(List<Task> taskArrayList) {
-                mTasks = taskArrayList;
-                mTasksView.setProgressBarInvisible();
-                mTasksView.setTasksAdapter(taskArrayList);
+                if (mTasksView != null) {
+                    mTasks = taskArrayList;
+                    mTasksView.setProgressBarInvisible();
+                    mTasksView.setTasksAdapter(taskArrayList);
+                }
             }
 
             @Override
             public void onFail(String message) {
-                mTasksView.onFail(message);
+                if (mTasksView != null) {
+                    mTasksView.onFail(message);
+                }
             }
 
             @Override
@@ -75,17 +79,21 @@ public class TasksPresenterImpl implements TasksContract.TasksPresenter {
                 task, PATCH, new TasksRepository.OnTasksLoadedListener() {
                     @Override
                     public void onSuccess(List<Task> taskArrayList) {
-                        mTasks = taskArrayList;
-                        mTasksView.setProgressBarInvisible();
-                        mTasksView.setScreenNotTouchable();
-                        mTasksView.updateTasksAdapter();
+                        if (mTasksView != null) {
+                            mTasks = taskArrayList;
+                            mTasksView.setProgressBarInvisible();
+                            mTasksView.setScreenNotTouchable();
+                            mTasksView.updateTasksAdapter();
+                        }
                     }
 
                     @Override
                     public void onFail(String message) {
-                        mTasksView.setProgressBarInvisible();
-                        mTasksView.setScreenNotTouchable();
-                        mTasksView.onFail(message);
+                        if (mTasksView != null) {
+                            mTasksView.setProgressBarInvisible();
+                            mTasksView.setScreenNotTouchable();
+                            mTasksView.onFail(message);
+                        }
                     }
 
                     @Override
@@ -102,13 +110,17 @@ public class TasksPresenterImpl implements TasksContract.TasksPresenter {
         mTasksRepository.deleteTask(mTaskList, task, new TasksRepository.OnTasksLoadedListener() {
             @Override
             public void onSuccess(List<Task> taskArrayList) {
-                mTasks = taskArrayList;
-                mTasksView.updateTasksAdapterAfterDelete(position);
+                if (mTasksView != null) {
+                    mTasks = taskArrayList;
+                    mTasksView.updateTasksAdapterAfterDelete(position);
+                }
             }
 
             @Override
             public void onFail(String message) {
-                mTasksView.onFail(message);
+                if (mTasksView != null) {
+                    mTasksView.onFail(message);
+                }
             }
 
             @Override
