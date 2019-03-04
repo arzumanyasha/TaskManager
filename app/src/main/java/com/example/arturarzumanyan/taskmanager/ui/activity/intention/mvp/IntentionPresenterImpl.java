@@ -6,7 +6,6 @@ import com.example.arturarzumanyan.taskmanager.domain.Event;
 import com.example.arturarzumanyan.taskmanager.domain.Task;
 import com.example.arturarzumanyan.taskmanager.domain.TaskList;
 import com.example.arturarzumanyan.taskmanager.networking.util.Log;
-import com.example.arturarzumanyan.taskmanager.ui.activity.intention.mvp.IntentionContract;
 
 import java.util.List;
 

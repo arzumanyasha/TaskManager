@@ -8,7 +8,6 @@ import com.example.arturarzumanyan.taskmanager.data.repository.events.specificat
 import com.example.arturarzumanyan.taskmanager.domain.Event;
 import com.example.arturarzumanyan.taskmanager.networking.util.DateUtils;
 import com.example.arturarzumanyan.taskmanager.ui.adapter.event.mvp.EventRowView;
-import com.example.arturarzumanyan.taskmanager.ui.fragment.event.daily.mvp.DailyEventsContract;
 import com.example.arturarzumanyan.taskmanager.ui.util.ColorPalette;
 
 import java.util.List;
