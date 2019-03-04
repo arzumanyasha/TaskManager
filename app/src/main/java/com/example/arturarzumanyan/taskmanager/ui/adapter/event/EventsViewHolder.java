@@ -8,7 +8,7 @@ import android.widget.TextView;
 
 import com.example.arturarzumanyan.taskmanager.R;
 import com.example.arturarzumanyan.taskmanager.ui.adapter.event.mvp.EventRowView;
-import com.example.arturarzumanyan.taskmanager.ui.fragment.event.daily.mvp.contract.DailyEventsContract;
+import com.example.arturarzumanyan.taskmanager.ui.fragment.event.daily.mvp.DailyEventsContract;
 
 public class EventsViewHolder extends RecyclerView.ViewHolder implements EventRowView {
     private DailyEventsContract.DailyEventsPresenter eventsListPresenter;

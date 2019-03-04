@@ -7,7 +7,7 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.example.arturarzumanyan.taskmanager.R;
-import com.example.arturarzumanyan.taskmanager.ui.fragment.task.mvp.contract.TasksContract;
+import com.example.arturarzumanyan.taskmanager.ui.fragment.task.mvp.TasksContract;
 
 public class TasksAdapter extends RecyclerView.Adapter<TasksViewHolder> {
     private TasksContract.TasksPresenter mTasksListPresenter;

@@ -1,4 +1,4 @@
-package com.example.arturarzumanyan.taskmanager.ui.fragment.event.daily.mvp.contract;
+package com.example.arturarzumanyan.taskmanager.ui.fragment.event.daily.mvp;
 
 import com.example.arturarzumanyan.taskmanager.domain.Event;
 import com.example.arturarzumanyan.taskmanager.ui.adapter.event.mvp.EventRowView;

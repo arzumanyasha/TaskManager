@@ -1,4 +1,4 @@
-package com.example.arturarzumanyan.taskmanager.ui.activity.intention.mvp.contract;
+package com.example.arturarzumanyan.taskmanager.ui.activity.intention.mvp;
 
 import com.example.arturarzumanyan.taskmanager.domain.Event;
 import com.example.arturarzumanyan.taskmanager.domain.Task;

@@ -1,4 +1,4 @@
-package com.example.arturarzumanyan.taskmanager.ui.activity.signin.mvp.contract;
+package com.example.arturarzumanyan.taskmanager.ui.activity.signin.mvp;
 
 import android.content.Intent;
 

@@ -1,4 +1,4 @@
-package com.example.arturarzumanyan.taskmanager.ui.activity.intention.mvp.presenter;
+package com.example.arturarzumanyan.taskmanager.ui.activity.intention.mvp;
 
 import com.example.arturarzumanyan.taskmanager.data.repository.tasklists.TaskListsRepository;
 import com.example.arturarzumanyan.taskmanager.data.repository.tasklists.specification.AllTaskListsSpecification;
@@ -6,7 +6,6 @@ import com.example.arturarzumanyan.taskmanager.domain.Event;
 import com.example.arturarzumanyan.taskmanager.domain.Task;
 import com.example.arturarzumanyan.taskmanager.domain.TaskList;
 import com.example.arturarzumanyan.taskmanager.networking.util.Log;
-import com.example.arturarzumanyan.taskmanager.ui.activity.intention.mvp.contract.IntentionContract;
 
 import java.util.List;
 

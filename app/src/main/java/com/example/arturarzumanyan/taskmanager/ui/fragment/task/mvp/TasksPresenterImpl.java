@@ -1,4 +1,4 @@
-package com.example.arturarzumanyan.taskmanager.ui.fragment.task.mvp.presenter;
+package com.example.arturarzumanyan.taskmanager.ui.fragment.task.mvp;
 
 import android.os.Bundle;
 
@@ -7,7 +7,6 @@ import com.example.arturarzumanyan.taskmanager.domain.Task;
 import com.example.arturarzumanyan.taskmanager.domain.TaskList;
 import com.example.arturarzumanyan.taskmanager.networking.util.Log;
 import com.example.arturarzumanyan.taskmanager.ui.adapter.task.mvp.TaskRowView;
-import com.example.arturarzumanyan.taskmanager.ui.fragment.task.mvp.contract.TasksContract;
 
 import java.util.List;
 

@@ -23,8 +23,8 @@ import com.example.arturarzumanyan.taskmanager.ui.activity.BaseActivity;
 import com.example.arturarzumanyan.taskmanager.ui.activity.intention.IntentionActivity;
 import com.example.arturarzumanyan.taskmanager.ui.adapter.task.TasksAdapter;
 import com.example.arturarzumanyan.taskmanager.ui.dialog.task.TasksDialog;
-import com.example.arturarzumanyan.taskmanager.ui.fragment.task.mvp.contract.TasksContract;
-import com.example.arturarzumanyan.taskmanager.ui.fragment.task.mvp.presenter.TasksPresenterImpl;
+import com.example.arturarzumanyan.taskmanager.ui.fragment.task.mvp.TasksContract;
+import com.example.arturarzumanyan.taskmanager.ui.fragment.task.mvp.TasksPresenterImpl;
 import com.squareup.leakcanary.RefWatcher;
 
 import java.util.List;

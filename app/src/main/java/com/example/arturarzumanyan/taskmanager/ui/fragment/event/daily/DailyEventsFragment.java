@@ -21,8 +21,8 @@ import com.example.arturarzumanyan.taskmanager.ui.activity.BaseActivity;
 import com.example.arturarzumanyan.taskmanager.ui.activity.intention.IntentionActivity;
 import com.example.arturarzumanyan.taskmanager.ui.adapter.event.EventsAdapter;
 import com.example.arturarzumanyan.taskmanager.ui.dialog.event.EventsDialog;
-import com.example.arturarzumanyan.taskmanager.ui.fragment.event.daily.mvp.contract.DailyEventsContract;
-import com.example.arturarzumanyan.taskmanager.ui.fragment.event.daily.mvp.presenter.DailyEventsPresenterImpl;
+import com.example.arturarzumanyan.taskmanager.ui.fragment.event.daily.mvp.DailyEventsContract;
+import com.example.arturarzumanyan.taskmanager.ui.fragment.event.daily.mvp.DailyEventsPresenterImpl;
 import com.squareup.leakcanary.RefWatcher;
 
 import java.util.List;
