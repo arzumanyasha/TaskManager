@@ -184,6 +184,7 @@ public class TasksFragment extends Fragment implements TasksContract.TasksView {
             mTasksAdapter.unsubscribe();
         }
         mTasksPresenter.unsubscribe();
+        setProgressBarInvisible();
         super.onDetach();
     }
 

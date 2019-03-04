@@ -31,7 +31,7 @@ import com.example.arturarzumanyan.taskmanager.ui.activity.signin.SignInActivity
 import com.example.arturarzumanyan.taskmanager.ui.dialog.event.EventsDialog;
 import com.example.arturarzumanyan.taskmanager.ui.dialog.task.TasksDialog;
 import com.example.arturarzumanyan.taskmanager.ui.dialog.tasklist.TaskListsDialog;
-import com.example.arturarzumanyan.taskmanager.ui.fragment.event.EventsFragment;
+import com.example.arturarzumanyan.taskmanager.ui.fragment.event.container.EventsFragment;
 import com.example.arturarzumanyan.taskmanager.ui.fragment.task.TasksFragment;
 import com.example.arturarzumanyan.taskmanager.ui.util.CircleTransformation;
 import com.squareup.picasso.Picasso;

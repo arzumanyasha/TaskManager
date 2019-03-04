@@ -158,6 +158,7 @@ public class DailyEventsFragment extends Fragment implements DailyEventsContract
             mEventsAdapter.unsubscribe();
         }
         mDailyEventsPresenter.unsubscribe();
+        setProgressBarInvisible();
         super.onDetach();
     }
 

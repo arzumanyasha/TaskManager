@@ -47,16 +47,20 @@ public class DailyEventsPresenterImpl implements DailyEventsContract.DailyEvents
             @Override
             public void onSuccess(List<Event> eventsList) {
                 mDailyEventsList = eventsList;
-                mDailyEventsView.setProgressBarInvisible();
-                mDailyEventsView.setEventsAdapter(eventsList);
-                if (eventsList.isEmpty()) {
-                    mDailyEventsView.setNoEventsTextViewVisible();
+                if (mDailyEventsView != null) {
+                    mDailyEventsView.setProgressBarInvisible();
+                    mDailyEventsView.setEventsAdapter(eventsList);
+                    if (eventsList.isEmpty()) {
+                        mDailyEventsView.setNoEventsTextViewVisible();
+                    }
                 }
             }
 
             @Override
             public void onFail(String message) {
-                mDailyEventsView.onFail(message);
+                if (mDailyEventsView != null) {
+                    mDailyEventsView.onFail(message);
+                }
             }
 
             @Override
@@ -79,15 +83,19 @@ public class DailyEventsPresenterImpl implements DailyEventsContract.DailyEvents
             @Override
             public void onSuccess(List<Event> eventsList) {
                 mDailyEventsList = eventsList;
-                mDailyEventsView.updateEventsAdapterAfterDelete(position);
-                if (eventsList.isEmpty()) {
-                    mDailyEventsView.setNoEventsTextViewVisible();
+                if (mDailyEventsView != null) {
+                    mDailyEventsView.updateEventsAdapterAfterDelete(position);
+                    if (eventsList.isEmpty()) {
+                        mDailyEventsView.setNoEventsTextViewVisible();
+                    }
                 }
             }
 
             @Override
             public void onFail(String message) {
-                mDailyEventsView.onFail(message);
+                if (mDailyEventsView != null) {
+                    mDailyEventsView.onFail(message);
+                }
             }
 
             @Override
