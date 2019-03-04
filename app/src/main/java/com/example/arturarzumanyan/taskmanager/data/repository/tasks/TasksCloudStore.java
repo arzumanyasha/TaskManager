@@ -34,7 +34,7 @@ public class TasksCloudStore {
         );
         requestParameters.setRequestHeaderParameters(new HashMap<String, String>());
 
-        return NetworkUtil.getResultFromServer(requestParameters);
+        return null/*NetworkUtil.getResultFromServer(requestParameters)*/;
     }
 
     public ResponseDto addTaskOnServer(TaskList taskList, Task task) {
@@ -45,7 +45,7 @@ public class TasksCloudStore {
 
         RequestParameters requestParameters = mRepositoryLoadHelper.getTaskCreateOrUpdateParameters(task, url, POST);
 
-        return NetworkUtil.getResultFromServer(requestParameters);
+        return null/*NetworkUtil.getResultFromServer(requestParameters)*/;
     }
 
     public ResponseDto updateTaskOnServer(TaskList taskList, Task task) {
@@ -57,7 +57,7 @@ public class TasksCloudStore {
 
         RequestParameters requestParameters = mRepositoryLoadHelper.getTaskCreateOrUpdateParameters(task, url, PATCH);
 
-        return NetworkUtil.getResultFromServer(requestParameters);
+        return null/*NetworkUtil.getResultFromServer(requestParameters)*/;
     }
 
     public ResponseDto deleteTaskOnServer(TaskList taskList, Task task) {
@@ -69,6 +69,6 @@ public class TasksCloudStore {
 
         RequestParameters requestParameters = mRepositoryLoadHelper.getDeleteParameters(url);
 
-        return NetworkUtil.getResultFromServer(requestParameters);
+        return null/*NetworkUtil.getResultFromServer(requestParameters)*/;
     }
 }

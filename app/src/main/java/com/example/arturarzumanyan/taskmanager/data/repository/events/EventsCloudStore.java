@@ -44,7 +44,7 @@ public class EventsCloudStore {
         );
         requestParameters.setRequestHeaderParameters(new HashMap<String, String>());
 
-        return NetworkUtil.getResultFromServer(requestParameters);
+        return /*NetworkUtil.getResultFromServer(requestParameters)*/null;
     }
 
     public ResponseDto addEventOnServer(Event event) {
@@ -53,7 +53,7 @@ public class EventsCloudStore {
                 "/events";
         RequestParameters requestParameters = mRepositoryLoadHelper.getEventCreateOrUpdateParameters(event, url, POST);
 
-        return NetworkUtil.getResultFromServer(requestParameters);
+        return /*NetworkUtil.getResultFromServer(requestParameters)*/null;
     }
 
     public ResponseDto updateEventOnServer(Event event) {
@@ -65,7 +65,7 @@ public class EventsCloudStore {
         RequestParameters requestParameters = mRepositoryLoadHelper
                 .getEventCreateOrUpdateParameters(event, url, PATCH);
 
-        return NetworkUtil.getResultFromServer(requestParameters);
+        return /*NetworkUtil.getResultFromServer(requestParameters)*/null;
     }
 
     public ResponseDto deleteEventOnServer(Event event) {
@@ -76,6 +76,6 @@ public class EventsCloudStore {
 
         RequestParameters requestParameters = mRepositoryLoadHelper.getDeleteParameters(url);
 
-        return NetworkUtil.getResultFromServer(requestParameters);
+        return /*NetworkUtil.getResultFromServer(requestParameters)*/null;
     }
 }

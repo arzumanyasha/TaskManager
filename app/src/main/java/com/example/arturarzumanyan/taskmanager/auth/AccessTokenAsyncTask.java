@@ -16,7 +16,7 @@ public class AccessTokenAsyncTask extends AsyncTask<RequestParameters, Void, Res
 
     @Override
     protected ResponseDto doInBackground(RequestParameters... requestParameters) {
-        return NetworkUtil.getResultFromServer(requestParameters[0]);
+        return null/*NetworkUtil.getResultFromServer(requestParameters[0])*/;
     }
 
     @Override

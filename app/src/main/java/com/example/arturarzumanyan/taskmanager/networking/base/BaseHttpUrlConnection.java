@@ -54,7 +54,7 @@ public class BaseHttpUrlConnection {
     }
 
     private String setRequestsDataTypeSettings(FirebaseWebService.RequestMethods requestMethod,
-                                             Map<String, Object> requestBodyParameters ){
+                                               Map<String, Object> requestBodyParameters) {
         if ((requestMethod == FirebaseWebService.RequestMethods.POST) && !isJson) {
             Uri.Builder uriBuilder = new Uri.Builder();
             for (Map.Entry<String, Object> map : requestBodyParameters.entrySet()) {

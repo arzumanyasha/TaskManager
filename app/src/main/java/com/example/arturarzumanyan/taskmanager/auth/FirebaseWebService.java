@@ -5,6 +5,8 @@ import android.content.Intent;
 import android.support.annotation.NonNull;
 
 import com.example.arturarzumanyan.taskmanager.data.repository.RepositoryLoadHelper;
+import com.example.arturarzumanyan.taskmanager.domain.ResponseDto;
+import com.example.arturarzumanyan.taskmanager.networking.NetworkUtil;
 import com.example.arturarzumanyan.taskmanager.networking.base.RequestParameters;
 import com.example.arturarzumanyan.taskmanager.networking.util.Log;
 import com.google.android.gms.auth.api.Auth;
@@ -28,6 +30,11 @@ import org.json.JSONObject;
 
 import java.util.HashMap;
 import java.util.Map;
+
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.CompositeDisposable;
+import io.reactivex.functions.Consumer;
+import io.reactivex.schedulers.Schedulers;
 
 public class FirebaseWebService implements GoogleApiClient.OnConnectionFailedListener, OnCompleteListener {
 
@@ -132,7 +139,9 @@ public class FirebaseWebService implements GoogleApiClient.OnConnectionFailedLis
     }
 
     private void requestToken(String authCode) {
-        mAccessTokenAsyncTask = new AccessTokenAsyncTask();
+
+        /////
+        /*mAccessTokenAsyncTask = new AccessTokenAsyncTask();
         mAccessTokenAsyncTask.setTokensLoadingListener(new AccessTokenAsyncTask.TokensLoadingListener() {
             @Override
             public void onDataLoaded(String buffer) throws JSONException {
@@ -144,7 +153,24 @@ public class FirebaseWebService implements GoogleApiClient.OnConnectionFailedLis
         });
 
         RequestParameters requestParameters = getAccessTokenParameters(authCode);
-        mAccessTokenAsyncTask.execute(requestParameters);
+        mAccessTokenAsyncTask.execute(requestParameters);*/
+        /////
+        RequestParameters requestParameters = getAccessTokenParameters(authCode);
+        CompositeDisposable compositeDisposable = new CompositeDisposable();
+        compositeDisposable.add(NetworkUtil.getResultFromServer(requestParameters)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Consumer<ResponseDto>() {
+                    @Override
+                    public void accept(ResponseDto responseDto) throws Exception {
+                        Log.v("ACCESS TOKEN RECEIVED");
+                        String accessToken = getAccessTokenFromBuffer(responseDto.getResponseData());
+                        String refreshToken = getRefreshTokenFromBuffer(responseDto.getResponseData());
+
+                        TokenStorage.getTokenStorageInstance().write(accessToken, refreshToken);
+                    }
+                }));
+
     }
 
     private String getAccessTokenFromBuffer(String buffer) throws JSONException {
@@ -248,6 +274,7 @@ public class FirebaseWebService implements GoogleApiClient.OnConnectionFailedLis
 
     public interface AccessTokenUpdatedListener {
         void onAccessTokenUpdated();
+
         void onFail();
     }
 }

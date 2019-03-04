@@ -8,8 +8,10 @@ import com.example.arturarzumanyan.taskmanager.networking.util.Log;
 
 import java.util.Map;
 
+import io.reactivex.Observable;
+
 public class NetworkUtil {
-    public static ResponseDto getResultFromServer(RequestParameters requestParameters) {
+    public static Observable<ResponseDto> getResultFromServer(RequestParameters requestParameters) {
         String url = requestParameters.getUrl();
         FirebaseWebService.RequestMethods requestMethod = requestParameters.getRequestMethod();
         Map<String, Object> requestBodyParameters = requestParameters.getRequestBodyParameters();

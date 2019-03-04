@@ -1,6 +1,9 @@
 package com.example.arturarzumanyan.taskmanager.domain;
 
-public class ResponseDto {
+import io.reactivex.Observable;
+import io.reactivex.Observer;
+
+public class ResponseDto extends Observable<ResponseDto> {
     private final int responseCode;
     private final String responseData;
 
@@ -15,5 +18,10 @@ public class ResponseDto {
 
     public String getResponseData() {
         return responseData;
+    }
+
+    @Override
+    protected void subscribeActual(Observer<? super ResponseDto> observer) {
+
     }
 }
