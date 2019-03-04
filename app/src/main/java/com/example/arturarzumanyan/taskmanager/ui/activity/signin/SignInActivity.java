@@ -9,8 +9,8 @@ import com.example.arturarzumanyan.taskmanager.R;
 import com.example.arturarzumanyan.taskmanager.networking.util.Log;
 import com.example.arturarzumanyan.taskmanager.ui.activity.BaseActivity;
 import com.example.arturarzumanyan.taskmanager.ui.activity.intention.IntentionActivity;
-import com.example.arturarzumanyan.taskmanager.ui.activity.signin.mvp.contract.SignInContract;
-import com.example.arturarzumanyan.taskmanager.ui.activity.signin.mvp.presenter.SignInPresenterImpl;
+import com.example.arturarzumanyan.taskmanager.ui.activity.signin.mvp.SignInContract;
+import com.example.arturarzumanyan.taskmanager.ui.activity.signin.mvp.SignInPresenterImpl;
 import com.google.android.gms.common.SignInButton;
 
 public class SignInActivity extends BaseActivity implements SignInContract.SignInView {

@@ -1,4 +1,4 @@
-package com.example.arturarzumanyan.taskmanager.ui.fragment.task.mvp.contract;
+package com.example.arturarzumanyan.taskmanager.ui.fragment.task.mvp;
 
 import android.os.Bundle;
 

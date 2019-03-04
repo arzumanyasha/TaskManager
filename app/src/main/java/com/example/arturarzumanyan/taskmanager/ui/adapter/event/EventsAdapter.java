@@ -7,7 +7,7 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.example.arturarzumanyan.taskmanager.R;
-import com.example.arturarzumanyan.taskmanager.ui.fragment.event.daily.mvp.contract.DailyEventsContract;
+import com.example.arturarzumanyan.taskmanager.ui.fragment.event.daily.mvp.DailyEventsContract;
 
 public class EventsAdapter extends RecyclerView.Adapter<EventsViewHolder> {
     private final DailyEventsContract.DailyEventsPresenter mEventsListPresenter;

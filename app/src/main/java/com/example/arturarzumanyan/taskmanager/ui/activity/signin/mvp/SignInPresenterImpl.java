@@ -1,9 +1,9 @@
-package com.example.arturarzumanyan.taskmanager.ui.activity.signin.mvp.presenter;
+package com.example.arturarzumanyan.taskmanager.ui.activity.signin.mvp;
 
 import android.content.Intent;
 
 import com.example.arturarzumanyan.taskmanager.auth.FirebaseWebService;
-import com.example.arturarzumanyan.taskmanager.ui.activity.signin.mvp.contract.SignInContract;
+import com.example.arturarzumanyan.taskmanager.ui.activity.signin.mvp.SignInContract;
 
 import static android.app.Activity.RESULT_OK;
 

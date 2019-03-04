@@ -8,7 +8,7 @@ import android.widget.TextView;
 
 import com.example.arturarzumanyan.taskmanager.R;
 import com.example.arturarzumanyan.taskmanager.ui.adapter.task.mvp.TaskRowView;
-import com.example.arturarzumanyan.taskmanager.ui.fragment.task.mvp.contract.TasksContract;
+import com.example.arturarzumanyan.taskmanager.ui.fragment.task.mvp.TasksContract;
 
 public class TasksViewHolder extends RecyclerView.ViewHolder implements TaskRowView {
     private TasksContract.TasksPresenter tasksListPresenter;

@@ -14,7 +14,6 @@ import android.widget.ProgressBar;
 import com.example.arturarzumanyan.taskmanager.BuildConfig;
 import com.example.arturarzumanyan.taskmanager.R;
 import com.example.arturarzumanyan.taskmanager.TaskManagerApp;
-import com.example.arturarzumanyan.taskmanager.domain.Event;
 import com.example.arturarzumanyan.taskmanager.ui.activity.BaseActivity;
 import com.example.arturarzumanyan.taskmanager.ui.fragment.event.week.mvp.WeekDashboardContract;
 import com.example.arturarzumanyan.taskmanager.ui.fragment.event.week.mvp.WeekDashboardPresenterImpl;
@@ -22,8 +21,6 @@ import com.squareup.leakcanary.RefWatcher;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import static com.example.arturarzumanyan.taskmanager.networking.util.DateUtils.MINUTES_IN_HOUR;
 
 public class WeekDashboardFragment extends Fragment implements WeekDashboardContract.WeekDashboardView {
     private ProgressBar progressBar;
