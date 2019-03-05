@@ -21,13 +21,13 @@ public class NetworkUtil {
         Log.v("NETWORKING REQUEST " + requestParameters.getUrl());
         Log.v("NETWORKING REQUEST " + requestParameters.getRequestMethod().toString());
         Log.v("NETWORKING REQUEST " + requestParameters.getRequestHeaderParameters().toString());
-        if(requestBodyParameters != null) {
+        if (requestBodyParameters != null) {
             Log.v("NETWORKING REQUEST " + requestParameters.getRequestBodyParameters().toString());
         }
         BaseHttpUrlConnection baseHttpUrlConnection = new BaseHttpUrlConnection();
-        return baseHttpUrlConnection.getResult(url,
+        return Observable.fromCallable(() -> baseHttpUrlConnection.getResult(url,
                 requestMethod,
                 requestBodyParameters,
-                requestHeaderParameters);
+                requestHeaderParameters));
     }
 }
