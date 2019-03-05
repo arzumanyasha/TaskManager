@@ -16,6 +16,4 @@ public class ResponseDto {
     public String getResponseData() {
         return responseData;
     }
-
-
 }
