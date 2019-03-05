@@ -17,6 +17,7 @@ public class NetworkUtil {
         Map<String, Object> requestBodyParameters = requestParameters.getRequestBodyParameters();
         Map<String, String> requestHeaderParameters = requestParameters.getRequestHeaderParameters();
 
+        Log.v("CURRENT THREAD " + Thread.currentThread().getName());
         Log.v("NETWORKING REQUEST " + requestParameters.getUrl());
         Log.v("NETWORKING REQUEST " + requestParameters.getRequestMethod().toString());
         Log.v("NETWORKING REQUEST " + requestParameters.getRequestHeaderParameters().toString());

@@ -30,10 +30,11 @@ import org.json.JSONObject;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.Callable;
 
+import io.reactivex.ObservableSource;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.CompositeDisposable;
-import io.reactivex.functions.Consumer;
 import io.reactivex.schedulers.Schedulers;
 
 public class FirebaseWebService implements GoogleApiClient.OnConnectionFailedListener, OnCompleteListener {
@@ -59,7 +60,7 @@ public class FirebaseWebService implements GoogleApiClient.OnConnectionFailedLis
     private static FirebaseWebService mFirebaseWebServiceInstance;
     private FirebaseAuth mAuth;
     private GoogleSignInClient mGoogleSignInClient;
-    private AccessTokenAsyncTask mAccessTokenAsyncTask;
+    private CompositeDisposable mCompositeDisposable = new CompositeDisposable();
     private Context mContext;
 
     private UserInfoLoadingListener userInfoLoadingListener;
@@ -139,38 +140,19 @@ public class FirebaseWebService implements GoogleApiClient.OnConnectionFailedLis
     }
 
     private void requestToken(String authCode) {
-
-        /////
-        /*mAccessTokenAsyncTask = new AccessTokenAsyncTask();
-        mAccessTokenAsyncTask.setTokensLoadingListener(new AccessTokenAsyncTask.TokensLoadingListener() {
-            @Override
-            public void onDataLoaded(String buffer) throws JSONException {
-                String accessToken = getAccessTokenFromBuffer(buffer);
-                String refreshToken = getRefreshTokenFromBuffer(buffer);
-
-                TokenStorage.getTokenStorageInstance().write(accessToken, refreshToken);
-            }
-        });
-
         RequestParameters requestParameters = getAccessTokenParameters(authCode);
-        mAccessTokenAsyncTask.execute(requestParameters);*/
-        /////
-        RequestParameters requestParameters = getAccessTokenParameters(authCode);
-        CompositeDisposable compositeDisposable = new CompositeDisposable();
-        compositeDisposable.add(NetworkUtil.getResultFromServer(requestParameters)
+        mCompositeDisposable.add(io.reactivex.Observable.defer((Callable<ObservableSource<ResponseDto>>) () ->
+                NetworkUtil.getResultFromServer(requestParameters))
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Consumer<ResponseDto>() {
-                    @Override
-                    public void accept(ResponseDto responseDto) throws Exception {
-                        Log.v("ACCESS TOKEN RECEIVED");
-                        String accessToken = getAccessTokenFromBuffer(responseDto.getResponseData());
-                        String refreshToken = getRefreshTokenFromBuffer(responseDto.getResponseData());
+                .subscribe(
+                        responseDto -> {
+                            Log.v("ACCESS TOKEN RECEIVED");
+                            String accessToken = getAccessTokenFromBuffer(responseDto.getResponseData());
+                            String refreshToken = getRefreshTokenFromBuffer(responseDto.getResponseData());
 
-                        TokenStorage.getTokenStorageInstance().write(accessToken, refreshToken);
-                    }
-                }));
-
+                            TokenStorage.getTokenStorageInstance().write(accessToken, refreshToken);
+                        }));
     }
 
     private String getAccessTokenFromBuffer(String buffer) throws JSONException {
@@ -199,23 +181,23 @@ public class FirebaseWebService implements GoogleApiClient.OnConnectionFailedLis
     }
 
     public void refreshAccessToken(final AccessTokenUpdatedListener listener) {
-        AccessTokenAsyncTask accessTokenAsyncTask = new AccessTokenAsyncTask();
-        accessTokenAsyncTask.setTokensLoadingListener(new AccessTokenAsyncTask.TokensLoadingListener() {
-            @Override
-            public void onDataLoaded(String buffer) throws JSONException {
-                if (RepositoryLoadHelper.isOnline() && buffer.isEmpty()) {
-                    listener.onFail();
-                } else {
-                    String accessToken = getAccessTokenFromBuffer(buffer);
-
-                    TokenStorage.getTokenStorageInstance().writeAccessToken(accessToken);
-                    listener.onAccessTokenUpdated();
-                }
-            }
-        });
-
         RequestParameters requestParameters = getRefreshTokenParameters();
-        accessTokenAsyncTask.execute(requestParameters);
+        mCompositeDisposable.add(io.reactivex.Observable.defer((Callable<ObservableSource<ResponseDto>>) () ->
+                NetworkUtil.getResultFromServer(requestParameters))
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(
+                        responseDto -> {
+                            if (RepositoryLoadHelper.isOnline() && responseDto.getResponseData().isEmpty()) {
+                                listener.onFail();
+                            } else {
+                                String accessToken = getAccessTokenFromBuffer(responseDto.getResponseData());
+
+                                TokenStorage.getTokenStorageInstance().writeAccessToken(accessToken);
+                                listener.onAccessTokenUpdated();
+                            }
+                        }));
+
     }
 
     private RequestParameters getRefreshTokenParameters() {
@@ -252,10 +234,7 @@ public class FirebaseWebService implements GoogleApiClient.OnConnectionFailedLis
     }
 
     public void closeAuthConnection() {
-        if (mAccessTokenAsyncTask != null) {
-            mAccessTokenAsyncTask.cancel(false);
-            mAccessTokenAsyncTask = null;
-        }
+        mCompositeDisposable.clear();
     }
 
     public void unsubscribe() {

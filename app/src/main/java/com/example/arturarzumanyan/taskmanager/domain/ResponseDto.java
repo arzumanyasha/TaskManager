@@ -22,6 +22,6 @@ public class ResponseDto extends Observable<ResponseDto> {
 
     @Override
     protected void subscribeActual(Observer<? super ResponseDto> observer) {
-
+        observer.onNext(this);
     }
 }
