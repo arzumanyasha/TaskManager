@@ -6,12 +6,9 @@ import com.example.arturarzumanyan.taskmanager.networking.base.BaseHttpUrlConnec
 import com.example.arturarzumanyan.taskmanager.networking.base.RequestParameters;
 import com.example.arturarzumanyan.taskmanager.networking.util.Log;
 
-import java.io.IOException;
 import java.util.Map;
 
 import io.reactivex.Single;
-import io.reactivex.SingleEmitter;
-import io.reactivex.SingleOnSubscribe;
 
 public class NetworkUtil {
     public static Single<ResponseDto> getResultFromServer(RequestParameters requestParameters) {
@@ -28,17 +25,9 @@ public class NetworkUtil {
             Log.v("NETWORKING REQUEST " + requestParameters.getRequestBodyParameters().toString());
         }
         BaseHttpUrlConnection baseHttpUrlConnection = new BaseHttpUrlConnection();
-        return Single.create(e -> {
-            try {
-                e.onSuccess(baseHttpUrlConnection.getResult(url,
-                        requestMethod,
-                        requestBodyParameters,
-                        requestHeaderParameters));
-            } catch (IOException exception) {
-                Log.v(exception.getMessage());
-                exception.printStackTrace();
-                e.onError(exception);
-            }
-        });
+        return Single.fromCallable(() -> baseHttpUrlConnection.getResult(url,
+                requestMethod,
+                requestBodyParameters,
+                requestHeaderParameters));
     }
 }

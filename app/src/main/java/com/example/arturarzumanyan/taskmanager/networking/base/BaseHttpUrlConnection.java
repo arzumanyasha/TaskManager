@@ -30,6 +30,8 @@ public class BaseHttpUrlConnection {
                                  Map<String, String> requestHeaderParameters) throws IOException {
         HttpURLConnection connection;
 
+        Log.v("Current thread is " + Thread.currentThread().getName());
+
         isJson = false;
 
         String query;

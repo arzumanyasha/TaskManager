@@ -33,6 +33,7 @@ import java.util.Map;
 
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.CompositeDisposable;
+import io.reactivex.functions.Consumer;
 import io.reactivex.observers.DisposableSingleObserver;
 import io.reactivex.schedulers.Schedulers;
 
@@ -140,23 +141,16 @@ public class FirebaseWebService implements GoogleApiClient.OnConnectionFailedLis
 
     private void requestToken(String authCode) {
         RequestParameters requestParameters = getAccessTokenParameters(authCode);
-        mCompositeDisposable.add(NetworkUtil.getResultFromServer(requestParameters).subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribeWith(new DisposableSingleObserver<ResponseDto>() {
-                    @Override
-                    public void onSuccess(ResponseDto responseDto) {
-                        Log.v("ACCESS TOKEN RECEIVED");
-                        String accessToken = getAccessTokenFromBuffer(responseDto.getResponseData());
-                        String refreshToken = getRefreshTokenFromBuffer(responseDto.getResponseData());
+        mCompositeDisposable.add(NetworkUtil.getResultFromServer(requestParameters)
+                .subscribeOn(Schedulers.io())
+                .doOnSuccess(responseDto -> {
+                    Log.v("ACCESS TOKEN RECEIVED");
+                    String accessToken = getAccessTokenFromBuffer(responseDto.getResponseData());
+                    String refreshToken = getRefreshTokenFromBuffer(responseDto.getResponseData());
 
-                        TokenStorage.getTokenStorageInstance().write(accessToken, refreshToken);
-                    }
-
-                    @Override
-                    public void onError(Throwable e) {
-
-                    }
-                }));
+                    TokenStorage.getTokenStorageInstance().write(accessToken, refreshToken);
+                })
+                .subscribe());
     }
 
     private String getAccessTokenFromBuffer(String buffer) {
@@ -202,13 +196,14 @@ public class FirebaseWebService implements GoogleApiClient.OnConnectionFailedLis
         RequestParameters requestParameters = getRefreshTokenParameters();
         mCompositeDisposable.add(NetworkUtil.getResultFromServer(requestParameters)
                 .subscribeOn(Schedulers.io())
+                .doOnSuccess(responseDto -> {
+                    String accessToken = getAccessTokenFromBuffer(responseDto.getResponseData());
+                    TokenStorage.getTokenStorageInstance().writeAccessToken(accessToken);
+                })
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribeWith(new DisposableSingleObserver<ResponseDto>() {
                     @Override
                     public void onSuccess(ResponseDto responseDto) {
-                        String accessToken = getAccessTokenFromBuffer(responseDto.getResponseData());
-
-                        TokenStorage.getTokenStorageInstance().writeAccessToken(accessToken);
                         listener.onAccessTokenUpdated();
                     }
 
