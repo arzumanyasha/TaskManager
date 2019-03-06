@@ -27,30 +27,28 @@ public class BaseHttpUrlConnection {
     public ResponseDto getResult(String url,
                                  FirebaseWebService.RequestMethods requestMethod,
                                  Map<String, Object> requestBodyParameters,
-                                 Map<String, String> requestHeaderParameters) {
-        HttpURLConnection connection = null;
+                                 Map<String, String> requestHeaderParameters) throws IOException {
+        HttpURLConnection connection;
 
         isJson = false;
 
         String query;
-        try {
-            connection = getConnectionSettings(url, requestMethod, requestHeaderParameters);
 
-            query = setRequestsDataTypeSettings(requestMethod, requestBodyParameters);
+        connection = getConnectionSettings(url, requestMethod, requestHeaderParameters);
 
-            setConnection(connection, query, requestMethod);
+        query = setRequestsDataTypeSettings(requestMethod, requestBodyParameters);
 
-            return getResponseDto(connection);
-        } catch (IOException e) {
-            Log.v(e.getMessage());
-            e.printStackTrace();
-            return null;
-        } finally {
-            if (connection != null) {
-                connection.disconnect();
-            }
+        setConnection(connection, query, requestMethod);
 
+        if (connection != null) {
+            connection.disconnect();
         }
+
+        if (connection != null) {
+            return getResponseDto(connection);
+        }
+
+        return null;
     }
 
     private String setRequestsDataTypeSettings(FirebaseWebService.RequestMethods requestMethod,

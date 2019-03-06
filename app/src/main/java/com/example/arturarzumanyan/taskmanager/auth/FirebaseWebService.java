@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.support.annotation.NonNull;
 
 import com.example.arturarzumanyan.taskmanager.data.repository.RepositoryLoadHelper;
+import com.example.arturarzumanyan.taskmanager.domain.ResponseDto;
 import com.example.arturarzumanyan.taskmanager.networking.NetworkUtil;
 import com.example.arturarzumanyan.taskmanager.networking.base.RequestParameters;
 import com.example.arturarzumanyan.taskmanager.networking.util.Log;
@@ -32,6 +33,7 @@ import java.util.Map;
 
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.CompositeDisposable;
+import io.reactivex.observers.DisposableSingleObserver;
 import io.reactivex.schedulers.Schedulers;
 
 public class FirebaseWebService implements GoogleApiClient.OnConnectionFailedListener, OnCompleteListener {
@@ -140,23 +142,45 @@ public class FirebaseWebService implements GoogleApiClient.OnConnectionFailedLis
         RequestParameters requestParameters = getAccessTokenParameters(authCode);
         mCompositeDisposable.add(NetworkUtil.getResultFromServer(requestParameters).subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(responseDto -> {
-                    Log.v("ACCESS TOKEN RECEIVED");
-                    String accessToken = getAccessTokenFromBuffer(responseDto.getResponseData());
-                    String refreshToken = getRefreshTokenFromBuffer(responseDto.getResponseData());
+                .subscribeWith(new DisposableSingleObserver<ResponseDto>() {
+                    @Override
+                    public void onSuccess(ResponseDto responseDto) {
+                        Log.v("ACCESS TOKEN RECEIVED");
+                        String accessToken = getAccessTokenFromBuffer(responseDto.getResponseData());
+                        String refreshToken = getRefreshTokenFromBuffer(responseDto.getResponseData());
 
-                    TokenStorage.getTokenStorageInstance().write(accessToken, refreshToken);
+                        TokenStorage.getTokenStorageInstance().write(accessToken, refreshToken);
+                    }
+
+                    @Override
+                    public void onError(Throwable e) {
+
+                    }
                 }));
     }
 
-    private String getAccessTokenFromBuffer(String buffer) throws JSONException {
-        JSONObject object = new JSONObject(buffer);
-        return object.getString(ACCESS_TOKEN_KEY);
+    private String getAccessTokenFromBuffer(String buffer) {
+        JSONObject object;
+        String accessToken = "";
+        try {
+            object = new JSONObject(buffer);
+            accessToken = object.getString(ACCESS_TOKEN_KEY);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        return accessToken;
     }
 
-    private String getRefreshTokenFromBuffer(String buffer) throws JSONException {
-        JSONObject object = new JSONObject(buffer);
-        return object.getString(REFRESH_TOKEN_KEY);
+    private String getRefreshTokenFromBuffer(String buffer) {
+        JSONObject object;
+        String refreshToken = "";
+        try {
+            object = new JSONObject(buffer);
+            refreshToken = object.getString(REFRESH_TOKEN_KEY);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        return refreshToken;
     }
 
     private RequestParameters getAccessTokenParameters(String authCode) {
@@ -179,18 +203,22 @@ public class FirebaseWebService implements GoogleApiClient.OnConnectionFailedLis
         mCompositeDisposable.add(NetworkUtil.getResultFromServer(requestParameters)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(
-                        responseDto -> {
-                            if (RepositoryLoadHelper.isOnline() && responseDto.getResponseData().isEmpty()) {
-                                listener.onFail();
-                            } else {
-                                String accessToken = getAccessTokenFromBuffer(responseDto.getResponseData());
+                .subscribeWith(new DisposableSingleObserver<ResponseDto>() {
+                    @Override
+                    public void onSuccess(ResponseDto responseDto) {
+                        String accessToken = getAccessTokenFromBuffer(responseDto.getResponseData());
 
-                                TokenStorage.getTokenStorageInstance().writeAccessToken(accessToken);
-                                listener.onAccessTokenUpdated();
-                            }
-                        }));
+                        TokenStorage.getTokenStorageInstance().writeAccessToken(accessToken);
+                        listener.onAccessTokenUpdated();
+                    }
 
+                    @Override
+                    public void onError(Throwable e) {
+                        if (RepositoryLoadHelper.isOnline()) {
+                            listener.onFail();
+                        }
+                    }
+                }));
     }
 
     private RequestParameters getRefreshTokenParameters() {
