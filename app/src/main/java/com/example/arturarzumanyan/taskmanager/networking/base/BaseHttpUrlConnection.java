@@ -43,11 +43,9 @@ public class BaseHttpUrlConnection {
         setConnection(connection, query, requestMethod);
 
         if (connection != null) {
+            ResponseDto responseDto = getResponseDto(connection);
             connection.disconnect();
-        }
-
-        if (connection != null) {
-            return getResponseDto(connection);
+            return responseDto;
         }
 
         return null;

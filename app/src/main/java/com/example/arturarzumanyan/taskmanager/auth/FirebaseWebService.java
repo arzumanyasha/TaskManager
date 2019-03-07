@@ -21,9 +21,11 @@ import com.google.android.gms.common.api.Scope;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthCredential;
+import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.GoogleAuthProvider;
+import com.kelvinapps.rxfirebase.RxFirebaseAuth;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -33,11 +35,11 @@ import java.util.Map;
 
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.CompositeDisposable;
-import io.reactivex.functions.Consumer;
 import io.reactivex.observers.DisposableSingleObserver;
 import io.reactivex.schedulers.Schedulers;
+import rx.Observable;
 
-public class FirebaseWebService implements GoogleApiClient.OnConnectionFailedListener, OnCompleteListener {
+public class FirebaseWebService implements GoogleApiClient.OnConnectionFailedListener/*, OnCompleteListener */{
 
     private static final String BASE_URL = "https://www.googleapis.com/oauth2/v4/token";
     private static final String CLIENT_ID = "685238908043-obre149i2k2gh9a71g2it0emsa97glma.apps.googleusercontent.com";
@@ -58,7 +60,6 @@ public class FirebaseWebService implements GoogleApiClient.OnConnectionFailedLis
     public enum RequestMethods {POST, GET, PATCH, DELETE}
 
     private static FirebaseWebService mFirebaseWebServiceInstance;
-    private FirebaseAuth mAuth;
     private GoogleSignInClient mGoogleSignInClient;
     private CompositeDisposable mCompositeDisposable = new CompositeDisposable();
     private Context mContext;
@@ -80,8 +81,6 @@ public class FirebaseWebService implements GoogleApiClient.OnConnectionFailedLis
     }
 
     public void setGoogleClientOptions() {
-        mAuth = FirebaseAuth.getInstance();
-
         GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
                 .requestIdToken(CLIENT_ID)
                 .requestServerAuthCode(CLIENT_ID, true)
@@ -93,7 +92,7 @@ public class FirebaseWebService implements GoogleApiClient.OnConnectionFailedLis
         mGoogleSignInClient = GoogleSignIn.getClient(mContext, gso);
     }
 
-    public void authWithGoogle(Intent data) {
+    public Observable<AuthResult> authWithGoogle(Intent data) {
         GoogleSignInResult result = Auth.GoogleSignInApi.getSignInResultFromIntent(data);
         if (result.isSuccess()) {
             GoogleSignInAccount acct = result.getSignInAccount();
@@ -103,8 +102,9 @@ public class FirebaseWebService implements GoogleApiClient.OnConnectionFailedLis
                 requestToken(authCode);
 
                 AuthCredential credential = GoogleAuthProvider.getCredential(acct.getIdToken(), null);
-                mAuth.signInWithCredential(credential)
-                        .addOnCompleteListener(this);
+                 return RxFirebaseAuth.signInWithCredential(FirebaseAuth.getInstance(), credential);
+                /*FirebaseAuth.getInstance().signInWithCredential(credential)
+                        .addOnCompleteListener(this);*/
             } else {
                 userInfoLoadingListener.onFail(AUTHENTICATION_ERROR);
             }
@@ -112,12 +112,14 @@ public class FirebaseWebService implements GoogleApiClient.OnConnectionFailedLis
             Log.e(result.getStatus().toString());
             userInfoLoadingListener.onFail(AUTHENTICATION_ERROR);
         }
+        return null;
     }
 
-    @Override
+    /*@Override
     public void onComplete(@NonNull Task task) {
+        Log.v("111111");
         if (task.isSuccessful()) {
-            FirebaseUser user = mAuth.getCurrentUser();
+            FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
             if (userInfoLoadingListener != null) {
                 if (user != null) {
                     userInfoLoadingListener.onDataLoaded(user.getDisplayName(),
@@ -131,7 +133,7 @@ public class FirebaseWebService implements GoogleApiClient.OnConnectionFailedLis
             Log.e(task.getResult().toString());
             userInfoLoadingListener.onFail(AUTHENTICATION_ERROR);
         }
-    }
+    }*/
 
     @Override
     public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
@@ -232,8 +234,7 @@ public class FirebaseWebService implements GoogleApiClient.OnConnectionFailedLis
     }
 
     public FirebaseUser getCurrentUser() {
-        mAuth = FirebaseAuth.getInstance();
-        return mAuth.getCurrentUser();
+        return FirebaseAuth.getInstance().getCurrentUser();
     }
 
     public String getUserEmail() {
