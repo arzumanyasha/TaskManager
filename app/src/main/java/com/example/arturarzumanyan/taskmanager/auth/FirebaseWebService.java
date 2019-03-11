@@ -11,21 +11,17 @@ import com.example.arturarzumanyan.taskmanager.networking.base.RequestParameters
 import com.example.arturarzumanyan.taskmanager.networking.util.Log;
 import com.google.android.gms.auth.api.Auth;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
-import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.auth.api.signin.GoogleSignInClient;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.android.gms.auth.api.signin.GoogleSignInResult;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.Scope;
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthCredential;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.GoogleAuthProvider;
-import com.kelvinapps.rxfirebase.RxFirebaseAuth;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -33,13 +29,14 @@ import org.json.JSONObject;
 import java.util.HashMap;
 import java.util.Map;
 
+import io.reactivex.Single;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.CompositeDisposable;
+import io.reactivex.functions.Function;
 import io.reactivex.observers.DisposableSingleObserver;
 import io.reactivex.schedulers.Schedulers;
-import rx.Observable;
 
-public class FirebaseWebService implements GoogleApiClient.OnConnectionFailedListener/*, OnCompleteListener */{
+public class FirebaseWebService implements GoogleApiClient.OnConnectionFailedListener {
 
     private static final String BASE_URL = "https://www.googleapis.com/oauth2/v4/token";
     private static final String CLIENT_ID = "685238908043-obre149i2k2gh9a71g2it0emsa97glma.apps.googleusercontent.com";
@@ -53,7 +50,6 @@ public class FirebaseWebService implements GoogleApiClient.OnConnectionFailedLis
     private static final String CONTENT_TYPE = "application/x-www-form-urlencoded";
     private static final String CODE_KEY = "code";
     private static final String AUTHORIZATION_CODE = "authorization_code";
-    private static final String AUTHENTICATION_ERROR = "Authentication error";
     public static final String ACCESS_TOKEN_KEY = "access_token";
     public static final String REFRESH_TOKEN_KEY = "refresh_token";
 
@@ -92,48 +88,26 @@ public class FirebaseWebService implements GoogleApiClient.OnConnectionFailedLis
         mGoogleSignInClient = GoogleSignIn.getClient(mContext, gso);
     }
 
-    public Observable<AuthResult> authWithGoogle(Intent data) {
-        GoogleSignInResult result = Auth.GoogleSignInApi.getSignInResultFromIntent(data);
-        if (result.isSuccess()) {
-            GoogleSignInAccount acct = result.getSignInAccount();
-            String authCode;
-            if (acct != null) {
-                authCode = acct.getServerAuthCode();
-                requestToken(authCode);
+    public Single<AuthResult> authWithGoogle(Intent data) {
 
-                AuthCredential credential = GoogleAuthProvider.getCredential(acct.getIdToken(), null);
-                 return RxFirebaseAuth.signInWithCredential(FirebaseAuth.getInstance(), credential);
-                /*FirebaseAuth.getInstance().signInWithCredential(credential)
-                        .addOnCompleteListener(this);*/
-            } else {
-                userInfoLoadingListener.onFail(AUTHENTICATION_ERROR);
-            }
-        } else {
-            Log.e(result.getStatus().toString());
-            userInfoLoadingListener.onFail(AUTHENTICATION_ERROR);
-        }
-        return null;
+        return getSignInResultFromIntent(data)
+                .filter(googleSignInResult -> googleSignInResult != null)
+                .map(GoogleSignInResult::getSignInAccount)
+                .filter(googleSignInAccount -> googleSignInAccount != null)
+                .doOnSuccess(googleSignInAccount -> requestToken(googleSignInAccount.getServerAuthCode()))
+                .map(googleSignInAccount -> GoogleAuthProvider.getCredential(googleSignInAccount.getIdToken(), null))
+                .flatMapSingle((Function<AuthCredential, Single<AuthResult>>) authCredential -> signInWithCredential(FirebaseAuth.getInstance(), authCredential));
     }
 
-    /*@Override
-    public void onComplete(@NonNull Task task) {
-        Log.v("111111");
-        if (task.isSuccessful()) {
-            FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
-            if (userInfoLoadingListener != null) {
-                if (user != null) {
-                    userInfoLoadingListener.onDataLoaded(user.getDisplayName(),
-                            user.getEmail(),
-                            String.valueOf(user.getPhotoUrl()));
-                } else {
-                    userInfoLoadingListener.onFail(AUTHENTICATION_ERROR);
-                }
-            }
-        } else {
-            Log.e(task.getResult().toString());
-            userInfoLoadingListener.onFail(AUTHENTICATION_ERROR);
-        }
-    }*/
+    private static Single<GoogleSignInResult> getSignInResultFromIntent(final Intent data) {
+
+        return Single.fromCallable(() -> Auth.GoogleSignInApi.getSignInResultFromIntent(data));
+    }
+
+    private static Single<AuthResult> signInWithCredential(@NonNull final FirebaseAuth firebaseAuth,
+                                                           @NonNull final AuthCredential credential) {
+        return Single.create(e -> RxTask.assignOnTask(e, firebaseAuth.signInWithCredential(credential)));
+    }
 
     @Override
     public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
@@ -142,6 +116,7 @@ public class FirebaseWebService implements GoogleApiClient.OnConnectionFailedLis
     }
 
     private void requestToken(String authCode) {
+        Log.v("REQUESTING TOKEN " + authCode);
         RequestParameters requestParameters = getAccessTokenParameters(authCode);
         mCompositeDisposable.add(NetworkUtil.getResultFromServer(requestParameters)
                 .subscribeOn(Schedulers.io())
