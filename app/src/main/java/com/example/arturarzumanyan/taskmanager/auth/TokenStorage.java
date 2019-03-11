@@ -3,6 +3,8 @@ package com.example.arturarzumanyan.taskmanager.auth;
 import android.content.Context;
 import android.content.SharedPreferences;
 
+import com.example.arturarzumanyan.taskmanager.networking.util.Log;
+
 import static android.content.Context.MODE_PRIVATE;
 
 public class TokenStorage {
@@ -27,6 +29,7 @@ public class TokenStorage {
     }
 
     public void write(String accessToken, String refreshToken) {
+        Log.v("Current thread is " + Thread.currentThread().getName());
         SharedPreferences prefs = mContext.getSharedPreferences(SHARED_PREFS_NAME, MODE_PRIVATE);
         SharedPreferences.Editor editor = prefs.edit();
         editor.putString(FirebaseWebService.ACCESS_TOKEN_KEY, accessToken);

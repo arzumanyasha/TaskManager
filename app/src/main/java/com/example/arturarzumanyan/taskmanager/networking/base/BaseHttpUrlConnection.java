@@ -27,34 +27,32 @@ public class BaseHttpUrlConnection {
     public ResponseDto getResult(String url,
                                  FirebaseWebService.RequestMethods requestMethod,
                                  Map<String, Object> requestBodyParameters,
-                                 Map<String, String> requestHeaderParameters) {
-        HttpURLConnection connection = null;
+                                 Map<String, String> requestHeaderParameters) throws IOException {
+        HttpURLConnection connection;
+
+        Log.v("Current thread is " + Thread.currentThread().getName());
 
         isJson = false;
 
         String query;
-        try {
-            connection = getConnectionSettings(url, requestMethod, requestHeaderParameters);
 
-            query = setRequestsDataTypeSettings(requestMethod, requestBodyParameters);
+        connection = getConnectionSettings(url, requestMethod, requestHeaderParameters);
 
-            setConnection(connection, query, requestMethod);
+        query = setRequestsDataTypeSettings(requestMethod, requestBodyParameters);
 
-            return getResponseDto(connection);
-        } catch (IOException e) {
-            Log.v(e.getMessage());
-            e.printStackTrace();
-            return null;
-        } finally {
-            if (connection != null) {
-                connection.disconnect();
-            }
+        setConnection(connection, query, requestMethod);
 
+        if (connection != null) {
+            ResponseDto responseDto = getResponseDto(connection);
+            connection.disconnect();
+            return responseDto;
         }
+
+        return null;
     }
 
     private String setRequestsDataTypeSettings(FirebaseWebService.RequestMethods requestMethod,
-                                             Map<String, Object> requestBodyParameters ){
+                                               Map<String, Object> requestBodyParameters) {
         if ((requestMethod == FirebaseWebService.RequestMethods.POST) && !isJson) {
             Uri.Builder uriBuilder = new Uri.Builder();
             for (Map.Entry<String, Object> map : requestBodyParameters.entrySet()) {

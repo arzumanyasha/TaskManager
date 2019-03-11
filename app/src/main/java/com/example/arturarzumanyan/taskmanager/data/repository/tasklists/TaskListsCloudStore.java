@@ -31,14 +31,14 @@ public class TaskListsCloudStore {
         );
         requestParameters.setRequestHeaderParameters(new HashMap<String, String>());
 
-        return NetworkUtil.getResultFromServer(requestParameters);
+        return null/*NetworkUtil.getResultFromServer(requestParameters)*/;
     }
 
     public ResponseDto addTaskListOnServer(TaskList taskList) {
         RequestParameters requestParameters = mRepositoryLoadHelper.getTaskListCreateOrUpdateParameters(taskList,
                 BASE_GOOGLE_APIS_URL + BASE_TASK_LISTS_URL, POST);
 
-        return NetworkUtil.getResultFromServer(requestParameters);
+        return null/*NetworkUtil.getResultFromServer(requestParameters)*/;
     }
 
     public ResponseDto updateTaskListOnServer(TaskList taskList) {
@@ -47,7 +47,7 @@ public class TaskListsCloudStore {
         RequestParameters requestParameters = mRepositoryLoadHelper.getTaskListCreateOrUpdateParameters(taskList,
                 url, PATCH);
 
-        return NetworkUtil.getResultFromServer(requestParameters);
+        return null/*NetworkUtil.getResultFromServer(requestParameters)*/;
     }
 
     public ResponseDto deleteTaskListOnServer(final TaskList taskList) {
@@ -55,6 +55,6 @@ public class TaskListsCloudStore {
 
         RequestParameters requestParameters = mRepositoryLoadHelper.getDeleteParameters(url);
 
-        return NetworkUtil.getResultFromServer(requestParameters);
+        return null/*NetworkUtil.getResultFromServer(requestParameters)*/;
     }
 }

@@ -8,23 +8,26 @@ import com.example.arturarzumanyan.taskmanager.networking.util.Log;
 
 import java.util.Map;
 
+import io.reactivex.Single;
+
 public class NetworkUtil {
-    public static ResponseDto getResultFromServer(RequestParameters requestParameters) {
+    public static Single<ResponseDto> getResultFromServer(RequestParameters requestParameters) {
         String url = requestParameters.getUrl();
         FirebaseWebService.RequestMethods requestMethod = requestParameters.getRequestMethod();
         Map<String, Object> requestBodyParameters = requestParameters.getRequestBodyParameters();
         Map<String, String> requestHeaderParameters = requestParameters.getRequestHeaderParameters();
 
+        Log.v("CURRENT THREAD " + Thread.currentThread().getName());
         Log.v("NETWORKING REQUEST " + requestParameters.getUrl());
         Log.v("NETWORKING REQUEST " + requestParameters.getRequestMethod().toString());
         Log.v("NETWORKING REQUEST " + requestParameters.getRequestHeaderParameters().toString());
-        if(requestBodyParameters != null) {
+        if (requestBodyParameters != null) {
             Log.v("NETWORKING REQUEST " + requestParameters.getRequestBodyParameters().toString());
         }
         BaseHttpUrlConnection baseHttpUrlConnection = new BaseHttpUrlConnection();
-        return baseHttpUrlConnection.getResult(url,
+        return Single.fromCallable(() -> baseHttpUrlConnection.getResult(url,
                 requestMethod,
                 requestBodyParameters,
-                requestHeaderParameters);
+                requestHeaderParameters));
     }
 }
