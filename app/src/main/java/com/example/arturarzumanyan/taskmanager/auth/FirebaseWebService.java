@@ -6,6 +6,7 @@ import android.support.annotation.NonNull;
 
 import com.example.arturarzumanyan.taskmanager.data.repository.RepositoryLoadHelper;
 import com.example.arturarzumanyan.taskmanager.domain.ResponseDto;
+import com.example.arturarzumanyan.taskmanager.domain.User;
 import com.example.arturarzumanyan.taskmanager.networking.NetworkUtil;
 import com.example.arturarzumanyan.taskmanager.networking.base.RequestParameters;
 import com.example.arturarzumanyan.taskmanager.networking.util.Log;
@@ -14,8 +15,6 @@ import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInClient;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.android.gms.auth.api.signin.GoogleSignInResult;
-import com.google.android.gms.common.ConnectionResult;
-import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.Scope;
 import com.google.firebase.auth.AuthCredential;
 import com.google.firebase.auth.AuthResult;
@@ -36,7 +35,7 @@ import io.reactivex.functions.Function;
 import io.reactivex.observers.DisposableSingleObserver;
 import io.reactivex.schedulers.Schedulers;
 
-public class FirebaseWebService implements GoogleApiClient.OnConnectionFailedListener {
+public class FirebaseWebService {
 
     private static final String BASE_URL = "https://www.googleapis.com/oauth2/v4/token";
     private static final String CLIENT_ID = "685238908043-obre149i2k2gh9a71g2it0emsa97glma.apps.googleusercontent.com";
@@ -59,8 +58,6 @@ public class FirebaseWebService implements GoogleApiClient.OnConnectionFailedLis
     private GoogleSignInClient mGoogleSignInClient;
     private CompositeDisposable mCompositeDisposable = new CompositeDisposable();
     private Context mContext;
-
-    private UserInfoLoadingListener userInfoLoadingListener;
 
     public static void initFirebaseWebServiceInstance(Context context) {
         if (mFirebaseWebServiceInstance == null) {
@@ -88,7 +85,7 @@ public class FirebaseWebService implements GoogleApiClient.OnConnectionFailedLis
         mGoogleSignInClient = GoogleSignIn.getClient(mContext, gso);
     }
 
-    public Single<AuthResult> authWithGoogle(Intent data) {
+    public Single<User> authWithGoogle(Intent data) {
 
         return getSignInResultFromIntent(data)
                 .filter(googleSignInResult -> googleSignInResult != null)
@@ -96,7 +93,10 @@ public class FirebaseWebService implements GoogleApiClient.OnConnectionFailedLis
                 .filter(googleSignInAccount -> googleSignInAccount != null)
                 .doOnSuccess(googleSignInAccount -> requestToken(googleSignInAccount.getServerAuthCode()))
                 .map(googleSignInAccount -> GoogleAuthProvider.getCredential(googleSignInAccount.getIdToken(), null))
-                .flatMapSingle((Function<AuthCredential, Single<AuthResult>>) authCredential -> signInWithCredential(FirebaseAuth.getInstance(), authCredential));
+                .flatMapSingle((Function<AuthCredential, Single<User>>) authCredential -> signInWithCredential(FirebaseAuth.getInstance(), authCredential)
+                        .map(authResult -> new User(authResult.getUser().getDisplayName(),
+                                authResult.getUser().getEmail(),
+                                String.valueOf(authResult.getUser().getPhotoUrl()))));
     }
 
     private static Single<GoogleSignInResult> getSignInResultFromIntent(final Intent data) {
@@ -107,12 +107,6 @@ public class FirebaseWebService implements GoogleApiClient.OnConnectionFailedLis
     private static Single<AuthResult> signInWithCredential(@NonNull final FirebaseAuth firebaseAuth,
                                                            @NonNull final AuthCredential credential) {
         return Single.create(e -> RxTask.assignOnTask(e, firebaseAuth.signInWithCredential(credential)));
-    }
-
-    @Override
-    public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
-        Log.v(connectionResult.getErrorMessage());
-        userInfoLoadingListener.onFail(connectionResult.getErrorMessage());
     }
 
     private void requestToken(String authCode) {
@@ -227,20 +221,6 @@ public class FirebaseWebService implements GoogleApiClient.OnConnectionFailedLis
 
     public void closeAuthConnection() {
         mCompositeDisposable.clear();
-    }
-
-    public void unsubscribe() {
-        userInfoLoadingListener = null;
-    }
-
-    public void setUserInfoLoadingListener(UserInfoLoadingListener listener) {
-        this.userInfoLoadingListener = listener;
-    }
-
-    public interface UserInfoLoadingListener {
-        void onDataLoaded(String userName, String userEmail, String userPhotoUrl);
-
-        void onFail(String message);
     }
 
     public interface AccessTokenUpdatedListener {

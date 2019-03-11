@@ -3,6 +3,7 @@ package com.example.arturarzumanyan.taskmanager.ui.activity.signin.mvp;
 import android.content.Intent;
 
 import com.example.arturarzumanyan.taskmanager.auth.FirebaseWebService;
+import com.example.arturarzumanyan.taskmanager.domain.User;
 import com.example.arturarzumanyan.taskmanager.networking.util.Log;
 import com.google.firebase.auth.AuthResult;
 
@@ -34,19 +35,19 @@ public class SignInPresenterImpl implements SignInContract.SignInPresenter {
     @Override
     public void processAuthWithGoogle(int requestCode, int resultCode, Intent data) {
         if (resultCode == RESULT_OK && requestCode == AUTHENTICATION_REQUEST_CODE) {
-            FirebaseWebService.getFirebaseWebServiceInstance().authWithGoogle(data).subscribe(new SingleObserver<AuthResult>() {
+            FirebaseWebService.getFirebaseWebServiceInstance().authWithGoogle(data).subscribe(new SingleObserver<User>() {
                 @Override
                 public void onSubscribe(Disposable d) {
 
                 }
 
                 @Override
-                public void onSuccess(AuthResult authResult) {
-                    if (authResult != null && authResult.getUser() != null) {
-                        Log.v("USER NAME " + authResult.getUser().getDisplayName());
-                        mSignInView.onSignInSuccess(authResult.getUser().getDisplayName(),
-                                authResult.getUser().getEmail(),
-                                String.valueOf(authResult.getUser().getPhotoUrl()));
+                public void onSuccess(User user) {
+                    if (user != null) {
+                        Log.v("USER NAME " + user.getDisplayName());
+                        mSignInView.onSignInSuccess(user.getDisplayName(),
+                                user.getEmail(),
+                                String.valueOf(user.getPhotoUrl()));
                     }
                 }
 
@@ -70,6 +71,5 @@ public class SignInPresenterImpl implements SignInContract.SignInPresenter {
     @Override
     public void unsubscribe() {
         FirebaseWebService.getFirebaseWebServiceInstance().closeAuthConnection();
-        FirebaseWebService.getFirebaseWebServiceInstance().unsubscribe();
     }
 }
