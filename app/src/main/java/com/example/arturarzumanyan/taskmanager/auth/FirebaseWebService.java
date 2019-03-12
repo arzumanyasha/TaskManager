@@ -5,10 +5,7 @@ import android.content.Intent;
 import android.support.annotation.NonNull;
 
 import com.example.arturarzumanyan.taskmanager.data.repository.RepositoryLoadHelper;
-import com.example.arturarzumanyan.taskmanager.domain.ResponseDto;
 import com.example.arturarzumanyan.taskmanager.domain.User;
-import com.example.arturarzumanyan.taskmanager.networking.NetworkUtil;
-import com.example.arturarzumanyan.taskmanager.networking.base.RequestParameters;
 import com.example.arturarzumanyan.taskmanager.networking.util.Log;
 import com.google.android.gms.auth.api.Auth;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
@@ -34,10 +31,13 @@ import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.functions.Function;
 import io.reactivex.observers.DisposableSingleObserver;
 import io.reactivex.schedulers.Schedulers;
+import okhttp3.FormBody;
+import okhttp3.RequestBody;
+import okhttp3.ResponseBody;
+
+import static com.example.arturarzumanyan.taskmanager.data.repository.RepositoryLoadHelper.AUTHORIZATION_KEY;
 
 public class FirebaseWebService {
-
-    private static final String BASE_URL = "https://www.googleapis.com/oauth2/v4/token";
     private static final String CLIENT_ID = "685238908043-obre149i2k2gh9a71g2it0emsa97glma.apps.googleusercontent.com";
     private static final String CLIENT_SECRET = "6ygf5qYHRMx3AnIwXGbLhWuz";
     private static final String CALENDAR_SCOPE = "https://www.googleapis.com/auth/calendar.events";
@@ -111,16 +111,31 @@ public class FirebaseWebService {
 
     private void requestToken(String authCode) {
         Log.v("REQUESTING TOKEN " + authCode);
-        RequestParameters requestParameters = getAccessTokenParameters(authCode);
-        mCompositeDisposable.add(NetworkUtil.getResultFromServer(requestParameters)
+
+        RequestBody requestBody = new FormBody.Builder()
+                .add(CODE_KEY, authCode)
+                .add(CLIENT_ID_KEY, CLIENT_ID)
+                .add(CLIENT_SECRET_KEY, CLIENT_SECRET)
+                .add(GRANT_TYPE_KEY, AUTHORIZATION_CODE)
+                .build();
+
+        Map<String, String> requestHeaderParameters = new HashMap<>();
+        requestHeaderParameters.put(CONTENT_TYPE_KEY, CONTENT_TYPE);
+        requestHeaderParameters.put(AUTHORIZATION_KEY, "Bearer " + TokenStorage.getTokenStorageInstance().getAccessToken());
+
+        Single<ResponseBody> responseSingle = GoogleSignInAuthApiFactory.getSignInService().requestToken(requestBody, requestHeaderParameters);
+
+        mCompositeDisposable.add(responseSingle
                 .subscribeOn(Schedulers.io())
-                .doOnSuccess(responseDto -> {
+                .doOnSuccess(response -> {
                     Log.v("ACCESS TOKEN RECEIVED");
-                    String accessToken = getAccessTokenFromBuffer(responseDto.getResponseData());
-                    String refreshToken = getRefreshTokenFromBuffer(responseDto.getResponseData());
+                    String buffer = response.string();
+                    String accessToken = getAccessTokenFromBuffer(buffer);
+                    String refreshToken = getRefreshTokenFromBuffer(buffer);
 
                     TokenStorage.getTokenStorageInstance().write(accessToken, refreshToken);
                 })
+                .doOnError(throwable -> Log.e("AUTH ERROR " + throwable.getLocalizedMessage()))
                 .subscribe());
     }
 
@@ -148,33 +163,30 @@ public class FirebaseWebService {
         return refreshToken;
     }
 
-    private RequestParameters getAccessTokenParameters(String authCode) {
-        RequestMethods requestMethod = RequestMethods.POST;
-        Map<String, Object> requestBodyParameters = new HashMap<>();
-        requestBodyParameters.put(CODE_KEY, authCode);
-        requestBodyParameters.put(CLIENT_ID_KEY, CLIENT_ID);
-        requestBodyParameters.put(CLIENT_SECRET_KEY, CLIENT_SECRET);
-        requestBodyParameters.put(GRANT_TYPE_KEY, AUTHORIZATION_CODE);
+    public void refreshAccessToken(final AccessTokenUpdatedListener listener) {
+        RequestBody requestBody = new FormBody.Builder()
+                .add(REFRESH_TOKEN_KEY, TokenStorage.getTokenStorageInstance().getRefreshToken())
+                .add(CLIENT_ID_KEY, CLIENT_ID)
+                .add(CLIENT_SECRET_KEY, CLIENT_SECRET)
+                .add(GRANT_TYPE_KEY, REFRESH_TOKEN_KEY)
+                .build();
+
         Map<String, String> requestHeaderParameters = new HashMap<>();
         requestHeaderParameters.put(CONTENT_TYPE_KEY, CONTENT_TYPE);
+        requestHeaderParameters.put(AUTHORIZATION_KEY, "Bearer " + TokenStorage.getTokenStorageInstance().getAccessToken());
 
-        RequestParameters requestParameters = new RequestParameters(BASE_URL, requestMethod, requestBodyParameters);
-        requestParameters.setRequestHeaderParameters(requestHeaderParameters);
-        return requestParameters;
-    }
+        Single<ResponseBody> responseSingle = GoogleSignInAuthApiFactory.getSignInService().requestRefreshToken(requestBody, requestHeaderParameters);
 
-    public void refreshAccessToken(final AccessTokenUpdatedListener listener) {
-        RequestParameters requestParameters = getRefreshTokenParameters();
-        mCompositeDisposable.add(NetworkUtil.getResultFromServer(requestParameters)
+        mCompositeDisposable.add(responseSingle
                 .subscribeOn(Schedulers.io())
-                .doOnSuccess(responseDto -> {
-                    String accessToken = getAccessTokenFromBuffer(responseDto.getResponseData());
+                .doOnSuccess(response -> {
+                    String accessToken = getAccessTokenFromBuffer(response.string());
                     TokenStorage.getTokenStorageInstance().writeAccessToken(accessToken);
                 })
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribeWith(new DisposableSingleObserver<ResponseDto>() {
+                .subscribeWith(new DisposableSingleObserver<ResponseBody>() {
                     @Override
-                    public void onSuccess(ResponseDto responseDto) {
+                    public void onSuccess(ResponseBody responseBody) {
                         listener.onAccessTokenUpdated();
                     }
 
@@ -185,21 +197,6 @@ public class FirebaseWebService {
                         }
                     }
                 }));
-    }
-
-    private RequestParameters getRefreshTokenParameters() {
-        FirebaseWebService.RequestMethods requestMethod = FirebaseWebService.RequestMethods.POST;
-        Map<String, Object> requestBodyParameters = new HashMap<>();
-        requestBodyParameters.put(REFRESH_TOKEN_KEY, TokenStorage.getTokenStorageInstance().getRefreshToken());
-        requestBodyParameters.put(CLIENT_ID_KEY, CLIENT_ID);
-        requestBodyParameters.put(CLIENT_SECRET_KEY, CLIENT_SECRET);
-        requestBodyParameters.put(GRANT_TYPE_KEY, REFRESH_TOKEN_KEY);
-        Map<String, String> requestHeaderParameters = new HashMap<>();
-        requestHeaderParameters.put(CONTENT_TYPE_KEY, CONTENT_TYPE);
-
-        RequestParameters requestParameters = new RequestParameters(BASE_URL, requestMethod, requestBodyParameters);
-        requestParameters.setRequestHeaderParameters(requestHeaderParameters);
-        return requestParameters;
     }
 
     public FirebaseUser getCurrentUser() {
