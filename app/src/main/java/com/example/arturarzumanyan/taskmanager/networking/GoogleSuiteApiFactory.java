@@ -2,7 +2,6 @@ package com.example.arturarzumanyan.taskmanager.networking;
 
 import com.example.arturarzumanyan.taskmanager.auth.FirebaseWebService;
 import com.example.arturarzumanyan.taskmanager.auth.TokenStorage;
-import com.example.arturarzumanyan.taskmanager.data.repository.RepositoryLoadHelper;
 import com.example.arturarzumanyan.taskmanager.networking.util.Log;
 
 import java.net.HttpURLConnection;

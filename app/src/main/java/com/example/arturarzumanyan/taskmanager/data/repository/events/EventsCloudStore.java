@@ -16,7 +16,6 @@ import okhttp3.Response;
 import okhttp3.ResponseBody;
 
 import static com.example.arturarzumanyan.taskmanager.data.repository.RepositoryLoadHelper.AUTHORIZATION_KEY;
-import static com.example.arturarzumanyan.taskmanager.data.repository.RepositoryLoadHelper.BASE_GOOGLE_APIS_URL;
 import static com.example.arturarzumanyan.taskmanager.data.repository.RepositoryLoadHelper.TOKEN_TYPE;
 import static com.example.arturarzumanyan.taskmanager.networking.base.BaseHttpUrlConnection.JSON_CONTENT_TYPE_VALUE;
 
@@ -35,10 +34,10 @@ public class EventsCloudStore {
     public Single<ResponseBody> getEventsFromServer(EventsSpecification eventsSpecification) {
         String eventsUrl;
         if (eventsSpecification.getStartDate().isEmpty() && eventsSpecification.getEndDate().isEmpty()) {
-            eventsUrl = BASE_GOOGLE_APIS_URL + BASE_EVENTS_URL +
+            eventsUrl = BASE_EVENTS_URL +
                     FirebaseWebService.getFirebaseWebServiceInstance().getUserEmail() + "/events";
         } else {
-            eventsUrl = BASE_GOOGLE_APIS_URL + BASE_EVENTS_URL +
+            eventsUrl = BASE_EVENTS_URL +
                     FirebaseWebService.getFirebaseWebServiceInstance().getUserEmail() + "/events?" +
                     "timeMax=" + DateUtils.decodeDate(eventsSpecification.getEndDate()) +
                     "&timeMin=" + DateUtils.decodeDate(eventsSpecification.getStartDate());
@@ -46,11 +45,11 @@ public class EventsCloudStore {
 
         Map<String, String> requestHeaderParameters = new HashMap<>();
         requestHeaderParameters.put(AUTHORIZATION_KEY, TOKEN_TYPE + TokenStorage.getTokenStorageInstance().getAccessToken());
-        return mGoogleCalendarApi.getEvents(eventsUrl, requestHeaderParameters)/*NetworkUtil.getResultFromServer(requestParameters)*/;
+        return mGoogleCalendarApi.getEvents(eventsUrl, requestHeaderParameters);
     }
 
     public Single<ResponseBody> addEventOnServer(Event event) {
-        String url = BASE_GOOGLE_APIS_URL + BASE_EVENTS_URL +
+        String url = BASE_EVENTS_URL +
                 FirebaseWebService.getFirebaseWebServiceInstance().getUserEmail() +
                 "/events";
         Map<String, String> requestHeaderParameters = new HashMap<>();
@@ -63,7 +62,7 @@ public class EventsCloudStore {
     }
 
     public Single<ResponseBody> updateEventOnServer(Event event) {
-        String url = BASE_GOOGLE_APIS_URL + BASE_EVENTS_URL +
+        String url = BASE_EVENTS_URL +
                 FirebaseWebService.getFirebaseWebServiceInstance().getUserEmail() +
                 "/events/" +
                 event.getId();
@@ -78,7 +77,7 @@ public class EventsCloudStore {
     }
 
     public Single<Response> deleteEventOnServer(Event event) {
-        String url = BASE_GOOGLE_APIS_URL + BASE_EVENTS_URL +
+        String url = BASE_EVENTS_URL +
                 FirebaseWebService.getFirebaseWebServiceInstance().getUserEmail() +
                 "/events/" +
                 event.getId();

@@ -167,25 +167,4 @@ public class RepositoryLoadHelper {
 
         return false;
     }
-
-    public static class TokenRefresherInterceptor implements Interceptor {
-        @Override public Response intercept(Interceptor.Chain chain) throws IOException {
-            Request request = chain.request();
-            Response response = chain.proceed(request);
-
-            if(response.code() == HttpURLConnection.HTTP_UNAUTHORIZED){
-                ResponseBody responseBody = FirebaseWebService.getFirebaseWebServiceInstance().refreshAccessToken().body();
-                String accessToken = FirebaseWebService.getFirebaseWebServiceInstance().getAccessTokenFromBuffer(responseBody.string());
-                TokenStorage.getTokenStorageInstance().writeAccessToken(accessToken);
-
-                Request.Builder builder = request.newBuilder();
-                builder.removeHeader(AUTHORIZATION_KEY);
-                builder.addHeader(AUTHORIZATION_KEY, TOKEN_TYPE + TokenStorage.getTokenStorageInstance().getAccessToken());
-                Request newRequest = builder.build();
-                response = chain.proceed(newRequest);
-            }
-
-            return response;
-        }
-    }
 }
