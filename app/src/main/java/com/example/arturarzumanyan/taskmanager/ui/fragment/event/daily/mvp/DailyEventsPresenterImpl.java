@@ -47,7 +47,7 @@ public class DailyEventsPresenterImpl implements DailyEventsContract.DailyEvents
     }
 
     private void loadDailyEvents() {
-        final EventsFromDateSpecification eventsFromDateSpecification = new EventsFromDateSpecification();
+        EventsFromDateSpecification eventsFromDateSpecification = new EventsFromDateSpecification();
         eventsFromDateSpecification.setDate(DateUtils.getCurrentTime());
         mCompositeDisposable.add(mEventsRepository.getEvents(eventsFromDateSpecification)
                 .subscribeOn(Schedulers.io())

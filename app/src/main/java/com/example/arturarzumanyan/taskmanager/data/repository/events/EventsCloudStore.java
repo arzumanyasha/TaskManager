@@ -5,7 +5,7 @@ import com.example.arturarzumanyan.taskmanager.auth.TokenStorage;
 import com.example.arturarzumanyan.taskmanager.data.repository.RepositoryLoadHelper;
 import com.example.arturarzumanyan.taskmanager.data.repository.events.specification.EventsSpecification;
 import com.example.arturarzumanyan.taskmanager.domain.Event;
-import com.example.arturarzumanyan.taskmanager.networking.GoogleApiFactory;
+import com.example.arturarzumanyan.taskmanager.networking.GoogleSuiteApiFactory;
 import com.example.arturarzumanyan.taskmanager.networking.util.DateUtils;
 
 import java.util.HashMap;
@@ -28,7 +28,7 @@ public class EventsCloudStore {
     private RepositoryLoadHelper mRepositoryLoadHelper;
 
     EventsCloudStore() {
-        mGoogleCalendarApi = GoogleApiFactory.getRetrofitInstance().create(GoogleCalendarApi.class);
+        mGoogleCalendarApi = GoogleSuiteApiFactory.getRetrofitInstance().create(GoogleCalendarApi.class);
         mRepositoryLoadHelper = new RepositoryLoadHelper();
     }
 

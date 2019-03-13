@@ -1,13 +1,11 @@
 package com.example.arturarzumanyan.taskmanager.networking;
 
-import com.example.arturarzumanyan.taskmanager.data.repository.RepositoryLoadHelper;
-
 import okhttp3.OkHttpClient;
 import okhttp3.logging.HttpLoggingInterceptor;
 import retrofit2.Retrofit;
 import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory;
 
-public class GoogleApiFactory {
+public class GoogleAuthApiFactory {
     private static Retrofit retrofit;
     private static final String BASE_URL = "https://www.googleapis.com/";
 
@@ -19,7 +17,6 @@ public class GoogleApiFactory {
 
             OkHttpClient httpClient = new OkHttpClient.Builder()
                     .addInterceptor(logging)
-                    .addInterceptor(new RepositoryLoadHelper.TokenRefresherInterceptor())
                     .build();
 
             retrofit = new Retrofit.Builder()
@@ -31,5 +28,4 @@ public class GoogleApiFactory {
 
         return retrofit;
     }
-
 }

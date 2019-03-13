@@ -5,7 +5,8 @@ import android.content.Intent;
 import android.support.annotation.NonNull;
 
 import com.example.arturarzumanyan.taskmanager.domain.User;
-import com.example.arturarzumanyan.taskmanager.networking.GoogleApiFactory;
+import com.example.arturarzumanyan.taskmanager.networking.GoogleAuthApiFactory;
+import com.example.arturarzumanyan.taskmanager.networking.GoogleSuiteApiFactory;
 import com.example.arturarzumanyan.taskmanager.networking.util.Log;
 import com.google.android.gms.auth.api.Auth;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
@@ -72,7 +73,7 @@ public class FirebaseWebService {
 
     private FirebaseWebService(Context context) {
         this.mContext = context;
-        mGoogleSignInAuthApi = GoogleApiFactory.getRetrofitInstance().create(GoogleSignInAuthApi.class);
+        mGoogleSignInAuthApi = GoogleAuthApiFactory.getRetrofitInstance().create(GoogleSignInAuthApi.class);
     }
 
     public void setGoogleClientOptions() {
