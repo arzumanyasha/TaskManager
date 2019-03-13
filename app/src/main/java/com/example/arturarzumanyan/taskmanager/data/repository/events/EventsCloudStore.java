@@ -5,6 +5,7 @@ import com.example.arturarzumanyan.taskmanager.auth.TokenStorage;
 import com.example.arturarzumanyan.taskmanager.data.repository.RepositoryLoadHelper;
 import com.example.arturarzumanyan.taskmanager.data.repository.events.specification.EventsSpecification;
 import com.example.arturarzumanyan.taskmanager.domain.Event;
+import com.example.arturarzumanyan.taskmanager.networking.GoogleApiFactory;
 import com.example.arturarzumanyan.taskmanager.networking.util.DateUtils;
 
 import java.util.HashMap;
@@ -23,9 +24,11 @@ public class EventsCloudStore {
     private static final String BASE_EVENTS_URL = "calendar/v3/calendars/";
     private static final String CONTENT_TYPE_KEY = "Content-Type";
 
+    private GoogleCalendarApi mGoogleCalendarApi;
     private RepositoryLoadHelper mRepositoryLoadHelper;
 
     EventsCloudStore() {
+        mGoogleCalendarApi = GoogleApiFactory.getRetrofitInstance().create(GoogleCalendarApi.class);
         mRepositoryLoadHelper = new RepositoryLoadHelper();
     }
 
@@ -43,7 +46,7 @@ public class EventsCloudStore {
 
         Map<String, String> requestHeaderParameters = new HashMap<>();
         requestHeaderParameters.put(AUTHORIZATION_KEY, TOKEN_TYPE + TokenStorage.getTokenStorageInstance().getAccessToken());
-        return GoogleCalendarApiFactory.getGoogleCalendarApi().getEvents(eventsUrl, requestHeaderParameters)/*NetworkUtil.getResultFromServer(requestParameters)*/;
+        return mGoogleCalendarApi.getEvents(eventsUrl, requestHeaderParameters)/*NetworkUtil.getResultFromServer(requestParameters)*/;
     }
 
     public Single<ResponseBody> addEventOnServer(Event event) {
@@ -56,7 +59,7 @@ public class EventsCloudStore {
 
         Map<String, Object> requestBodyParameters = mRepositoryLoadHelper.getEventBodyParameters(event);
 
-        return GoogleCalendarApiFactory.getGoogleCalendarApi().addEvent(url, requestHeaderParameters, requestBodyParameters);
+        return mGoogleCalendarApi.addEvent(url, requestHeaderParameters, requestBodyParameters);
     }
 
     public Single<ResponseBody> updateEventOnServer(Event event) {
@@ -71,7 +74,7 @@ public class EventsCloudStore {
 
         Map<String, Object> requestBodyParameters = mRepositoryLoadHelper.getEventBodyParameters(event);
 
-        return GoogleCalendarApiFactory.getGoogleCalendarApi().updateEvent(url, requestHeaderParameters, requestBodyParameters);
+        return mGoogleCalendarApi.updateEvent(url, requestHeaderParameters, requestBodyParameters);
     }
 
     public Single<Response> deleteEventOnServer(Event event) {
@@ -83,6 +86,6 @@ public class EventsCloudStore {
         Map<String, String> requestHeaderParameters = new HashMap<>();
         requestHeaderParameters.put(AUTHORIZATION_KEY, TOKEN_TYPE + TokenStorage.getTokenStorageInstance().getAccessToken());
 
-        return GoogleCalendarApiFactory.getGoogleCalendarApi().deleteEvent(url, requestHeaderParameters);
+        return mGoogleCalendarApi.deleteEvent(url, requestHeaderParameters);
     }
 }
