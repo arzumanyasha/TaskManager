@@ -1,5 +1,6 @@
 package com.example.arturarzumanyan.taskmanager.ui.activity.intention.mvp;
 
+import com.example.arturarzumanyan.taskmanager.auth.FirebaseWebService;
 import com.example.arturarzumanyan.taskmanager.data.repository.tasklists.TaskListsRepository;
 import com.example.arturarzumanyan.taskmanager.data.repository.tasklists.specification.AllTaskListsSpecification;
 import com.example.arturarzumanyan.taskmanager.domain.Event;
@@ -111,6 +112,12 @@ public class IntentionPresenterImpl implements IntentionContract.IntentionPresen
             }
         }
         return 0;
+    }
+
+    @Override
+    public void processLogOut() {
+        FirebaseWebService.getFirebaseWebServiceInstance().logOut();
+        mIntentionView.displaySignInScreen();
     }
 
     @Override

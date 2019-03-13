@@ -176,6 +176,21 @@ public class IntentionActivity extends BaseActivity implements IntentionContract
         Menu mainMenu = mNavigationView.getMenu();
         mainMenu = populateCalendarMenu(mainMenu);
         populateTasksMenu(taskLists, mainMenu);
+        displaySignOutMenu(mainMenu);
+    }
+
+    private void displaySignOutMenu(Menu menu) {
+        SubMenu signOutMenu = menu.addSubMenu("Sign Out");
+        signOutMenu.add("Log Out").setOnMenuItemClickListener(item -> {
+            mIntentionPresenter.processLogOut();
+            return false;
+        });
+    }
+
+    @Override
+    public void displaySignInScreen() {
+        Intent intent = new Intent(IntentionActivity.this, SignInActivity.class);
+        startActivity(intent);
     }
 
     private Menu populateCalendarMenu(Menu menu) {

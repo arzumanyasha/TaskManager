@@ -203,6 +203,10 @@ public class FirebaseWebService {
         return FirebaseAuth.getInstance().getCurrentUser();
     }
 
+    public void logOut() {
+        FirebaseAuth.getInstance().signOut();
+    }
+
     public String getUserEmail() {
         FirebaseUser firebaseUser = getCurrentUser();
         if (firebaseUser != null) {
