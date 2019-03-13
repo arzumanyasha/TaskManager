@@ -34,6 +34,8 @@ public class IntentionContract {
 
         void processActionBarMenuItems(String title);
 
+        void processLogOut();
+
         void unsubscribe();
     }
 
@@ -59,6 +61,8 @@ public class IntentionContract {
         void displayRestoredEventsUi();
 
         void displayPreviousTaskFragment(List<TaskList> taskLists, TaskList taskList);
+
+        void displaySignInScreen();
 
         void recreateTaskListsMenu(List<TaskList> taskLists);
 
