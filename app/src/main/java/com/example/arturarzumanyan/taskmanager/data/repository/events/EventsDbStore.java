@@ -6,20 +6,22 @@ import com.example.arturarzumanyan.taskmanager.domain.Event;
 
 import java.util.List;
 
+import io.reactivex.Single;
+
 public class EventsDbStore {
 
     EventsDbStore() {
     }
 
-    public List<Event> getEvents(EventsSpecification eventsSpecification) {
-        return DbHelper.getDbHelperInstance().getEvents(eventsSpecification);
+    public Single<List<Event>> getEvents(EventsSpecification eventsSpecification) {
+        return Single.fromCallable(() -> DbHelper.getDbHelperInstance().getEvents(eventsSpecification));
     }
 
-    public void addOrUpdateEvents(List<Event> eventList) {
-        DbHelper.getDbHelperInstance().addOrUpdateEvents(eventList);
+    public Single<List<Event>> addOrUpdateEvents(List<Event> eventList, EventsSpecification eventsSpecification) {
+        return Single.fromCallable(() -> DbHelper.getDbHelperInstance().addOrUpdateEvents(eventList, eventsSpecification));
     }
 
-    public void deleteEvent(Event event) {
-        DbHelper.getDbHelperInstance().deleteEvent(event);
+    public Single<List<Event>> deleteEvent(Event event, EventsSpecification eventsSpecification) {
+        return Single.fromCallable(() -> DbHelper.getDbHelperInstance().deleteEvent(event, eventsSpecification));
     }
 }

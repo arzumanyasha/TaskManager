@@ -1,6 +1,7 @@
 package com.example.arturarzumanyan.taskmanager.data.repository;
 
 import com.example.arturarzumanyan.taskmanager.auth.FirebaseWebService;
+import com.example.arturarzumanyan.taskmanager.auth.TokenStorage;
 import com.example.arturarzumanyan.taskmanager.domain.Event;
 import com.example.arturarzumanyan.taskmanager.domain.Task;
 import com.example.arturarzumanyan.taskmanager.domain.TaskList;
@@ -8,10 +9,16 @@ import com.example.arturarzumanyan.taskmanager.networking.base.RequestParameters
 import com.example.arturarzumanyan.taskmanager.networking.util.DateUtils;
 
 import java.io.IOException;
+import java.net.HttpURLConnection;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import okhttp3.Interceptor;
+import okhttp3.Request;
+import okhttp3.Response;
+import okhttp3.ResponseBody;
 
 import static com.example.arturarzumanyan.taskmanager.networking.base.BaseHttpUrlConnection.JSON_CONTENT_TYPE_VALUE;
 import static com.example.arturarzumanyan.taskmanager.networking.util.EventsParser.COLOR_ID_KEY;
@@ -31,6 +38,7 @@ import static com.example.arturarzumanyan.taskmanager.networking.util.TasksParse
 public class RepositoryLoadHelper {
     public static final String BASE_GOOGLE_APIS_URL = "https://www.googleapis.com/";
     public static final String AUTHORIZATION_KEY = "Authorization";
+    public static final String TOKEN_TYPE = "Bearer ";
     private static final String CONTENT_TYPE_KEY = "Content-Type";
     private static final String NEEDS_ACTION_KEY = "needsAction";
     private static final String POPUP_KEY = "popup";
@@ -41,9 +49,7 @@ public class RepositoryLoadHelper {
     public RepositoryLoadHelper() {
     }
 
-    public RequestParameters getEventCreateOrUpdateParameters(Event event,
-                                                              String url,
-                                                              FirebaseWebService.RequestMethods requestMethod) {
+    public Map<String, Object> getEventBodyParameters(Event event) {
         Map<String, Object> requestBody = new HashMap<>();
 
         Map<String, String> startTimeMap = new HashMap<>();
@@ -76,17 +82,7 @@ public class RepositoryLoadHelper {
             requestBody.put(REMINDERS_KEY, remindersMap);
         }
 
-        Map<String, String> requestHeaderParameters = new HashMap<>();
-
-        requestHeaderParameters.put(CONTENT_TYPE_KEY, JSON_CONTENT_TYPE_VALUE);
-
-        RequestParameters requestParameters = new RequestParameters(
-                url,
-                requestMethod,
-                requestBody);
-        requestParameters.setRequestHeaderParameters(requestHeaderParameters);
-
-        return requestParameters;
+        return requestBody;
     }
 
     public RequestParameters getTaskCreateOrUpdateParameters(Task task,
@@ -170,5 +166,26 @@ public class RepositoryLoadHelper {
         }
 
         return false;
+    }
+
+    public static class TokenRefresherInterceptor implements Interceptor {
+        @Override public Response intercept(Interceptor.Chain chain) throws IOException {
+            Request request = chain.request();
+            Response response = chain.proceed(request);
+
+            if(response.code() == HttpURLConnection.HTTP_UNAUTHORIZED){
+                ResponseBody responseBody = FirebaseWebService.getFirebaseWebServiceInstance().refreshAccessToken().body();
+                String accessToken = FirebaseWebService.getFirebaseWebServiceInstance().getAccessTokenFromBuffer(responseBody.string());
+                TokenStorage.getTokenStorageInstance().writeAccessToken(accessToken);
+
+                Request.Builder builder = request.newBuilder();
+                builder.removeHeader(AUTHORIZATION_KEY);
+                builder.addHeader(AUTHORIZATION_KEY, TOKEN_TYPE + TokenStorage.getTokenStorageInstance().getAccessToken());
+                Request newRequest = builder.build();
+                response = chain.proceed(newRequest);
+            }
+
+            return response;
+        }
     }
 }

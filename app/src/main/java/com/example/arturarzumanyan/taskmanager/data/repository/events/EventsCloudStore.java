@@ -1,22 +1,27 @@
 package com.example.arturarzumanyan.taskmanager.data.repository.events;
 
 import com.example.arturarzumanyan.taskmanager.auth.FirebaseWebService;
+import com.example.arturarzumanyan.taskmanager.auth.TokenStorage;
 import com.example.arturarzumanyan.taskmanager.data.repository.RepositoryLoadHelper;
 import com.example.arturarzumanyan.taskmanager.data.repository.events.specification.EventsSpecification;
 import com.example.arturarzumanyan.taskmanager.domain.Event;
-import com.example.arturarzumanyan.taskmanager.domain.ResponseDto;
-import com.example.arturarzumanyan.taskmanager.networking.NetworkUtil;
-import com.example.arturarzumanyan.taskmanager.networking.base.RequestParameters;
 import com.example.arturarzumanyan.taskmanager.networking.util.DateUtils;
 
 import java.util.HashMap;
+import java.util.Map;
 
-import static com.example.arturarzumanyan.taskmanager.auth.FirebaseWebService.RequestMethods.PATCH;
-import static com.example.arturarzumanyan.taskmanager.auth.FirebaseWebService.RequestMethods.POST;
+import io.reactivex.Single;
+import okhttp3.Response;
+import okhttp3.ResponseBody;
+
+import static com.example.arturarzumanyan.taskmanager.data.repository.RepositoryLoadHelper.AUTHORIZATION_KEY;
 import static com.example.arturarzumanyan.taskmanager.data.repository.RepositoryLoadHelper.BASE_GOOGLE_APIS_URL;
+import static com.example.arturarzumanyan.taskmanager.data.repository.RepositoryLoadHelper.TOKEN_TYPE;
+import static com.example.arturarzumanyan.taskmanager.networking.base.BaseHttpUrlConnection.JSON_CONTENT_TYPE_VALUE;
 
 public class EventsCloudStore {
     private static final String BASE_EVENTS_URL = "calendar/v3/calendars/";
+    private static final String CONTENT_TYPE_KEY = "Content-Type";
 
     private RepositoryLoadHelper mRepositoryLoadHelper;
 
@@ -24,7 +29,7 @@ public class EventsCloudStore {
         mRepositoryLoadHelper = new RepositoryLoadHelper();
     }
 
-    public ResponseDto getEventsFromServer(EventsSpecification eventsSpecification) {
+    public Single<ResponseBody> getEventsFromServer(EventsSpecification eventsSpecification) {
         String eventsUrl;
         if (eventsSpecification.getStartDate().isEmpty() && eventsSpecification.getEndDate().isEmpty()) {
             eventsUrl = BASE_GOOGLE_APIS_URL + BASE_EVENTS_URL +
@@ -36,46 +41,48 @@ public class EventsCloudStore {
                     "&timeMin=" + DateUtils.decodeDate(eventsSpecification.getStartDate());
         }
 
-        FirebaseWebService.RequestMethods requestMethod = FirebaseWebService.RequestMethods.GET;
-        RequestParameters requestParameters = new RequestParameters(
-                eventsUrl,
-                requestMethod,
-                null
-        );
-        requestParameters.setRequestHeaderParameters(new HashMap<String, String>());
-
-        return /*NetworkUtil.getResultFromServer(requestParameters)*/null;
+        Map<String, String> requestHeaderParameters = new HashMap<>();
+        requestHeaderParameters.put(AUTHORIZATION_KEY, TOKEN_TYPE + TokenStorage.getTokenStorageInstance().getAccessToken());
+        return GoogleCalendarApiFactory.getGoogleCalendarApi().getEvents(eventsUrl, requestHeaderParameters)/*NetworkUtil.getResultFromServer(requestParameters)*/;
     }
 
-    public ResponseDto addEventOnServer(Event event) {
-        final String url = BASE_GOOGLE_APIS_URL + BASE_EVENTS_URL +
+    public Single<ResponseBody> addEventOnServer(Event event) {
+        String url = BASE_GOOGLE_APIS_URL + BASE_EVENTS_URL +
                 FirebaseWebService.getFirebaseWebServiceInstance().getUserEmail() +
                 "/events";
-        RequestParameters requestParameters = mRepositoryLoadHelper.getEventCreateOrUpdateParameters(event, url, POST);
+        Map<String, String> requestHeaderParameters = new HashMap<>();
+        requestHeaderParameters.put(AUTHORIZATION_KEY, TOKEN_TYPE + TokenStorage.getTokenStorageInstance().getAccessToken());
+        requestHeaderParameters.put(CONTENT_TYPE_KEY, JSON_CONTENT_TYPE_VALUE);
 
-        return /*NetworkUtil.getResultFromServer(requestParameters)*/null;
+        Map<String, Object> requestBodyParameters = mRepositoryLoadHelper.getEventBodyParameters(event);
+
+        return GoogleCalendarApiFactory.getGoogleCalendarApi().addEvent(url, requestHeaderParameters, requestBodyParameters);
     }
 
-    public ResponseDto updateEventOnServer(Event event) {
-        final String url = BASE_GOOGLE_APIS_URL + BASE_EVENTS_URL +
+    public Single<ResponseBody> updateEventOnServer(Event event) {
+        String url = BASE_GOOGLE_APIS_URL + BASE_EVENTS_URL +
                 FirebaseWebService.getFirebaseWebServiceInstance().getUserEmail() +
                 "/events/" +
                 event.getId();
 
-        RequestParameters requestParameters = mRepositoryLoadHelper
-                .getEventCreateOrUpdateParameters(event, url, PATCH);
+        Map<String, String> requestHeaderParameters = new HashMap<>();
+        requestHeaderParameters.put(AUTHORIZATION_KEY, TOKEN_TYPE + TokenStorage.getTokenStorageInstance().getAccessToken());
+        requestHeaderParameters.put(CONTENT_TYPE_KEY, JSON_CONTENT_TYPE_VALUE);
 
-        return /*NetworkUtil.getResultFromServer(requestParameters)*/null;
+        Map<String, Object> requestBodyParameters = mRepositoryLoadHelper.getEventBodyParameters(event);
+
+        return GoogleCalendarApiFactory.getGoogleCalendarApi().updateEvent(url, requestHeaderParameters, requestBodyParameters);
     }
 
-    public ResponseDto deleteEventOnServer(Event event) {
-        final String url = BASE_GOOGLE_APIS_URL + BASE_EVENTS_URL +
+    public Single<Response> deleteEventOnServer(Event event) {
+        String url = BASE_GOOGLE_APIS_URL + BASE_EVENTS_URL +
                 FirebaseWebService.getFirebaseWebServiceInstance().getUserEmail() +
                 "/events/" +
                 event.getId();
 
-        RequestParameters requestParameters = mRepositoryLoadHelper.getDeleteParameters(url);
+        Map<String, String> requestHeaderParameters = new HashMap<>();
+        requestHeaderParameters.put(AUTHORIZATION_KEY, TOKEN_TYPE + TokenStorage.getTokenStorageInstance().getAccessToken());
 
-        return /*NetworkUtil.getResultFromServer(requestParameters)*/null;
+        return GoogleCalendarApiFactory.getGoogleCalendarApi().deleteEvent(url, requestHeaderParameters);
     }
 }

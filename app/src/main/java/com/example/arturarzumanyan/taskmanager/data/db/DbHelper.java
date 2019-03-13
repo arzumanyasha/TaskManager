@@ -37,12 +37,14 @@ public class DbHelper {
         mSqLiteDbHelper = new SQLiteDbHelper(context);
     }
 
-    public void addOrUpdateEvents(List<Event> eventsList) {
+    public List<Event> addOrUpdateEvents(List<Event> eventsList, EventsSpecification specification) {
         mDbSqlite = mSqLiteDbHelper.getWritableDatabase();
 
         for (Event event : eventsList) {
             insertOrUpdateEvent(event);
         }
+
+        return getEvents(specification);
     }
 
     private void insertOrUpdateEvent(Event event) {
@@ -90,7 +92,7 @@ public class DbHelper {
         return cv;
     }
 
-    public void deleteEvent(Event event) {
+    public List<Event> deleteEvent(Event event, EventsSpecification eventsSpecification) {
         mDbSqlite = mSqLiteDbHelper.getWritableDatabase();
 
         mDbSqlite.beginTransaction();
@@ -103,6 +105,8 @@ public class DbHelper {
         } finally {
             mDbSqlite.endTransaction();
         }
+
+        return getEvents(eventsSpecification);
     }
 
     public List<Event> getEvents(EventsSpecification specification) {

@@ -4,18 +4,15 @@ import android.app.AlertDialog;
 import android.app.DatePickerDialog;
 import android.app.Dialog;
 import android.app.TimePickerDialog;
-import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatDialogFragment;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.Switch;
 import android.widget.TextView;
-import android.widget.TimePicker;
 import android.widget.Toast;
 
 import com.example.arturarzumanyan.taskmanager.R;
@@ -70,22 +67,13 @@ public class EventsDialog extends AppCompatDialogFragment implements EventsDialo
 
         builder.setView(view)
                 .setTitle(getString(R.string.events_title))
-                .setNegativeButton(getString(R.string.cancel_button), new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-
-                    }
+                .setNegativeButton(getString(R.string.cancel_button), (dialog, which) -> {
                 })
-                .setPositiveButton(getString(R.string.ok_button), new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        mEventsDialogPresenter.processOkButtonClick(bundle,
-                                mEditTextEventName.getText().toString(),
-                                mEditTextEventDescription.getText().toString(),
-                                mTextViewDate.getText().toString(),
-                                mSwitchNotification.isChecked() ? 1 : 0);
-                    }
-                });
+                .setPositiveButton(getString(R.string.ok_button), (dialog, which) -> mEventsDialogPresenter.processOkButtonClick(bundle,
+                        mEditTextEventName.getText().toString(),
+                        mEditTextEventDescription.getText().toString(),
+                        mTextViewDate.getText().toString(),
+                        mSwitchNotification.isChecked() ? 1 : 0));
 
         setViews(view);
 
@@ -107,12 +95,7 @@ public class EventsDialog extends AppCompatDialogFragment implements EventsDialo
 
         mImageButtonColorPicker.setColorFilter(requireActivity().getResources().getColor(R.color._9));
 
-        mImageButtonColorPicker.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                mEventsDialogPresenter.processColorPicker();
-            }
-        });
+        mImageButtonColorPicker.setOnClickListener(v -> mEventsDialogPresenter.processColorPicker());
     }
 
     @Override
@@ -139,43 +122,17 @@ public class EventsDialog extends AppCompatDialogFragment implements EventsDialo
 
     @Override
     public void setTimeAndDatePickers(final int year, final int month, final int day, final int hour, final int minute) {
-        mTextViewStartTime.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                new TimePickerDialog(getActivity(), new TimePickerDialog.OnTimeSetListener() {
-                    @Override
-                    public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
-                        mEventsDialogPresenter.setEventStartTime(hourOfDay, minute);
-                    }
-                }, hour, minute, true).show();
-            }
-        });
+        mTextViewStartTime.setOnClickListener(v -> new TimePickerDialog(getActivity(),
+                (view, hourOfDay, minute1) -> mEventsDialogPresenter.setEventStartTime(hourOfDay, minute1), hour, minute, true).show());
 
-        mTextViewEndTime.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                new TimePickerDialog(getActivity(), new TimePickerDialog.OnTimeSetListener() {
-                    @Override
-                    public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
-                        mEventsDialogPresenter.setEventEndTime(hourOfDay, minute);
-                    }
-                }, hour, minute, true).show();
-            }
-        });
+        mTextViewEndTime.setOnClickListener(v -> new TimePickerDialog(getActivity(),
+                (view, hourOfDay, minute12) -> mEventsDialogPresenter.setEventEndTime(hourOfDay, minute12), hour, minute, true).show());
 
-        mTextViewDate.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                DatePickerDialog datePickerDialog = new DatePickerDialog(requireActivity(), new DatePickerDialog.OnDateSetListener() {
+        mTextViewDate.setOnClickListener(v -> {
+            DatePickerDialog datePickerDialog = new DatePickerDialog(requireActivity(),
+                    (view, year1, monthOfYear, dayOfMonth) -> mEventsDialogPresenter.setEventDate(year1, monthOfYear, dayOfMonth), year, month, day);
 
-                    @Override
-                    public void onDateSet(DatePicker view, int year, int monthOfYear, int dayOfMonth) {
-                        mEventsDialogPresenter.setEventDate(year, monthOfYear, dayOfMonth);
-                    }
-                }, year, month, day);
-
-                datePickerDialog.show();
-            }
+            datePickerDialog.show();
         });
     }
 
@@ -233,6 +190,12 @@ public class EventsDialog extends AppCompatDialogFragment implements EventsDialo
 
                     }
                 }).show();
+    }
+
+    @Override
+    public void onDestroy() {
+        mEventsDialogPresenter.unsubscribe();
+        super.onDestroy();
     }
 
     public void setEventsReadyListener(EventsReadyListener listener) {
