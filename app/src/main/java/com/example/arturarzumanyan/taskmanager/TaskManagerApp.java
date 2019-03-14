@@ -5,6 +5,7 @@ import android.support.multidex.MultiDexApplication;
 
 import com.example.arturarzumanyan.taskmanager.auth.FirebaseWebService;
 import com.example.arturarzumanyan.taskmanager.auth.TokenStorage;
+import com.example.arturarzumanyan.taskmanager.data.db.AppDatabase;
 import com.example.arturarzumanyan.taskmanager.data.db.DbHelper;
 import com.squareup.leakcanary.LeakCanary;
 import com.squareup.leakcanary.RefWatcher;

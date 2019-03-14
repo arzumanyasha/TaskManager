@@ -27,8 +27,10 @@ public class DbHelper {
     {
         if (mDbInstance == null) {
             mDbInstance = new DbHelper(context);
+            AppDatabase.initAppDatabase(context);
         }
     }
+
     public synchronized static DbHelper getDbHelperInstance() {
         return mDbInstance;
     }
@@ -49,13 +51,14 @@ public class DbHelper {
         mDbSqlite.beginTransaction();
 
         try {
-            ContentValues cv = createEventContentValues(event);
+            //ContentValues cv = createEventContentValues(event);
             if (isEventExistsInDb(event.getId())) {
-                mDbSqlite.update(EventsContract.EventsTable.TABLE_NAME, cv,
-                        EventsContract.EventsTable.COLUMN_EVENT_ID + " = ?", new String[]{event.getId()});
+                AppDatabase.getAppDatabase().eventDao.update(event);
+                //mDbSqlite.update(EventsContract.EventsTable.TABLE_NAME, cv,
+                  //      EventsContract.EventsTable.COLUMN_EVENT_ID + " = ?", new String[]{event.getId()});
             } else {
-                mDbSqlite.insert(EventsContract.EventsTable.TABLE_NAME,
-                        null, cv);
+                AppDatabase.getAppDatabase().eventDao.insert(event);
+                //mDbSqlite.insert(EventsContract.EventsTable.TABLE_NAME, null, cv);
             }
             mDbSqlite.setTransactionSuccessful();
         } finally {
@@ -63,16 +66,17 @@ public class DbHelper {
         }
     }
 
-    private boolean isEventExistsInDb(String eventId) {
-        String[] selectionArgs = new String[]{eventId};
+    private boolean isEventExistsInDb(/*String eventId*/int id) {
+        /*String[] selectionArgs = new String[]{eventId};
         Cursor c = mDbSqlite.rawQuery("SELECT * FROM " + EventsContract.EventsTable.TABLE_NAME +
                 " WHERE " + EventsContract.EventsTable.COLUMN_EVENT_ID + " = ?", selectionArgs);
         boolean result = c.getCount() != 0;
-        c.close();
-        return result;
+        c.close();*/
+
+        return AppDatabase.getAppDatabase().eventDao.getEventById(id) != null;
     }
 
-    private ContentValues createEventContentValues(Event event) {
+    /*private ContentValues createEventContentValues(Event event) {
         ContentValues cv = new ContentValues();
 
         cv.put(EventsContract.EventsTable.COLUMN_EVENT_ID, event.getId());
@@ -88,10 +92,10 @@ public class DbHelper {
         cv.put(EventsContract.EventsTable.COLUMN_REMINDER, event.getIsNotify());
 
         return cv;
-    }
+    }*/
 
     public void deleteEvent(Event event) {
-        mDbSqlite = mSqLiteDbHelper.getWritableDatabase();
+        /*mDbSqlite = mSqLiteDbHelper.getWritableDatabase();
 
         mDbSqlite.beginTransaction();
         try {
@@ -102,16 +106,18 @@ public class DbHelper {
             mDbSqlite.setTransactionSuccessful();
         } finally {
             mDbSqlite.endTransaction();
-        }
+        }*/
+        AppDatabase.getAppDatabase().eventDao.delete(event);
     }
 
     public List<Event> getEvents(EventsSpecification specification) {
-        mDbSqlite = mSqLiteDbHelper.getReadableDatabase();
+        /*mDbSqlite = mSqLiteDbHelper.getReadableDatabase();
         Cursor c = mDbSqlite.rawQuery(specification.getSqlQuery(), null);
-        return getEventsFromCursor(c);
+        return getEventsFromCursor(c);*/
+        return AppDatabase.getAppDatabase().eventDao.getEvents(specification.getStartDate(), specification.getEndDate());
     }
 
-    private List<Event> getEventsFromCursor(Cursor c) {
+    /*private List<Event> getEventsFromCursor(Cursor c) {
         List<Event> eventsList = new ArrayList<>();
         if (c.moveToFirst()) {
             do {
@@ -135,7 +141,7 @@ public class DbHelper {
 
         c.close();
         return eventsList;
-    }
+    }*/
 
     public void addOrUpdateTaskLists(List<TaskList> taskLists) {
         mDbSqlite = mSqLiteDbHelper.getWritableDatabase();

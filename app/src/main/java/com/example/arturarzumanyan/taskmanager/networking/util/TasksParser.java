@@ -54,13 +54,15 @@ public class TasksParser {
             isExecuted = 0;
         }
 
-        Date date = null;
+        String date = null;
+        //Date date = null;
 
         String id = jsonObject.getString(ID_KEY);
         String name = jsonObject.getString(TITLE_KEY);
 
         if (!jsonObject.isNull(DUE_KEY)) {
-            date = DateUtils.getTaskDateFromString(jsonObject.getString(DUE_KEY));
+            //date = DateUtils.getTaskDateFromString(jsonObject.getString(DUE_KEY));
+            date = jsonObject.getString(DUE_KEY);
         }
 
         return new Task(id,

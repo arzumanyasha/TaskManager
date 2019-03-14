@@ -145,7 +145,7 @@ public class DateUtils {
         return simpleDateFormat.format(time);
     }
 
-    public static String formatTimeWithoutA(Date time) {
+    public static String formatTimeWithoutA(String time) {
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat(HOUR_MINUTE_TIME_PATTERN, Locale.getDefault());
         return simpleDateFormat.format(time);
     }

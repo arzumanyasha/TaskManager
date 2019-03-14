@@ -19,11 +19,11 @@ public class EventsDialogContract {
 
         void setEventStartTime(int hour, int minute);
 
-        void setEventStartTime(Date date);
+        void setEventStartTime(String date);
 
         void setEventEndTime(int hour, int minute);
 
-        void setEventEndTime(Date date);
+        void setEventEndTime(String date);
 
         void setEventDate(int year, int month, int day);
 

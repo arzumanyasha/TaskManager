@@ -69,12 +69,12 @@ public class EventsDialogPresenterImpl implements EventsDialogContract.EventsDia
     }
 
     @Override
-    public void setEventStartTime(Date date) {
+    public void setEventStartTime(String date) {
         mStartTime = DateUtils.getTimeWithoutA(DateUtils.formatTimeWithoutA(date));
     }
 
     @Override
-    public void setEventEndTime(Date date) {
+    public void setEventEndTime(String date) {
         mEndTime = DateUtils.getTimeWithoutA(DateUtils.formatTimeWithoutA(date));
     }
 

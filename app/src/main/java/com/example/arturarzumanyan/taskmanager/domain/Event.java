@@ -1,5 +1,7 @@
 package com.example.arturarzumanyan.taskmanager.domain;
 
+import android.arch.persistence.room.Entity;
+import android.arch.persistence.room.PrimaryKey;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -7,38 +9,41 @@ import com.example.arturarzumanyan.taskmanager.networking.util.DateUtils;
 
 import java.util.Date;
 
+@Entity(tableName = "event_table")
 public class Event implements Parcelable{
-    private String id;
+    @PrimaryKey(autoGenerate = true)
+    private int id;
+    private String eventId;
     private String name;
     private String description;
     private int colorId;
-    private Date startTime;
-    private Date endTime;
+    private String startTime;
+    private String endTime;
     private int isNotify;
 
-    public Event(String id,
+    public Event(String eventId,
                  String name,
                  String description,
                  int colorId,
-                 Date startTime,
-                 Date endTime,
+                 String startTime,
+                 String endTime,
                  int isNotify) {
-        this.id = id;
+        this.eventId = eventId;
         this.name = name;
         this.description = description;
         this.colorId = colorId;
-        this.startTime = startTime;
-        this.endTime = endTime;
+        this.startTime = /*DateUtils.formatTaskDate(startTime)*/startTime;
+        this.endTime = /*DateUtils.formatTaskDate(endTime)*/endTime;
         this.isNotify = isNotify;
     }
 
     protected Event(Parcel in) {
-        id = in.readString();
+        eventId = in.readString();
         name = in.readString();
         description = in.readString();
         colorId = in.readInt();
-        startTime = DateUtils.getEventDateFromString(in.readString());
-        endTime = DateUtils.getEventDateFromString(in.readString());
+        startTime = /*DateUtils.getEventDateFromString(in.readString());*/in.readString();
+        endTime = /*DateUtils.getEventDateFromString(in.readString());*/in.readString();
         isNotify = in.readInt();
     }
 
@@ -54,16 +59,32 @@ public class Event implements Parcelable{
         }
     };
 
-    public String getId() {
+    public int getId() {
         return id;
     }
 
-    public void setId(String id) {
+    public void setId(int id) {
         this.id = id;
+    }
+
+    public String getEventId() {
+        return eventId;
+    }
+
+    public void setEventId(String eventId) {
+        this.eventId = eventId;
     }
 
     public String getName() {
         return name;
+    }
+
+    public void setStartTime(String startTime) {
+        this.startTime = startTime;
+    }
+
+    public void setEndTime(String endTime) {
+        this.endTime = endTime;
     }
 
     public void setName(String name) {
@@ -86,21 +107,21 @@ public class Event implements Parcelable{
         this.colorId = colorId;
     }
 
-    public Date getStartTime() {
+    public String getStartTime() {
         return startTime;
     }
 
-    public void setStartTime(Date startTime) {
-        this.startTime = startTime;
-    }
-
-    public Date getEndTime() {
+    public String getEndTime() {
         return endTime;
     }
 
-    public void setEndTime(Date endTime) {
-        this.endTime = endTime;
+    /*public Date getStartTime() {
+        return DateUtils.getEventDateFromString(startTime);
     }
+
+    public Date getEndTime() {
+        return DateUtils.getEventDateFromString(endTime);
+    }*/
 
     public int getIsNotify() {
         return isNotify;
@@ -117,12 +138,12 @@ public class Event implements Parcelable{
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
-        dest.writeString(id);
+        dest.writeString(eventId);
         dest.writeString(name);
         dest.writeString(description);
         dest.writeInt(colorId);
-        dest.writeString(DateUtils.formatTaskDate(startTime));
-        dest.writeString(DateUtils.formatTaskDate(endTime));
+        dest.writeString(/*DateUtils.formatTaskDate(startTime)*/startTime);
+        dest.writeString(/*DateUtils.formatTaskDate(endTime)*/endTime);
         dest.writeInt(isNotify);
     }
 }
