@@ -1,116 +1,166 @@
 package com.example.arturarzumanyan.taskmanager.data.repository.events;
 
-import android.os.AsyncTask;
-
-import com.example.arturarzumanyan.taskmanager.auth.FirebaseWebService;
-import com.example.arturarzumanyan.taskmanager.data.repository.BaseDataLoadingAsyncTask;
 import com.example.arturarzumanyan.taskmanager.data.repository.RepositoryLoadHelper;
 import com.example.arturarzumanyan.taskmanager.data.repository.events.specification.EventsFromDateSpecification;
 import com.example.arturarzumanyan.taskmanager.data.repository.events.specification.EventsSpecification;
 import com.example.arturarzumanyan.taskmanager.domain.Event;
-import com.example.arturarzumanyan.taskmanager.domain.ResponseDto;
 import com.example.arturarzumanyan.taskmanager.networking.util.DateUtils;
 import com.example.arturarzumanyan.taskmanager.networking.util.EventsParser;
-import com.example.arturarzumanyan.taskmanager.networking.util.Log;
 
+import java.io.IOException;
+import java.net.HttpURLConnection;
 import java.util.Collections;
 import java.util.List;
 
-import static com.example.arturarzumanyan.taskmanager.auth.FirebaseWebService.RequestMethods.DELETE;
-import static com.example.arturarzumanyan.taskmanager.auth.FirebaseWebService.RequestMethods.GET;
-import static com.example.arturarzumanyan.taskmanager.auth.FirebaseWebService.RequestMethods.POST;
+import io.reactivex.Single;
+import io.reactivex.SingleSource;
+import io.reactivex.functions.Function;
+import io.reactivex.functions.Predicate;
+import okhttp3.ResponseBody;
 
 public class EventsRepository {
     private EventsDbStore mEventsDbStore;
     private EventsCloudStore mEventsCloudStore;
-    private RepositoryLoadHelper mRepositoryLoadHelper;
 
     public EventsRepository() {
         mEventsCloudStore = new EventsCloudStore();
         mEventsDbStore = new EventsDbStore();
-        mRepositoryLoadHelper = new RepositoryLoadHelper();
     }
 
-    public void getEvents(EventsSpecification eventsSpecification, final OnEventsLoadedListener listener) {
-        EventsAsyncTask eventsAsyncTask = new EventsAsyncTask(null,
-                mRepositoryLoadHelper, mEventsDbStore, mEventsCloudStore,
-                eventsSpecification, listener);
+    public Single<List<Event>> getEvents(EventsSpecification eventsSpecification) {
+        Single<List<Event>> eventsSingle;
+        if (RepositoryLoadHelper.isOnline()) {
+            eventsSingle = mEventsCloudStore.getEventsFromServer(eventsSpecification)
+                    .filter(response -> response != null).toSingle()
+                    .flatMap(this::updateDbQuery)
+                    .flatMap(aBoolean -> {
+                        if (aBoolean) {
+                            return mEventsDbStore.getEvents(eventsSpecification);
+                        } else {
+                            throw new IOException();
+                        }
+                    });
+        } else {
+            eventsSingle = mEventsDbStore.getEvents(eventsSpecification);
+        }
 
-        eventsAsyncTask.setDataInfoLoadingListener(new BaseDataLoadingAsyncTask.UserDataLoadingListener<Event>() {
-            @Override
-            public void onSuccess(List<Event> list) {
-                listener.onSuccess(list);
-            }
-
-            @Override
-            public void onFail(String message) {
-                listener.onFail(message + '\n' + "Failed to load events");
-            }
-        });
-
-        eventsAsyncTask.execute(GET);
+        return eventsSingle;
     }
 
-    public void addOrUpdateEvent(Event event, final FirebaseWebService.RequestMethods requestMethod,
-                                 final OnEventsLoadedListener listener) {
+    private Single<Boolean> updateDbQuery(ResponseBody responseBody) throws IOException {
+        EventsParser eventsParser = new EventsParser();
+        List<Event> events = eventsParser.parseEvents(responseBody.string());
+        return mEventsDbStore.addOrUpdateEvents(events);
+    }
+
+    public Single<List<Event>> addEvent(Event event) {
         EventsFromDateSpecification eventsFromDateSpecification = new EventsFromDateSpecification();
         eventsFromDateSpecification.setDate(DateUtils.formatEventDate(event.getStartTime()));
 
-        EventsAsyncTask eventsAsyncTask = new EventsAsyncTask(event,
-                mRepositoryLoadHelper, mEventsDbStore, mEventsCloudStore,
-                eventsFromDateSpecification, null);
-        eventsAsyncTask.setDataInfoLoadingListener(new BaseDataLoadingAsyncTask.UserDataLoadingListener<Event>() {
-            @Override
-            public void onSuccess(List<Event> list) {
-                listener.onSuccess(list);
-            }
+        Single<List<Event>> eventsSingle;
+        if (RepositoryLoadHelper.isOnline()) {
+            eventsSingle = mEventsCloudStore.addEventOnServer(event)
+                    .filter(response -> response != null).toSingle()
+                    .map(this::parseEvent)
+                    .flatMap(responseBody -> mEventsDbStore.addOrUpdateEvents(Collections.singletonList(event)))
+                    .flatMap(aBoolean -> {
+                        if (aBoolean) {
+                            return mEventsDbStore.getEvents(eventsFromDateSpecification);
+                        } else {
+                            throw new IOException();
+                        }
+                    });
+        } else {
+            eventsSingle = mEventsDbStore.addOrUpdateEvents(Collections.singletonList(event))
+                    .flatMap(aBoolean -> {
+                        if (aBoolean) {
+                            return mEventsDbStore.getEvents(eventsFromDateSpecification);
+                        } else {
+                            throw new IOException();
+                        }
+                    });
+        }
 
-            @Override
-            public void onFail(String message) {
-                if (requestMethod == POST) {
-                    listener.onFail(message + '\n' + "Failed to create event");
-                } else {
-                    listener.onFail(message + '\n' + "Failed to update event");
-                }
-            }
-        });
-        eventsAsyncTask.execute(requestMethod);
+        return eventsSingle;
     }
 
-    public void deleteEvent(Event event, final OnEventsLoadedListener listener) {
+    public Single<List<Event>> updateEvent(Event event) {
+        EventsFromDateSpecification eventsFromDateSpecification = new EventsFromDateSpecification();
+        eventsFromDateSpecification.setDate(DateUtils.formatEventDate(event.getStartTime()));
+
+        Single<List<Event>> eventsSingle;
+        if (RepositoryLoadHelper.isOnline()) {
+            eventsSingle = mEventsCloudStore.updateEventOnServer(event)
+                    .filter(response -> response != null).toSingle()
+                    .map(this::parseEvent)
+                    .flatMap(responseBody -> mEventsDbStore.addOrUpdateEvents(Collections.singletonList(event)))
+                    .flatMap(aBoolean -> {
+                        if (aBoolean) {
+                            return mEventsDbStore.getEvents(eventsFromDateSpecification);
+                        } else {
+                            throw new IOException();
+                        }
+                    });
+        } else {
+            eventsSingle = mEventsDbStore.addOrUpdateEvents(Collections.singletonList(event))
+                    .flatMap(aBoolean -> {
+                        if (aBoolean) {
+                            return mEventsDbStore.getEvents(eventsFromDateSpecification);
+                        } else {
+                            throw new IOException();
+                        }
+                    });
+        }
+
+        return eventsSingle;
+    }
+
+    private Event parseEvent(ResponseBody responseBody) throws IOException {
+        Event event = null;
+        if (responseBody != null) {
+            EventsParser eventsParser = new EventsParser();
+            event = eventsParser.parseEvent(responseBody.string());
+        }
+        return event;
+    }
+
+    public Single<List<Event>> deleteEvent(Event event) {
         EventsFromDateSpecification eventsFromDateSpecification = new EventsFromDateSpecification();
         eventsFromDateSpecification.setDate(DateUtils.getCurrentTime());
 
-        EventsAsyncTask eventsAsyncTask = new EventsAsyncTask(event,
-                mRepositoryLoadHelper, mEventsDbStore, mEventsCloudStore,
-                eventsFromDateSpecification, null);
+        Single<List<Event>> eventsSingle;
+        if (RepositoryLoadHelper.isOnline()) {
+            eventsSingle = mEventsCloudStore.deleteEventOnServer(event)
+                    .filter(response -> {
+                        if (response.code() == HttpURLConnection.HTTP_NO_CONTENT) {
+                            return true;
+                        } else {
+                            throw new IOException();
+                        }
+                    }).toSingle()
+                    .flatMap(responseBody -> mEventsDbStore.deleteEvent(event))
+                    .flatMap(aBoolean -> {
+                        if (aBoolean) {
+                            return mEventsDbStore.getEvents(eventsFromDateSpecification);
+                        } else {
+                            throw new IOException();
+                        }
+                    });
+        } else {
+            eventsSingle = mEventsDbStore.deleteEvent(event)
+                    .flatMap(aBoolean -> {
+                        if (aBoolean) {
+                            return mEventsDbStore.getEvents(eventsFromDateSpecification);
+                        } else {
+                            throw new IOException();
+                        }
+                    });
+        }
 
-        eventsAsyncTask.setDataInfoLoadingListener(new BaseDataLoadingAsyncTask.UserDataLoadingListener<Event>() {
-            @Override
-            public void onSuccess(List<Event> list) {
-                listener.onSuccess(list);
-                Log.v("Event successfully deleted");
-            }
-
-            @Override
-            public void onFail(String message) {
-                listener.onFail(message + '\n' + "Failed to delete event");
-                Log.v("Failed to delete event");
-            }
-        });
-
-        eventsAsyncTask.execute(DELETE);
+        return eventsSingle;
     }
 
-    public interface OnEventsLoadedListener {
-        void onSuccess(List<Event> eventsList);
-
-        void onFail(String message);
-
-        void onPermissionDenied();
-    }
-
-    public static class EventsAsyncTask extends BaseDataLoadingAsyncTask<Event> {
+    /*public static class EventsAsyncTask extends BaseDataLoadingAsyncTask<Event> {
 
         private Event mEvent;
         private RepositoryLoadHelper mRepositoryLoadHelper;
@@ -143,7 +193,7 @@ public class EventsRepository {
             return mEventsCloudStore.getEventsFromServer(mEventsSpecification);
         }
 
-        @Override
+       @Override
         protected ResponseDto doPostRequest() {
             return mEventsCloudStore.addEventOnServer(mEvent);
         }
@@ -239,5 +289,5 @@ public class EventsRepository {
             mEventsDbStore.getEvents(mEventsSpecification);
         }
 
-    }
+    }*/
 }

@@ -5,6 +5,7 @@ import android.util.SparseIntArray;
 
 import com.example.arturarzumanyan.taskmanager.data.repository.events.EventsRepository;
 import com.example.arturarzumanyan.taskmanager.data.repository.events.specification.EventsFromDateSpecification;
+import com.example.arturarzumanyan.taskmanager.data.repository.events.specification.EventsSpecification;
 import com.example.arturarzumanyan.taskmanager.data.repository.events.specification.MonthlyEventsSpecification;
 import com.example.arturarzumanyan.taskmanager.data.repository.events.specification.WeeklyEventsSpecification;
 import com.example.arturarzumanyan.taskmanager.domain.Event;
@@ -15,7 +16,12 @@ import com.github.mikephil.charting.data.PieEntry;
 import java.util.ArrayList;
 import java.util.List;
 
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.CompositeDisposable;
+import io.reactivex.schedulers.Schedulers;
+
 import static com.example.arturarzumanyan.taskmanager.networking.util.DateUtils.MINUTES_IN_HOUR;
+import static com.example.arturarzumanyan.taskmanager.ui.fragment.event.daily.mvp.DailyEventsPresenterImpl.FAILED_TO_LOAD_EVENTS_MSG;
 
 public class EventsStatisticPresenterImpl implements EventsStatisticContract.EventsStatisticPresenter {
     private static final int MINUTES_IN_DAY = 1440;
@@ -27,6 +33,7 @@ public class EventsStatisticPresenterImpl implements EventsStatisticContract.Eve
     private SparseIntArray mColorPaletteArray;
     private EventsRepository mEventsRepository;
     private Integer mCountOfMinutes;
+    private CompositeDisposable mCompositeDisposable = new CompositeDisposable();
     private List<Event> mEvents;
 
     public EventsStatisticPresenterImpl(EventsStatisticContract.EventsStatisticView mEventsStatisticView, Context context) {
@@ -49,87 +56,43 @@ public class EventsStatisticPresenterImpl implements EventsStatisticContract.Eve
         mCountOfMinutes = MINUTES_IN_DAY;
         EventsFromDateSpecification eventsFromDateSpecification = new EventsFromDateSpecification();
         eventsFromDateSpecification.setDate(DateUtils.getCurrentTime());
-        mEventsRepository.getEvents(eventsFromDateSpecification, new EventsRepository.OnEventsLoadedListener() {
-            @Override
-            public void onSuccess(List<Event> eventsList) {
-                if (mEventsStatisticView != null) {
-                    mEvents = eventsList;
-                    if (mEvents.size() != 0) {
-                        createPieChartData();
-                    }
-                }
-            }
+        loadEvents(eventsFromDateSpecification);
 
-            @Override
-            public void onFail(String message) {
-                if (mEventsStatisticView != null) {
-                    mEventsStatisticView.onFail(message);
-                }
-            }
-
-            @Override
-            public void onPermissionDenied() {
-                /** To-do: add realization with start signInActivity*/
-            }
-        });
     }
 
     @Override
     public void loadWeeklyEvents() {
         mCountOfMinutes = MINUTES_IN_WEEK;
         WeeklyEventsSpecification weeklyEventsSpecification = new WeeklyEventsSpecification();
-        mEventsRepository.getEvents(weeklyEventsSpecification, new EventsRepository.OnEventsLoadedListener() {
-            @Override
-            public void onSuccess(List<Event> eventsList) {
-                if (mEventsStatisticView != null) {
-                    mEvents = eventsList;
-                    if (mEvents.size() != 0) {
-                        createPieChartData();
-                    }
-                }
-            }
-
-            @Override
-            public void onFail(String message) {
-                if (mEventsStatisticView != null) {
-                    mEventsStatisticView.onFail(message);
-                }
-            }
-
-            @Override
-            public void onPermissionDenied() {
-                /** To-do: add realization with start signInActivity*/
-            }
-        });
+        loadEvents(weeklyEventsSpecification);
     }
 
     @Override
     public void loadMonthlyEvents() {
         mCountOfMinutes = DateUtils.getDaysInCurrentMonth() * MINUTES_IN_DAY;
         MonthlyEventsSpecification monthlyEventsSpecification = new MonthlyEventsSpecification();
-        mEventsRepository.getEvents(monthlyEventsSpecification, new EventsRepository.OnEventsLoadedListener() {
-            @Override
-            public void onSuccess(List<Event> eventsList) {
-                if (mEventsStatisticView != null) {
-                    mEvents = eventsList;
-                    if (mEvents.size() != 0) {
-                        createPieChartData();
+        loadEvents(monthlyEventsSpecification);
+    }
+
+    private void loadEvents(EventsSpecification eventsSpecification) {
+        mCompositeDisposable.add(mEventsRepository.getEvents(eventsSpecification)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .doOnSuccess(events -> {
+                    if (mEventsStatisticView != null) {
+                        mEvents = events;
+                        if (mEvents.size() != 0) {
+                            createPieChartData();
+                        }
                     }
-                }
-            }
-
-            @Override
-            public void onFail(String message) {
-                if (mEventsStatisticView != null) {
-                    mEventsStatisticView.onFail(message);
-                }
-            }
-
-            @Override
-            public void onPermissionDenied() {
-                /** To-do: add realization with start signInActivity*/
-            }
-        });
+                })
+                .doOnError(throwable -> {
+                    if (mEventsStatisticView != null) {
+                        mEventsStatisticView.onFail(FAILED_TO_LOAD_EVENTS_MSG);
+                    }
+                })
+                .subscribe()
+        );
     }
 
     @Override
@@ -163,6 +126,7 @@ public class EventsStatisticPresenterImpl implements EventsStatisticContract.Eve
 
     @Override
     public void unsubscribe() {
+        mCompositeDisposable.clear();
         mEventsStatisticView = null;
     }
 }

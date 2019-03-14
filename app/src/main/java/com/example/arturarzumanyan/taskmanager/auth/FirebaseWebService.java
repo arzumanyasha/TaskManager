@@ -4,8 +4,9 @@ import android.content.Context;
 import android.content.Intent;
 import android.support.annotation.NonNull;
 
-import com.example.arturarzumanyan.taskmanager.data.repository.RepositoryLoadHelper;
 import com.example.arturarzumanyan.taskmanager.domain.User;
+import com.example.arturarzumanyan.taskmanager.networking.GoogleAuthApiFactory;
+import com.example.arturarzumanyan.taskmanager.networking.GoogleSuiteApiFactory;
 import com.example.arturarzumanyan.taskmanager.networking.util.Log;
 import com.google.android.gms.auth.api.Auth;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
@@ -22,18 +23,18 @@ import com.google.firebase.auth.GoogleAuthProvider;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
 import io.reactivex.Single;
-import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.functions.Function;
-import io.reactivex.observers.DisposableSingleObserver;
 import io.reactivex.schedulers.Schedulers;
 import okhttp3.FormBody;
 import okhttp3.RequestBody;
 import okhttp3.ResponseBody;
+import retrofit2.Response;
 
 import static com.example.arturarzumanyan.taskmanager.data.repository.RepositoryLoadHelper.AUTHORIZATION_KEY;
 
@@ -55,6 +56,7 @@ public class FirebaseWebService {
     public enum RequestMethods {POST, GET, PATCH, DELETE}
 
     private static FirebaseWebService mFirebaseWebServiceInstance;
+    private GoogleSignInAuthApi mGoogleSignInAuthApi;
     private GoogleSignInClient mGoogleSignInClient;
     private CompositeDisposable mCompositeDisposable = new CompositeDisposable();
     private Context mContext;
@@ -71,6 +73,7 @@ public class FirebaseWebService {
 
     private FirebaseWebService(Context context) {
         this.mContext = context;
+        mGoogleSignInAuthApi = GoogleAuthApiFactory.getRetrofitInstance().create(GoogleSignInAuthApi.class);
     }
 
     public void setGoogleClientOptions() {
@@ -123,7 +126,7 @@ public class FirebaseWebService {
         requestHeaderParameters.put(CONTENT_TYPE_KEY, CONTENT_TYPE);
         requestHeaderParameters.put(AUTHORIZATION_KEY, "Bearer " + TokenStorage.getTokenStorageInstance().getAccessToken());
 
-        Single<ResponseBody> responseSingle = GoogleSignInAuthApiFactory.getSignInService().requestToken(requestBody, requestHeaderParameters);
+        Single<ResponseBody> responseSingle = mGoogleSignInAuthApi.requestToken(requestBody, requestHeaderParameters);
 
         mCompositeDisposable.add(responseSingle
                 .subscribeOn(Schedulers.io())
@@ -139,7 +142,7 @@ public class FirebaseWebService {
                 .subscribe());
     }
 
-    private String getAccessTokenFromBuffer(String buffer) {
+    public String getAccessTokenFromBuffer(String buffer) {
         JSONObject object;
         String accessToken = "";
         try {
@@ -163,7 +166,7 @@ public class FirebaseWebService {
         return refreshToken;
     }
 
-    public void refreshAccessToken(final AccessTokenUpdatedListener listener) {
+    public Response<ResponseBody> refreshAccessToken() {
         RequestBody requestBody = new FormBody.Builder()
                 .add(REFRESH_TOKEN_KEY, TokenStorage.getTokenStorageInstance().getRefreshToken())
                 .add(CLIENT_ID_KEY, CLIENT_ID)
@@ -175,28 +178,13 @@ public class FirebaseWebService {
         requestHeaderParameters.put(CONTENT_TYPE_KEY, CONTENT_TYPE);
         requestHeaderParameters.put(AUTHORIZATION_KEY, "Bearer " + TokenStorage.getTokenStorageInstance().getAccessToken());
 
-        Single<ResponseBody> responseSingle = GoogleSignInAuthApiFactory.getSignInService().requestRefreshToken(requestBody, requestHeaderParameters);
+        try {
+            return mGoogleSignInAuthApi.requestRefreshToken(requestBody, requestHeaderParameters).execute();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
 
-        mCompositeDisposable.add(responseSingle
-                .subscribeOn(Schedulers.io())
-                .doOnSuccess(response -> {
-                    String accessToken = getAccessTokenFromBuffer(response.string());
-                    TokenStorage.getTokenStorageInstance().writeAccessToken(accessToken);
-                })
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribeWith(new DisposableSingleObserver<ResponseBody>() {
-                    @Override
-                    public void onSuccess(ResponseBody responseBody) {
-                        listener.onAccessTokenUpdated();
-                    }
-
-                    @Override
-                    public void onError(Throwable e) {
-                        if (RepositoryLoadHelper.isOnline()) {
-                            listener.onFail();
-                        }
-                    }
-                }));
+        return null;
     }
 
     public FirebaseUser getCurrentUser() {
@@ -222,11 +210,5 @@ public class FirebaseWebService {
 
     public void closeAuthConnection() {
         mCompositeDisposable.clear();
-    }
-
-    public interface AccessTokenUpdatedListener {
-        void onAccessTokenUpdated();
-
-        void onFail();
     }
 }
