@@ -17,11 +17,11 @@ public class EventsDbStore {
         return Single.fromCallable(() -> DbHelper.getDbHelperInstance().getEvents(eventsSpecification));
     }
 
-    public Single<List<Event>> addOrUpdateEvents(List<Event> eventList, EventsSpecification eventsSpecification) {
-        return Single.fromCallable(() -> DbHelper.getDbHelperInstance().addOrUpdateEvents(eventList, eventsSpecification));
+    public Single<Boolean> addOrUpdateEvents(List<Event> eventList) {
+        return Single.fromCallable(() -> DbHelper.getDbHelperInstance().addOrUpdateEvents(eventList));
     }
 
-    public Single<List<Event>> deleteEvent(Event event, EventsSpecification eventsSpecification) {
-        return Single.fromCallable(() -> DbHelper.getDbHelperInstance().deleteEvent(event, eventsSpecification));
+    public Single<Boolean> deleteEvent(Event event) {
+        return Single.fromCallable(() -> DbHelper.getDbHelperInstance().deleteEvent(event));
     }
 }

@@ -13,6 +13,9 @@ import java.util.Collections;
 import java.util.List;
 
 import io.reactivex.Single;
+import io.reactivex.SingleSource;
+import io.reactivex.functions.Function;
+import io.reactivex.functions.Predicate;
 import okhttp3.ResponseBody;
 
 public class EventsRepository {
@@ -29,7 +32,14 @@ public class EventsRepository {
         if (RepositoryLoadHelper.isOnline()) {
             eventsSingle = mEventsCloudStore.getEventsFromServer(eventsSpecification)
                     .filter(response -> response != null).toSingle()
-                    .flatMap(responseBody -> updateDbQuery(responseBody, eventsSpecification));
+                    .flatMap(this::updateDbQuery)
+                    .flatMap(aBoolean -> {
+                        if (aBoolean) {
+                            return mEventsDbStore.getEvents(eventsSpecification);
+                        } else {
+                            throw new IOException();
+                        }
+                    });
         } else {
             eventsSingle = mEventsDbStore.getEvents(eventsSpecification);
         }
@@ -37,10 +47,10 @@ public class EventsRepository {
         return eventsSingle;
     }
 
-    private Single<List<Event>> updateDbQuery(ResponseBody responseBody, EventsSpecification eventsSpecification) throws IOException {
+    private Single<Boolean> updateDbQuery(ResponseBody responseBody) throws IOException {
         EventsParser eventsParser = new EventsParser();
         List<Event> events = eventsParser.parseEvents(responseBody.string());
-        return mEventsDbStore.addOrUpdateEvents(events, eventsSpecification);
+        return mEventsDbStore.addOrUpdateEvents(events);
     }
 
     public Single<List<Event>> addEvent(Event event) {
@@ -52,9 +62,23 @@ public class EventsRepository {
             eventsSingle = mEventsCloudStore.addEventOnServer(event)
                     .filter(response -> response != null).toSingle()
                     .map(this::parseEvent)
-                    .flatMap(responseBody -> mEventsDbStore.addOrUpdateEvents(Collections.singletonList(event), eventsFromDateSpecification));
+                    .flatMap(responseBody -> mEventsDbStore.addOrUpdateEvents(Collections.singletonList(event)))
+                    .flatMap(aBoolean -> {
+                        if (aBoolean) {
+                            return mEventsDbStore.getEvents(eventsFromDateSpecification);
+                        } else {
+                            throw new IOException();
+                        }
+                    });
         } else {
-            eventsSingle = mEventsDbStore.addOrUpdateEvents(Collections.singletonList(event), eventsFromDateSpecification);
+            eventsSingle = mEventsDbStore.addOrUpdateEvents(Collections.singletonList(event))
+                    .flatMap(aBoolean -> {
+                        if (aBoolean) {
+                            return mEventsDbStore.getEvents(eventsFromDateSpecification);
+                        } else {
+                            throw new IOException();
+                        }
+                    });
         }
 
         return eventsSingle;
@@ -69,9 +93,23 @@ public class EventsRepository {
             eventsSingle = mEventsCloudStore.updateEventOnServer(event)
                     .filter(response -> response != null).toSingle()
                     .map(this::parseEvent)
-                    .flatMap(responseBody -> mEventsDbStore.addOrUpdateEvents(Collections.singletonList(event), eventsFromDateSpecification));
+                    .flatMap(responseBody -> mEventsDbStore.addOrUpdateEvents(Collections.singletonList(event)))
+                    .flatMap(aBoolean -> {
+                        if (aBoolean) {
+                            return mEventsDbStore.getEvents(eventsFromDateSpecification);
+                        } else {
+                            throw new IOException();
+                        }
+                    });
         } else {
-            eventsSingle = mEventsDbStore.addOrUpdateEvents(Collections.singletonList(event), eventsFromDateSpecification);
+            eventsSingle = mEventsDbStore.addOrUpdateEvents(Collections.singletonList(event))
+                    .flatMap(aBoolean -> {
+                        if (aBoolean) {
+                            return mEventsDbStore.getEvents(eventsFromDateSpecification);
+                        } else {
+                            throw new IOException();
+                        }
+                    });
         }
 
         return eventsSingle;
@@ -99,11 +137,24 @@ public class EventsRepository {
                         } else {
                             throw new IOException();
                         }
-
                     }).toSingle()
-                    .flatMap(responseBody -> mEventsDbStore.deleteEvent(event, eventsFromDateSpecification));
+                    .flatMap(responseBody -> mEventsDbStore.deleteEvent(event))
+                    .flatMap(aBoolean -> {
+                        if (aBoolean) {
+                            return mEventsDbStore.getEvents(eventsFromDateSpecification);
+                        } else {
+                            throw new IOException();
+                        }
+                    });
         } else {
-            eventsSingle = mEventsDbStore.deleteEvent(event, eventsFromDateSpecification);
+            eventsSingle = mEventsDbStore.deleteEvent(event)
+                    .flatMap(aBoolean -> {
+                        if (aBoolean) {
+                            return mEventsDbStore.getEvents(eventsFromDateSpecification);
+                        } else {
+                            throw new IOException();
+                        }
+                    });
         }
 
         return eventsSingle;
