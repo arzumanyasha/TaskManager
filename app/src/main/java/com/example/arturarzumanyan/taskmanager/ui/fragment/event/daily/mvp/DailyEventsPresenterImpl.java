@@ -2,7 +2,7 @@ package com.example.arturarzumanyan.taskmanager.ui.fragment.event.daily.mvp;
 
 import android.util.SparseIntArray;
 
-import com.example.arturarzumanyan.taskmanager.ResourceManager;
+import com.example.arturarzumanyan.taskmanager.ui.util.ResourceManager;
 import com.example.arturarzumanyan.taskmanager.data.repository.events.EventsRepository;
 import com.example.arturarzumanyan.taskmanager.data.repository.events.specification.EventsFromDateSpecification;
 import com.example.arturarzumanyan.taskmanager.domain.Event;
@@ -15,9 +15,9 @@ import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.schedulers.Schedulers;
 
+import static com.example.arturarzumanyan.taskmanager.ui.util.ResourceManager.*;
+
 public class DailyEventsPresenterImpl implements DailyEventsContract.DailyEventsPresenter {
-    public static final String FAILED_TO_LOAD_EVENTS_MSG = "Failed to load events";
-    private static final String FAILED_TO_DELETE_EVENT_MSG = "Failed to delete event";
     private DailyEventsContract.DailyEventsView mDailyEventsView;
     private EventsRepository mEventsRepository;
     private List<Event> mDailyEventsList;
@@ -60,7 +60,7 @@ public class DailyEventsPresenterImpl implements DailyEventsContract.DailyEvents
                         }
                     }
                 })
-                .doOnError(throwable -> onFail(FAILED_TO_LOAD_EVENTS_MSG))
+                .doOnError(throwable -> onFail(getResourceManager().getErrorMessage(State.FAILED_TO_LOAD_EVENTS_ERROR)))
                 .subscribe());
     }
 
@@ -85,7 +85,7 @@ public class DailyEventsPresenterImpl implements DailyEventsContract.DailyEvents
                         }
                     }
                 })
-                .doOnError(throwable -> onFail(FAILED_TO_DELETE_EVENT_MSG))
+                .doOnError(throwable -> onFail(getResourceManager().getErrorMessage(State.FAILED_TO_DELETE_EVENT_ERROR)))
                 .subscribe());
     }
 

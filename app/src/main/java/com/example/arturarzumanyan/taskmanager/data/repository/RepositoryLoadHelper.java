@@ -1,24 +1,16 @@
 package com.example.arturarzumanyan.taskmanager.data.repository;
 
 import com.example.arturarzumanyan.taskmanager.auth.FirebaseWebService;
-import com.example.arturarzumanyan.taskmanager.auth.TokenStorage;
 import com.example.arturarzumanyan.taskmanager.domain.Event;
 import com.example.arturarzumanyan.taskmanager.domain.Task;
 import com.example.arturarzumanyan.taskmanager.domain.TaskList;
 import com.example.arturarzumanyan.taskmanager.networking.base.RequestParameters;
-import com.example.arturarzumanyan.taskmanager.networking.util.DateUtils;
 
 import java.io.IOException;
-import java.net.HttpURLConnection;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import okhttp3.Interceptor;
-import okhttp3.Request;
-import okhttp3.Response;
-import okhttp3.ResponseBody;
 
 import static com.example.arturarzumanyan.taskmanager.networking.base.BaseHttpUrlConnection.JSON_CONTENT_TYPE_VALUE;
 import static com.example.arturarzumanyan.taskmanager.networking.util.EventsParser.COLOR_ID_KEY;

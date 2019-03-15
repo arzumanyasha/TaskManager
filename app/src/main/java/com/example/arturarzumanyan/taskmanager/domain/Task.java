@@ -101,14 +101,6 @@ public class Task implements Parcelable {
         this.description = description;
     }
 
-    /*public Date getDate() {
-        return DateUtils.getTaskDateFromString(date);
-    }
-
-    public void setDate(Date date) {
-        this.date = DateUtils.formatTaskDate(date);
-    }*/
-
     public int getIsExecuted() {
         return isExecuted;
     }

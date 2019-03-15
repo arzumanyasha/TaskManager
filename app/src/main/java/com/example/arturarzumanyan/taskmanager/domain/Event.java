@@ -5,10 +5,6 @@ import android.arch.persistence.room.PrimaryKey;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-import com.example.arturarzumanyan.taskmanager.networking.util.DateUtils;
-
-import java.util.Date;
-
 @Entity(tableName = "event_table")
 public class Event implements Parcelable{
     @PrimaryKey(autoGenerate = true)
@@ -114,14 +110,6 @@ public class Event implements Parcelable{
     public String getEndTime() {
         return endTime;
     }
-
-    /*public Date getStartTime() {
-        return DateUtils.getEventDateFromString(startTime);
-    }
-
-    public Date getEndTime() {
-        return DateUtils.getEventDateFromString(endTime);
-    }*/
 
     public int getIsNotify() {
         return isNotify;

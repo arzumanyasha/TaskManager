@@ -1,14 +1,12 @@
 package com.example.arturarzumanyan.taskmanager.ui.fragment.event.statistic.mvp;
 
-import android.content.Context;
-
 import com.github.mikephil.charting.data.PieEntry;
 
 import java.util.List;
 
 public class EventsStatisticContract {
     public interface EventsStatisticPresenter {
-        void attachView(EventsStatisticView eventsStatisticView, Context context);
+        void attachView(EventsStatisticView eventsStatisticView);
 
         void loadDailyEvents();
 

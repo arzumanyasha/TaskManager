@@ -21,6 +21,8 @@
 
         <!--Events Dialog-->
             <string name="time_error_msg">End time might be bigger than start time</string>
+            <string name="failed_to_create_event_msg">Failed to create event</string>
+            <string name="failed_to_update_event_msg">Failed to update event</string>
             <string name="events_title">Events</string>
 
         <!--Tasks Dialog-->
@@ -71,6 +73,8 @@
 
             <!--fragment_daily_events-->
                 <string name="no_events_for_today">No events for today</string>
+                <string name="failed_to_load_events_msg">Failed to load events</string>
+                <string name="failed_to_delete_event_msg">Failed to delete event</string>
 
             <!--fragment_week_dashboard-->
                 <string name="monday_name">Mon</string>

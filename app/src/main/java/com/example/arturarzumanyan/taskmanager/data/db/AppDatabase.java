@@ -13,13 +13,13 @@ import com.example.arturarzumanyan.taskmanager.domain.TaskList;
 public abstract class AppDatabase extends RoomDatabase {
     private static volatile AppDatabase instance;
     private static final String DATABASE_NAME = "intention_database";
-    public EventDao eventDao;
-    public TaskListDao taskListDao;
-    public TaskDao taskDao;
+    public abstract EventDao eventDao();
+    public abstract TaskListDao taskListDao();
+    public abstract TaskDao taskDao();
 
     public static void initAppDatabase(Context context) {
         if (instance == null) {
-            instance = Room.databaseBuilder(context,
+            instance = Room.databaseBuilder(context.getApplicationContext(),
                     AppDatabase.class,
                     DATABASE_NAME)
                     .fallbackToDestructiveMigration()

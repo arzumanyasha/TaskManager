@@ -1,17 +1,15 @@
 package com.example.arturarzumanyan.taskmanager.ui.dialog.event.mvp;
 
-import android.content.Context;
 import android.os.Bundle;
 
 import com.example.arturarzumanyan.taskmanager.domain.Event;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 public class EventsDialogContract {
     public interface EventsDialogPresenter {
-        void setDefaultCurrentColor(Context context);
+        void setDefaultCurrentColor();
 
         void setCurrentColor(int colorId);
 

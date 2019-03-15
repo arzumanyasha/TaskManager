@@ -13,9 +13,6 @@ import java.util.Collections;
 import java.util.List;
 
 import io.reactivex.Single;
-import io.reactivex.SingleSource;
-import io.reactivex.functions.Function;
-import io.reactivex.functions.Predicate;
 import okhttp3.ResponseBody;
 
 public class EventsRepository {
@@ -55,7 +52,7 @@ public class EventsRepository {
 
     public Single<List<Event>> addEvent(Event event) {
         EventsFromDateSpecification eventsFromDateSpecification = new EventsFromDateSpecification();
-        eventsFromDateSpecification.setDate(DateUtils.formatEventDate(event.getStartTime()));
+        eventsFromDateSpecification.setDate(/*DateUtils.formatEventDate(event.getStartTime())*/event.getStartTime());
 
         Single<List<Event>> eventsSingle;
         if (RepositoryLoadHelper.isOnline()) {
@@ -86,7 +83,7 @@ public class EventsRepository {
 
     public Single<List<Event>> updateEvent(Event event) {
         EventsFromDateSpecification eventsFromDateSpecification = new EventsFromDateSpecification();
-        eventsFromDateSpecification.setDate(DateUtils.formatEventDate(event.getStartTime()));
+        eventsFromDateSpecification.setDate(/*DateUtils.formatEventDate(event.getStartTime())*/event.getStartTime());
 
         Single<List<Event>> eventsSingle;
         if (RepositoryLoadHelper.isOnline()) {
@@ -159,135 +156,4 @@ public class EventsRepository {
 
         return eventsSingle;
     }
-
-    /*public static class EventsAsyncTask extends BaseDataLoadingAsyncTask<Event> {
-
-        private Event mEvent;
-        private RepositoryLoadHelper mRepositoryLoadHelper;
-        private EventsDbStore mEventsDbStore;
-        private EventsCloudStore mEventsCloudStore;
-        private EventsSpecification mEventsSpecification;
-        private OnEventsLoadedListener mListener;
-
-        EventsAsyncTask(Event event,
-                        RepositoryLoadHelper repositoryLoadHelper,
-                        EventsDbStore eventsDbStore,
-                        EventsCloudStore eventsCloudStore,
-                        EventsSpecification eventsSpecification,
-                        OnEventsLoadedListener listener) {
-            this.mEvent = event;
-            this.mRepositoryLoadHelper = repositoryLoadHelper;
-            this.mEventsDbStore = eventsDbStore;
-            this.mEventsCloudStore = eventsCloudStore;
-            this.mEventsSpecification = eventsSpecification;
-            this.mListener = listener;
-        }
-
-        @Override
-        protected List<Event> doInBackground(FirebaseWebService.RequestMethods... requestMethods) {
-            return super.doInBackground(requestMethods[0]);
-        }
-
-        @Override
-        protected ResponseDto doGetRequest() {
-            return mEventsCloudStore.getEventsFromServer(mEventsSpecification);
-        }
-
-       @Override
-        protected ResponseDto doPostRequest() {
-            return mEventsCloudStore.addEventOnServer(mEvent);
-        }
-
-        @Override
-        protected ResponseDto doPatchRequest() {
-            return mEventsCloudStore.updateEventOnServer(mEvent);
-        }
-
-        @Override
-        protected ResponseDto doDeleteRequest() {
-            return mEventsCloudStore.deleteEventOnServer(mEvent);
-        }
-
-        @Override
-        protected List<Event> doSelectQuery() {
-            return mEventsDbStore.getEvents(mEventsSpecification);
-        }
-
-        @Override
-        protected void refreshDbQuery(ResponseDto responseDto) {
-            List<Event> events = parseEventsData(responseDto.getResponseData());
-            updateDbQuery(events);
-        }
-
-        @Override
-        protected void doInsertQuery(ResponseDto responseDto) {
-            Event event;
-            if (responseDto != null) {
-                event = parseEvent(responseDto.getResponseData());
-            } else {
-                event = mEvent;
-            }
-            mEventsDbStore.addOrUpdateEvents(Collections.singletonList(event));
-        }
-
-        @Override
-        protected void doUpdateQuery() {
-            mEventsDbStore.addOrUpdateEvents(Collections.singletonList(mEvent));
-        }
-
-        @Override
-        protected boolean doDeleteQuery() {
-            mEventsDbStore.deleteEvent(mEvent);
-            return true;
-        }
-
-        @Override
-        protected void retryGetResultFromServer(final FirebaseWebService.RequestMethods requestMethod) {
-            FirebaseWebService.getFirebaseWebServiceInstance().refreshAccessToken(new FirebaseWebService.AccessTokenUpdatedListener() {
-                @Override
-                public void onAccessTokenUpdated() {
-                    EventsAsyncTask eventsAsyncTask = new EventsAsyncTask(null,
-                            mRepositoryLoadHelper, mEventsDbStore, mEventsCloudStore,
-                            mEventsSpecification, mListener);
-
-                    if (requestMethod != DELETE) {
-                        eventsAsyncTask.setDataInfoLoadingListener(new UserDataLoadingListener<Event>() {
-                            @Override
-                            public void onSuccess(List<Event> list) {
-                                mListener.onSuccess(list);
-                            }
-
-                            @Override
-                            public void onFail(String message) {
-                                mListener.onFail(message);
-                            }
-                        });
-                    }
-
-                    eventsAsyncTask.execute(requestMethod);
-                }
-
-                @Override
-                public void onFail() {
-                    mListener.onPermissionDenied();
-                }
-            });
-        }
-
-        private Event parseEvent(String data) {
-            EventsParser eventsParser = new EventsParser();
-            return eventsParser.parseEvent(data);
-        }
-
-        private List<Event> parseEventsData(String data) {
-            EventsParser eventsParser = new EventsParser();
-            return eventsParser.parseEvents(data);
-        }
-
-        private void updateDbQuery(List<Event> events) {
-            mEventsDbStore.addOrUpdateEvents(events);
-            mEventsDbStore.getEvents(mEventsSpecification);
-        }
-
-    }*/
 }

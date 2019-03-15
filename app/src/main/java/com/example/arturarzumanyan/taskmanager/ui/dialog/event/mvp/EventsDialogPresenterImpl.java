@@ -1,13 +1,11 @@
 package com.example.arturarzumanyan.taskmanager.ui.dialog.event.mvp;
 
-import android.content.Context;
 import android.os.Bundle;
 import android.util.SparseIntArray;
 
 import com.example.arturarzumanyan.taskmanager.data.repository.events.EventsRepository;
 import com.example.arturarzumanyan.taskmanager.domain.Event;
 import com.example.arturarzumanyan.taskmanager.networking.util.DateUtils;
-import com.example.arturarzumanyan.taskmanager.ui.util.ColorPalette;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -18,10 +16,10 @@ import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.schedulers.Schedulers;
 
 import static com.example.arturarzumanyan.taskmanager.ui.activity.intention.IntentionActivity.EVENTS_KEY;
+import static com.example.arturarzumanyan.taskmanager.ui.util.ResourceManager.State;
+import static com.example.arturarzumanyan.taskmanager.ui.util.ResourceManager.getResourceManager;
 
 public class EventsDialogPresenterImpl implements EventsDialogContract.EventsDialogPresenter {
-    private static final String FAILED_TO_CREATE_EVENT_MSG = "Failed to create event";
-    private static final String FAILED_TO_UPDATE_EVENT_MSG = "Failed to update event";
     private static final int DEFAULT_COLOR = 9;
     private SparseIntArray mColorMap;
     private int mCurrentColor;
@@ -37,10 +35,8 @@ public class EventsDialogPresenterImpl implements EventsDialogContract.EventsDia
     }
 
     @Override
-    public void setDefaultCurrentColor(Context context) {
-        ColorPalette colorPalette = new ColorPalette(context);
-        mColorMap = colorPalette.getColorPalette();
-
+    public void setDefaultCurrentColor() {
+        mColorMap = getResourceManager().getColorPalette();
         mCurrentColor = mColorMap.get(DEFAULT_COLOR);
     }
 
@@ -116,7 +112,7 @@ public class EventsDialogPresenterImpl implements EventsDialogContract.EventsDia
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .doOnSuccess(events -> mEventsDialogView.onEventsReady(events))
-                .doOnError(throwable -> mEventsDialogView.onFail(FAILED_TO_CREATE_EVENT_MSG))
+                .doOnError(throwable -> mEventsDialogView.onFail(getResourceManager().getErrorMessage(State.FAILED_TO_CREATE_EVENT_ERROR)))
                 .subscribe());
 
     }
@@ -126,7 +122,7 @@ public class EventsDialogPresenterImpl implements EventsDialogContract.EventsDia
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .doOnSuccess(events -> mEventsDialogView.onEventsReady(events))
-                .doOnError(throwable -> mEventsDialogView.onFail(FAILED_TO_UPDATE_EVENT_MSG))
+                .doOnError(throwable -> mEventsDialogView.onFail(getResourceManager().getErrorMessage(State.FAILED_TO_UPDATE_EVENT_ERROR)))
                 .subscribe());
     }
 
