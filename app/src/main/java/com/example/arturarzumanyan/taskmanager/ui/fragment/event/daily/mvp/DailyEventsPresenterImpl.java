@@ -1,14 +1,13 @@
 package com.example.arturarzumanyan.taskmanager.ui.fragment.event.daily.mvp;
 
-import android.content.Context;
 import android.util.SparseIntArray;
 
+import com.example.arturarzumanyan.taskmanager.ResourceManager;
 import com.example.arturarzumanyan.taskmanager.data.repository.events.EventsRepository;
 import com.example.arturarzumanyan.taskmanager.data.repository.events.specification.EventsFromDateSpecification;
 import com.example.arturarzumanyan.taskmanager.domain.Event;
 import com.example.arturarzumanyan.taskmanager.networking.util.DateUtils;
 import com.example.arturarzumanyan.taskmanager.ui.adapter.event.mvp.EventRowView;
-import com.example.arturarzumanyan.taskmanager.ui.util.ColorPalette;
 
 import java.util.List;
 
@@ -18,11 +17,10 @@ public class DailyEventsPresenterImpl implements DailyEventsContract.DailyEvents
     private List<Event> mDailyEventsList;
     private SparseIntArray mColorPaletteArray;
 
-    public DailyEventsPresenterImpl(DailyEventsContract.DailyEventsView mDailyEventsView, Context context) {
+    public DailyEventsPresenterImpl(DailyEventsContract.DailyEventsView mDailyEventsView) {
         this.mDailyEventsView = mDailyEventsView;
         mEventsRepository = new EventsRepository();
-        ColorPalette colorPalette = new ColorPalette(context);
-        mColorPaletteArray = colorPalette.getColorPalette();
+        mColorPaletteArray = ResourceManager.getResourceManager().getColorPalette();
     }
 
     @Override
@@ -111,7 +109,8 @@ public class DailyEventsPresenterImpl implements DailyEventsContract.DailyEvents
         rowView.setName(event.getName());
         rowView.setDescription(event.getDescription().replaceAll("[\n]", ""));
         rowView.setEventColor(mColorPaletteArray.get(event.getColorId()));
-        rowView.setTime(DateUtils.formatTime(event.getStartTime()) + " - " + DateUtils.formatTime(event.getEndTime()));
+        rowView.setTime(DateUtils.formatTime(DateUtils.getEventDateFromString(event.getStartTime())) +
+                " - " + DateUtils.formatTime(DateUtils.getEventDateFromString(event.getEndTime())));
         rowView.setDelete();
     }
 

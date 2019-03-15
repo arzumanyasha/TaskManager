@@ -9,7 +9,7 @@ public class AllTaskListsSpecification implements TaskListsSpecification {
     }
 
     @Override
-    public String getSelectionArgs() {
-        return null;
+    public int getSelectionArgs() {
+        return 0;
     }
 }

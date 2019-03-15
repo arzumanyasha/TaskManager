@@ -93,12 +93,13 @@ public class EventsDialogPresenterImpl implements EventsDialogContract.EventsDia
             if (bundle != null) {
                 Event event = bundle.getParcelable(EVENTS_KEY);
                 if (event != null) {
-                    event = createEventObject(event.getId(), name, description, colorNumber, startDate, endDate, isNotify);
+                    event = createEventObject(event.getEventId(), name, description, colorNumber,
+                            DateUtils.formatTaskDate(startDate), DateUtils.formatTaskDate(endDate), isNotify);
                 }
                 updateEvent(event);
             } else {
-                Event event = createEventObject(UUID.randomUUID().toString(), name, description,
-                        colorNumber, startDate, endDate, isNotify);
+                Event event = createEventObject(UUID.randomUUID().toString(), name, description, colorNumber,
+                        DateUtils.formatTaskDate(startDate), DateUtils.formatTaskDate(endDate), isNotify);
                 addEvent(event);
             }
         } else {
@@ -147,7 +148,7 @@ public class EventsDialogPresenterImpl implements EventsDialogContract.EventsDia
     }
 
     private Event createEventObject(String id, String name, String description, int colorNumber,
-                                    Date startDate, Date endDate, int isNotify) {
+                                    String startDate, String endDate, int isNotify) {
         return new Event(id, name, description, colorNumber, startDate, endDate, isNotify);
     }
 

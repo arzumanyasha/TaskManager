@@ -15,6 +15,7 @@ import com.example.arturarzumanyan.taskmanager.domain.TaskList;
 import com.example.arturarzumanyan.taskmanager.networking.util.DateUtils;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
@@ -23,8 +24,7 @@ public class DbHelper {
     private SQLiteDatabase mDbSqlite;
     private static SQLiteDbHelper mSqLiteDbHelper;
 
-    public static void initDbHelperInstance(Context context)
-    {
+    public static void initDbHelperInstance(Context context) {
         if (mDbInstance == null) {
             mDbInstance = new DbHelper(context);
             AppDatabase.initAppDatabase(context);
@@ -55,7 +55,7 @@ public class DbHelper {
             if (isEventExistsInDb(event.getId())) {
                 AppDatabase.getAppDatabase().eventDao.update(event);
                 //mDbSqlite.update(EventsContract.EventsTable.TABLE_NAME, cv,
-                  //      EventsContract.EventsTable.COLUMN_EVENT_ID + " = ?", new String[]{event.getId()});
+                //      EventsContract.EventsTable.COLUMN_EVENT_ID + " = ?", new String[]{event.getId()});
             } else {
                 AppDatabase.getAppDatabase().eventDao.insert(event);
                 //mDbSqlite.insert(EventsContract.EventsTable.TABLE_NAME, null, cv);
@@ -155,14 +155,15 @@ public class DbHelper {
         mDbSqlite.beginTransaction();
 
         try {
-            ContentValues cv = createTaskListContentValues(taskList);
-            if (isTaskListExistsInDb(taskList.getTaskListId())) {
-                mDbSqlite.update(TasksContract.TaskListTable.TABLE_NAME, cv,
+            //ContentValues cv = createTaskListContentValues(taskList);
+            if (isTaskListExistsInDb(taskList.getId())) {
+                /*mDbSqlite.update(TasksContract.TaskListTable.TABLE_NAME, cv,
                         TasksContract.TaskListTable._ID + " = ?",
-                        new String[]{Integer.toString(taskList.getId())});
+                        new String[]{Integer.toString(taskList.getId())});*/
+                AppDatabase.getAppDatabase().taskListDao.update(taskList);
             } else {
-                mDbSqlite.insert(TasksContract.TaskListTable.TABLE_NAME,
-                        null, cv);
+                //mDbSqlite.insert(TasksContract.TaskListTable.TABLE_NAME, null, cv);
+                AppDatabase.getAppDatabase().taskListDao.insert(taskList);
             }
             mDbSqlite.setTransactionSuccessful();
         } finally {
@@ -170,26 +171,26 @@ public class DbHelper {
         }
     }
 
-    private boolean isTaskListExistsInDb(String taskListId) {
-        String[] selectionArgs = new String[]{taskListId};
+    private boolean isTaskListExistsInDb(int taskListId) {
+        /*String[] selectionArgs = new String[]{taskListId};
         Cursor c = mDbSqlite.rawQuery("SELECT * FROM " + TasksContract.TaskListTable.TABLE_NAME +
                 " WHERE " + TasksContract.TaskListTable.COLUMN_LIST_ID + " = ?", selectionArgs);
         boolean result = c.getCount() != 0;
-        c.close();
-        return result;
+        c.close();*/
+        return AppDatabase.getAppDatabase().taskListDao.getTaskListById(taskListId) != null;
     }
 
-    private ContentValues createTaskListContentValues(TaskList taskList) {
+    /*private ContentValues createTaskListContentValues(TaskList taskList) {
         ContentValues cv = new ContentValues();
 
         cv.put(TasksContract.TaskListTable.COLUMN_LIST_ID, taskList.getTaskListId());
         cv.put(TasksContract.TaskListTable.COLUMN_TITLE, taskList.getTitle());
 
         return cv;
-    }
+    }*/
 
     public List<TaskList> getTaskLists(TaskListsSpecification specification) {
-        List<TaskList> taskListArrayList = new ArrayList<>();
+        /*List<TaskList> taskListArrayList = new ArrayList<>();
         mDbSqlite = mSqLiteDbHelper.getReadableDatabase();
 
         Cursor c;
@@ -210,15 +211,20 @@ public class DbHelper {
             } while (c.moveToNext());
         }
 
-        c.close();
-        return taskListArrayList;
+        c.close();*/
+        if (specification.getSelectionArgs() == 0) {
+            return AppDatabase.getAppDatabase().taskListDao.getTaskLists();
+        } else {
+            return Collections.singletonList(AppDatabase.getAppDatabase().taskListDao.getTaskListById(specification.getSelectionArgs()));
+        }
     }
 
     public void deleteTaskList(TaskList taskList) {
-        mDbSqlite = mSqLiteDbHelper.getWritableDatabase();
+        /*mDbSqlite = mSqLiteDbHelper.getWritableDatabase();
         mDbSqlite.delete(TasksContract.TaskListTable.TABLE_NAME,
                 TasksContract.TaskListTable._ID + " = ?",
-                new String[]{Integer.toString(taskList.getId())});
+                new String[]{Integer.toString(taskList.getId())});*/
+        AppDatabase.getAppDatabase().taskListDao.delete(taskList);
     }
 
     public void addOrUpdateTasks(List<Task> tasks) {
@@ -233,13 +239,14 @@ public class DbHelper {
         mDbSqlite.beginTransaction();
 
         try {
-            ContentValues cv = createTaskContentValues(task);
+            //ContentValues cv = createTaskContentValues(task);
             if (isTaskExistsInDb(task.getId())) {
-                mDbSqlite.update(TasksContract.TasksTable.TABLE_NAME, cv,
-                        TasksContract.TasksTable.COLUMN_TASK_ID + " = ?", new String[]{task.getId()});
+                /*mDbSqlite.update(TasksContract.TasksTable.TABLE_NAME, cv,
+                        TasksContract.TasksTable.COLUMN_TASK_ID + " = ?", new String[]{task.getId()});*/
+                AppDatabase.getAppDatabase().taskDao.update(task);
             } else {
-                mDbSqlite.insert(TasksContract.TasksTable.TABLE_NAME,
-                        null, cv);
+                //mDbSqlite.insert(TasksContract.TasksTable.TABLE_NAME, null, cv);
+                AppDatabase.getAppDatabase().taskDao.insert(task);
             }
             mDbSqlite.setTransactionSuccessful();
         } finally {
@@ -247,16 +254,16 @@ public class DbHelper {
         }
     }
 
-    private boolean isTaskExistsInDb(String taskId) {
-        String[] selectionArgs = new String[]{taskId};
+    private boolean isTaskExistsInDb(int taskId) {
+        /*String[] selectionArgs = new String[]{taskId};
         Cursor c = mDbSqlite.rawQuery("SELECT * FROM " + TasksContract.TasksTable.TABLE_NAME +
                 " WHERE " + TasksContract.TasksTable.COLUMN_TASK_ID + " = ?", selectionArgs);
         boolean result = c.getCount() != 0;
-        c.close();
-        return result;
+        c.close();*/
+        return AppDatabase.getAppDatabase().taskDao.getTaskById(taskId) != null;
     }
 
-    private ContentValues createTaskContentValues(Task task) {
+    /*private ContentValues createTaskContentValues(Task task) {
         ContentValues cv = new ContentValues();
 
         cv.put(TasksContract.TasksTable.COLUMN_TASK_ID, task.getId());
@@ -272,16 +279,17 @@ public class DbHelper {
         cv.put(TasksContract.TasksTable.COLUMN_LIST_ID, task.getListId());
 
         return cv;
-    }
+    }*/
 
     public void deleteTask(Task task) {
-        mDbSqlite = mSqLiteDbHelper.getWritableDatabase();
+        /*mDbSqlite = mSqLiteDbHelper.getWritableDatabase();
         mDbSqlite.delete(TasksContract.TasksTable.TABLE_NAME,
-                TasksContract.TasksTable.COLUMN_TASK_ID + " = ?", new String[]{task.getId()});
+                TasksContract.TasksTable.COLUMN_TASK_ID + " = ?", new String[]{task.getId()});*/
+        AppDatabase.getAppDatabase().taskDao.delete(task);
     }
 
     public List<Task> getTasksFromList(int tasksListId) {
-        List<Task> tasksList = new ArrayList<>();
+        /*List<Task> tasksList = new ArrayList<>();
         mDbSqlite = mSqLiteDbHelper.getReadableDatabase();
 
         String[] selectionArgs = new String[]{Integer.toString(tasksListId)};
@@ -309,7 +317,7 @@ public class DbHelper {
             } while (c.moveToNext());
         }
 
-        c.close();
-        return tasksList;
+        c.close();*/
+        return AppDatabase.getAppDatabase().taskDao.getTasksFromList(tasksListId);
     }
 }

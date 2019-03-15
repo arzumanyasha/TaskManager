@@ -62,7 +62,7 @@ public class DailyEventsFragment extends Fragment implements DailyEventsContract
         mNoEventsTextView = view.findViewById(R.id.text_view_no_events);
 
         if (mDailyEventsPresenter == null) {
-            mDailyEventsPresenter = new DailyEventsPresenterImpl(this, requireActivity());
+            mDailyEventsPresenter = new DailyEventsPresenterImpl(this);
         } else {
             mDailyEventsPresenter.attachView(this);
             mDailyEventsPresenter.processRetainedState();

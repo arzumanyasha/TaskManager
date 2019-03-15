@@ -35,7 +35,7 @@ public class TasksDialogPresenterImpl implements TasksDialogContract.TasksDialog
                 if (task != null) {
                     task.setName(taskName);
                     task.setDescription(description);
-                    task.setDate(mTaskDate);
+                    task.setDate(DateUtils.formatTaskDate(mTaskDate));
 
                     updateTask(task, taskList);
                 }
@@ -45,10 +45,11 @@ public class TasksDialogPresenterImpl implements TasksDialogContract.TasksDialog
                 TaskList taskList = bundle.getParcelable(TASK_LISTS_KEY);
                 if (taskList != null) {
                     int taskListId = taskList.getId();
-                    Date taskDate = null;
+                    String taskDate = null;
 
                     if (date != null) {
-                        taskDate = DateUtils.getTaskDateFromString(DateUtils.formatReversedYearMonthDayDate(date));
+                        taskDate = DateUtils.formatTaskDate(DateUtils.getTaskDateFromString(
+                                DateUtils.formatReversedYearMonthDayDate(date)));
                     }
 
                     Task task = createTaskObject(taskId, taskName, description, isExecuted, taskListId, taskDate);
@@ -103,7 +104,7 @@ public class TasksDialogPresenterImpl implements TasksDialogContract.TasksDialog
         this.mTaskDate = date;
     }
 
-    private Task createTaskObject(String id, String name, String description, int isExecuted, int taskListId, Date date) {
+    private Task createTaskObject(String id, String name, String description, int isExecuted, int taskListId, String date) {
         return new Task(id, name, description, isExecuted, taskListId, date);
     }
 

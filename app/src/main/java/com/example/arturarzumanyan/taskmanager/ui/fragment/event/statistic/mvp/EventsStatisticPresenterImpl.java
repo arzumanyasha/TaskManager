@@ -13,6 +13,7 @@ import com.example.arturarzumanyan.taskmanager.ui.util.ColorPalette;
 import com.github.mikephil.charting.data.PieEntry;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import static com.example.arturarzumanyan.taskmanager.networking.util.DateUtils.MINUTES_IN_HOUR;
@@ -138,8 +139,10 @@ public class EventsStatisticPresenterImpl implements EventsStatisticContract.Eve
         SparseIntArray minutesOnEvents = new SparseIntArray();
 
         for (Event event : mEvents) {
-            int eventTimeSpent = event.getEndTime().getHours() * MINUTES_IN_HOUR + event.getEndTime().getMinutes()
-                    - event.getStartTime().getHours() * MINUTES_IN_HOUR - event.getStartTime().getMinutes();
+            int eventTimeSpent = DateUtils.getEventDateFromString(event.getEndTime()).getHours() *
+                    MINUTES_IN_HOUR + DateUtils.getEventDateFromString(event.getEndTime()).getMinutes()
+                    - DateUtils.getEventDateFromString(event.getStartTime()).getHours() *
+                    MINUTES_IN_HOUR - DateUtils.getEventDateFromString(event.getStartTime()).getMinutes();
             int colorNumber = event.getColorId();
             if (minutesOnEvents.get(colorNumber, VALUE_IF_KEY_NOT_FOUND) != VALUE_IF_KEY_NOT_FOUND) {
                 minutesOnEvents.put(colorNumber, minutesOnEvents.get(colorNumber) + eventTimeSpent);

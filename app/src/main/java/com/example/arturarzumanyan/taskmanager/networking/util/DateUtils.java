@@ -39,8 +39,8 @@ public class DateUtils {
             return dateFormat.parse(date);
         } catch (ParseException e) {
             e.printStackTrace();
+            return null;
         }
-        return null;
     }
 
     public static String trimEventDate(String date) {

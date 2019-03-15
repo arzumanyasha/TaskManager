@@ -86,7 +86,8 @@ public class WeekDashboardPresenterImpl implements WeekDashboardContract.WeekDas
     @Override
     public void fetchWeeklyEventsWithDate() {
         for (Event event : mWeeklyEventsList) {
-            Date eventDate = DateUtils.getEventDateWithoutTime(event.getStartTime());
+            Date eventDate = DateUtils.getEventDateWithoutTime(
+                    DateUtils.getEventDateFromString(event.getStartTime()));
 
             if (mWeeklyEvents.containsKey(eventDate)) {
                 mWeeklyEvents.get(eventDate).add(event);
@@ -105,13 +106,18 @@ public class WeekDashboardPresenterImpl implements WeekDashboardContract.WeekDas
             currentEventList = mWeeklyEvents.get(weekDateList.get(i));
             if (currentEventList != null) {
                 for (Event event : currentEventList) {
-                    Date startTime = event.getStartTime();
-                    int minutes = startTime.getHours() * MINUTES_IN_HOUR + startTime.getMinutes();
-                    mWeekDashboardView.makeEmptiness(i, minutes - lastMinute);
-                    mWeekDashboardView.makeEventPart(mColorPaletteArray.get(event.getColorId()), i,
-                            event.getEndTime().getHours() * MINUTES_IN_HOUR + event.getEndTime().getMinutes()
-                                    - event.getStartTime().getHours() * MINUTES_IN_HOUR - event.getStartTime().getMinutes());
-                    lastMinute = event.getEndTime().getHours() * MINUTES_IN_HOUR + event.getEndTime().getMinutes();
+                    Date startTime = DateUtils.getEventDateFromString(event.getStartTime());
+                    Date endTime = DateUtils.getEventDateFromString(event.getEndTime());
+                    int minutes;
+                    if (startTime != null && endTime != null) {
+                        minutes = startTime.getHours() * MINUTES_IN_HOUR + startTime.getMinutes();
+
+                        mWeekDashboardView.makeEmptiness(i, minutes - lastMinute);
+                        mWeekDashboardView.makeEventPart(mColorPaletteArray.get(event.getColorId()), i,
+                                /*event.getEndTime()*/endTime.getHours() * MINUTES_IN_HOUR + /*event.getEndTime()*/endTime.getMinutes()
+                                        - /*event.getStartTime()*/startTime.getHours() * MINUTES_IN_HOUR - /*event.getStartTime()*/startTime.getMinutes());
+                        lastMinute = /*event.getEndTime()*/endTime.getHours() * MINUTES_IN_HOUR + /*event.getEndTime()*/endTime.getMinutes();
+                    }
                 }
                 lastMinute = 0;
             }

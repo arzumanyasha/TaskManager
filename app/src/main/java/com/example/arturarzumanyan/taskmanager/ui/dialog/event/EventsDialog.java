@@ -203,7 +203,8 @@ public class EventsDialog extends AppCompatDialogFragment implements EventsDialo
 
         mTextViewStartTime.setText(DateUtils.formatTimeWithoutA(event.getStartTime()));
         mTextViewEndTime.setText(DateUtils.formatTimeWithoutA(event.getEndTime()));
-        mTextViewDate.setText(DateUtils.formatReversedDayMonthYearDate(DateUtils.formatEventDate(event.getStartTime())));
+        mTextViewDate.setText(DateUtils.formatReversedDayMonthYearDate(
+                /*DateUtils.formatEventDate(event.getStartTime())*/event.getStartTime()));
 
         mSwitchNotification.setChecked(event.getIsNotify() == 1);
 

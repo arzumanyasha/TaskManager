@@ -2,5 +2,5 @@ package com.example.arturarzumanyan.taskmanager.data.repository.tasklists.specif
 
 public interface TaskListsSpecification {
     String getSqlQuery();
-    String getSelectionArgs();
+    int getSelectionArgs();
 }

@@ -104,7 +104,8 @@ public class TasksDialog extends AppCompatDialogFragment implements TasksDialogC
                     @Override
                     public void onDateSet(DatePicker view, int year, int monthOfYear, int dayOfMonth) {
                         mTextViewTaskDate.setText(DateUtils.getStringDateFromInt(year, monthOfYear, dayOfMonth));
-                        mTasksDialogPresenter.setTaskDate(DateUtils.getTaskDateFromString(DateUtils.formatReversedYearMonthDayDate(mTextViewTaskDate.getText().toString())));
+                        mTasksDialogPresenter.setTaskDate(DateUtils.getTaskDateFromString(
+                                DateUtils.formatReversedYearMonthDayDate(mTextViewTaskDate.getText().toString())));
                     }
                 }, year, month, day);
 
@@ -118,7 +119,8 @@ public class TasksDialog extends AppCompatDialogFragment implements TasksDialogC
         mEditTextTaskName.setText(task.getName());
         mEditTextTaskDescription.setText(task.getDescription());
         if (task.getDate() != null) {
-            mTextViewTaskDate.setText(DateUtils.formatReversedDayMonthYearDate(DateUtils.getTaskDate(task.getDate())));
+            mTextViewTaskDate.setText(DateUtils.formatReversedDayMonthYearDate(
+                    DateUtils.getTaskDate(DateUtils.getTaskDateFromString(task.getDate()))));
         }
     }
 

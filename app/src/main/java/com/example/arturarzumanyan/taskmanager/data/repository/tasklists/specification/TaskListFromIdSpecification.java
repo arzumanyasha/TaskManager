@@ -12,8 +12,8 @@ public class TaskListFromIdSpecification implements TaskListsSpecification {
     }
 
     @Override
-    public String getSelectionArgs() {
-        return Integer.toString(taskListId);
+    public int getSelectionArgs() {
+        return taskListId;
     }
 
     public void setTaskListId(int taskListId) {
