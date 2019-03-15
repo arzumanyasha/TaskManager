@@ -52,7 +52,7 @@ public class EventsRepository {
 
     public Single<List<Event>> addEvent(Event event) {
         EventsFromDateSpecification eventsFromDateSpecification = new EventsFromDateSpecification();
-        eventsFromDateSpecification.setDate(/*DateUtils.formatEventDate(event.getStartTime())*/event.getStartTime());
+        eventsFromDateSpecification.setDate(event.getStartTime());
 
         Single<List<Event>> eventsSingle;
         if (RepositoryLoadHelper.isOnline()) {
@@ -83,7 +83,7 @@ public class EventsRepository {
 
     public Single<List<Event>> updateEvent(Event event) {
         EventsFromDateSpecification eventsFromDateSpecification = new EventsFromDateSpecification();
-        eventsFromDateSpecification.setDate(/*DateUtils.formatEventDate(event.getStartTime())*/event.getStartTime());
+        eventsFromDateSpecification.setDate(event.getStartTime());
 
         Single<List<Event>> eventsSingle;
         if (RepositoryLoadHelper.isOnline()) {

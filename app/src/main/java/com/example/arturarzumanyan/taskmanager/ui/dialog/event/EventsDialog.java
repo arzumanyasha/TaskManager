@@ -63,7 +63,7 @@ public class EventsDialog extends AppCompatDialogFragment implements EventsDialo
         final Bundle bundle = getArguments();
 
         mEventsDialogPresenter = new EventsDialogPresenterImpl(this);
-        mEventsDialogPresenter.setDefaultCurrentColor(getActivity());
+        mEventsDialogPresenter.setDefaultCurrentColor();
 
         builder.setView(view)
                 .setTitle(getString(R.string.events_title))
@@ -160,8 +160,7 @@ public class EventsDialog extends AppCompatDialogFragment implements EventsDialo
 
         mTextViewStartTime.setText(DateUtils.formatTimeWithoutA(event.getStartTime()));
         mTextViewEndTime.setText(DateUtils.formatTimeWithoutA(event.getEndTime()));
-        mTextViewDate.setText(DateUtils.formatReversedDayMonthYearDate(
-                /*DateUtils.formatEventDate(event.getStartTime())*/event.getStartTime()));
+        mTextViewDate.setText(DateUtils.formatReversedDayMonthYearDate(event.getStartTime()));
 
         mSwitchNotification.setChecked(event.getIsNotify() == 1);
 

@@ -46,8 +46,8 @@ public class RepositoryLoadHelper {
 
         Map<String, String> startTimeMap = new HashMap<>();
         Map<String, String> endTimeMap = new HashMap<>();
-        startTimeMap.put(DATETIME_KEY, /*DateUtils.formatEventTime(event.getStartTime())*/event.getStartTime());
-        endTimeMap.put(DATETIME_KEY, /*DateUtils.formatEventTime(event.getEndTime())*/event.getEndTime());
+        startTimeMap.put(DATETIME_KEY, event.getStartTime());
+        endTimeMap.put(DATETIME_KEY, event.getEndTime());
 
         requestBody.put(SUMMARY_KEY, event.getName());
 
@@ -90,7 +90,7 @@ public class RepositoryLoadHelper {
         }
 
         if (task.getDate() != null) {
-            requestBody.put(DUE_KEY, /*DateUtils.formatTaskDate(task.getDate())*/task.getDate());
+            requestBody.put(DUE_KEY, task.getDate());
         }
 
         if (task.getIsExecuted() == 1) {

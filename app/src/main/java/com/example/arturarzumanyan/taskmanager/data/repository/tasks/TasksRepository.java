@@ -182,34 +182,6 @@ public class TasksRepository {
 
         @Override
         protected void retryGetResultFromServer(final FirebaseWebService.RequestMethods requestMethod) {
-            /*FirebaseWebService.getFirebaseWebServiceInstance().refreshAccessToken(new FirebaseWebService.AccessTokenUpdatedListener() {
-                @Override
-                public void onAccessTokenUpdated() {
-                    TasksAsyncTask tasksAsyncTask = new TasksRepository.TasksAsyncTask(mTask, mTaskList,
-                            mRepositoryLoadHelper, mTasksDbStore, mTasksCloudStore, mListener);
-
-                    if (requestMethod != DELETE) {
-                        tasksAsyncTask.setDataInfoLoadingListener(new UserDataLoadingListener<Task>() {
-                            @Override
-                            public void onSuccess(List<Task> list) {
-                                mListener.onSuccess(list);
-                            }
-
-                            @Override
-                            public void onFail(String message) {
-                                mListener.onFail(message);
-                            }
-                        });
-                    }
-
-                    tasksAsyncTask.execute(requestMethod);
-                }
-
-                @Override
-                public void onFail() {
-                    mListener.onPermissionDenied();
-                }
-            });*/
         }
 
         private Task parseTask(String data) {

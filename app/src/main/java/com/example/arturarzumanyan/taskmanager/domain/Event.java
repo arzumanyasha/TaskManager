@@ -28,8 +28,8 @@ public class Event implements Parcelable{
         this.name = name;
         this.description = description;
         this.colorId = colorId;
-        this.startTime = /*DateUtils.formatTaskDate(startTime)*/startTime;
-        this.endTime = /*DateUtils.formatTaskDate(endTime)*/endTime;
+        this.startTime = startTime;
+        this.endTime = endTime;
         this.isNotify = isNotify;
     }
 
@@ -38,8 +38,8 @@ public class Event implements Parcelable{
         name = in.readString();
         description = in.readString();
         colorId = in.readInt();
-        startTime = /*DateUtils.getEventDateFromString(in.readString());*/in.readString();
-        endTime = /*DateUtils.getEventDateFromString(in.readString());*/in.readString();
+        startTime = in.readString();
+        endTime = in.readString();
         isNotify = in.readInt();
     }
 
@@ -130,8 +130,8 @@ public class Event implements Parcelable{
         dest.writeString(name);
         dest.writeString(description);
         dest.writeInt(colorId);
-        dest.writeString(/*DateUtils.formatTaskDate(startTime)*/startTime);
-        dest.writeString(/*DateUtils.formatTaskDate(endTime)*/endTime);
+        dest.writeString(startTime);
+        dest.writeString(endTime);
         dest.writeInt(isNotify);
     }
 }

@@ -4,7 +4,6 @@ import com.example.arturarzumanyan.taskmanager.auth.FirebaseWebService;
 import com.example.arturarzumanyan.taskmanager.data.repository.RepositoryLoadHelper;
 import com.example.arturarzumanyan.taskmanager.domain.ResponseDto;
 import com.example.arturarzumanyan.taskmanager.domain.TaskList;
-import com.example.arturarzumanyan.taskmanager.networking.NetworkUtil;
 import com.example.arturarzumanyan.taskmanager.networking.base.RequestParameters;
 
 import java.util.HashMap;
@@ -31,14 +30,14 @@ public class TaskListsCloudStore {
         );
         requestParameters.setRequestHeaderParameters(new HashMap<String, String>());
 
-        return null/*NetworkUtil.getResultFromServer(requestParameters)*/;
+        return null;
     }
 
     public ResponseDto addTaskListOnServer(TaskList taskList) {
         RequestParameters requestParameters = mRepositoryLoadHelper.getTaskListCreateOrUpdateParameters(taskList,
                 BASE_GOOGLE_APIS_URL + BASE_TASK_LISTS_URL, POST);
 
-        return null/*NetworkUtil.getResultFromServer(requestParameters)*/;
+        return null;
     }
 
     public ResponseDto updateTaskListOnServer(TaskList taskList) {
@@ -47,7 +46,7 @@ public class TaskListsCloudStore {
         RequestParameters requestParameters = mRepositoryLoadHelper.getTaskListCreateOrUpdateParameters(taskList,
                 url, PATCH);
 
-        return null/*NetworkUtil.getResultFromServer(requestParameters)*/;
+        return null;
     }
 
     public ResponseDto deleteTaskListOnServer(final TaskList taskList) {
@@ -55,6 +54,6 @@ public class TaskListsCloudStore {
 
         RequestParameters requestParameters = mRepositoryLoadHelper.getDeleteParameters(url);
 
-        return null/*NetworkUtil.getResultFromServer(requestParameters)*/;
+        return null;
     }
 }

@@ -1,7 +1,5 @@
 package com.example.arturarzumanyan.taskmanager.data.repository.tasklists;
 
-import android.os.AsyncTask;
-
 import com.example.arturarzumanyan.taskmanager.auth.FirebaseWebService;
 import com.example.arturarzumanyan.taskmanager.data.repository.BaseDataLoadingAsyncTask;
 import com.example.arturarzumanyan.taskmanager.data.repository.RepositoryLoadHelper;
@@ -232,34 +230,6 @@ public class TaskListsRepository {
 
         @Override
         protected void retryGetResultFromServer(final FirebaseWebService.RequestMethods requestMethod) {
-            /*FirebaseWebService.getFirebaseWebServiceInstance().refreshAccessToken(new FirebaseWebService.AccessTokenUpdatedListener() {
-                @Override
-                public void onAccessTokenUpdated() {
-                    Log.v("Access token refreshed successfully");
-                    TaskListsAsyncTask taskListsAsyncTask = new TaskListsAsyncTask(null,
-                            mRepositoryLoadHelper, mTaskListsDbStore, mTaskListsCloudStore,
-                            mTasksDbStore, mTasksCloudStore, mTaskListsSpecification, mListener);
-                    taskListsAsyncTask.setDataInfoLoadingListener(new UserDataLoadingListener<TaskList>() {
-                        @Override
-                        public void onSuccess(List<TaskList> list) {
-                            Log.v("TaskLists loading retried successfully");
-                            mListener.onUpdate(list);
-                        }
-
-                        @Override
-                        public void onFail(String message) {
-                            mListener.onFail(message);
-                        }
-                    });
-
-                    taskListsAsyncTask.execute(requestMethod);
-                }
-
-                @Override
-                public void onFail() {
-                    mListener.onPermissionDenied();
-                }
-            });*/
         }
 
         private TaskList parseTaskList(String data) {
@@ -271,24 +241,6 @@ public class TaskListsRepository {
             TaskListsParser taskListsParser = new TaskListsParser();
             return taskListsParser.parseTaskLists(data);
         }
-
-        /**
-         * IF TASK LOADING NEEDED FROM THIS ASYNCTASK
-         * private void loadTasks(TaskList taskList, int taskListNumber) {
-         * ResponseDto responseDto = mTasksCloudStore.getTasksFromServer(taskList);
-         * <p>
-         * int responseCode = responseDto.getResponseCode();
-         * if (responseCode == HttpURLConnection.HTTP_OK ||
-         * responseCode == HttpURLConnection.HTTP_NO_CONTENT) {
-         * TasksParser tasksParser = new TasksParser();
-         * updateTasksInDbQuery(tasksParser.parseTasks(responseDto.getResponseData(), taskListNumber));
-         * }
-         * }
-         * <p>
-         * private void updateTasksInDbQuery(List<Task> tasks) {
-         * mTasksDbStore.addOrUpdateTasks(tasks);
-         * }
-         */
 
         private void updateDbQuery(List<TaskList> events) {
             mTaskListsDbStore.addOrUpdateTaskLists(events);

@@ -33,7 +33,7 @@ public class Task implements Parcelable {
         this.description = description;
         this.isExecuted = isExecuted;
         this.listId = listId;
-        this.date = /*DateUtils.formatTaskDate(date)*/date;
+        this.date = date;
     }
 
     protected Task(Parcel in) {
@@ -45,7 +45,7 @@ public class Task implements Parcelable {
         listId = in.readInt();
 
         if (in.dataAvail() > 0) {
-            date = /*DateUtils.getTaskDateFromString(in.readString())*/in.readString();
+            date = in.readString();
         }
     }
 
@@ -131,7 +131,7 @@ public class Task implements Parcelable {
         dest.writeInt(isExecuted);
         dest.writeInt(listId);
         if (date != null) {
-            dest.writeString(/*DateUtils.formatTaskDate(date)*/date);
+            dest.writeString(date);
         }
     }
 }

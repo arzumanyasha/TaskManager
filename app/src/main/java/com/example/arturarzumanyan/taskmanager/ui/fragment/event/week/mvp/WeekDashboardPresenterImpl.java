@@ -109,9 +109,9 @@ public class WeekDashboardPresenterImpl implements WeekDashboardContract.WeekDas
 
                         mWeekDashboardView.makeEmptiness(i, minutes - lastMinute);
                         mWeekDashboardView.makeEventPart(mColorPaletteArray.get(event.getColorId()), i,
-                                /*event.getEndTime()*/endTime.getHours() * MINUTES_IN_HOUR + /*event.getEndTime()*/endTime.getMinutes()
-                                        - /*event.getStartTime()*/startTime.getHours() * MINUTES_IN_HOUR - /*event.getStartTime()*/startTime.getMinutes());
-                        lastMinute = /*event.getEndTime()*/endTime.getHours() * MINUTES_IN_HOUR + /*event.getEndTime()*/endTime.getMinutes();
+                                endTime.getHours() * MINUTES_IN_HOUR + endTime.getMinutes()
+                                        - startTime.getHours() * MINUTES_IN_HOUR - startTime.getMinutes());
+                        lastMinute = endTime.getHours() * MINUTES_IN_HOUR + endTime.getMinutes();
                     }
                 }
                 lastMinute = 0;

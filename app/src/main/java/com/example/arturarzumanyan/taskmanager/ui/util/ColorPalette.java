@@ -9,7 +9,7 @@ import com.example.arturarzumanyan.taskmanager.R;
 public class ColorPalette {
     private Context mContext;
 
-    public ColorPalette(Context mContext) {
+    ColorPalette(Context mContext) {
         this.mContext = mContext;
     }
 

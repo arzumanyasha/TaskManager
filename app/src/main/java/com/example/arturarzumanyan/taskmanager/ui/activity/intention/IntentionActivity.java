@@ -86,15 +86,6 @@ public class IntentionActivity extends BaseActivity implements IntentionContract
             mIntentionPresenter.attachView(this);
             mIntentionPresenter.processRestoredInfo(savedInstanceState.getString(TITLE_KEY, TASK_LISTS_KEY));
         }
-
-        /*EventsFromDateSpecification eventsSpecification = new EventsFromDateSpecification();
-        eventsSpecification.setDate(DateUtils.getCurrentTime());
-        EventsRepository eventsRepository = new EventsRepository();
-        eventsRepository.getEvents(eventsSpecification)
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .doOnSuccess(events -> Log.v(events.get(0).getName()))
-                .subscribe();*/
     }
 
     @Override
