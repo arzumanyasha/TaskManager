@@ -11,14 +11,17 @@ import com.example.arturarzumanyan.taskmanager.ui.util.ColorPalette;
 
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
 import java.util.UUID;
 
-import static com.example.arturarzumanyan.taskmanager.auth.FirebaseWebService.RequestMethods.PATCH;
-import static com.example.arturarzumanyan.taskmanager.auth.FirebaseWebService.RequestMethods.POST;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.CompositeDisposable;
+import io.reactivex.schedulers.Schedulers;
+
 import static com.example.arturarzumanyan.taskmanager.ui.activity.intention.IntentionActivity.EVENTS_KEY;
 
 public class EventsDialogPresenterImpl implements EventsDialogContract.EventsDialogPresenter {
+    private static final String FAILED_TO_CREATE_EVENT_MSG = "Failed to create event";
+    private static final String FAILED_TO_UPDATE_EVENT_MSG = "Failed to update event";
     private static final int DEFAULT_COLOR = 9;
     private SparseIntArray mColorMap;
     private int mCurrentColor;
@@ -26,6 +29,7 @@ public class EventsDialogPresenterImpl implements EventsDialogContract.EventsDia
     private EventsRepository mEventsRepository;
     private Date mStartTime;
     private Date mEndTime;
+    private CompositeDisposable mCompositeDisposable = new CompositeDisposable();
 
     public EventsDialogPresenterImpl(EventsDialogContract.EventsDialogView mEventsDialogView) {
         this.mEventsDialogView = mEventsDialogView;
@@ -108,43 +112,22 @@ public class EventsDialogPresenterImpl implements EventsDialogContract.EventsDia
     }
 
     private void addEvent(Event event) {
-        mEventsRepository.addOrUpdateEvent(event, POST,
-                new EventsRepository.OnEventsLoadedListener() {
-                    @Override
-                    public void onSuccess(List<Event> eventsList) {
-                        mEventsDialogView.onEventsReady(eventsList);
-                    }
-
-                    @Override
-                    public void onFail(String message) {
-                        mEventsDialogView.onFail(message);
-                    }
-
-                    @Override
-                    public void onPermissionDenied() {
-                        /** To-do: add realization with start signInActivity*/
-                    }
-                });
+        mCompositeDisposable.add(mEventsRepository.addEvent(event)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .doOnSuccess(events -> mEventsDialogView.onEventsReady(events))
+                .doOnError(throwable -> mEventsDialogView.onFail(FAILED_TO_CREATE_EVENT_MSG))
+                .subscribe());
 
     }
 
     private void updateEvent(Event event) {
-        mEventsRepository.addOrUpdateEvent(event, PATCH, new EventsRepository.OnEventsLoadedListener() {
-            @Override
-            public void onSuccess(List<Event> eventsList) {
-                mEventsDialogView.onEventsReady(eventsList);
-            }
-
-            @Override
-            public void onFail(String message) {
-                mEventsDialogView.onFail(message);
-            }
-
-            @Override
-            public void onPermissionDenied() {
-                /** To-do: add realization with start signInActivity*/
-            }
-        });
+        mCompositeDisposable.add(mEventsRepository.updateEvent(event)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .doOnSuccess(events -> mEventsDialogView.onEventsReady(events))
+                .doOnError(throwable -> mEventsDialogView.onFail(FAILED_TO_UPDATE_EVENT_MSG))
+                .subscribe());
     }
 
     private Event createEventObject(String id, String name, String description, int colorNumber,
@@ -176,5 +159,10 @@ public class EventsDialogPresenterImpl implements EventsDialogContract.EventsDia
                 mEventsDialogView.setEventInfoViews(event);
             }
         }
+    }
+
+    @Override
+    public void unsubscribe() {
+        mCompositeDisposable.clear();
     }
 }

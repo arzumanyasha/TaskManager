@@ -17,14 +17,20 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.CompositeDisposable;
+import io.reactivex.schedulers.Schedulers;
+
 import static com.example.arturarzumanyan.taskmanager.networking.util.DateUtils.DAYS_IN_WEEK;
 import static com.example.arturarzumanyan.taskmanager.networking.util.DateUtils.MINUTES_IN_HOUR;
+import static com.example.arturarzumanyan.taskmanager.ui.fragment.event.daily.mvp.DailyEventsPresenterImpl.FAILED_TO_LOAD_EVENTS_MSG;
 
 public class WeekDashboardPresenterImpl implements WeekDashboardContract.WeekDashboardPresenter {
     private WeekDashboardContract.WeekDashboardView mWeekDashboardView;
     private SparseIntArray mColorPaletteArray;
     private List<Event> mWeeklyEventsList;
     private Map<Date, List<Event>> mWeeklyEvents = new HashMap<>();
+    private CompositeDisposable mCompositeDisposable = new CompositeDisposable();
 
     public WeekDashboardPresenterImpl(WeekDashboardContract.WeekDashboardView weekDashboardView, Context context) {
         this.mWeekDashboardView = weekDashboardView;
@@ -43,29 +49,21 @@ public class WeekDashboardPresenterImpl implements WeekDashboardContract.WeekDas
     public void loadWeeklyEvents() {
         WeeklyEventsSpecification weeklyEventsSpecification = new WeeklyEventsSpecification();
         EventsRepository eventsRepository = new EventsRepository();
-        eventsRepository.getEvents(weeklyEventsSpecification, new EventsRepository.OnEventsLoadedListener() {
-            @Override
-            public void onSuccess(List<Event> eventsList) {
-                Log.v("Weekly events loaded");
+        mCompositeDisposable.add(eventsRepository.getEvents(weeklyEventsSpecification)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .doOnSuccess(events -> {
+                    Log.v("Weekly events loaded");
 
-                mWeeklyEventsList = eventsList;
-                fetchWeeklyEventsWithDate();
-                if (mWeekDashboardView != null) {
-                    mWeekDashboardView.setProgressBarInvisible();
-                    processWeekDashboard();
-                }
-            }
-
-            @Override
-            public void onFail(String message) {
-                mWeekDashboardView.onFail(message);
-            }
-
-            @Override
-            public void onPermissionDenied() {
-                /** To-do: add realization with start signInActivity*/
-            }
-        });
+                    mWeeklyEventsList = events;
+                    fetchWeeklyEventsWithDate();
+                    if (mWeekDashboardView != null) {
+                        mWeekDashboardView.setProgressBarInvisible();
+                        processWeekDashboard();
+                    }
+                })
+                .doOnError(throwable -> mWeekDashboardView.onFail(FAILED_TO_LOAD_EVENTS_MSG))
+                .subscribe());
     }
 
     private List<Date> getDatesOfWeek() {
@@ -126,6 +124,7 @@ public class WeekDashboardPresenterImpl implements WeekDashboardContract.WeekDas
 
     @Override
     public void unsubscribe() {
+        mCompositeDisposable.clear();
         mWeekDashboardView = null;
     }
 }

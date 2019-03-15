@@ -232,7 +232,7 @@ public class TaskListsRepository {
 
         @Override
         protected void retryGetResultFromServer(final FirebaseWebService.RequestMethods requestMethod) {
-            FirebaseWebService.getFirebaseWebServiceInstance().refreshAccessToken(new FirebaseWebService.AccessTokenUpdatedListener() {
+            /*FirebaseWebService.getFirebaseWebServiceInstance().refreshAccessToken(new FirebaseWebService.AccessTokenUpdatedListener() {
                 @Override
                 public void onAccessTokenUpdated() {
                     Log.v("Access token refreshed successfully");
@@ -259,7 +259,7 @@ public class TaskListsRepository {
                 public void onFail() {
                     mListener.onPermissionDenied();
                 }
-            });
+            });*/
         }
 
         private TaskList parseTaskList(String data) {

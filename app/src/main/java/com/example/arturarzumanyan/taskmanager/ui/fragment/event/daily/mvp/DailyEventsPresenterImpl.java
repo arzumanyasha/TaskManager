@@ -11,11 +11,18 @@ import com.example.arturarzumanyan.taskmanager.ui.adapter.event.mvp.EventRowView
 
 import java.util.List;
 
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.CompositeDisposable;
+import io.reactivex.schedulers.Schedulers;
+
 public class DailyEventsPresenterImpl implements DailyEventsContract.DailyEventsPresenter {
+    public static final String FAILED_TO_LOAD_EVENTS_MSG = "Failed to load events";
+    private static final String FAILED_TO_DELETE_EVENT_MSG = "Failed to delete event";
     private DailyEventsContract.DailyEventsView mDailyEventsView;
     private EventsRepository mEventsRepository;
     private List<Event> mDailyEventsList;
     private SparseIntArray mColorPaletteArray;
+    private CompositeDisposable mCompositeDisposable = new CompositeDisposable();
 
     public DailyEventsPresenterImpl(DailyEventsContract.DailyEventsView mDailyEventsView) {
         this.mDailyEventsView = mDailyEventsView;
@@ -38,33 +45,23 @@ public class DailyEventsPresenterImpl implements DailyEventsContract.DailyEvents
     }
 
     private void loadDailyEvents() {
-        final EventsFromDateSpecification eventsFromDateSpecification = new EventsFromDateSpecification();
+        EventsFromDateSpecification eventsFromDateSpecification = new EventsFromDateSpecification();
         eventsFromDateSpecification.setDate(DateUtils.getCurrentTime());
-        mEventsRepository.getEvents(eventsFromDateSpecification, new EventsRepository.OnEventsLoadedListener() {
-            @Override
-            public void onSuccess(List<Event> eventsList) {
-                mDailyEventsList = eventsList;
-                if (mDailyEventsView != null) {
-                    mDailyEventsView.setProgressBarInvisible();
-                    mDailyEventsView.setEventsAdapter(eventsList);
-                    if (eventsList.isEmpty()) {
-                        mDailyEventsView.setNoEventsTextViewVisible();
+        mCompositeDisposable.add(mEventsRepository.getEvents(eventsFromDateSpecification)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .doOnSuccess(events -> {
+                    mDailyEventsList = events;
+                    if (mDailyEventsView != null) {
+                        mDailyEventsView.setProgressBarInvisible();
+                        mDailyEventsView.setEventsAdapter(events);
+                        if (events.isEmpty()) {
+                            mDailyEventsView.setNoEventsTextViewVisible();
+                        }
                     }
-                }
-            }
-
-            @Override
-            public void onFail(String message) {
-                if (mDailyEventsView != null) {
-                    mDailyEventsView.onFail(message);
-                }
-            }
-
-            @Override
-            public void onPermissionDenied() {
-                /** To-do: add realization with start signInActivity*/
-            }
-        });
+                })
+                .doOnError(throwable -> onFail(FAILED_TO_LOAD_EVENTS_MSG))
+                .subscribe());
     }
 
     @Override
@@ -76,30 +73,26 @@ public class DailyEventsPresenterImpl implements DailyEventsContract.DailyEvents
     public void processItemDelete(final int position) {
         Event event = mDailyEventsList.get(position);
         mDailyEventsList.remove(event);
-        mEventsRepository.deleteEvent(event, new EventsRepository.OnEventsLoadedListener() {
-            @Override
-            public void onSuccess(List<Event> eventsList) {
-                mDailyEventsList = eventsList;
-                if (mDailyEventsView != null) {
-                    mDailyEventsView.updateEventsAdapterAfterDelete(position);
-                    if (eventsList.isEmpty()) {
-                        mDailyEventsView.setNoEventsTextViewVisible();
+        mCompositeDisposable.add(mEventsRepository.deleteEvent(event)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .doOnSuccess(events -> {
+                    mDailyEventsList = events;
+                    if (mDailyEventsView != null) {
+                        mDailyEventsView.updateEventsAdapterAfterDelete(position);
+                        if (events.isEmpty()) {
+                            mDailyEventsView.setNoEventsTextViewVisible();
+                        }
                     }
-                }
-            }
+                })
+                .doOnError(throwable -> onFail(FAILED_TO_DELETE_EVENT_MSG))
+                .subscribe());
+    }
 
-            @Override
-            public void onFail(String message) {
-                if (mDailyEventsView != null) {
-                    mDailyEventsView.onFail(message);
-                }
-            }
-
-            @Override
-            public void onPermissionDenied() {
-                /** To-do: add realization with start signInActivity*/
-            }
-        });
+    private void onFail(String message) {
+        if (mDailyEventsView != null) {
+            mDailyEventsView.onFail(message);
+        }
     }
 
     @Override
@@ -135,6 +128,7 @@ public class DailyEventsPresenterImpl implements DailyEventsContract.DailyEvents
 
     @Override
     public void unsubscribe() {
+        mCompositeDisposable.clear();
         mDailyEventsView = null;
     }
 }

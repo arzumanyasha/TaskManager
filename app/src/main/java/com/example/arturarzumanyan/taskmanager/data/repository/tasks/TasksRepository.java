@@ -182,7 +182,7 @@ public class TasksRepository {
 
         @Override
         protected void retryGetResultFromServer(final FirebaseWebService.RequestMethods requestMethod) {
-            FirebaseWebService.getFirebaseWebServiceInstance().refreshAccessToken(new FirebaseWebService.AccessTokenUpdatedListener() {
+            /*FirebaseWebService.getFirebaseWebServiceInstance().refreshAccessToken(new FirebaseWebService.AccessTokenUpdatedListener() {
                 @Override
                 public void onAccessTokenUpdated() {
                     TasksAsyncTask tasksAsyncTask = new TasksRepository.TasksAsyncTask(mTask, mTaskList,
@@ -209,7 +209,7 @@ public class TasksRepository {
                 public void onFail() {
                     mListener.onPermissionDenied();
                 }
-            });
+            });*/
         }
 
         private Task parseTask(String data) {

@@ -20,9 +20,13 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.example.arturarzumanyan.taskmanager.R;
+import com.example.arturarzumanyan.taskmanager.data.repository.events.EventsRepository;
+import com.example.arturarzumanyan.taskmanager.data.repository.events.specification.EventsFromDateSpecification;
+import com.example.arturarzumanyan.taskmanager.data.repository.events.specification.EventsSpecification;
 import com.example.arturarzumanyan.taskmanager.domain.Event;
 import com.example.arturarzumanyan.taskmanager.domain.Task;
 import com.example.arturarzumanyan.taskmanager.domain.TaskList;
+import com.example.arturarzumanyan.taskmanager.networking.util.DateUtils;
 import com.example.arturarzumanyan.taskmanager.networking.util.Log;
 import com.example.arturarzumanyan.taskmanager.ui.activity.BaseActivity;
 import com.example.arturarzumanyan.taskmanager.ui.activity.intention.mvp.IntentionContract;
@@ -37,6 +41,9 @@ import com.example.arturarzumanyan.taskmanager.ui.util.CircleTransformation;
 import com.squareup.picasso.Picasso;
 
 import java.util.List;
+
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.schedulers.Schedulers;
 
 public class IntentionActivity extends BaseActivity implements IntentionContract.IntentionView {
     public static final String EVENTS_KEY = "Events";
@@ -79,6 +86,15 @@ public class IntentionActivity extends BaseActivity implements IntentionContract
             mIntentionPresenter.attachView(this);
             mIntentionPresenter.processRestoredInfo(savedInstanceState.getString(TITLE_KEY, TASK_LISTS_KEY));
         }
+
+        EventsFromDateSpecification eventsSpecification = new EventsFromDateSpecification();
+        eventsSpecification.setDate(DateUtils.getCurrentTime());
+        EventsRepository eventsRepository = new EventsRepository();
+        eventsRepository.getEvents(eventsSpecification)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .doOnSuccess(events -> Log.v(events.get(0).getName()))
+                .subscribe();
     }
 
     @Override

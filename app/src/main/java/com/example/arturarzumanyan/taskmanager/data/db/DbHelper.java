@@ -13,6 +13,7 @@ import com.example.arturarzumanyan.taskmanager.domain.Event;
 import com.example.arturarzumanyan.taskmanager.domain.Task;
 import com.example.arturarzumanyan.taskmanager.domain.TaskList;
 import com.example.arturarzumanyan.taskmanager.networking.util.DateUtils;
+import com.example.arturarzumanyan.taskmanager.networking.util.Log;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -39,11 +40,17 @@ public class DbHelper {
         mSqLiteDbHelper = new SQLiteDbHelper(context);
     }
 
-    public void addOrUpdateEvents(List<Event> eventsList) {
+    public Boolean addOrUpdateEvents(List<Event> eventsList) {
         mDbSqlite = mSqLiteDbHelper.getWritableDatabase();
 
-        for (Event event : eventsList) {
-            insertOrUpdateEvent(event);
+        try {
+            for (Event event : eventsList) {
+                insertOrUpdateEvent(event);
+            }
+            return Boolean.TRUE;
+        } catch (Exception ex) {
+            Log.e(ex.getMessage());
+            return Boolean.FALSE;
         }
     }
 
@@ -104,6 +111,10 @@ public class DbHelper {
                     new String[]{event.getId()});
 
             mDbSqlite.setTransactionSuccessful();
+            return Boolean.TRUE;
+        } catch (Exception ex) {
+            Log.e(ex.getMessage());
+            return Boolean.FALSE;
         } finally {
             mDbSqlite.endTransaction();
         }*/
