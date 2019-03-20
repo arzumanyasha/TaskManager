@@ -1,10 +1,8 @@
 package com.example.arturarzumanyan.taskmanager.data.repository;
 
-import com.example.arturarzumanyan.taskmanager.auth.FirebaseWebService;
 import com.example.arturarzumanyan.taskmanager.domain.Event;
 import com.example.arturarzumanyan.taskmanager.domain.Task;
 import com.example.arturarzumanyan.taskmanager.domain.TaskList;
-import com.example.arturarzumanyan.taskmanager.networking.base.RequestParameters;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -12,7 +10,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static com.example.arturarzumanyan.taskmanager.networking.base.BaseHttpUrlConnection.JSON_CONTENT_TYPE_VALUE;
 import static com.example.arturarzumanyan.taskmanager.networking.util.EventsParser.COLOR_ID_KEY;
 import static com.example.arturarzumanyan.taskmanager.networking.util.EventsParser.DATETIME_KEY;
 import static com.example.arturarzumanyan.taskmanager.networking.util.EventsParser.DESCRIPTION_KEY;
@@ -28,10 +25,10 @@ import static com.example.arturarzumanyan.taskmanager.networking.util.TasksParse
 import static com.example.arturarzumanyan.taskmanager.networking.util.TasksParser.STATUS_KEY;
 
 public class RepositoryLoadHelper {
-    public static final String BASE_GOOGLE_APIS_URL = "https://www.googleapis.com/";
     public static final String AUTHORIZATION_KEY = "Authorization";
     public static final String TOKEN_TYPE = "Bearer ";
-    private static final String CONTENT_TYPE_KEY = "Content-Type";
+    public static final String CONTENT_TYPE_KEY = "Content-Type";
+    public static final String JSON_CONTENT_TYPE_VALUE = "application/json";
     private static final String NEEDS_ACTION_KEY = "needsAction";
     private static final String POPUP_KEY = "popup";
     private static final String METHOD_KEY = "method";
@@ -77,9 +74,7 @@ public class RepositoryLoadHelper {
         return requestBody;
     }
 
-    public RequestParameters getTaskCreateOrUpdateParameters(Task task,
-                                                             String url,
-                                                             FirebaseWebService.RequestMethods requestMethod) {
+    public Map<String, Object> getTaskBodyParameters(Task task) {
 
         Map<String, Object> requestBody = new HashMap<>();
 
@@ -97,52 +92,16 @@ public class RepositoryLoadHelper {
             requestBody.put(STATUS_KEY, COMPLETED_KEY);
         } else {
             requestBody.put(STATUS_KEY, NEEDS_ACTION_KEY);
-            if (requestMethod.equals(FirebaseWebService.RequestMethods.PATCH)) {
-                requestBody.put(COMPLETED_KEY, null);
-            }
+            requestBody.put(COMPLETED_KEY, null);
         }
 
-        Map<String, String> requestHeaderParameters = new HashMap<>();
-
-        requestHeaderParameters.put(CONTENT_TYPE_KEY, JSON_CONTENT_TYPE_VALUE);
-
-        RequestParameters requestParameters = new RequestParameters(
-                url,
-                requestMethod,
-                requestBody);
-        requestParameters.setRequestHeaderParameters(requestHeaderParameters);
-
-        return requestParameters;
+        return requestBody;
     }
 
-    public RequestParameters getTaskListCreateOrUpdateParameters(TaskList taskList,
-                                                                 String url,
-                                                                 FirebaseWebService.RequestMethods requestMethod) {
+    public Map<String, Object> getTaskListCreateOrUpdateParameters(TaskList taskList) {
         Map<String, Object> requestBody = new HashMap<>();
         requestBody.put(TITLE_KEY, taskList.getTitle());
-
-        Map<String, String> requestHeaderParameters = new HashMap<>();
-
-        requestHeaderParameters.put(CONTENT_TYPE_KEY, JSON_CONTENT_TYPE_VALUE);
-
-        RequestParameters requestParameters = new RequestParameters(
-                url,
-                requestMethod,
-                requestBody);
-        requestParameters.setRequestHeaderParameters(requestHeaderParameters);
-
-        return requestParameters;
-    }
-
-    public RequestParameters getDeleteParameters(String url) {
-        RequestParameters requestParameters = new RequestParameters(
-                url,
-                FirebaseWebService.RequestMethods.DELETE,
-                new HashMap<String, Object>()
-        );
-
-        requestParameters.setRequestHeaderParameters(new HashMap<String, String>());
-        return requestParameters;
+        return requestBody;
     }
 
     public static boolean isOnline() {

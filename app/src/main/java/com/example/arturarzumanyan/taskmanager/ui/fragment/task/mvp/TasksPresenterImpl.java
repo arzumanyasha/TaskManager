@@ -7,21 +7,28 @@ import com.example.arturarzumanyan.taskmanager.domain.Task;
 import com.example.arturarzumanyan.taskmanager.domain.TaskList;
 import com.example.arturarzumanyan.taskmanager.networking.util.Log;
 import com.example.arturarzumanyan.taskmanager.ui.adapter.task.mvp.TaskRowView;
+import com.example.arturarzumanyan.taskmanager.ui.util.ResourceManager;
 
 import java.util.List;
 
-import static com.example.arturarzumanyan.taskmanager.auth.FirebaseWebService.RequestMethods.PATCH;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.CompositeDisposable;
+import io.reactivex.schedulers.Schedulers;
+
 import static com.example.arturarzumanyan.taskmanager.ui.activity.intention.IntentionActivity.TASK_LISTS_KEY;
+import static com.example.arturarzumanyan.taskmanager.ui.util.ResourceManager.getResourceManager;
 
 public class TasksPresenterImpl implements TasksContract.TasksPresenter {
     private TasksContract.TasksView mTasksView;
     private TasksRepository mTasksRepository;
     private TaskList mTaskList;
     private List<Task> mTasks;
+    private CompositeDisposable mCompositeDisposable;
 
     public TasksPresenterImpl(TasksContract.TasksView mTasksView) {
         this.mTasksView = mTasksView;
         this.mTasksRepository = new TasksRepository();
+        this.mCompositeDisposable = new CompositeDisposable();
     }
 
     @Override
@@ -41,28 +48,24 @@ public class TasksPresenterImpl implements TasksContract.TasksPresenter {
     @Override
     public void loadTasks(TaskList taskList) {
         Log.v("Loading tasks");
-        mTasksRepository.loadTasks(taskList, new TasksRepository.OnTasksLoadedListener() {
-            @Override
-            public void onSuccess(List<Task> taskArrayList) {
-                if (mTasksView != null) {
-                    mTasks = taskArrayList;
-                    mTasksView.setProgressBarInvisible();
-                    mTasksView.setTasksAdapter(taskArrayList);
-                }
-            }
-
-            @Override
-            public void onFail(String message) {
-                if (mTasksView != null) {
-                    mTasksView.onFail(message);
-                }
-            }
-
-            @Override
-            public void onPermissionDenied() {
-                /** To-do: add realization with start signInActivity*/
-            }
-        });
+        mCompositeDisposable.add(mTasksRepository.loadTasks(taskList)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .doOnSuccess(tasks -> {
+                    if (mTasksView != null) {
+                        mTasks = tasks;
+                        mTasksView.setProgressBarInvisible();
+                        mTasksView.setTasksAdapter(tasks);
+                    }
+                })
+                .doOnError(throwable -> {
+                    if (mTasksView != null) {
+                        mTasksView.setProgressBarInvisible();
+                        mTasksView.setScreenNotTouchable();
+                        mTasksView.onFail(getResourceManager().getErrorMessage(ResourceManager.State.FAILED_TO_LOAD_TASKS));
+                    }
+                })
+                .subscribe());
         mTasksView.updateAppTitle(taskList.getTitle());
     }
 
@@ -74,59 +77,45 @@ public class TasksPresenterImpl implements TasksContract.TasksPresenter {
     }
 
     private void updateTask(Task task) {
-        mTasksRepository.addOrUpdateTask(mTaskList,
-                task, PATCH, new TasksRepository.OnTasksLoadedListener() {
-                    @Override
-                    public void onSuccess(List<Task> taskArrayList) {
-                        if (mTasksView != null) {
-                            mTasks = taskArrayList;
-                            mTasksView.setProgressBarInvisible();
-                            mTasksView.setScreenNotTouchable();
-                            mTasksView.updateTasksAdapter();
-                        }
+        mCompositeDisposable.add(mTasksRepository.updateTask(mTaskList, task)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .doOnSuccess(tasks -> {
+                    if (mTasksView != null) {
+                        mTasks = tasks;
+                        mTasksView.setProgressBarInvisible();
+                        mTasksView.setScreenNotTouchable();
+                        mTasksView.updateTasksAdapter();
                     }
-
-                    @Override
-                    public void onFail(String message) {
-                        if (mTasksView != null) {
-                            mTasksView.setProgressBarInvisible();
-                            mTasksView.setScreenNotTouchable();
-                            mTasksView.onFail(message);
-                        }
+                })
+                .doOnError(throwable -> {
+                    if (mTasksView != null) {
+                        mTasksView.setProgressBarInvisible();
+                        mTasksView.setScreenNotTouchable();
+                        mTasksView.onFail(getResourceManager().getErrorMessage(ResourceManager.State.FAILED_TO_UPDATE_TASK));
                     }
-
-                    @Override
-                    public void onPermissionDenied() {
-                        /** To-do: add realization with start signInActivity*/
-                    }
-                });
+                })
+                .subscribe());
     }
 
     @Override
     public void processItemDelete(final int position) {
         Task task = mTasks.get(position);
-        mTasks.remove(task);
-        mTasksRepository.deleteTask(mTaskList, task, new TasksRepository.OnTasksLoadedListener() {
-            @Override
-            public void onSuccess(List<Task> taskArrayList) {
-                if (mTasksView != null) {
-                    mTasks = taskArrayList;
-                    mTasksView.updateTasksAdapterAfterDelete(position);
-                }
-            }
-
-            @Override
-            public void onFail(String message) {
-                if (mTasksView != null) {
-                    mTasksView.onFail(message);
-                }
-            }
-
-            @Override
-            public void onPermissionDenied() {
-                /** To-do: add realization with start signInActivity*/
-            }
-        });
+        mCompositeDisposable.add(mTasksRepository.deleteTask(mTaskList, task)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .doOnSuccess(tasks -> {
+                    if (mTasksView != null) {
+                        mTasks = tasks;
+                        mTasksView.updateTasksAdapterAfterDelete(position);
+                    }
+                })
+                .doOnError(throwable -> {
+                    if (mTasksView != null) {
+                        mTasksView.onFail(getResourceManager().getErrorMessage(ResourceManager.State.FAILED_TO_DELETE_TASK));
+                    }
+                })
+                .subscribe());
     }
 
     @Override
@@ -173,6 +162,7 @@ public class TasksPresenterImpl implements TasksContract.TasksPresenter {
 
     @Override
     public void unsubscribe() {
+        mCompositeDisposable.clear();
         mTasksView = null;
     }
 }

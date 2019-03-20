@@ -1,14 +1,14 @@
 package com.example.arturarzumanyan.taskmanager.data.repository.tasklists.specification;
 
 public class TaskListFromIdSpecification implements TaskListsSpecification {
-    private int taskListId;
+    private String taskListId;
 
     @Override
-    public int getSelectionArgs() {
+    public String getSelectionArgs() {
         return taskListId;
     }
 
-    public void setTaskListId(int taskListId) {
+    public void setTaskListId(String taskListId) {
         this.taskListId = taskListId;
     }
 }

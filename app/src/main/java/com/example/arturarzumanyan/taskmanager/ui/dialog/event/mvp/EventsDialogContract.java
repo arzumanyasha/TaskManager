@@ -31,8 +31,6 @@ public class EventsDialogContract {
                                   String eventDate, int isNotify);
 
         void processReceivedBundle(Bundle bundle);
-
-        void unsubscribe();
     }
 
     public interface EventsDialogView {

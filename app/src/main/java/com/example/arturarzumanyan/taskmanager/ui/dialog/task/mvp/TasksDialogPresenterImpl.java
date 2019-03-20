@@ -6,24 +6,29 @@ import com.example.arturarzumanyan.taskmanager.data.repository.tasks.TasksReposi
 import com.example.arturarzumanyan.taskmanager.domain.Task;
 import com.example.arturarzumanyan.taskmanager.domain.TaskList;
 import com.example.arturarzumanyan.taskmanager.networking.util.DateUtils;
+import com.example.arturarzumanyan.taskmanager.ui.util.ResourceManager;
 
 import java.util.Date;
-import java.util.List;
 import java.util.UUID;
 
-import static com.example.arturarzumanyan.taskmanager.auth.FirebaseWebService.RequestMethods.PATCH;
-import static com.example.arturarzumanyan.taskmanager.auth.FirebaseWebService.RequestMethods.POST;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.CompositeDisposable;
+import io.reactivex.schedulers.Schedulers;
+
 import static com.example.arturarzumanyan.taskmanager.ui.activity.intention.IntentionActivity.TASKS_KEY;
 import static com.example.arturarzumanyan.taskmanager.ui.activity.intention.IntentionActivity.TASK_LISTS_KEY;
+import static com.example.arturarzumanyan.taskmanager.ui.util.ResourceManager.getResourceManager;
 
 public class TasksDialogPresenterImpl implements TasksDialogContract.TasksDialogPresenter {
     private TasksDialogContract.TasksDialogView mTasksDialogView;
     private TasksRepository mTasksRepository;
+    private CompositeDisposable mCompositeDisposable;
     private Date mTaskDate;
 
     public TasksDialogPresenterImpl(TasksDialogContract.TasksDialogView mTasksDialogView) {
         this.mTasksDialogView = mTasksDialogView;
         mTasksRepository = new TasksRepository();
+        mCompositeDisposable = new CompositeDisposable();
     }
 
     @Override
@@ -35,8 +40,9 @@ public class TasksDialogPresenterImpl implements TasksDialogContract.TasksDialog
                 if (task != null) {
                     task.setName(taskName);
                     task.setDescription(description);
-                    task.setDate(DateUtils.formatTaskDate(mTaskDate));
-
+                    if (mTaskDate != null) {
+                        task.setDate(DateUtils.formatTaskDate(mTaskDate));
+                    }
                     updateTask(task, taskList);
                 }
             } else {
@@ -62,41 +68,21 @@ public class TasksDialogPresenterImpl implements TasksDialogContract.TasksDialog
     }
 
     private void addTask(Task task, TaskList taskList) {
-        mTasksRepository.addOrUpdateTask(taskList, task, POST, new TasksRepository.OnTasksLoadedListener() {
-            @Override
-            public void onSuccess(List<Task> taskArrayList) {
-                mTasksDialogView.onTaskReady(taskArrayList);
-            }
-
-            @Override
-            public void onFail(String message) {
-                mTasksDialogView.onFail(message);
-            }
-
-            @Override
-            public void onPermissionDenied() {
-
-            }
-        });
+        mCompositeDisposable.add(mTasksRepository.addTask(taskList, task)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .doOnSuccess(tasks -> mTasksDialogView.onTaskReady(tasks))
+                .doOnError(throwable -> mTasksDialogView.onFail(getResourceManager().getErrorMessage(ResourceManager.State.FAILED_TO_CREATE_TASK)))
+                .subscribe());
     }
 
     private void updateTask(Task task, TaskList taskList) {
-        mTasksRepository.addOrUpdateTask(taskList, task, PATCH, new TasksRepository.OnTasksLoadedListener() {
-            @Override
-            public void onSuccess(List<Task> taskArrayList) {
-                mTasksDialogView.onTaskReady(taskArrayList);
-            }
-
-            @Override
-            public void onFail(String message) {
-                mTasksDialogView.onFail(message);
-            }
-
-            @Override
-            public void onPermissionDenied() {
-                /** To-do: add realization with start signInActivity*/
-            }
-        });
+        mCompositeDisposable.add(mTasksRepository.updateTask(taskList, task)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .doOnSuccess(tasks -> mTasksDialogView.onTaskReady(tasks))
+                .doOnError(throwable -> mTasksDialogView.onFail(getResourceManager().getErrorMessage(ResourceManager.State.FAILED_TO_UPDATE_TASK)))
+                .subscribe());
     }
 
     @Override

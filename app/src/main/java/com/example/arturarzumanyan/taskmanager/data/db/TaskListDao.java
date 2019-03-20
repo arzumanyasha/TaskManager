@@ -13,18 +13,18 @@ import java.util.List;
 
 @Dao
 public interface TaskListDao {
-    @Query("SELECT * FROM taskList_table WHERE id = :id")
-    TaskList getTaskListById(int id);
+    @Query("SELECT * FROM taskList_table WHERE taskListId = :taskListId")
+    TaskList getTaskListById(String taskListId);
 
     @Query("SELECT * FROM taskList_table")
     List<TaskList> getTaskLists();
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    void insert(TaskList TaskList);
+    void insert(TaskList taskList);
 
     @Update
-    void update(TaskList TaskList);
+    void update(TaskList taskList);
 
     @Delete
-    void delete(TaskList TaskList);
+    void delete(TaskList taskList);
 }

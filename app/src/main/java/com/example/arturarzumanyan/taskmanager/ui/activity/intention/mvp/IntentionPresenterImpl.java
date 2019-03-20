@@ -3,12 +3,20 @@ package com.example.arturarzumanyan.taskmanager.ui.activity.intention.mvp;
 import com.example.arturarzumanyan.taskmanager.auth.FirebaseWebService;
 import com.example.arturarzumanyan.taskmanager.data.repository.tasklists.TaskListsRepository;
 import com.example.arturarzumanyan.taskmanager.data.repository.tasklists.specification.AllTaskListsSpecification;
+import com.example.arturarzumanyan.taskmanager.data.repository.tasklists.specification.TaskListFromIdSpecification;
 import com.example.arturarzumanyan.taskmanager.domain.Event;
 import com.example.arturarzumanyan.taskmanager.domain.Task;
 import com.example.arturarzumanyan.taskmanager.domain.TaskList;
 import com.example.arturarzumanyan.taskmanager.networking.util.Log;
+import com.example.arturarzumanyan.taskmanager.ui.util.ResourceManager;
 
 import java.util.List;
+
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.CompositeDisposable;
+import io.reactivex.schedulers.Schedulers;
+
+import static com.example.arturarzumanyan.taskmanager.ui.util.ResourceManager.getResourceManager;
 
 public class IntentionPresenterImpl implements IntentionContract.IntentionPresenter {
     private static final String EVENTS_KEY = "Events";
@@ -18,10 +26,12 @@ public class IntentionPresenterImpl implements IntentionContract.IntentionPresen
     private List<TaskList> mTaskLists;
     private TaskList mCurrentTaskList;
     private IntentionContract.IntentionView mIntentionView;
+    private CompositeDisposable mCompositeDisposable;
 
     public IntentionPresenterImpl(IntentionContract.IntentionView intentionView) {
         mTaskListsRepository = new TaskListsRepository();
         this.mIntentionView = intentionView;
+        mCompositeDisposable = new CompositeDisposable();
     }
 
     @Override
@@ -123,91 +133,47 @@ public class IntentionPresenterImpl implements IntentionContract.IntentionPresen
     @Override
     public void deleteTaskList(String title) {
         if (!title.equals(EVENTS_KEY)) {
-            mTaskListsRepository.deleteTaskList(mCurrentTaskList, new TaskListsRepository.OnTaskListsLoadedListener() {
-                @Override
-                public void onSuccess(List<TaskList> taskListArrayList) {
-                    if (mTaskLists.size() != 0 && mCurrentTaskList != null) {
-                        processPreviousTaskList(mCurrentTaskList);
-                        mIntentionView.displayPreviousTaskFragment(mTaskLists, mCurrentTaskList);
-                    }
-                }
 
-                @Override
-                public void onUpdate(List<TaskList> taskLists) {
-
-                }
-
-                @Override
-                public void onSuccess(TaskList taskList) {
-
-                }
-
-                @Override
-                public void onFail(String message) {
-                    mIntentionView.onFail(message);
-                }
-
-                @Override
-                public void onPermissionDenied() {
-                    /** To-do: add realization with start signInActivity*/
-                }
-            });
-        }
-    }
-
-    private void processPreviousTaskList(TaskList taskList) {
-        int menuSize = mTaskLists.size();
-        TaskList previousTaskList = null;
-        for (int i = 0; i < menuSize; i++) {
-            if (mTaskLists.get(i).getId() == taskList.getId()) {
-                mTaskLists.remove(i);
-                previousTaskList = mTaskLists.get(i - 1);
-                break;
+            TaskList previousTaskList = mTaskLists.get(mTaskLists.indexOf(mCurrentTaskList) - 1);
+            TaskListFromIdSpecification taskListFromIdSpecification = new TaskListFromIdSpecification();
+            taskListFromIdSpecification.setTaskListId(previousTaskList.getTaskListId());
+            if (mCurrentTaskList.getId() != 1) {
+                mCompositeDisposable.add(mTaskListsRepository.deleteTaskList(mCurrentTaskList, taskListFromIdSpecification)
+                        .subscribeOn(Schedulers.io())
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .doOnSuccess(taskList -> {
+                            if (mTaskLists.size() != 0 && mCurrentTaskList != null) {
+                                mTaskLists.remove(mCurrentTaskList);
+                                mCurrentTaskList = previousTaskList;
+                                mIntentionView.displayPreviousTaskFragment(mTaskLists, mCurrentTaskList);
+                            }
+                        })
+                        .doOnError(throwable -> mIntentionView.onFail(getResourceManager().getErrorMessage(ResourceManager.State.FAILED_TO_DELETE_TASK_LIST)))
+                        .subscribe());
+            } else {
+                mIntentionView.onFail(getResourceManager().getErrorMessage(ResourceManager.State.DEFAULT_TASK_LIST_DELETING_ERROR));
             }
         }
-        mCurrentTaskList = previousTaskList;
     }
 
     @Override
     public void fetchTaskListsData() {
         AllTaskListsSpecification allTaskListsSpecification = new AllTaskListsSpecification();
 
-        TaskListsRepository.OnTaskListsLoadedListener onTaskListsLoadedListener = new TaskListsRepository.OnTaskListsLoadedListener() {
-            @Override
-            public void onSuccess(List<TaskList> taskLists) {
-                if (taskLists.size() != 0) {
-                    mTaskLists = taskLists;
-                    mCurrentTaskList = taskLists.get(0);
-                    mIntentionView.displayDefaultUi(taskLists);
-                    mIntentionView.displayDefaultTasksUi(mTaskLists.get(0));
-                }
-            }
-
-            @Override
-            public void onUpdate(List<TaskList> taskLists) {
-                if (taskLists.size() != 0) {
-                    mTaskLists = taskLists;
-                    mIntentionView.recreateTaskListsMenu(taskLists);
-                }
-            }
-
-            @Override
-            public void onSuccess(TaskList taskList) {
-
-            }
-
-            @Override
-            public void onFail(String message) {
-                mIntentionView.onFail(message);
-            }
-
-            @Override
-            public void onPermissionDenied() {
-                /** To-do: add realization with start signInActivity*/
-            }
-        };
-
-        mTaskListsRepository.loadTaskLists(allTaskListsSpecification, onTaskListsLoadedListener);
+        mCompositeDisposable.add(mTaskListsRepository.loadTaskLists(allTaskListsSpecification)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .doOnSuccess(taskLists -> {
+                    if (taskLists.size() != 0) {
+                        mTaskLists = taskLists;
+                        mCurrentTaskList = taskLists.get(0);
+                        mIntentionView.displayDefaultUi(taskLists);
+                        mIntentionView.displayDefaultTasksUi(mTaskLists.get(0));
+                    }
+                })
+                .doOnError(throwable -> mIntentionView.onFail(getResourceManager()
+                        .getErrorMessage(ResourceManager.State.FAILED_TO_LOAD_TASK_LISTS)))
+                .subscribe());
     }
 
     @Override
@@ -223,6 +189,7 @@ public class IntentionPresenterImpl implements IntentionContract.IntentionPresen
 
     @Override
     public void unsubscribe() {
+        mCompositeDisposable.clear();
         mIntentionView = null;
     }
 }

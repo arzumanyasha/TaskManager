@@ -18,10 +18,12 @@ import okhttp3.ResponseBody;
 public class EventsRepository {
     private EventsDbStore mEventsDbStore;
     private EventsCloudStore mEventsCloudStore;
+    private EventsParser mEventsParser;
 
     public EventsRepository() {
         mEventsCloudStore = new EventsCloudStore();
         mEventsDbStore = new EventsDbStore();
+        mEventsParser = new EventsParser();
     }
 
     public Single<List<Event>> getEvents(EventsSpecification eventsSpecification) {
@@ -45,8 +47,7 @@ public class EventsRepository {
     }
 
     private Single<Boolean> updateDbQuery(ResponseBody responseBody) throws IOException {
-        EventsParser eventsParser = new EventsParser();
-        List<Event> events = eventsParser.parseEvents(responseBody.string());
+        List<Event> events = mEventsParser.parseEvents(responseBody.string());
         return mEventsDbStore.addOrUpdateEvents(events);
     }
 
@@ -59,7 +60,7 @@ public class EventsRepository {
             eventsSingle = mEventsCloudStore.addEventOnServer(event)
                     .filter(response -> response != null).toSingle()
                     .map(this::parseEvent)
-                    .flatMap(responseBody -> mEventsDbStore.addOrUpdateEvents(Collections.singletonList(event)))
+                    .flatMap(parsedEvent -> mEventsDbStore.addOrUpdateEvents(Collections.singletonList(parsedEvent)))
                     .flatMap(aBoolean -> {
                         if (aBoolean) {
                             return mEventsDbStore.getEvents(eventsFromDateSpecification);
@@ -90,7 +91,7 @@ public class EventsRepository {
             eventsSingle = mEventsCloudStore.updateEventOnServer(event)
                     .filter(response -> response != null).toSingle()
                     .map(this::parseEvent)
-                    .flatMap(responseBody -> mEventsDbStore.addOrUpdateEvents(Collections.singletonList(event)))
+                    .flatMap(parsedEvent -> mEventsDbStore.addOrUpdateEvents(Collections.singletonList(parsedEvent)))
                     .flatMap(aBoolean -> {
                         if (aBoolean) {
                             return mEventsDbStore.getEvents(eventsFromDateSpecification);
@@ -115,8 +116,7 @@ public class EventsRepository {
     private Event parseEvent(ResponseBody responseBody) throws IOException {
         Event event = null;
         if (responseBody != null) {
-            EventsParser eventsParser = new EventsParser();
-            event = eventsParser.parseEvent(responseBody.string());
+            event = mEventsParser.parseEvent(responseBody.string());
         }
         return event;
     }

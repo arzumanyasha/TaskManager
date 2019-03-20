@@ -1,59 +1,70 @@
 package com.example.arturarzumanyan.taskmanager.data.repository.tasklists;
 
-import com.example.arturarzumanyan.taskmanager.auth.FirebaseWebService;
+import com.example.arturarzumanyan.taskmanager.auth.TokenStorage;
 import com.example.arturarzumanyan.taskmanager.data.repository.RepositoryLoadHelper;
-import com.example.arturarzumanyan.taskmanager.domain.ResponseDto;
+import com.example.arturarzumanyan.taskmanager.data.repository.tasks.GoogleTasksApi;
 import com.example.arturarzumanyan.taskmanager.domain.TaskList;
-import com.example.arturarzumanyan.taskmanager.networking.base.RequestParameters;
+import com.example.arturarzumanyan.taskmanager.networking.GoogleSuiteApiFactory;
 
 import java.util.HashMap;
+import java.util.Map;
 
-import static com.example.arturarzumanyan.taskmanager.auth.FirebaseWebService.RequestMethods.PATCH;
-import static com.example.arturarzumanyan.taskmanager.auth.FirebaseWebService.RequestMethods.POST;
-import static com.example.arturarzumanyan.taskmanager.data.repository.RepositoryLoadHelper.BASE_GOOGLE_APIS_URL;
+import io.reactivex.Single;
+
+import okhttp3.ResponseBody;
+import retrofit2.Response;
+
+import static com.example.arturarzumanyan.taskmanager.data.repository.RepositoryLoadHelper.AUTHORIZATION_KEY;
+import static com.example.arturarzumanyan.taskmanager.data.repository.RepositoryLoadHelper.CONTENT_TYPE_KEY;
+import static com.example.arturarzumanyan.taskmanager.data.repository.RepositoryLoadHelper.JSON_CONTENT_TYPE_VALUE;
+import static com.example.arturarzumanyan.taskmanager.data.repository.RepositoryLoadHelper.TOKEN_TYPE;
 
 public class TaskListsCloudStore {
     private static final String BASE_TASK_LISTS_URL = "tasks/v1/users/@me/lists/";
 
+    private GoogleTasksApi mGoogleTasksApi;
     private RepositoryLoadHelper mRepositoryLoadHelper;
 
     TaskListsCloudStore() {
+        mGoogleTasksApi = GoogleSuiteApiFactory.getRetrofitInstance().create(GoogleTasksApi.class);
         mRepositoryLoadHelper = new RepositoryLoadHelper();
     }
 
-    public ResponseDto getTaskListsFromServer() {
-        FirebaseWebService.RequestMethods requestMethod = FirebaseWebService.RequestMethods.GET;
-        RequestParameters requestParameters = new RequestParameters(
-                BASE_GOOGLE_APIS_URL + BASE_TASK_LISTS_URL,
-                requestMethod,
-                null
-        );
-        requestParameters.setRequestHeaderParameters(new HashMap<String, String>());
+    public Single<ResponseBody> getTaskListsFromServer() {
+        Map<String, String> requestHeaderParameters = new HashMap<>();
+        requestHeaderParameters.put(AUTHORIZATION_KEY, TOKEN_TYPE + TokenStorage.getTokenStorageInstance().getAccessToken());
 
-        return null;
+        return mGoogleTasksApi.getTaskLists(BASE_TASK_LISTS_URL, requestHeaderParameters);
     }
 
-    public ResponseDto addTaskListOnServer(TaskList taskList) {
-        RequestParameters requestParameters = mRepositoryLoadHelper.getTaskListCreateOrUpdateParameters(taskList,
-                BASE_GOOGLE_APIS_URL + BASE_TASK_LISTS_URL, POST);
+    public Single<ResponseBody> addTaskListOnServer(TaskList taskList) {
+        Map<String, String> requestHeaderParameters = new HashMap<>();
+        requestHeaderParameters.put(CONTENT_TYPE_KEY, JSON_CONTENT_TYPE_VALUE);
+        requestHeaderParameters.put(AUTHORIZATION_KEY, TOKEN_TYPE + TokenStorage.getTokenStorageInstance().getAccessToken());
 
-        return null;
+        Map<String, Object> requestBodyParameters = mRepositoryLoadHelper.getTaskListCreateOrUpdateParameters(taskList);
+
+        return mGoogleTasksApi.addTaskList(BASE_TASK_LISTS_URL, requestHeaderParameters, requestBodyParameters);
     }
 
-    public ResponseDto updateTaskListOnServer(TaskList taskList) {
-        String url = BASE_GOOGLE_APIS_URL + BASE_TASK_LISTS_URL + taskList.getTaskListId();
+    public Single<ResponseBody> updateTaskListOnServer(TaskList taskList) {
+        String url = BASE_TASK_LISTS_URL + taskList.getTaskListId();
 
-        RequestParameters requestParameters = mRepositoryLoadHelper.getTaskListCreateOrUpdateParameters(taskList,
-                url, PATCH);
+        Map<String, String> requestHeaderParameters = new HashMap<>();
+        requestHeaderParameters.put(CONTENT_TYPE_KEY, JSON_CONTENT_TYPE_VALUE);
+        requestHeaderParameters.put(AUTHORIZATION_KEY, TOKEN_TYPE + TokenStorage.getTokenStorageInstance().getAccessToken());
 
-        return null;
+        Map<String, Object> requestBodyParameters = mRepositoryLoadHelper.getTaskListCreateOrUpdateParameters(taskList);
+
+        return mGoogleTasksApi.updateTaskList(url, requestHeaderParameters, requestBodyParameters);
     }
 
-    public ResponseDto deleteTaskListOnServer(final TaskList taskList) {
-        String url = BASE_GOOGLE_APIS_URL + BASE_TASK_LISTS_URL + taskList.getTaskListId();
+    public Single<Response<ResponseBody>> deleteTaskListOnServer(final TaskList taskList) {
+        String url = BASE_TASK_LISTS_URL + taskList.getTaskListId();
 
-        RequestParameters requestParameters = mRepositoryLoadHelper.getDeleteParameters(url);
+        Map<String, String> requestHeaderParameters = new HashMap<>();
+        requestHeaderParameters.put(AUTHORIZATION_KEY, TOKEN_TYPE + TokenStorage.getTokenStorageInstance().getAccessToken());
 
-        return null;
+        return mGoogleTasksApi.deleteTaskList(url, requestHeaderParameters);
     }
 }

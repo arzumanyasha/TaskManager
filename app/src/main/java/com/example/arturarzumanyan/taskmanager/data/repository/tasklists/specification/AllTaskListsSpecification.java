@@ -2,7 +2,7 @@ package com.example.arturarzumanyan.taskmanager.data.repository.tasklists.specif
 
 public class AllTaskListsSpecification implements TaskListsSpecification {
     @Override
-    public int getSelectionArgs() {
-        return 0;
+    public String getSelectionArgs() {
+        return null;
     }
 }

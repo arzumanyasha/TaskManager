@@ -70,12 +70,14 @@ public class EventsDialogPresenterImpl implements EventsDialogContract.EventsDia
 
     @Override
     public void setEventStartTime(String date) {
-        mStartTime = DateUtils.getTimeWithoutA(DateUtils.formatTimeWithoutA(date));
+        mStartTime = DateUtils.getTimeWithoutA(DateUtils.formatTimeWithoutA(
+                DateUtils.getEventDateFromString(date)));
     }
 
     @Override
     public void setEventEndTime(String date) {
-        mEndTime = DateUtils.getTimeWithoutA(DateUtils.formatTimeWithoutA(date));
+        mEndTime = DateUtils.getTimeWithoutA(DateUtils.formatTimeWithoutA(
+                DateUtils.getEventDateFromString(date)));
     }
 
     @Override
@@ -94,12 +96,12 @@ public class EventsDialogPresenterImpl implements EventsDialogContract.EventsDia
                 Event event = bundle.getParcelable(EVENTS_KEY);
                 if (event != null) {
                     event = createEventObject(event.getEventId(), name, description, colorNumber,
-                            DateUtils.formatTaskDate(startDate), DateUtils.formatTaskDate(endDate), isNotify);
+                            DateUtils.formatEventTime(startDate), DateUtils.formatEventTime(endDate), isNotify);
                 }
                 updateEvent(event);
             } else {
                 Event event = createEventObject(UUID.randomUUID().toString(), name, description, colorNumber,
-                        DateUtils.formatTaskDate(startDate), DateUtils.formatTaskDate(endDate), isNotify);
+                        DateUtils.formatEventTime(startDate), DateUtils.formatEventTime(endDate), isNotify);
                 addEvent(event);
             }
         } else {
@@ -155,10 +157,5 @@ public class EventsDialogPresenterImpl implements EventsDialogContract.EventsDia
                 mEventsDialogView.setEventInfoViews(event);
             }
         }
-    }
-
-    @Override
-    public void unsubscribe() {
-        mCompositeDisposable.clear();
     }
 }

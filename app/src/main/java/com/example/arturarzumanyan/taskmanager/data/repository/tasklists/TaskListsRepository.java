@@ -1,25 +1,21 @@
 package com.example.arturarzumanyan.taskmanager.data.repository.tasklists;
 
-import com.example.arturarzumanyan.taskmanager.auth.FirebaseWebService;
-import com.example.arturarzumanyan.taskmanager.data.repository.BaseDataLoadingAsyncTask;
 import com.example.arturarzumanyan.taskmanager.data.repository.RepositoryLoadHelper;
 import com.example.arturarzumanyan.taskmanager.data.repository.tasklists.specification.AllTaskListsSpecification;
 import com.example.arturarzumanyan.taskmanager.data.repository.tasklists.specification.TaskListFromIdSpecification;
 import com.example.arturarzumanyan.taskmanager.data.repository.tasklists.specification.TaskListsSpecification;
 import com.example.arturarzumanyan.taskmanager.data.repository.tasks.TasksCloudStore;
 import com.example.arturarzumanyan.taskmanager.data.repository.tasks.TasksDbStore;
-import com.example.arturarzumanyan.taskmanager.domain.ResponseDto;
 import com.example.arturarzumanyan.taskmanager.domain.TaskList;
-import com.example.arturarzumanyan.taskmanager.networking.util.Log;
 import com.example.arturarzumanyan.taskmanager.networking.util.TaskListsParser;
 
+import java.io.IOException;
+import java.net.HttpURLConnection;
 import java.util.Collections;
 import java.util.List;
 
-import static com.example.arturarzumanyan.taskmanager.auth.FirebaseWebService.RequestMethods.DELETE;
-import static com.example.arturarzumanyan.taskmanager.auth.FirebaseWebService.RequestMethods.GET;
-import static com.example.arturarzumanyan.taskmanager.auth.FirebaseWebService.RequestMethods.PATCH;
-import static com.example.arturarzumanyan.taskmanager.auth.FirebaseWebService.RequestMethods.POST;
+import io.reactivex.Single;
+import okhttp3.ResponseBody;
 
 public class TaskListsRepository {
     private TaskListsCloudStore mTaskListsCloudStore;
@@ -27,6 +23,7 @@ public class TaskListsRepository {
     private TasksDbStore mTasksDbStore;
     private TasksCloudStore mTasksCloudStore;
     private RepositoryLoadHelper mRepositoryLoadHelper;
+    private TaskListsParser mTaskListsParser;
 
     public TaskListsRepository() {
         mTaskListsCloudStore = new TaskListsCloudStore();
@@ -34,218 +31,139 @@ public class TaskListsRepository {
         mTasksCloudStore = new TasksCloudStore();
         mTasksDbStore = new TasksDbStore();
         mRepositoryLoadHelper = new RepositoryLoadHelper();
+        mTaskListsParser = new TaskListsParser();
     }
 
-    public void loadTaskLists(TaskListsSpecification taskListsSpecification, final OnTaskListsLoadedListener listener) {
-        TaskListsAsyncTask taskListsAsyncTask = new TaskListsAsyncTask(null, mRepositoryLoadHelper,
-                mTaskListsDbStore, mTaskListsCloudStore, mTasksDbStore, mTasksCloudStore, taskListsSpecification, listener);
+    public Single<List<TaskList>> loadTaskLists(TaskListsSpecification taskListsSpecification) {
+        Single<List<TaskList>> taskListsSingle;
+        if (RepositoryLoadHelper.isOnline()) {
+            taskListsSingle = mTaskListsCloudStore.getTaskListsFromServer()
+                    .filter(responseBody -> responseBody != null).toSingle()
+                    .flatMap(this::updateDbQuery)
+                    .flatMap(aBoolean -> {
+                        if (aBoolean) {
+                            return mTaskListsDbStore.getTaskLists(taskListsSpecification);
+                        } else {
+                            throw new IOException();
+                        }
+                    });
+        } else {
+            taskListsSingle = mTaskListsDbStore.getTaskLists(taskListsSpecification);
+        }
 
-        taskListsAsyncTask.setDataInfoLoadingListener(new BaseDataLoadingAsyncTask.UserDataLoadingListener<TaskList>() {
-            @Override
-            public void onSuccess(List<TaskList> list) {
-                Log.v("TaskLists loaded successfully");
-                listener.onSuccess(list);
-            }
-
-            @Override
-            public void onFail(String message) {
-                listener.onFail(message + '\n' + "Failed to get events");
-            }
-        });
-
-        taskListsAsyncTask.execute(GET);
+        return taskListsSingle;
     }
 
-    public void addTaskList(TaskList taskList, final OnTaskListsLoadedListener listener) {
+    private Single<Boolean> updateDbQuery(ResponseBody responseBody) throws IOException {
+        List<TaskList> taskLists = mTaskListsParser.parseTaskLists(responseBody.string());
+        return mTaskListsDbStore.addOrUpdateTaskLists(taskLists);
+    }
+
+    public Single<TaskList> addTaskList(TaskList taskList) {
         AllTaskListsSpecification allTaskListsSpecification = new AllTaskListsSpecification();
 
-        TaskListsAsyncTask taskListsAsyncTask = new TaskListsAsyncTask(taskList,
-                mRepositoryLoadHelper, mTaskListsDbStore, mTaskListsCloudStore,
-                mTasksDbStore, null, allTaskListsSpecification, listener);
+        Single<TaskList> taskListsSingle;
+        if (RepositoryLoadHelper.isOnline()) {
+            taskListsSingle = mTaskListsCloudStore.addTaskListOnServer(taskList)
+                    .filter(responseBody -> responseBody != null).toSingle()
+                    .map(this::parseTaskList)
+                    .flatMap(parsedTaskList -> mTaskListsDbStore.addOrUpdateTaskLists(Collections.singletonList(parsedTaskList)))
+                    .flatMap(aBoolean -> {
+                        if (aBoolean) {
+                            return mTaskListsDbStore.getTaskLists(allTaskListsSpecification);
+                        } else {
+                            throw new IOException();
+                        }
+                    })
+                    .map(taskLists -> taskLists.get(taskLists.size() - 1));
+        } else {
+            taskListsSingle = mTaskListsDbStore.addOrUpdateTaskLists(Collections.singletonList(taskList))
+                    .flatMap(aBoolean -> {
+                        if (aBoolean) {
+                            return mTaskListsDbStore.getTaskLists(allTaskListsSpecification);
+                        } else {
+                            throw new IOException();
+                        }
+                    })
+                    .map(taskLists -> taskLists.get(taskLists.size() - 1));
+        }
 
-        taskListsAsyncTask.setDataInfoLoadingListener(new BaseDataLoadingAsyncTask.UserDataLoadingListener<TaskList>() {
-            @Override
-            public void onSuccess(List<TaskList> list) {
-                listener.onSuccess(list.get(list.size() - 1));
-            }
-
-            @Override
-            public void onFail(String message) {
-                listener.onFail(message + '\n' + "Failed to create task list");
-            }
-        });
-        taskListsAsyncTask.execute(POST);
+        return taskListsSingle;
     }
 
-    public void updateTaskList(TaskList taskList, final OnTaskListsLoadedListener listener) {
+    public Single<TaskList> updateTaskList(TaskList taskList) {
         TaskListFromIdSpecification taskListFromIdSpecification = new TaskListFromIdSpecification();
-        taskListFromIdSpecification.setTaskListId(taskList.getId());
+        taskListFromIdSpecification.setTaskListId(taskList.getTaskListId());
 
-        TaskListsAsyncTask taskListsAsyncTask = new TaskListsAsyncTask(taskList,
-                mRepositoryLoadHelper, mTaskListsDbStore, mTaskListsCloudStore,
-                mTasksDbStore, null, taskListFromIdSpecification, null);
+        Single<TaskList> taskListsSingle;
+        if (RepositoryLoadHelper.isOnline()) {
+            taskListsSingle = mTaskListsCloudStore.updateTaskListOnServer(taskList)
+                    .filter(responseBody -> responseBody != null).toSingle()
+                    .map(this::parseTaskList)
+                    .flatMap(parsedTaskList -> mTaskListsDbStore.addOrUpdateTaskLists(Collections.singletonList(parsedTaskList)))
+                    .flatMap(aBoolean -> {
+                        if (aBoolean) {
+                            return mTaskListsDbStore.getTaskLists(taskListFromIdSpecification);
+                        } else {
+                            throw new IOException();
+                        }
+                    })
+                    .map(taskLists -> taskLists.get(0));
+        } else {
+            taskListsSingle = mTaskListsDbStore.addOrUpdateTaskLists(Collections.singletonList(taskList))
+                    .flatMap(aBoolean -> {
+                        if (aBoolean) {
+                            return mTaskListsDbStore.getTaskLists(taskListFromIdSpecification);
+                        } else {
+                            throw new IOException();
+                        }
+                    })
+                    .map(taskLists -> taskLists.get(0));
+        }
 
-        taskListsAsyncTask.setDataInfoLoadingListener(new BaseDataLoadingAsyncTask.UserDataLoadingListener<TaskList>() {
-            @Override
-            public void onSuccess(List<TaskList> list) {
-                listener.onSuccess(list.get(0));
-            }
-
-            @Override
-            public void onFail(String message) {
-                listener.onFail(message + '\n' + "Failed to update task list");
-            }
-        });
-        taskListsAsyncTask.execute(PATCH);
+        return taskListsSingle;
     }
 
-    public void deleteTaskList(TaskList taskList, final OnTaskListsLoadedListener listener) {
-        TaskListFromIdSpecification taskListFromIdSpecification = new TaskListFromIdSpecification();
-        taskListFromIdSpecification.setTaskListId(taskList.getId());
-
-        TaskListsAsyncTask taskListsAsyncTask = new TaskListsAsyncTask(taskList,
-                mRepositoryLoadHelper, mTaskListsDbStore, mTaskListsCloudStore,
-                mTasksDbStore, null, taskListFromIdSpecification, listener);
-
-        taskListsAsyncTask.setDataInfoLoadingListener(new BaseDataLoadingAsyncTask.UserDataLoadingListener<TaskList>() {
-            @Override
-            public void onSuccess(List<TaskList> list) {
-                listener.onSuccess(list);
-            }
-
-            @Override
-            public void onFail(String message) {
-                listener.onFail(message + '\n' + "Failed to delete task list");
-            }
-        });
-        taskListsAsyncTask.execute(DELETE);
+    private TaskList parseTaskList(ResponseBody responseBody) throws IOException {
+        TaskList taskList = null;
+        if (responseBody != null) {
+            taskList = mTaskListsParser.parseTaskList(responseBody.string());
+        }
+        return taskList;
     }
 
-    public interface OnTaskListsLoadedListener {
-        void onSuccess(List<TaskList> taskListArrayList);
-
-        void onUpdate(List<TaskList> taskLists);
-
-        void onSuccess(TaskList taskList);
-
-        void onFail(String message);
-
-        void onPermissionDenied();
-    }
-
-    public static class TaskListsAsyncTask extends BaseDataLoadingAsyncTask<TaskList> {
-
-        private TaskList mTaskList;
-        private RepositoryLoadHelper mRepositoryLoadHelper;
-        private TaskListsDbStore mTaskListsDbStore;
-        private TaskListsCloudStore mTaskListsCloudStore;
-        private TasksDbStore mTasksDbStore;
-        private TasksCloudStore mTasksCloudStore;
-        private TaskListsSpecification mTaskListsSpecification;
-        private OnTaskListsLoadedListener mListener;
-
-        TaskListsAsyncTask(TaskList taskList,
-                           RepositoryLoadHelper repositoryLoadHelper,
-                           TaskListsDbStore taskListsDbStore,
-                           TaskListsCloudStore taskListsCloudStore,
-                           TasksDbStore tasksDbStore,
-                           TasksCloudStore tasksCloudStore,
-                           TaskListsSpecification taskListsSpecification,
-                           OnTaskListsLoadedListener listener) {
-            this.mTaskList = taskList;
-            this.mRepositoryLoadHelper = repositoryLoadHelper;
-            this.mTaskListsDbStore = taskListsDbStore;
-            this.mTaskListsCloudStore = taskListsCloudStore;
-            this.mTasksDbStore = tasksDbStore;
-            this.mTasksCloudStore = tasksCloudStore;
-            this.mTaskListsSpecification = taskListsSpecification;
-            this.mListener = listener;
+    public Single<TaskList> deleteTaskList(TaskList taskList, TaskListsSpecification taskListsSpecification) {
+        Single<TaskList> taskListsSingle;
+        if (RepositoryLoadHelper.isOnline()) {
+            taskListsSingle = mTaskListsCloudStore.deleteTaskListOnServer(taskList)
+                    .filter(response -> {
+                        if (response.code() == HttpURLConnection.HTTP_NO_CONTENT) {
+                            return true;
+                        } else {
+                            throw new IOException();
+                        }
+                    }).toSingle()
+                    .flatMap(response -> mTaskListsDbStore.deleteTaskList(taskList))
+                    .flatMap(aBoolean -> {
+                        if (aBoolean) {
+                            return mTaskListsDbStore.getTaskLists(taskListsSpecification);
+                        } else {
+                            throw new IOException();
+                        }
+                    })
+                    .map(taskLists -> taskLists.get(0));
+        } else {
+            taskListsSingle = mTaskListsDbStore.deleteTaskList(taskList)
+                    .flatMap(aBoolean -> {
+                        if (aBoolean) {
+                            return mTaskListsDbStore.getTaskLists(taskListsSpecification);
+                        } else {
+                            throw new IOException();
+                        }
+                    })
+                    .map(taskLists -> taskLists.get(0));
         }
 
-        @Override
-        protected List<TaskList> doInBackground(final FirebaseWebService.RequestMethods... requestMethods) {
-            return super.doInBackground(requestMethods[0]);
-        }
-
-        @Override
-        protected ResponseDto doGetRequest() {
-            return mTaskListsCloudStore.getTaskListsFromServer();
-        }
-
-        @Override
-        protected ResponseDto doPostRequest() {
-            return mTaskListsCloudStore.addTaskListOnServer(mTaskList);
-        }
-
-        @Override
-        protected ResponseDto doPatchRequest() {
-            return mTaskListsCloudStore.updateTaskListOnServer(mTaskList);
-        }
-
-        @Override
-        protected ResponseDto doDeleteRequest() {
-            if (mTaskList.getId() != 1) {
-                return mTaskListsCloudStore.deleteTaskListOnServer(mTaskList);
-            } else {
-                return null;
-            }
-        }
-
-        @Override
-        protected List<TaskList> doSelectQuery() {
-            return mTaskListsDbStore.getTaskLists(mTaskListsSpecification);
-        }
-
-        @Override
-        protected void refreshDbQuery(ResponseDto responseDto) {
-            List<TaskList> taskLists = parseTaskListsData(responseDto.getResponseData());
-            updateDbQuery(taskLists);
-        }
-
-        @Override
-        protected void doInsertQuery(ResponseDto responseDto) {
-            TaskList taskList;
-            if (responseDto != null) {
-                taskList = parseTaskList(responseDto.getResponseData());
-            } else {
-                taskList = mTaskList;
-            }
-            mTaskListsDbStore.addOrUpdateTaskLists(Collections.singletonList(taskList));
-        }
-
-        @Override
-        protected void doUpdateQuery() {
-            mTaskListsDbStore.addOrUpdateTaskLists(Collections.singletonList(mTaskList));
-        }
-
-        @Override
-        protected boolean doDeleteQuery() {
-            if (mTaskList.getId() != 1) {
-                mTaskListsDbStore.deleteTaskList(mTaskList);
-                return true;
-            } else {
-                return false;
-            }
-        }
-
-        @Override
-        protected void retryGetResultFromServer(final FirebaseWebService.RequestMethods requestMethod) {
-        }
-
-        private TaskList parseTaskList(String data) {
-            TaskListsParser taskListsParser = new TaskListsParser();
-            return taskListsParser.parseTaskList(data);
-        }
-
-        private List<TaskList> parseTaskListsData(String data) {
-            TaskListsParser taskListsParser = new TaskListsParser();
-            return taskListsParser.parseTaskLists(data);
-        }
-
-        private void updateDbQuery(List<TaskList> events) {
-            mTaskListsDbStore.addOrUpdateTaskLists(events);
-            mTaskListsDbStore.getTaskLists(mTaskListsSpecification);
-        }
-
+        return taskListsSingle;
     }
 }

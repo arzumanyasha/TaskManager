@@ -47,7 +47,7 @@ public class DateUtils {
         return DateUtils.formatEventDate(DateUtils.getEventDateFromString(date));
     }
 
-    public static String formatEventDate(Date eventDate) {
+    private static String formatEventDate(Date eventDate) {
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat(YEAR_MONTH_DAY_DATE_PATTERN, Locale.getDefault());
         return simpleDateFormat.format(eventDate);
     }
@@ -145,7 +145,7 @@ public class DateUtils {
         return simpleDateFormat.format(time);
     }
 
-    public static String formatTimeWithoutA(String time) {
+    public static String formatTimeWithoutA(Date time) {
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat(HOUR_MINUTE_TIME_PATTERN, Locale.getDefault());
         return simpleDateFormat.format(time);
     }

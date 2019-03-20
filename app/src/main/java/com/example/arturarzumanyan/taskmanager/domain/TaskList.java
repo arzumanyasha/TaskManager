@@ -1,26 +1,18 @@
 package com.example.arturarzumanyan.taskmanager.domain;
 
 import android.arch.persistence.room.Entity;
-import android.arch.persistence.room.Ignore;
 import android.arch.persistence.room.PrimaryKey;
 import android.os.Parcel;
 import android.os.Parcelable;
 
 @Entity(tableName = "tasklist_table")
-public class TaskList implements Parcelable{
-    @PrimaryKey
+public class TaskList implements Parcelable {
+    @PrimaryKey(autoGenerate = true)
     private int id;
     private String taskListId;
     private String title;
 
     public TaskList(String taskListId, String title) {
-        this.taskListId = taskListId;
-        this.title = title;
-    }
-
-    @Ignore
-    public TaskList(int id, String taskListId, String title) {
-        this.id = id;
         this.taskListId = taskListId;
         this.title = title;
     }

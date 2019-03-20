@@ -12,16 +12,16 @@ import java.util.HashMap;
 import java.util.Map;
 
 import io.reactivex.Single;
-import okhttp3.Response;
 import okhttp3.ResponseBody;
+import retrofit2.Response;
 
 import static com.example.arturarzumanyan.taskmanager.data.repository.RepositoryLoadHelper.AUTHORIZATION_KEY;
+import static com.example.arturarzumanyan.taskmanager.data.repository.RepositoryLoadHelper.CONTENT_TYPE_KEY;
+import static com.example.arturarzumanyan.taskmanager.data.repository.RepositoryLoadHelper.JSON_CONTENT_TYPE_VALUE;
 import static com.example.arturarzumanyan.taskmanager.data.repository.RepositoryLoadHelper.TOKEN_TYPE;
-import static com.example.arturarzumanyan.taskmanager.networking.base.BaseHttpUrlConnection.JSON_CONTENT_TYPE_VALUE;
 
 public class EventsCloudStore {
     private static final String BASE_EVENTS_URL = "calendar/v3/calendars/";
-    private static final String CONTENT_TYPE_KEY = "Content-Type";
 
     private GoogleCalendarApi mGoogleCalendarApi;
     private RepositoryLoadHelper mRepositoryLoadHelper;
@@ -65,7 +65,7 @@ public class EventsCloudStore {
         String url = BASE_EVENTS_URL +
                 FirebaseWebService.getFirebaseWebServiceInstance().getUserEmail() +
                 "/events/" +
-                event.getId();
+                event.getEventId();
 
         Map<String, String> requestHeaderParameters = new HashMap<>();
         requestHeaderParameters.put(AUTHORIZATION_KEY, TOKEN_TYPE + TokenStorage.getTokenStorageInstance().getAccessToken());
@@ -76,11 +76,11 @@ public class EventsCloudStore {
         return mGoogleCalendarApi.updateEvent(url, requestHeaderParameters, requestBodyParameters);
     }
 
-    public Single<Response> deleteEventOnServer(Event event) {
+    public Single<Response<ResponseBody>> deleteEventOnServer(Event event) {
         String url = BASE_EVENTS_URL +
                 FirebaseWebService.getFirebaseWebServiceInstance().getUserEmail() +
                 "/events/" +
-                event.getId();
+                event.getEventId();
 
         Map<String, String> requestHeaderParameters = new HashMap<>();
         requestHeaderParameters.put(AUTHORIZATION_KEY, TOKEN_TYPE + TokenStorage.getTokenStorageInstance().getAccessToken());

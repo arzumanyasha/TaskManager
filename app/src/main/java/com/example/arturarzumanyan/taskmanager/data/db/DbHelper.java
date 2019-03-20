@@ -41,15 +41,17 @@ public class DbHelper {
         }
     }
 
-    private void insertOrUpdateEvent(Event event) {
-        if (isEventExistsInDb(event.getId())) {
-            AppDatabase.getAppDatabase().eventDao().update(event);
+    private void insertOrUpdateEvent(Event newEvent) {
+        if (isEventExistsInDb(newEvent.getEventId())) {
+            Event event = AppDatabase.getAppDatabase().eventDao().getEventById(newEvent.getEventId());
+            newEvent.setId(event.getId());
+            AppDatabase.getAppDatabase().eventDao().update(newEvent);
         } else {
-            AppDatabase.getAppDatabase().eventDao().insert(event);
+            AppDatabase.getAppDatabase().eventDao().insert(newEvent);
         }
     }
 
-    private boolean isEventExistsInDb(int id) {
+    private boolean isEventExistsInDb(String id) {
         return AppDatabase.getAppDatabase().eventDao().getEventById(id) != null;
     }
 
@@ -67,56 +69,85 @@ public class DbHelper {
         return AppDatabase.getAppDatabase().eventDao().getEvents(specification.getStartDate(), specification.getEndDate());
     }
 
-    public void addOrUpdateTaskLists(List<TaskList> taskLists) {
-        for (TaskList taskList : taskLists) {
-            insertOrUpdateTaskList(taskList);
+    public Boolean addOrUpdateTaskLists(List<TaskList> taskLists) {
+        try {
+            for (TaskList taskList : taskLists) {
+                insertOrUpdateTaskList(taskList);
+            }
+            return Boolean.TRUE;
+        } catch (Exception ex) {
+            Log.e(ex.getMessage());
+            return Boolean.FALSE;
         }
     }
 
-    private void insertOrUpdateTaskList(TaskList taskList) {
-        if (isTaskListExistsInDb(taskList.getId())) {
-            AppDatabase.getAppDatabase().taskListDao().update(taskList);
+    private void insertOrUpdateTaskList(TaskList newTaskList) {
+        if (isTaskListExistsInDb(newTaskList.getTaskListId())) {
+            TaskList taskList = AppDatabase.getAppDatabase().taskListDao()
+                    .getTaskListById(newTaskList.getTaskListId());
+            newTaskList.setId(taskList.getId());
+            AppDatabase.getAppDatabase().taskListDao().update(newTaskList);
         } else {
-            AppDatabase.getAppDatabase().taskListDao().insert(taskList);
+            AppDatabase.getAppDatabase().taskListDao().insert(newTaskList);
         }
     }
 
-    private boolean isTaskListExistsInDb(int taskListId) {
+    private boolean isTaskListExistsInDb(String taskListId) {
         return AppDatabase.getAppDatabase().taskListDao().getTaskListById(taskListId) != null;
     }
 
     public List<TaskList> getTaskLists(TaskListsSpecification specification) {
-        if (specification.getSelectionArgs() == 0) {
+        if (specification.getSelectionArgs() == null) {
             return AppDatabase.getAppDatabase().taskListDao().getTaskLists();
         } else {
             return Collections.singletonList(AppDatabase.getAppDatabase().taskListDao().getTaskListById(specification.getSelectionArgs()));
         }
     }
 
-    public void deleteTaskList(TaskList taskList) {
-        AppDatabase.getAppDatabase().taskListDao().delete(taskList);
-    }
-
-    public void addOrUpdateTasks(List<Task> tasks) {
-        for (Task task : tasks) {
-            insertOrUpdateTask(task);
+    public Boolean deleteTaskList(TaskList taskList) {
+        try {
+            AppDatabase.getAppDatabase().taskListDao().delete(taskList);
+            return Boolean.TRUE;
+        } catch (Exception ex) {
+            Log.e(ex.getMessage());
+            return Boolean.FALSE;
         }
     }
 
-    private void insertOrUpdateTask(Task task) {
-        if (isTaskExistsInDb(task.getId())) {
-            AppDatabase.getAppDatabase().taskDao().update(task);
+    public Boolean addOrUpdateTasks(List<Task> tasks) {
+        try {
+            for (Task task : tasks) {
+                insertOrUpdateTask(task);
+            }
+            return Boolean.TRUE;
+        } catch (Exception ex) {
+            Log.e(ex.getMessage());
+            return Boolean.FALSE;
+        }
+    }
+
+    private void insertOrUpdateTask(Task newTask) {
+        if (isTaskExistsInDb(newTask.getTaskId())) {
+            Task task = AppDatabase.getAppDatabase().taskDao().getTaskById(newTask.getTaskId());
+            newTask.setId(task.getId());
+            AppDatabase.getAppDatabase().taskDao().update(newTask);
         } else {
-            AppDatabase.getAppDatabase().taskDao().insert(task);
+            AppDatabase.getAppDatabase().taskDao().insert(newTask);
         }
     }
 
-    private boolean isTaskExistsInDb(int taskId) {
+    private boolean isTaskExistsInDb(String taskId) {
         return AppDatabase.getAppDatabase().taskDao().getTaskById(taskId) != null;
     }
 
-    public void deleteTask(Task task) {
-        AppDatabase.getAppDatabase().taskDao().delete(task);
+    public Boolean deleteTask(Task task) {
+        try {
+            AppDatabase.getAppDatabase().taskDao().delete(task);
+            return Boolean.TRUE;
+        } catch (Exception ex) {
+            Log.e(ex.getMessage());
+            return Boolean.FALSE;
+        }
     }
 
     public List<Task> getTasksFromList(int tasksListId) {

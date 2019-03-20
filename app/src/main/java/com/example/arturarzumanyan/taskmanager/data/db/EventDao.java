@@ -13,8 +13,8 @@ import java.util.List;
 
 @Dao
 public interface EventDao {
-    @Query("SELECT * FROM event_table WHERE id = :id")
-    Event getEventById(int id);
+    @Query("SELECT * FROM event_table WHERE eventId = :eventId")
+    Event getEventById(String eventId);
 
     @Query("SELECT * FROM event_table WHERE startTime > :startTime AND startTime < :endTime")
     List<Event> getEvents(String startTime, String endTime);
