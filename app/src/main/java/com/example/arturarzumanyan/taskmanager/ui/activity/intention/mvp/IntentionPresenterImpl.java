@@ -63,7 +63,6 @@ public class IntentionPresenterImpl implements IntentionContract.IntentionPresen
         if (mTaskLists.size() != 0) {
             mCurrentTaskList = mTaskLists.get(0);
             mIntentionView.displayDefaultUi(mTaskLists);
-            mIntentionView.displayRestoredEventsUi();
         }
     }
 

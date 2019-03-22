@@ -17,14 +17,14 @@ public class ResourceManager {
     }
 
     private static ResourceManager resourceManager;
-    private static ColorPalette colorPalette;
-    private static Context context;
+    private ColorPalette colorPalette;
+    private Context context;
 
     public static void initResourceManager(Context appContext) {
         if (resourceManager == null) {
-            colorPalette = new ColorPalette(appContext);
-            context = appContext;
             resourceManager = new ResourceManager();
+            resourceManager.colorPalette = new ColorPalette(appContext);
+            resourceManager.context = appContext;
         }
     }
 

@@ -158,6 +158,7 @@ public class TasksPresenterImpl implements TasksContract.TasksPresenter {
     public void processRetainedState() {
         mTasksView.setTasksAdapter(mTasks);
         mTasksView.updateAppTitle(mTaskList.getTitle());
+        mTasksView.setProgressBarInvisible();
     }
 
     @Override

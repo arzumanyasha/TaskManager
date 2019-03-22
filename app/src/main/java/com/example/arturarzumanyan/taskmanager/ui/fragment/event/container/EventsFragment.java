@@ -69,18 +69,12 @@ public class EventsFragment extends Fragment implements BottomNavigationContract
     }
 
     private BottomNavigationView.OnNavigationItemSelectedListener navListener =
-            new BottomNavigationView.OnNavigationItemSelectedListener() {
-                @Override
-                public boolean onNavigationItemSelected(@NonNull MenuItem item) {
-                    Log.v("Selected");
-                    requireFragmentManager().popBackStack(BACK_STACK_ROOT_TAG,
-                            FragmentManager.POP_BACK_STACK_INCLUSIVE);
+            item -> {
+                Log.v("Selected");
+                setSelectedFragment(item);
 
-                    setSelectedFragment(item);
+                return true;
 
-                    return true;
-
-                }
             };
 
     @Override
@@ -163,7 +157,7 @@ public class EventsFragment extends Fragment implements BottomNavigationContract
     }
 
     private void openRetainedFragment(Fragment retainedFragment, String tag) {
-        requireFragmentManager().beginTransaction()
+        getChildFragmentManager().beginTransaction()
                 .replace(R.id.fragment_container, retainedFragment, tag)
                 .commit();
     }

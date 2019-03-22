@@ -94,6 +94,7 @@ public class WeekDashboardPresenterImpl implements WeekDashboardContract.WeekDas
 
     @Override
     public void processWeekDashboard() {
+        mWeekDashboardView.setProgressBarInvisible();
         List<Date> weekDateList = getDatesOfWeek();
         List<Event> currentEventList;
         int lastMinute = 0;
