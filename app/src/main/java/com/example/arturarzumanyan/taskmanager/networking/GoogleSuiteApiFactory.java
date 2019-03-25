@@ -3,6 +3,7 @@ package com.example.arturarzumanyan.taskmanager.networking;
 import com.example.arturarzumanyan.taskmanager.auth.FirebaseWebService;
 import com.example.arturarzumanyan.taskmanager.auth.TokenStorage;
 import com.example.arturarzumanyan.taskmanager.networking.util.Log;
+import com.google.gson.GsonBuilder;
 
 import java.net.HttpURLConnection;
 
@@ -11,6 +12,7 @@ import okhttp3.ResponseBody;
 import okhttp3.logging.HttpLoggingInterceptor;
 import retrofit2.Retrofit;
 import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory;
+import retrofit2.converter.gson.GsonConverterFactory;
 
 import static com.example.arturarzumanyan.taskmanager.data.repository.RepositoryLoadHelper.AUTHORIZATION_KEY;
 import static com.example.arturarzumanyan.taskmanager.data.repository.RepositoryLoadHelper.TOKEN_TYPE;
@@ -47,6 +49,7 @@ public class GoogleSuiteApiFactory {
             retrofit = new Retrofit.Builder()
                     .baseUrl(BASE_URL)
                     .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
+                    .addConverterFactory(GsonConverterFactory.create(new GsonBuilder().serializeNulls().create()))
                     .client(httpClient)
                     .build();
         }

@@ -56,24 +56,24 @@ public class EventsDialog extends AppCompatDialogFragment implements EventsDialo
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
 
-
         LayoutInflater inflater = requireActivity().getLayoutInflater();
         View view = inflater.inflate(R.layout.dialog_events, null);
 
         final Bundle bundle = getArguments();
 
         mEventsDialogPresenter = new EventsDialogPresenterImpl(this);
-        mEventsDialogPresenter.setDefaultCurrentColor(getActivity());
+        mEventsDialogPresenter.setDefaultCurrentColor();
 
         builder.setView(view)
                 .setTitle(getString(R.string.events_title))
                 .setNegativeButton(getString(R.string.cancel_button), (dialog, which) -> {
                 })
-                .setPositiveButton(getString(R.string.ok_button), (dialog, which) -> mEventsDialogPresenter.processOkButtonClick(bundle,
-                        mEditTextEventName.getText().toString(),
-                        mEditTextEventDescription.getText().toString(),
-                        mTextViewDate.getText().toString(),
-                        mSwitchNotification.isChecked() ? 1 : 0));
+                .setPositiveButton(getString(R.string.ok_button), (dialog, which) ->
+                        mEventsDialogPresenter.processOkButtonClick(bundle,
+                                mEditTextEventName.getText().toString(),
+                                mEditTextEventDescription.getText().toString(),
+                                mTextViewDate.getText().toString(),
+                                mSwitchNotification.isChecked() ? 1 : 0));
 
         setViews(view);
 
@@ -158,9 +158,12 @@ public class EventsDialog extends AppCompatDialogFragment implements EventsDialo
 
         mEventsDialogPresenter.setCurrentColor(event.getColorId());
 
-        mTextViewStartTime.setText(DateUtils.formatTimeWithoutA(event.getStartTime()));
-        mTextViewEndTime.setText(DateUtils.formatTimeWithoutA(event.getEndTime()));
-        mTextViewDate.setText(DateUtils.formatReversedDayMonthYearDate(DateUtils.formatEventDate(event.getStartTime())));
+        mTextViewStartTime.setText(DateUtils.formatTimeWithoutA(
+                DateUtils.getEventDateFromString(event.getStartTime())));
+        mTextViewEndTime.setText(DateUtils.formatTimeWithoutA(
+                DateUtils.getEventDateFromString(event.getEndTime())));
+        mTextViewDate.setText(DateUtils.formatReversedDayMonthYearDate(
+                DateUtils.trimEventDate(event.getStartTime())));
 
         mSwitchNotification.setChecked(event.getIsNotify() == 1);
 
@@ -190,12 +193,6 @@ public class EventsDialog extends AppCompatDialogFragment implements EventsDialo
 
                     }
                 }).show();
-    }
-
-    @Override
-    public void onDestroy() {
-        mEventsDialogPresenter.unsubscribe();
-        super.onDestroy();
     }
 
     public void setEventsReadyListener(EventsReadyListener listener) {

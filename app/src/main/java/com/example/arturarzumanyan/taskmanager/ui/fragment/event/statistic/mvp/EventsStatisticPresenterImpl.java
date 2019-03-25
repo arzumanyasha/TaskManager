@@ -1,6 +1,5 @@
 package com.example.arturarzumanyan.taskmanager.ui.fragment.event.statistic.mvp;
 
-import android.content.Context;
 import android.util.SparseIntArray;
 
 import com.example.arturarzumanyan.taskmanager.data.repository.events.EventsRepository;
@@ -10,7 +9,7 @@ import com.example.arturarzumanyan.taskmanager.data.repository.events.specificat
 import com.example.arturarzumanyan.taskmanager.data.repository.events.specification.WeeklyEventsSpecification;
 import com.example.arturarzumanyan.taskmanager.domain.Event;
 import com.example.arturarzumanyan.taskmanager.networking.util.DateUtils;
-import com.example.arturarzumanyan.taskmanager.ui.util.ColorPalette;
+import com.example.arturarzumanyan.taskmanager.ui.util.ResourceManager;
 import com.github.mikephil.charting.data.PieEntry;
 
 import java.util.ArrayList;
@@ -21,7 +20,7 @@ import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.schedulers.Schedulers;
 
 import static com.example.arturarzumanyan.taskmanager.networking.util.DateUtils.MINUTES_IN_HOUR;
-import static com.example.arturarzumanyan.taskmanager.ui.fragment.event.daily.mvp.DailyEventsPresenterImpl.FAILED_TO_LOAD_EVENTS_MSG;
+import static com.example.arturarzumanyan.taskmanager.ui.util.ResourceManager.getResourceManager;
 
 public class EventsStatisticPresenterImpl implements EventsStatisticContract.EventsStatisticPresenter {
     private static final int MINUTES_IN_DAY = 1440;
@@ -36,18 +35,16 @@ public class EventsStatisticPresenterImpl implements EventsStatisticContract.Eve
     private CompositeDisposable mCompositeDisposable = new CompositeDisposable();
     private List<Event> mEvents;
 
-    public EventsStatisticPresenterImpl(EventsStatisticContract.EventsStatisticView mEventsStatisticView, Context context) {
+    public EventsStatisticPresenterImpl(EventsStatisticContract.EventsStatisticView mEventsStatisticView) {
         this.mEventsStatisticView = mEventsStatisticView;
-        ColorPalette colorPalette = new ColorPalette(context);
-        mColorPaletteArray = colorPalette.getColorPalette();
+        mColorPaletteArray = getResourceManager().getColorPalette();
         mEventsRepository = new EventsRepository();
     }
 
     @Override
-    public void attachView(EventsStatisticContract.EventsStatisticView eventsStatisticView, Context context) {
+    public void attachView(EventsStatisticContract.EventsStatisticView eventsStatisticView) {
         this.mEventsStatisticView = eventsStatisticView;
-        ColorPalette colorPalette = new ColorPalette(context);
-        mColorPaletteArray = colorPalette.getColorPalette();
+        mColorPaletteArray = getResourceManager().getColorPalette();
         mEventsRepository = new EventsRepository();
     }
 
@@ -88,7 +85,7 @@ public class EventsStatisticPresenterImpl implements EventsStatisticContract.Eve
                 })
                 .doOnError(throwable -> {
                     if (mEventsStatisticView != null) {
-                        mEventsStatisticView.onFail(FAILED_TO_LOAD_EVENTS_MSG);
+                        mEventsStatisticView.onFail(getResourceManager().getErrorMessage(ResourceManager.State.FAILED_TO_LOAD_EVENTS_ERROR));
                     }
                 })
                 .subscribe()
@@ -101,8 +98,10 @@ public class EventsStatisticPresenterImpl implements EventsStatisticContract.Eve
         SparseIntArray minutesOnEvents = new SparseIntArray();
 
         for (Event event : mEvents) {
-            int eventTimeSpent = event.getEndTime().getHours() * MINUTES_IN_HOUR + event.getEndTime().getMinutes()
-                    - event.getStartTime().getHours() * MINUTES_IN_HOUR - event.getStartTime().getMinutes();
+            int eventTimeSpent = DateUtils.getEventDateFromString(event.getEndTime()).getHours() *
+                    MINUTES_IN_HOUR + DateUtils.getEventDateFromString(event.getEndTime()).getMinutes()
+                    - DateUtils.getEventDateFromString(event.getStartTime()).getHours() *
+                    MINUTES_IN_HOUR - DateUtils.getEventDateFromString(event.getStartTime()).getMinutes();
             int colorNumber = event.getColorId();
             if (minutesOnEvents.get(colorNumber, VALUE_IF_KEY_NOT_FOUND) != VALUE_IF_KEY_NOT_FOUND) {
                 minutesOnEvents.put(colorNumber, minutesOnEvents.get(colorNumber) + eventTimeSpent);

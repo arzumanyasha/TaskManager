@@ -58,9 +58,12 @@ public class EventsParser {
         JSONObject startTimeJsonObject = jsonObject.getJSONObject(START_KEY);
         JSONObject endTimeJsonObject = jsonObject.getJSONObject(END_KEY);
 
-        Date startDate = DateUtils.getEventDateFromString(startTimeJsonObject.getString(DATETIME_KEY));
+        //Date startDate = DateUtils.getEventDateFromString(startTimeJsonObject.getString(DATETIME_KEY));
 
-        Date endDate = DateUtils.getEventDateFromString(endTimeJsonObject.getString(DATETIME_KEY));
+        //Date endDate = DateUtils.getEventDateFromString(endTimeJsonObject.getString(DATETIME_KEY));
+
+        String startDate = startTimeJsonObject.getString(DATETIME_KEY);
+        String endDate = endTimeJsonObject.getString(DATETIME_KEY);
 
         int isNotify;
         JSONObject reminderJsonObject = jsonObject.getJSONObject(REMINDERS_KEY);

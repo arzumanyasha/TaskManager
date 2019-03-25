@@ -3,8 +3,9 @@ package com.example.arturarzumanyan.taskmanager.data.repository.events;
 import java.util.Map;
 
 import io.reactivex.Single;
-import okhttp3.Response;
+
 import okhttp3.ResponseBody;
+import retrofit2.Response;
 import retrofit2.http.Body;
 import retrofit2.http.DELETE;
 import retrofit2.http.GET;
@@ -24,5 +25,5 @@ public interface GoogleCalendarApi {
     Single<ResponseBody> updateEvent(@Url String url, @HeaderMap Map<String, String> map, @Body Map<String, Object> requestBody);
 
     @DELETE
-    Single<Response> deleteEvent(@Url String url, @HeaderMap Map<String, String> map);
+    Single<Response<ResponseBody>> deleteEvent(@Url String url, @HeaderMap Map<String, String> map);
 }

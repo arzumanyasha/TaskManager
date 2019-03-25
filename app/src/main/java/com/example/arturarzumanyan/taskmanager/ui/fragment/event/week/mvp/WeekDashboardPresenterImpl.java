@@ -1,6 +1,5 @@
 package com.example.arturarzumanyan.taskmanager.ui.fragment.event.week.mvp;
 
-import android.content.Context;
 import android.util.SparseIntArray;
 
 import com.example.arturarzumanyan.taskmanager.data.repository.events.EventsRepository;
@@ -8,7 +7,7 @@ import com.example.arturarzumanyan.taskmanager.data.repository.events.specificat
 import com.example.arturarzumanyan.taskmanager.domain.Event;
 import com.example.arturarzumanyan.taskmanager.networking.util.DateUtils;
 import com.example.arturarzumanyan.taskmanager.networking.util.Log;
-import com.example.arturarzumanyan.taskmanager.ui.util.ColorPalette;
+import com.example.arturarzumanyan.taskmanager.ui.util.ResourceManager;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -23,7 +22,7 @@ import io.reactivex.schedulers.Schedulers;
 
 import static com.example.arturarzumanyan.taskmanager.networking.util.DateUtils.DAYS_IN_WEEK;
 import static com.example.arturarzumanyan.taskmanager.networking.util.DateUtils.MINUTES_IN_HOUR;
-import static com.example.arturarzumanyan.taskmanager.ui.fragment.event.daily.mvp.DailyEventsPresenterImpl.FAILED_TO_LOAD_EVENTS_MSG;
+import static com.example.arturarzumanyan.taskmanager.ui.util.ResourceManager.getResourceManager;
 
 public class WeekDashboardPresenterImpl implements WeekDashboardContract.WeekDashboardPresenter {
     private WeekDashboardContract.WeekDashboardView mWeekDashboardView;
@@ -32,17 +31,15 @@ public class WeekDashboardPresenterImpl implements WeekDashboardContract.WeekDas
     private Map<Date, List<Event>> mWeeklyEvents = new HashMap<>();
     private CompositeDisposable mCompositeDisposable = new CompositeDisposable();
 
-    public WeekDashboardPresenterImpl(WeekDashboardContract.WeekDashboardView weekDashboardView, Context context) {
+    public WeekDashboardPresenterImpl(WeekDashboardContract.WeekDashboardView weekDashboardView) {
         this.mWeekDashboardView = weekDashboardView;
-        ColorPalette colorPalette = new ColorPalette(context);
-        mColorPaletteArray = colorPalette.getColorPalette();
+        mColorPaletteArray = getResourceManager().getColorPalette();
     }
 
     @Override
-    public void attachView(WeekDashboardContract.WeekDashboardView weekDashboardView, Context context) {
+    public void attachView(WeekDashboardContract.WeekDashboardView weekDashboardView) {
         this.mWeekDashboardView = weekDashboardView;
-        ColorPalette colorPalette = new ColorPalette(context);
-        mColorPaletteArray = colorPalette.getColorPalette();
+        mColorPaletteArray = getResourceManager().getColorPalette();
     }
 
     @Override
@@ -62,7 +59,7 @@ public class WeekDashboardPresenterImpl implements WeekDashboardContract.WeekDas
                         processWeekDashboard();
                     }
                 })
-                .doOnError(throwable -> mWeekDashboardView.onFail(FAILED_TO_LOAD_EVENTS_MSG))
+                .doOnError(throwable -> mWeekDashboardView.onFail(getResourceManager().getErrorMessage(ResourceManager.State.FAILED_TO_LOAD_EVENTS_ERROR)))
                 .subscribe());
     }
 
@@ -84,7 +81,8 @@ public class WeekDashboardPresenterImpl implements WeekDashboardContract.WeekDas
     @Override
     public void fetchWeeklyEventsWithDate() {
         for (Event event : mWeeklyEventsList) {
-            Date eventDate = DateUtils.getEventDateWithoutTime(event.getStartTime());
+            Date eventDate = DateUtils.getEventDateWithoutTime(
+                    DateUtils.getEventDateFromString(event.getStartTime()));
 
             if (mWeeklyEvents.containsKey(eventDate)) {
                 mWeeklyEvents.get(eventDate).add(event);
@@ -96,6 +94,7 @@ public class WeekDashboardPresenterImpl implements WeekDashboardContract.WeekDas
 
     @Override
     public void processWeekDashboard() {
+        mWeekDashboardView.setProgressBarInvisible();
         List<Date> weekDateList = getDatesOfWeek();
         List<Event> currentEventList;
         int lastMinute = 0;
@@ -103,13 +102,18 @@ public class WeekDashboardPresenterImpl implements WeekDashboardContract.WeekDas
             currentEventList = mWeeklyEvents.get(weekDateList.get(i));
             if (currentEventList != null) {
                 for (Event event : currentEventList) {
-                    Date startTime = event.getStartTime();
-                    int minutes = startTime.getHours() * MINUTES_IN_HOUR + startTime.getMinutes();
-                    mWeekDashboardView.makeEmptiness(i, minutes - lastMinute);
-                    mWeekDashboardView.makeEventPart(mColorPaletteArray.get(event.getColorId()), i,
-                            event.getEndTime().getHours() * MINUTES_IN_HOUR + event.getEndTime().getMinutes()
-                                    - event.getStartTime().getHours() * MINUTES_IN_HOUR - event.getStartTime().getMinutes());
-                    lastMinute = event.getEndTime().getHours() * MINUTES_IN_HOUR + event.getEndTime().getMinutes();
+                    Date startTime = DateUtils.getEventDateFromString(event.getStartTime());
+                    Date endTime = DateUtils.getEventDateFromString(event.getEndTime());
+                    int minutes;
+                    if (startTime != null && endTime != null) {
+                        minutes = startTime.getHours() * MINUTES_IN_HOUR + startTime.getMinutes();
+
+                        mWeekDashboardView.makeEmptiness(i, minutes - lastMinute);
+                        mWeekDashboardView.makeEventPart(mColorPaletteArray.get(event.getColorId()), i,
+                                endTime.getHours() * MINUTES_IN_HOUR + endTime.getMinutes()
+                                        - startTime.getHours() * MINUTES_IN_HOUR - startTime.getMinutes());
+                        lastMinute = endTime.getHours() * MINUTES_IN_HOUR + endTime.getMinutes();
+                    }
                 }
                 lastMinute = 0;
             }

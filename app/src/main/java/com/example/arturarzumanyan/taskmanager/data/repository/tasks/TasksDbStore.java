@@ -5,20 +5,22 @@ import com.example.arturarzumanyan.taskmanager.domain.Task;
 
 import java.util.List;
 
+import io.reactivex.Single;
+
 public class TasksDbStore {
 
     public TasksDbStore() {
     }
 
-    public List<Task> getTasksFromTaskList(int taskListId) {
-        return DbHelper.getDbHelperInstance().getTasksFromList(taskListId);
+    public Single<List<Task>> getTasksFromTaskList(int taskListId) {
+        return Single.fromCallable(() -> DbHelper.getDbHelperInstance().getTasksFromList(taskListId));
     }
 
-    public void addOrUpdateTasks(List<Task> tasks) {
-        DbHelper.getDbHelperInstance().addOrUpdateTasks(tasks);
+    public Single<Boolean> addOrUpdateTasks(List<Task> tasks) {
+        return Single.fromCallable(() -> DbHelper.getDbHelperInstance().addOrUpdateTasks(tasks));
     }
 
-    public void deleteTask(Task task) {
-        DbHelper.getDbHelperInstance().deleteTask(task);
+    public Single<Boolean> deleteTask(Task task) {
+        return Single.fromCallable(() -> DbHelper.getDbHelperInstance().deleteTask(task));
     }
 }

@@ -69,9 +69,9 @@ public class EventsStatisticFragment extends Fragment implements EventsStatistic
         super.onActivityCreated(savedInstanceState);
 
         if (mEventsStatisticPresenter == null) {
-            mEventsStatisticPresenter = new EventsStatisticPresenterImpl(this, requireActivity());
+            mEventsStatisticPresenter = new EventsStatisticPresenterImpl(this);
         } else {
-            mEventsStatisticPresenter.attachView(this, requireActivity());
+            mEventsStatisticPresenter.attachView(this);
             mEventsStatisticPresenter.createPieChartData();
         }
 

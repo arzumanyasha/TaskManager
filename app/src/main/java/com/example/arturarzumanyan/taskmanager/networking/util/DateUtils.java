@@ -39,15 +39,15 @@ public class DateUtils {
             return dateFormat.parse(date);
         } catch (ParseException e) {
             e.printStackTrace();
+            return null;
         }
-        return null;
     }
 
     public static String trimEventDate(String date) {
         return DateUtils.formatEventDate(DateUtils.getEventDateFromString(date));
     }
 
-    public static String formatEventDate(Date eventDate) {
+    private static String formatEventDate(Date eventDate) {
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat(YEAR_MONTH_DAY_DATE_PATTERN, Locale.getDefault());
         return simpleDateFormat.format(eventDate);
     }

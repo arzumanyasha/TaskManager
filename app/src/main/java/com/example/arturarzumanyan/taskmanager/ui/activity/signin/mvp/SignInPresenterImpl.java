@@ -5,16 +5,15 @@ import android.content.Intent;
 import com.example.arturarzumanyan.taskmanager.auth.FirebaseWebService;
 import com.example.arturarzumanyan.taskmanager.domain.User;
 import com.example.arturarzumanyan.taskmanager.networking.util.Log;
-import com.google.firebase.auth.AuthResult;
 
 import io.reactivex.SingleObserver;
 import io.reactivex.disposables.Disposable;
 
 import static android.app.Activity.RESULT_OK;
+import static com.example.arturarzumanyan.taskmanager.ui.util.ResourceManager.*;
 
 public class SignInPresenterImpl implements SignInContract.SignInPresenter {
     private static final int AUTHENTICATION_REQUEST_CODE = 101;
-    private static final String AUTHENTICATION_ERROR = "Authentication error";
     private SignInContract.SignInView mSignInView;
 
     public SignInPresenterImpl(SignInContract.SignInView signInView) {
@@ -53,7 +52,7 @@ public class SignInPresenterImpl implements SignInContract.SignInPresenter {
 
                 @Override
                 public void onError(Throwable e) {
-                    mSignInView.onSignInFailed(AUTHENTICATION_ERROR);
+                    mSignInView.onSignInFailed(getResourceManager().getErrorMessage(State.AUTHENTICATION_ERROR));
                 }
             });
         }

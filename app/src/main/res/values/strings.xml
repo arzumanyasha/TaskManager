@@ -21,10 +21,14 @@
 
         <!--Events Dialog-->
             <string name="time_error_msg">End time might be bigger than start time</string>
+            <string name="failed_to_create_event_msg">Failed to create event</string>
+            <string name="failed_to_update_event_msg">Failed to update event</string>
             <string name="events_title">Events</string>
 
         <!--Tasks Dialog-->
             <string name="tasks_title">Tasks</string>
+            <string name="failed_to_create_task_msg">Failed to create task</string>
+            <string name="failed_to_update_task_msg">Failed to update task</string>
 
         <!--TaskLists Dialog-->
             <string name="task_list_rename_title">Rename list</string>
@@ -50,6 +54,7 @@
 
             <!--activity_intention-->
                 <string name="add_task_list"> + Add list</string>
+                <string name="default_tasklist_error_msg">You can not delete the default list.</string>
 
             <!--dialog_events-->
                 <string name="choose_color">Choose color</string>
@@ -60,6 +65,8 @@
 
             <!--dialog_tasklists-->
                 <string name="tasklist_name_hint">Title</string>
+                <string name="failed_to_create_tasklist_msg">Failed to create task list</string>
+                <string name="failed_to_update_tasklist_msg">Failed to update task list</string>
 
             <!--dialog_tasks-->
                 <string name="set_task_date_title">Set task date</string>
@@ -71,6 +78,8 @@
 
             <!--fragment_daily_events-->
                 <string name="no_events_for_today">No events for today</string>
+                <string name="failed_to_load_events_msg">Failed to load events</string>
+                <string name="failed_to_delete_event_msg">Failed to delete event</string>
 
             <!--fragment_week_dashboard-->
                 <string name="monday_name">Mon</string>
@@ -92,6 +101,10 @@
                 <string name="choose_watch_mode">Choose watch mode</string>
                 <string name="no_events_to_show_message">No events to show</string>
 
+            <!--fragment_tasks-->
+                <string name="failed_to_load_tasks_msg">Failed to load tasks</string>
+                <string name="failed_to_delete_task_msg">Failed to delete task</string>
+
             <!--item_task-->
                 <string name="task_name">Task title</string>
                 <string name="task_description">Task description</string>
@@ -108,4 +121,7 @@
             <!--intention-->
                 <string name="update_tasklist_title">Update task list</string>
                 <string name="delete_tasklist_title">Delete task list</string>
+                <string name="failed_to_load_tasklists_msg">Failed to load task lists</string>
+                <string name="failed_to_delete_tasklist_msg">Failed to delete task list</string>
+
 </resources>

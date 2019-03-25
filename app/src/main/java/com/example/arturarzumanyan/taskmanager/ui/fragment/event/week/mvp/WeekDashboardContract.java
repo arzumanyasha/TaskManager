@@ -1,10 +1,8 @@
 package com.example.arturarzumanyan.taskmanager.ui.fragment.event.week.mvp;
 
-import android.content.Context;
-
 public class WeekDashboardContract {
     public interface WeekDashboardPresenter {
-        void attachView(WeekDashboardView weekDashboardView, Context context);
+        void attachView(WeekDashboardView weekDashboardView);
 
         void loadWeeklyEvents();
 

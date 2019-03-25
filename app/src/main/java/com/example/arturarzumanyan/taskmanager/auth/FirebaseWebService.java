@@ -37,6 +37,7 @@ import okhttp3.ResponseBody;
 import retrofit2.Response;
 
 import static com.example.arturarzumanyan.taskmanager.data.repository.RepositoryLoadHelper.AUTHORIZATION_KEY;
+import static com.example.arturarzumanyan.taskmanager.data.repository.RepositoryLoadHelper.TOKEN_TYPE;
 
 public class FirebaseWebService {
     private static final String CLIENT_ID = "685238908043-obre149i2k2gh9a71g2it0emsa97glma.apps.googleusercontent.com";
@@ -124,7 +125,7 @@ public class FirebaseWebService {
 
         Map<String, String> requestHeaderParameters = new HashMap<>();
         requestHeaderParameters.put(CONTENT_TYPE_KEY, CONTENT_TYPE);
-        requestHeaderParameters.put(AUTHORIZATION_KEY, "Bearer " + TokenStorage.getTokenStorageInstance().getAccessToken());
+        requestHeaderParameters.put(AUTHORIZATION_KEY, TOKEN_TYPE + TokenStorage.getTokenStorageInstance().getAccessToken());
 
         Single<ResponseBody> responseSingle = mGoogleSignInAuthApi.requestToken(requestBody, requestHeaderParameters);
 
@@ -176,7 +177,7 @@ public class FirebaseWebService {
 
         Map<String, String> requestHeaderParameters = new HashMap<>();
         requestHeaderParameters.put(CONTENT_TYPE_KEY, CONTENT_TYPE);
-        requestHeaderParameters.put(AUTHORIZATION_KEY, "Bearer " + TokenStorage.getTokenStorageInstance().getAccessToken());
+        requestHeaderParameters.put(AUTHORIZATION_KEY, TOKEN_TYPE + TokenStorage.getTokenStorageInstance().getAccessToken());
 
         try {
             return mGoogleSignInAuthApi.requestRefreshToken(requestBody, requestHeaderParameters).execute();

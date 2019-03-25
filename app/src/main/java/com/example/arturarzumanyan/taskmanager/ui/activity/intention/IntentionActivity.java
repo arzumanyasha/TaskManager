@@ -20,13 +20,9 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.example.arturarzumanyan.taskmanager.R;
-import com.example.arturarzumanyan.taskmanager.data.repository.events.EventsRepository;
-import com.example.arturarzumanyan.taskmanager.data.repository.events.specification.EventsFromDateSpecification;
-import com.example.arturarzumanyan.taskmanager.data.repository.events.specification.EventsSpecification;
 import com.example.arturarzumanyan.taskmanager.domain.Event;
 import com.example.arturarzumanyan.taskmanager.domain.Task;
 import com.example.arturarzumanyan.taskmanager.domain.TaskList;
-import com.example.arturarzumanyan.taskmanager.networking.util.DateUtils;
 import com.example.arturarzumanyan.taskmanager.networking.util.Log;
 import com.example.arturarzumanyan.taskmanager.ui.activity.BaseActivity;
 import com.example.arturarzumanyan.taskmanager.ui.activity.intention.mvp.IntentionContract;
@@ -41,9 +37,6 @@ import com.example.arturarzumanyan.taskmanager.ui.util.CircleTransformation;
 import com.squareup.picasso.Picasso;
 
 import java.util.List;
-
-import io.reactivex.android.schedulers.AndroidSchedulers;
-import io.reactivex.schedulers.Schedulers;
 
 public class IntentionActivity extends BaseActivity implements IntentionContract.IntentionView {
     public static final String EVENTS_KEY = "Events";
@@ -86,15 +79,6 @@ public class IntentionActivity extends BaseActivity implements IntentionContract
             mIntentionPresenter.attachView(this);
             mIntentionPresenter.processRestoredInfo(savedInstanceState.getString(TITLE_KEY, TASK_LISTS_KEY));
         }
-
-        EventsFromDateSpecification eventsSpecification = new EventsFromDateSpecification();
-        eventsSpecification.setDate(DateUtils.getCurrentTime());
-        EventsRepository eventsRepository = new EventsRepository();
-        eventsRepository.getEvents(eventsSpecification)
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .doOnSuccess(events -> Log.v(events.get(0).getName()))
-                .subscribe();
     }
 
     @Override
@@ -174,12 +158,9 @@ public class IntentionActivity extends BaseActivity implements IntentionContract
         mTaskListsMenu.clear();
 
         for (final TaskList taskList : taskLists) {
-            mTaskListsMenu.add(taskList.getTitle()).setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
-                @Override
-                public boolean onMenuItemClick(MenuItem item) {
-                    mIntentionPresenter.processTaskListMenuItemClick(taskList);
-                    return false;
-                }
+            mTaskListsMenu.add(taskList.getTitle()).setOnMenuItemClickListener(item -> {
+                mIntentionPresenter.processTaskListMenuItemClick(taskList);
+                return false;
             });
         }
     }
@@ -212,12 +193,9 @@ public class IntentionActivity extends BaseActivity implements IntentionContract
     private Menu populateCalendarMenu(Menu menu) {
         SubMenu calendarMenu = menu.addSubMenu("Calendars");
         calendarMenu.add(mUserData.getStringExtra(SignInActivity.EXTRA_USER_EMAIL))
-                .setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
-                    @Override
-                    public boolean onMenuItemClick(MenuItem item) {
-                        openCalendarFragment();
-                        return false;
-                    }
+                .setOnMenuItemClickListener(item -> {
+                    openCalendarFragment();
+                    return false;
                 });
 
         return menu;
@@ -373,16 +351,15 @@ public class IntentionActivity extends BaseActivity implements IntentionContract
 
     private void updateRetainedTasksFragment(TaskList taskList) {
         mRetainedTasksFragment = getRetainedTaskFragment();
+        mRetainedEventsFragment = null;
         if (mRetainedTasksFragment == null) {
             Log.v("Retained fragment is null");
             mRetainedTasksFragment = TasksFragment.newInstance(taskList);
-            mRetainedEventsFragment = null;
             openRetainedFragment(mRetainedTasksFragment, RETAINED_TASK_FRAGMENT_TAG);
         } else {
             Log.v("Retained fragment is not null");
             mRetainedTasksFragment.setTaskList(taskList);
         }
-
     }
 
     @Override

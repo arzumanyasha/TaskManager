@@ -1,18 +1,11 @@
 package com.example.arturarzumanyan.taskmanager.data.repository.events.specification;
 
-import com.example.arturarzumanyan.taskmanager.data.db.contract.EventsContract;
 import com.example.arturarzumanyan.taskmanager.networking.util.DateUtils;
 
 import java.util.Date;
 
 public class EventsFromDateSpecification implements EventsSpecification {
     private String mDate;
-
-    @Override
-    public String getSqlQuery() {
-        return "SELECT * FROM " + EventsContract.EventsTable.TABLE_NAME +
-                " WHERE " + EventsContract.EventsTable.COLUMN_START_TIME + " LIKE '" + mDate + "%'";
-    }
 
     public void setDate(String date) {
         if (DateUtils.isMatchesEventFormat(date)) {
@@ -36,6 +29,4 @@ public class EventsFromDateSpecification implements EventsSpecification {
         Date eventsEndTime = DateUtils.getEventDate(mDate, time);
         return DateUtils.formatEventTime(eventsEndTime);
     }
-
-
 }

@@ -1,17 +1,15 @@
 package com.example.arturarzumanyan.taskmanager.ui.dialog.event.mvp;
 
-import android.content.Context;
 import android.os.Bundle;
 
 import com.example.arturarzumanyan.taskmanager.domain.Event;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 public class EventsDialogContract {
     public interface EventsDialogPresenter {
-        void setDefaultCurrentColor(Context context);
+        void setDefaultCurrentColor();
 
         void setCurrentColor(int colorId);
 
@@ -19,11 +17,11 @@ public class EventsDialogContract {
 
         void setEventStartTime(int hour, int minute);
 
-        void setEventStartTime(Date date);
+        void setEventStartTime(String date);
 
         void setEventEndTime(int hour, int minute);
 
-        void setEventEndTime(Date date);
+        void setEventEndTime(String date);
 
         void setEventDate(int year, int month, int day);
 
@@ -33,8 +31,6 @@ public class EventsDialogContract {
                                   String eventDate, int isNotify);
 
         void processReceivedBundle(Bundle bundle);
-
-        void unsubscribe();
     }
 
     public interface EventsDialogView {

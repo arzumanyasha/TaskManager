@@ -6,6 +6,7 @@ import android.support.multidex.MultiDexApplication;
 import com.example.arturarzumanyan.taskmanager.auth.FirebaseWebService;
 import com.example.arturarzumanyan.taskmanager.auth.TokenStorage;
 import com.example.arturarzumanyan.taskmanager.data.db.DbHelper;
+import com.example.arturarzumanyan.taskmanager.ui.util.ResourceManager;
 import com.squareup.leakcanary.LeakCanary;
 import com.squareup.leakcanary.RefWatcher;
 
@@ -18,6 +19,7 @@ public class TaskManagerApp extends MultiDexApplication {
         TokenStorage.initTokenStorageInstance(this);
         FirebaseWebService.initFirebaseWebServiceInstance(this);
         DbHelper.initDbHelperInstance(this);
+        ResourceManager.initResourceManager(this);
         installLeakCanary();
     }
 

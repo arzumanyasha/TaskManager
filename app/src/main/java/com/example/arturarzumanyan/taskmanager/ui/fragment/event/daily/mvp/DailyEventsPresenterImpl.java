@@ -1,14 +1,13 @@
 package com.example.arturarzumanyan.taskmanager.ui.fragment.event.daily.mvp;
 
-import android.content.Context;
 import android.util.SparseIntArray;
 
+import com.example.arturarzumanyan.taskmanager.ui.util.ResourceManager;
 import com.example.arturarzumanyan.taskmanager.data.repository.events.EventsRepository;
 import com.example.arturarzumanyan.taskmanager.data.repository.events.specification.EventsFromDateSpecification;
 import com.example.arturarzumanyan.taskmanager.domain.Event;
 import com.example.arturarzumanyan.taskmanager.networking.util.DateUtils;
 import com.example.arturarzumanyan.taskmanager.ui.adapter.event.mvp.EventRowView;
-import com.example.arturarzumanyan.taskmanager.ui.util.ColorPalette;
 
 import java.util.List;
 
@@ -16,20 +15,19 @@ import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.schedulers.Schedulers;
 
+import static com.example.arturarzumanyan.taskmanager.ui.util.ResourceManager.*;
+
 public class DailyEventsPresenterImpl implements DailyEventsContract.DailyEventsPresenter {
-    public static final String FAILED_TO_LOAD_EVENTS_MSG = "Failed to load events";
-    private static final String FAILED_TO_DELETE_EVENT_MSG = "Failed to delete event";
     private DailyEventsContract.DailyEventsView mDailyEventsView;
     private EventsRepository mEventsRepository;
     private List<Event> mDailyEventsList;
     private SparseIntArray mColorPaletteArray;
     private CompositeDisposable mCompositeDisposable = new CompositeDisposable();
 
-    public DailyEventsPresenterImpl(DailyEventsContract.DailyEventsView mDailyEventsView, Context context) {
+    public DailyEventsPresenterImpl(DailyEventsContract.DailyEventsView mDailyEventsView) {
         this.mDailyEventsView = mDailyEventsView;
         mEventsRepository = new EventsRepository();
-        ColorPalette colorPalette = new ColorPalette(context);
-        mColorPaletteArray = colorPalette.getColorPalette();
+        mColorPaletteArray = ResourceManager.getResourceManager().getColorPalette();
     }
 
     @Override
@@ -62,7 +60,7 @@ public class DailyEventsPresenterImpl implements DailyEventsContract.DailyEvents
                         }
                     }
                 })
-                .doOnError(throwable -> onFail(FAILED_TO_LOAD_EVENTS_MSG))
+                .doOnError(throwable -> onFail(getResourceManager().getErrorMessage(State.FAILED_TO_LOAD_EVENTS_ERROR)))
                 .subscribe());
     }
 
@@ -87,7 +85,7 @@ public class DailyEventsPresenterImpl implements DailyEventsContract.DailyEvents
                         }
                     }
                 })
-                .doOnError(throwable -> onFail(FAILED_TO_DELETE_EVENT_MSG))
+                .doOnError(throwable -> onFail(getResourceManager().getErrorMessage(State.FAILED_TO_DELETE_EVENT_ERROR)))
                 .subscribe());
     }
 
@@ -104,7 +102,8 @@ public class DailyEventsPresenterImpl implements DailyEventsContract.DailyEvents
         rowView.setName(event.getName());
         rowView.setDescription(event.getDescription().replaceAll("[\n]", ""));
         rowView.setEventColor(mColorPaletteArray.get(event.getColorId()));
-        rowView.setTime(DateUtils.formatTime(event.getStartTime()) + " - " + DateUtils.formatTime(event.getEndTime()));
+        rowView.setTime(DateUtils.formatTime(DateUtils.getEventDateFromString(event.getStartTime())) +
+                " - " + DateUtils.formatTime(DateUtils.getEventDateFromString(event.getEndTime())));
         rowView.setDelete();
     }
 

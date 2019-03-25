@@ -71,10 +71,10 @@ public class WeekDashboardFragment extends Fragment implements WeekDashboardCont
         super.onActivityCreated(savedInstanceState);
 
         if (mWeekDashboardPresenter == null) {
-            mWeekDashboardPresenter = new WeekDashboardPresenterImpl(this, requireActivity());
+            mWeekDashboardPresenter = new WeekDashboardPresenterImpl(this);
             mWeekDashboardPresenter.loadWeeklyEvents();
         } else {
-            mWeekDashboardPresenter.attachView(this, requireActivity());
+            mWeekDashboardPresenter.attachView(this);
             mWeekDashboardPresenter.fetchWeeklyEventsWithDate();
             mWeekDashboardPresenter.processWeekDashboard();
         }
