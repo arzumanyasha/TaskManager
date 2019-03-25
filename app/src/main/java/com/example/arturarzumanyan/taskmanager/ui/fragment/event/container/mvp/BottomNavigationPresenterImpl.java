@@ -4,6 +4,7 @@ import static com.example.arturarzumanyan.taskmanager.ui.activity.intention.Inte
 
 public class BottomNavigationPresenterImpl implements BottomNavigationContract.BottomNavigationPresenter {
     private BottomNavigationContract.BottomNavigationView bottomNavigationView;
+    private int mCurrentFragmentId;
 
     public BottomNavigationPresenterImpl(BottomNavigationContract.BottomNavigationView bottomNavigationView) {
         this.bottomNavigationView = bottomNavigationView;
@@ -20,8 +21,23 @@ public class BottomNavigationPresenterImpl implements BottomNavigationContract.B
     }
 
     @Override
+    public void processDefaultBottomNavigationMenu() {
+        bottomNavigationView.displayDefaultUi();
+    }
+
+    @Override
+    public void processRotatedStateOfBottomNavigationMenu() {
+        bottomNavigationView.displaySelectedFragment(mCurrentFragmentId);
+    }
+
+    @Override
     public void processWeekDashboardClick() {
         bottomNavigationView.displayWeekDashboard();
+    }
+
+    @Override
+    public void setCurrentFragmentId(int id) {
+        mCurrentFragmentId = id;
     }
 
     @Override
