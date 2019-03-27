@@ -142,16 +142,6 @@ public class IntentionActivity extends BaseActivity implements IntentionContract
     }
 
     @Override
-    public void displayRestoredEventsUi() {
-        mRetainedEventsFragment = getRetainedEventsFragment();
-        if (mRetainedEventsFragment == null) {
-            mRetainedEventsFragment = EventsFragment.newInstance();
-            mRetainedTasksFragment = null;
-        }
-        openRetainedFragment(mRetainedEventsFragment, RETAINED_EVENT_FRAGMENT_TAG);
-    }
-
-    @Override
     public void recreateTaskListsMenu(List<TaskList> taskLists) {
         Log.v("TaskLists Menu updating");
 
@@ -182,6 +172,7 @@ public class IntentionActivity extends BaseActivity implements IntentionContract
             mIntentionPresenter.processLogOut();
             return false;
         });
+        signOutMenu.add("");
     }
 
     @Override
@@ -209,7 +200,7 @@ public class IntentionActivity extends BaseActivity implements IntentionContract
         mRetainedTasksFragment = null;
         openRetainedFragment(mRetainedEventsFragment, RETAINED_EVENT_FRAGMENT_TAG);
         mDrawer.closeDrawer(Gravity.START);
-        invalidateOptionsMenu();
+        mIntentionPresenter.processActionBarMenuItems(getTitle().toString());
     }
 
     private void populateTasksMenu(List<TaskList> taskLists, Menu menu) {
@@ -271,7 +262,7 @@ public class IntentionActivity extends BaseActivity implements IntentionContract
         mRetainedEventsFragment = null;
         updateRetainedTasksFragment(taskList);
         mDrawer.closeDrawer(Gravity.START);
-        invalidateOptionsMenu();
+        mIntentionPresenter.processActionBarMenuItems(getTitle().toString());
     }
 
     private void openRetainedFragment(Fragment retainedFragment, String tag) {
@@ -300,15 +291,6 @@ public class IntentionActivity extends BaseActivity implements IntentionContract
         getMenuInflater().inflate(R.menu.intention, menu);
         mActionBarMenu = menu;
 
-        return true;
-    }
-
-    @Override
-    public boolean onPrepareOptionsMenu(Menu menu) {
-        super.onPrepareOptionsMenu(menu);
-
-        mActionBarMenu = menu;
-        mIntentionPresenter.processActionBarMenuItems(getTitle().toString());
         return true;
     }
 

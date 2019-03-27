@@ -4,8 +4,6 @@ import com.example.arturarzumanyan.taskmanager.data.repository.RepositoryLoadHel
 import com.example.arturarzumanyan.taskmanager.data.repository.tasklists.specification.AllTaskListsSpecification;
 import com.example.arturarzumanyan.taskmanager.data.repository.tasklists.specification.TaskListFromIdSpecification;
 import com.example.arturarzumanyan.taskmanager.data.repository.tasklists.specification.TaskListsSpecification;
-import com.example.arturarzumanyan.taskmanager.data.repository.tasks.TasksCloudStore;
-import com.example.arturarzumanyan.taskmanager.data.repository.tasks.TasksDbStore;
 import com.example.arturarzumanyan.taskmanager.domain.TaskList;
 import com.example.arturarzumanyan.taskmanager.networking.util.TaskListsParser;
 
@@ -20,17 +18,11 @@ import okhttp3.ResponseBody;
 public class TaskListsRepository {
     private TaskListsCloudStore mTaskListsCloudStore;
     private TaskListsDbStore mTaskListsDbStore;
-    private TasksDbStore mTasksDbStore;
-    private TasksCloudStore mTasksCloudStore;
-    private RepositoryLoadHelper mRepositoryLoadHelper;
     private TaskListsParser mTaskListsParser;
 
     public TaskListsRepository() {
         mTaskListsCloudStore = new TaskListsCloudStore();
         mTaskListsDbStore = new TaskListsDbStore();
-        mTasksCloudStore = new TasksCloudStore();
-        mTasksDbStore = new TasksDbStore();
-        mRepositoryLoadHelper = new RepositoryLoadHelper();
         mTaskListsParser = new TaskListsParser();
     }
 
