@@ -43,9 +43,7 @@ public class EventsCloudStore {
                     "&timeMin=" + DateUtils.decodeDate(eventsSpecification.getStartDate());
         }
 
-        Map<String, String> requestHeaderParameters = new HashMap<>();
-        requestHeaderParameters.put(AUTHORIZATION_KEY, TOKEN_TYPE + TokenStorage.getTokenStorageInstance().getAccessToken());
-        return mGoogleCalendarApi.getEvents(eventsUrl, requestHeaderParameters);
+        return mGoogleCalendarApi.getEvents(eventsUrl);
     }
 
     public Single<ResponseBody> addEventOnServer(Event event) {
@@ -53,7 +51,6 @@ public class EventsCloudStore {
                 FirebaseWebService.getFirebaseWebServiceInstance().getUserEmail() +
                 "/events";
         Map<String, String> requestHeaderParameters = new HashMap<>();
-        requestHeaderParameters.put(AUTHORIZATION_KEY, TOKEN_TYPE + TokenStorage.getTokenStorageInstance().getAccessToken());
         requestHeaderParameters.put(CONTENT_TYPE_KEY, JSON_CONTENT_TYPE_VALUE);
 
         Map<String, Object> requestBodyParameters = mRepositoryLoadHelper.getEventBodyParameters(event);
@@ -68,7 +65,6 @@ public class EventsCloudStore {
                 event.getEventId();
 
         Map<String, String> requestHeaderParameters = new HashMap<>();
-        requestHeaderParameters.put(AUTHORIZATION_KEY, TOKEN_TYPE + TokenStorage.getTokenStorageInstance().getAccessToken());
         requestHeaderParameters.put(CONTENT_TYPE_KEY, JSON_CONTENT_TYPE_VALUE);
 
         Map<String, Object> requestBodyParameters = mRepositoryLoadHelper.getEventBodyParameters(event);
@@ -82,9 +78,6 @@ public class EventsCloudStore {
                 "/events/" +
                 event.getEventId();
 
-        Map<String, String> requestHeaderParameters = new HashMap<>();
-        requestHeaderParameters.put(AUTHORIZATION_KEY, TOKEN_TYPE + TokenStorage.getTokenStorageInstance().getAccessToken());
-
-        return mGoogleCalendarApi.deleteEvent(url, requestHeaderParameters);
+        return mGoogleCalendarApi.deleteEvent(url);
     }
 }

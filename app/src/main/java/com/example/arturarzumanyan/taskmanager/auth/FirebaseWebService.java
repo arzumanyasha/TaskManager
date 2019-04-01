@@ -6,7 +6,6 @@ import android.support.annotation.NonNull;
 
 import com.example.arturarzumanyan.taskmanager.domain.User;
 import com.example.arturarzumanyan.taskmanager.networking.GoogleAuthApiFactory;
-import com.example.arturarzumanyan.taskmanager.networking.GoogleSuiteApiFactory;
 import com.example.arturarzumanyan.taskmanager.networking.util.Log;
 import com.google.android.gms.auth.api.Auth;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
@@ -53,8 +52,6 @@ public class FirebaseWebService {
     private static final String AUTHORIZATION_CODE = "authorization_code";
     public static final String ACCESS_TOKEN_KEY = "access_token";
     public static final String REFRESH_TOKEN_KEY = "refresh_token";
-
-    public enum RequestMethods {POST, GET, PATCH, DELETE}
 
     private static FirebaseWebService mFirebaseWebServiceInstance;
     private GoogleSignInAuthApi mGoogleSignInAuthApi;

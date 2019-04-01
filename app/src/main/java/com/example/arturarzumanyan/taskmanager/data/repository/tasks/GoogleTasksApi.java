@@ -15,7 +15,7 @@ import retrofit2.http.Url;
 
 public interface GoogleTasksApi {
     @GET
-    Single<ResponseBody> getTasksFromTaskList(@Url String url, @HeaderMap Map<String, String> map);
+    Single<ResponseBody> getTasksFromTaskList(@Url String url);
 
     @POST
     Single<ResponseBody> addTask(@Url String url, @HeaderMap Map<String, String> map, @Body Map<String, Object> requestBody);
@@ -24,10 +24,10 @@ public interface GoogleTasksApi {
     Single<ResponseBody> updateTask(@Url String url, @HeaderMap Map<String, String> map, @Body Map<String, Object> requestBody);
 
     @DELETE
-    Single<Response<ResponseBody>> deleteTask(@Url String url, @HeaderMap Map<String, String> map);
+    Single<Response<ResponseBody>> deleteTask(@Url String url);
 
     @GET
-    Single<ResponseBody> getTaskLists(@Url String url, @HeaderMap Map<String, String> map);
+    Single<ResponseBody> getTaskLists(@Url String url);
 
     @POST
     Single<ResponseBody> addTaskList(@Url String url, @HeaderMap Map<String, String> map, @Body Map<String, Object> requestBody);
@@ -36,5 +36,5 @@ public interface GoogleTasksApi {
     Single<ResponseBody> updateTaskList(@Url String url, @HeaderMap Map<String, String> map, @Body Map<String, Object> requestBody);
 
     @DELETE
-    Single<Response<ResponseBody>> deleteTaskList(@Url String url, @HeaderMap Map<String, String> map);
+    Single<Response<ResponseBody>> deleteTaskList(@Url String url);
 }

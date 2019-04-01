@@ -1,6 +1,7 @@
 package com.example.arturarzumanyan.taskmanager.networking;
 
 import com.example.arturarzumanyan.taskmanager.networking.util.GoogleAuthenticator;
+import com.example.arturarzumanyan.taskmanager.networking.util.RequestTokenInterceptor;
 import com.google.gson.GsonBuilder;
 
 import okhttp3.OkHttpClient;
@@ -21,6 +22,7 @@ public class GoogleSuiteApiFactory {
 
             OkHttpClient httpClient = new OkHttpClient.Builder()
                     .addInterceptor(logging)
+                    .addInterceptor(new RequestTokenInterceptor())
                     .authenticator(new GoogleAuthenticator())
                     .build();
 

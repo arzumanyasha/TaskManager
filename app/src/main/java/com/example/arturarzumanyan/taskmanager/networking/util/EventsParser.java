@@ -7,7 +7,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 public class EventsParser {
@@ -57,10 +56,6 @@ public class EventsParser {
 
         JSONObject startTimeJsonObject = jsonObject.getJSONObject(START_KEY);
         JSONObject endTimeJsonObject = jsonObject.getJSONObject(END_KEY);
-
-        //Date startDate = DateUtils.getEventDateFromString(startTimeJsonObject.getString(DATETIME_KEY));
-
-        //Date endDate = DateUtils.getEventDateFromString(endTimeJsonObject.getString(DATETIME_KEY));
 
         String startDate = startTimeJsonObject.getString(DATETIME_KEY);
         String endDate = endTimeJsonObject.getString(DATETIME_KEY);

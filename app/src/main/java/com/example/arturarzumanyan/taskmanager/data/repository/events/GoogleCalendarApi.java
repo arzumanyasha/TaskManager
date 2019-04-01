@@ -16,7 +16,7 @@ import retrofit2.http.Url;
 
 public interface GoogleCalendarApi {
     @GET
-    Single<ResponseBody> getEvents(@Url String url, @HeaderMap Map<String, String> map);
+    Single<ResponseBody> getEvents(@Url String url);
 
     @POST
     Single<ResponseBody> addEvent(@Url String url, @HeaderMap Map<String, String> map, @Body Map<String, Object> requestBody);
@@ -25,5 +25,5 @@ public interface GoogleCalendarApi {
     Single<ResponseBody> updateEvent(@Url String url, @HeaderMap Map<String, String> map, @Body Map<String, Object> requestBody);
 
     @DELETE
-    Single<Response<ResponseBody>> deleteEvent(@Url String url, @HeaderMap Map<String, String> map);
+    Single<Response<ResponseBody>> deleteEvent(@Url String url);
 }
