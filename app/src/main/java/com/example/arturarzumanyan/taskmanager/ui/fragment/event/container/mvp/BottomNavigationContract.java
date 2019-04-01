@@ -4,7 +4,13 @@ public class BottomNavigationContract {
     public interface BottomNavigationPresenter {
         void attachView(BottomNavigationView bottomNavigationView);
 
+        void processDefaultBottomNavigationMenu();
+
+        void processRotatedStateOfBottomNavigationMenu();
+
         void processWeekDashboardClick();
+
+        void setCurrentFragmentId(int id);
 
         void processDailyEventsClick();
 
@@ -17,6 +23,10 @@ public class BottomNavigationContract {
 
     public interface BottomNavigationView {
         void updateAppTitle(String title);
+
+        void displayDefaultUi();
+
+        void displaySelectedFragment(int id);
 
         void displayWeekDashboard();
 

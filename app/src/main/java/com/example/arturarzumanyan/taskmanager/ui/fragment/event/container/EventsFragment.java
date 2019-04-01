@@ -6,7 +6,6 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.BottomNavigationView;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
@@ -25,11 +24,9 @@ import com.example.arturarzumanyan.taskmanager.ui.fragment.event.week.WeekDashbo
 import com.squareup.leakcanary.RefWatcher;
 
 public class EventsFragment extends Fragment implements BottomNavigationContract.BottomNavigationView {
-    private static final String BACK_STACK_ROOT_TAG = "root_fragment";
     private static final String DAILY_FRAGMENT_TAG = "daily_fragment_tag";
     private static final String WEEK_DASHBOARD_FRAGMENT_TAG = "week_dashboard_fragment_tag";
     private static final String STATISTIC_FRAGMENT_TAG = "statistic_fragment_tag";
-    private MenuItem mSelectedFragmentItem;
     private BottomNavigationView mBottomNav;
     private DailyEventsFragment mRetainedDailyEventsFragment;
     private WeekDashboardFragment mRetainedWeekDashboardFragment;
@@ -56,26 +53,26 @@ public class EventsFragment extends Fragment implements BottomNavigationContract
         View view = inflater.inflate(R.layout.fragment_events, container, false);
 
         mBottomNav = view.findViewById(R.id.bottom_navigation);
-        mBottomNav.setOnNavigationItemSelectedListener(navListener);
+        mBottomNav.setOnNavigationItemSelectedListener(getNavigationListener());
 
-        if (mSelectedFragmentItem == null) {
+        if (mBottomNavigationPresenter == null) {
             mBottomNavigationPresenter = new BottomNavigationPresenterImpl(this);
-            mBottomNav.setSelectedItemId(R.id.nav_today);
+            mBottomNavigationPresenter.processDefaultBottomNavigationMenu();
         } else {
             mBottomNavigationPresenter.attachView(this);
-            mBottomNav.setSelectedItemId(mSelectedFragmentItem.getItemId());
+            mBottomNavigationPresenter.processRotatedStateOfBottomNavigationMenu();
         }
         return view;
     }
 
-    private BottomNavigationView.OnNavigationItemSelectedListener navListener =
-            item -> {
-                Log.v("Selected");
-                setSelectedFragment(item);
+    private BottomNavigationView.OnNavigationItemSelectedListener getNavigationListener() {
+        return item -> {
+            Log.v("Selected");
+            setSelectedFragment(item);
 
-                return true;
-
-            };
+            return true;
+        };
+    }
 
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
@@ -89,8 +86,18 @@ public class EventsFragment extends Fragment implements BottomNavigationContract
         requireActivity().setTitle(title);
     }
 
+    @Override
+    public void displayDefaultUi() {
+        mBottomNav.setSelectedItemId(R.id.nav_today);
+    }
+
+    @Override
+    public void displaySelectedFragment(int id) {
+        mBottomNav.setSelectedItemId(id);
+    }
+
     private void setSelectedFragment(MenuItem item) {
-        mSelectedFragmentItem = item;
+        mBottomNavigationPresenter.setCurrentFragmentId(item.getItemId());
 
         switch (item.getItemId()) {
             case R.id.nav_week:
@@ -173,7 +180,6 @@ public class EventsFragment extends Fragment implements BottomNavigationContract
         mRetainedDailyEventsFragment = null;
         mRetainedWeekDashboardFragment = null;
         mRetainedEventsStatisticFragment = null;
-        navListener = null;
         mBottomNavigationPresenter.unsubscribe();
         super.onDetach();
     }

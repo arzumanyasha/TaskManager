@@ -12,6 +12,8 @@ import com.example.arturarzumanyan.taskmanager.ui.util.ResourceManager;
 
 import java.util.List;
 
+import io.reactivex.Single;
+import io.reactivex.SingleObserver;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.schedulers.Schedulers;
@@ -170,6 +172,13 @@ public class IntentionPresenterImpl implements IntentionContract.IntentionPresen
                         mIntentionView.displayDefaultTasksUi(mTaskLists.get(0));
                     }
                 })
+                .onErrorResumeNext(new Single<List<TaskList>>() {
+                    @Override
+                    protected void subscribeActual(SingleObserver<? super List<TaskList>> observer) {
+                        FirebaseWebService.getFirebaseWebServiceInstance().logOut();
+                        mIntentionView.displaySignInScreen();
+                    }
+                })
                 .doOnError(throwable -> mIntentionView.onFail(getResourceManager()
                         .getErrorMessage(ResourceManager.State.FAILED_TO_LOAD_TASK_LISTS)))
                 .subscribe());
@@ -177,7 +186,7 @@ public class IntentionPresenterImpl implements IntentionContract.IntentionPresen
 
     @Override
     public void processActionBarMenuItems(String title) {
-        if (!title.equals(EVENTS_KEY)) {
+        if (title.equals(EVENTS_KEY)) {
             Log.v("TaskLists key");
             mIntentionView.setActionBarMenuItemsVisibility(true);
         } else {

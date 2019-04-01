@@ -41,6 +41,9 @@ public class DailyEventsPresenterImpl implements DailyEventsContract.DailyEvents
             loadDailyEvents();
         } else {
             mDailyEventsView.setEventsAdapter(mDailyEventsList);
+            if (mDailyEventsList.isEmpty()) {
+                mDailyEventsView.setNoEventsTextViewVisible();
+            }
         }
     }
 

@@ -7,7 +7,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 import static com.example.arturarzumanyan.taskmanager.networking.util.TaskListsParser.ID_KEY;
@@ -55,13 +54,11 @@ public class TasksParser {
         }
 
         String date = null;
-        //Date date = null;
 
         String id = jsonObject.getString(ID_KEY);
         String name = jsonObject.getString(TITLE_KEY);
 
         if (!jsonObject.isNull(DUE_KEY)) {
-            //date = DateUtils.getTaskDateFromString(jsonObject.getString(DUE_KEY));
             date = jsonObject.getString(DUE_KEY);
         }
 

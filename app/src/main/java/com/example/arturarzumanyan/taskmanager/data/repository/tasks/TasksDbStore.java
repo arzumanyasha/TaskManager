@@ -9,7 +9,7 @@ import io.reactivex.Single;
 
 public class TasksDbStore {
 
-    public TasksDbStore() {
+    TasksDbStore() {
     }
 
     public Single<List<Task>> getTasksFromTaskList(int taskListId) {

@@ -58,8 +58,6 @@ public class IntentionContract {
 
         void displayDefaultTasksUi(TaskList taskList);
 
-        void displayRestoredEventsUi();
-
         void displayPreviousTaskFragment(List<TaskList> taskLists, TaskList taskList);
 
         void displaySignInScreen();

@@ -71,6 +71,7 @@ public class TasksViewHolder extends RecyclerView.ViewHolder implements TaskRowV
         if (description.isEmpty()) {
             this.taskDescription.setVisibility(View.GONE);
         } else {
+            this.taskDescription.setVisibility(View.VISIBLE);
             this.taskDescription.setText(description);
         }
     }
